@@ -4,6 +4,7 @@ data class packageRaw(
     val id: String,
     val weight: Double,
     val destinationHubId: String,
+    val originHubId: String,
     val priority: Priority
 )
 
@@ -31,5 +32,7 @@ data class routeRaw(
 data class warehouseRaw(
     val id: String,
     val name: String,
-    val regionalZone: String
+    val regionalZone: String,
+    val longitude: Double,
+    val latitude: Double
 )

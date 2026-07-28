@@ -47,6 +47,10 @@ private fun parseDouble(
     fieldName: String,
     lineNumber: Int
 ): Double? {
+    if (value.equals("null", ignoreCase = true) || value.isBlank()) {
+        return null
+    }
+
     return value.toDoubleOrNull() ?: run {
         println(
             "Warning: Skipping line $lineNumber. " +
@@ -91,15 +95,17 @@ private fun parsePackage(line: String, lineNumber: Int): packageRaw? {
 
     val id = columns[0]
     val weightValue = columns[1]
-    val destinationHubId = columns[2]
-    val priorityValue = columns[3]
+    val originHubId = columns[2]
+    val destinationHubId = columns[3]
+    val priorityValue = columns[4]
 
     if (
         !hasRequiredValues(
             lineNumber,
             "Missing required data (ID or Destination).",
             id,
-            destinationHubId
+            destinationHubId,
+            originHubId
         )
     ) {
         return null
@@ -110,6 +116,7 @@ private fun parsePackage(line: String, lineNumber: Int): packageRaw? {
     return packageRaw(
         id = id,
         weight = weight,
+        originHubId = originHubId,
         destinationHubId = destinationHubId,
         priority = parsePriority(priorityValue)
     )
@@ -249,6 +256,8 @@ private fun parseWarehouse(
     val id = columns[0]
     val name = columns[1]
     val regionalZone = columns[2]
+    val latitudeValue = columns[3]
+    val longitudeValue = columns[4]
 
     if (
         !hasRequiredValues(
@@ -262,10 +271,20 @@ private fun parseWarehouse(
         return null
     }
 
+    val latitude = parseDouble(latitudeValue, "latitude", lineNumber)
+    val longitude = parseDouble(longitudeValue, "longitude", lineNumber)
+
+    if (longitude == null || latitude == null) {
+        println("Warning: Skipping warehouse at line $lineNumber.")
+        return null
+    }
+
     return warehouseRaw(
         id = id,
         name = name,
-        regionalZone = regionalZone
+        regionalZone = regionalZone,
+        latitude = latitude,
+        longitude = longitude
     )
 }
 
