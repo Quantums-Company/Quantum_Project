@@ -52,6 +52,7 @@ fun printTopPackages(packages: List<packageRaw>, count: Int) {
         println("${index + 1}.")
         println("ID: ${packageItem.id}")
         println("Weight: ${packageItem.weight}")
+        println("Origin: ${packageItem.originHubId}")
         println("Priority: ${packageItem.priority}")
         println("Destination: ${packageItem.destinationHubId}")
         println()
