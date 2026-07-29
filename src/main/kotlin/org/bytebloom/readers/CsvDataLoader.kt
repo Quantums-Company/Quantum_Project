@@ -292,6 +292,17 @@ private fun parseWarehouse(
     )
 }
 
+fun readWarehouses(fileName: String): List<warehouseRaw> {
+    val warehouses = mutableListOf<warehouseRaw>()
+
+    readCsvFile(fileName) { line, lineNumber ->
+        parseWarehouse(line, lineNumber)?.let(warehouses::add)
+    }
+
+    println("Successfully parsed routes: ${warehouses.size}")
+    return warehouses
+}
+
 private fun readCsvFile(
     fileName: String,
     processLine: (String, Int) -> Unit

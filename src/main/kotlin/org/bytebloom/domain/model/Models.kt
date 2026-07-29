@@ -1,6 +1,7 @@
 package org.bytebloom.domain.model
 
 import org.bytebloom.dataHolder.Priority
+import org.bytebloom.logic.quickSortCargo
 
 class Warehouse(
     val id: String,
@@ -20,6 +21,10 @@ class Warehouse(
     private val _stationedVehicles = mutableListOf<Vehicle>()
     val stationedVehicles: List<Vehicle>
         get() = _stationedVehicles
+
+    fun sortCargo() {
+        quickSortCargo(_cargoQueue)
+    }
 
     fun addPackage(pkg: Package) {
         _cargoQueue.add(pkg)
