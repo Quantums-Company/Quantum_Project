@@ -27,8 +27,8 @@ private fun isMoreUrgentThan(first: packageRaw, second: packageRaw): Boolean {
     return hasGreaterWeight(first, second)
 }
 
- //Urgency is defined as the highest priority first,
- //followed by the greater weight (descending) as a secondary rule.
+//Urgency is defined as the highest priority first,
+//followed by the greater weight (descending) as a secondary rule.
 fun selectionSortPackagesByUrgency(packages: MutableList<packageRaw>) {
     for (i in 0 until packages.size - 1) {
         var bestPackageIndex = i
@@ -44,19 +44,5 @@ fun selectionSortPackagesByUrgency(packages: MutableList<packageRaw>) {
             packages[i] = packages[bestPackageIndex]
             packages[bestPackageIndex] = tempPackage
         }
-    }
-}
-
-fun printTopPackages(packages: List<packageRaw>, count: Int) {
-    println("\nTop Priority Packages:\n")
-
-    packages.take(count).forEachIndexed { index, packageItem ->
-        println("${index + 1}.")
-        println("ID: ${packageItem.id}")
-        println("Weight: ${packageItem.weight}")
-        println("Origin: ${packageItem.originHubId}")
-        println("Priority: ${packageItem.priority}")
-        println("Destination: ${packageItem.destinationHubId}")
-        println()
     }
 }

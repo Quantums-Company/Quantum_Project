@@ -60,7 +60,6 @@ Every review must verify:
 2. IEEE-compliant documentation for complex functions.
 3. Compliance with functional requirements.
 ---
-
 ## 5. Hadeel Hejazy – Architecture & .gitignore
 
 ### 5.1 Project Architecture
