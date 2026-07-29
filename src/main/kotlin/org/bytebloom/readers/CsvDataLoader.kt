@@ -9,6 +9,10 @@ import java.io.File
 import java.io.IOException
 
 private const val RESOURCE_PATH = "src/resources"
+private const val PACKAGE_COLUMNS = 5
+private const val VEHICLE_COLUMNS = 4
+private const val ROUTE_COLUMNS = 5
+private const val WAREHOUSE_COLUMNS = 5
 
 private fun hasExpectedColumns(
     columns: List<String>,
@@ -89,7 +93,7 @@ fun parsePriority(value: String): Priority {
 private fun parsePackage(line: String, lineNumber: Int): packageRaw? {
     val columns = line.split(",").map(String::trim)
 
-    if (!hasExpectedColumns(columns, 4, lineNumber)) {
+    if (!hasExpectedColumns(columns, PACKAGE_COLUMNS, lineNumber)) {
         return null
     }
 
@@ -140,7 +144,7 @@ private fun parseVehicle(
 
     val columns = line.split(",").map(String::trim)
 
-    if (!hasExpectedColumns(columns, 4, lineNumber)) {
+    if (!hasExpectedColumns(columns, VEHICLE_COLUMNS, lineNumber)) {
         return null
     }
 
@@ -192,7 +196,7 @@ private fun parseRoute(
 
     val columns = line.split(",").map(String::trim)
 
-    if (!hasExpectedColumns(columns, 5, lineNumber)) {
+    if (!hasExpectedColumns(columns, ROUTE_COLUMNS, lineNumber)) {
         return null
     }
 
@@ -249,7 +253,7 @@ private fun parseWarehouse(
 
     val columns = line.split(",").map(String::trim)
 
-    if (!hasExpectedColumns(columns, 3, lineNumber)) {
+    if (!hasExpectedColumns(columns, WAREHOUSE_COLUMNS, lineNumber)) {
         return null
     }
 
