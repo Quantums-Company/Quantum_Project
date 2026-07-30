@@ -15,14 +15,14 @@ enum class Priority {
 }
 
 data class vehicleRaw(
-    val vehicleId: String,
+    val id: String,
     val currentHubId: String,
     val maxCapacityKg: Double,
     val costPerKm: Double
 )
 
 data class routeRaw(
-    val routeId: String,
+    val id: String,
     val originHubId: String,
     val destinationHubId: String,
     val distanceKm: Double,

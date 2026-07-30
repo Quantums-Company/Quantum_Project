@@ -97,10 +97,10 @@ private fun parsePackage(line: String, lineNumber: Int): packageRaw? {
         return null
     }
 
-    val id = columns[0]
+    val id = columns[0].trim().uppercase()
     val weightValue = columns[1]
-    val originHubId = columns[2]
-    val destinationHubId = columns[3]
+    val originHubId = columns[2].trim().uppercase()
+    val destinationHubId = columns[3].trim().uppercase()
     val priorityValue = columns[4]
 
     if (
@@ -148,8 +148,8 @@ private fun parseVehicle(
         return null
     }
 
-    val vehicleId = columns[0]
-    val currentHubId = columns[1]
+    val vehicleId = columns[0].trim().uppercase()
+    val currentHubId = columns[1].trim().uppercase()
     val maxCapacityValue = columns[2]
     val costPerKmValue = columns[3]
 
@@ -171,7 +171,7 @@ private fun parseVehicle(
             ?: return null
 
     return vehicleRaw(
-        vehicleId = vehicleId,
+        id = vehicleId,
         currentHubId = currentHubId,
         maxCapacityKg = maxCapacityKg,
         costPerKm = costPerKm
@@ -200,9 +200,9 @@ private fun parseRoute(
         return null
     }
 
-    val routeId = columns[0]
-    val originHubId = columns[1]
-    val destinationHubId = columns[2]
+    val routeId = columns[0].trim().uppercase()
+    val originHubId = columns[1].trim().uppercase()
+    val destinationHubId = columns[2].trim().uppercase()
     val distanceValue = columns[3]
     val typicalDelayValue = columns[4]
 
@@ -227,7 +227,7 @@ private fun parseRoute(
             ?: return null
 
     return routeRaw(
-        routeId = routeId,
+        id = routeId,
         originHubId = originHubId,
         destinationHubId = destinationHubId,
         distanceKm = distanceKm,
@@ -257,7 +257,7 @@ private fun parseWarehouse(
         return null
     }
 
-    val id = columns[0]
+    val id = columns[0].trim().uppercase()
     val name = columns[1]
     val regionalZone = columns[2]
     val latitudeValue = columns[3]

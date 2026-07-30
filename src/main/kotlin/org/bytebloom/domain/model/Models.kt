@@ -37,6 +37,10 @@ class Warehouse(
     fun addVehicle(vehicle: Vehicle) {
         _stationedVehicles.add(vehicle)
     }
+
+    override fun toString(): String {
+        return "Warehouse(id='$id', name=$name, regionalZone=$regionalZone, longitude:$longitude, latitude=$latitude)"
+    }
 }
 
 class Package(
@@ -45,19 +49,31 @@ class Package(
     val priority: Priority,
     val origin: Warehouse,
     val destination: Warehouse
-)
+){
+    override fun toString(): String {
+        return "Package(id='$id', weight=$weight, priority=$priority, origin:${origin.id}, destination=${destination.id})"
+    }
+}
 
 class Route(
-    val routeId: String,
+    val id: String,
     val distanceKm: Double,
     val typicalDelayMin: Int,
     val origin: Warehouse,
     val destination: Warehouse
-)
+){
+    override fun toString(): String {
+        return "Route(id='$id', distanceKm=$distanceKm, typicalDelayMin=$typicalDelayMin, origin:${origin.id}, destination=${destination.id})"
+    }
+}
 
 class Vehicle(
-    val vehicleId: String,
+    val id: String,
     val maxCapacityKg: Double,
     val costPerKm: Double,
     val currentHub: Warehouse
-)
+){
+    override fun toString(): String {
+        return "Vehicle(id='$id', maxCapacityKg=$maxCapacityKg, costPerKm=$costPerKm, currentHub:${currentHub.id})"
+    }
+}

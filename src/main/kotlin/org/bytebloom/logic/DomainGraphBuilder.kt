@@ -67,7 +67,7 @@ object DomainGraphBuilder {
 
             rawsForHub.map { raw ->
                 val vehicle = Vehicle(
-                    raw.vehicleId,
+                    raw.id,
                     raw.maxCapacityKg,
                     raw.costPerKm,
                     hub
@@ -108,7 +108,7 @@ object DomainGraphBuilder {
             if (origin == null || destination == null) {
                 return@mapNotNull null
             }
-            val route = Route(raw.routeId, raw.distanceKm, raw.typicalDelayMin, origin, destination)
+            val route = Route(raw.id, raw.distanceKm, raw.typicalDelayMin, origin, destination)
             origin.addRoute(route)
             route
         }

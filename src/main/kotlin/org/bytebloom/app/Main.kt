@@ -1,31 +1,25 @@
 package org.bytebloom.app
 
+import org.bytebloom.domain.model.Package
+import org.bytebloom.dataHolder.Priority
 import org.bytebloom.logic.DomainGraphBuilder
+import org.bytebloom.logic.EcoStrategy
+import org.bytebloom.logic.ExpressStrategy
+import org.bytebloom.logic.FragileStrategy
+import org.bytebloom.logic.RoutePricingEngine
+import org.bytebloom.logic.printPackages
+import org.bytebloom.logic.printPackagesForFirstWarehouse
+import org.bytebloom.logic.printRoutes
+import org.bytebloom.logic.printVehicles
+import org.bytebloom.logic.printWarehouses
 import org.bytebloom.readers.readPackages
 import org.bytebloom.readers.readWarehouses
 import org.bytebloom.readers.readRoutes
 import org.bytebloom.readers.readVehicles
 
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Route
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.logic.EcoStrategy
-import org.bytebloom.logic.ExpressStrategy
-import org.bytebloom.logic.RoutePricingEngine
-
-import org.bytebloom.dataHolder.packageRaw
-import org.bytebloom.dataHolder.routeRaw
-import org.bytebloom.dataHolder.warehouseRaw
-import org.bytebloom.logic.printTopPackages
-import org.bytebloom.logic.quickSortCargoByWeight
-import org.bytebloom.readers.readPackages
-import org.bytebloom.logic.selectionSortPackagesByUrgency
-
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
-
    // selectionSortPackagesByUrgency(packages)
-
    // printTopPackages(packages, 3)
 
     val warehouseRaws = readWarehouses("warehouses.csv")
@@ -40,37 +34,43 @@ fun main() {
         vehicleRaws
     )
 
-    val firstWarehouse = graph.warehouses[0]
+    val firstWarehouse = graph.warehouses.first()
     firstWarehouse.sortCargoByWeight()
-    firstWarehouse.cargoQueue.forEach {
-        println("${it.id} - ${it.weight}")
-    }
-
-    val warehouseA = Warehouse("W1", "Main Warehouse", "Zone A", 0.0, 0.0)
-    val warehouseB = Warehouse("W2", "Secondary Warehouse", "Zone B", 0.0, 0.0)
+    printPackagesForFirstWarehouse(firstWarehouse)
 
     val samplePackage = Package(
-        id = "PKG-001",
-        weight = 12.5,
-        priority = org.bytebloom.dataHolder.Priority.STANDARD,
-        origin = warehouseA,
-        destination = warehouseB
-    )
-
-    val routesList = listOf(
-        Route(
-            routeId = "R1",
-            origin = warehouseA,
-            destination = warehouseB,
-            distanceKm = 45.0,
-            typicalDelayMin = 10
-        )
+        "PKG-001",
+         12.5,
+       Priority.STANDARD,
+        graph.warehouses[0],
+         graph.warehouses[1],
     )
     val pricingEngine = RoutePricingEngine(EcoStrategy())
-    val ecoCost = pricingEngine.calculatePackageCost(samplePackage, routesList)
-    println("Eco Shipping Cost: $ecoCost")
+
+    println("\n=== Strategy Pattern Validation ===")
+    println("Package: ${samplePackage.id}")
+    println("Route: ${samplePackage.origin.id} -> ${samplePackage.destination.id}")
+
+
+    val ecoCost = pricingEngine.calculateShippingCost(
+        samplePackage,
+        graph.routes
+    )
+    println("Eco Strategy Cost      : $ecoCost")
 
     pricingEngine.setStrategy(ExpressStrategy())
-    val expressCost = pricingEngine.calculatePackageCost(samplePackage, routesList)
-    println("Express Shipping Cost: $expressCost")
+
+    val expressCost = pricingEngine.calculateShippingCost(
+        samplePackage,
+        graph.routes
+    )
+    println("Express Strategy Cost : $expressCost")
+
+    pricingEngine.setStrategy(FragileStrategy())
+
+    val fragileCost = pricingEngine.calculateShippingCost(
+        samplePackage,
+        graph.routes
+    )
+    println("Fragile Strategy Cost : $fragileCost")
 }
