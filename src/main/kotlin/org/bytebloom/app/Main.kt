@@ -6,6 +6,13 @@ import org.bytebloom.readers.readWarehouses
 import org.bytebloom.readers.readRoutes
 import org.bytebloom.readers.readVehicles
 
+import org.bytebloom.domain.model.Package
+import org.bytebloom.domain.model.Route
+import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.logic.EcoStrategy
+import org.bytebloom.logic.ExpressStrategy
+import org.bytebloom.logic.RoutePricingEngine
+
 import org.bytebloom.dataHolder.packageRaw
 import org.bytebloom.dataHolder.routeRaw
 import org.bytebloom.dataHolder.warehouseRaw
@@ -39,5 +46,28 @@ fun main() {
         println("${it.id} - ${it.weight}")
     }
 
+    val warehouseA = Warehouse("W1", "Main Warehouse", "Zone A", 0.0, 0.0)
+    val warehouseB = Warehouse("W2", "Secondary Warehouse", "Zone B", 0.0, 0.0)
 
+    // 2. إنشاء طرد تجريبي للاختبار
+    val samplePackage = Package(
+        id = "PKG-001",
+        weight = 12.5,
+        priority = org.bytebloom.dataHolder.Priority.STANDARD, // أو حسب تعريف الـ Priority عندك
+        origin = warehouseA,
+        destination = warehouseB
+    )
+
+
+    val routesList = listOf(
+        Route("R1", warehouseA, warehouseB, distanceKm = 45.0, typicalDelayMin = 10)
+    )
+
+    val pricingEngine = RoutePricingEngine(EcoStrategy())
+    val ecoCost = pricingEngine.calculatePackageCost(samplePackage, routesList)
+    println("Eco Shipping Cost: $ecoCost")
+
+    pricingEngine.setStrategy(ExpressStrategy())
+    val expressCost = pricingEngine.calculatePackageCost(samplePackage, routesList)
+    println("Express Shipping Cost: $expressCost")
 }
