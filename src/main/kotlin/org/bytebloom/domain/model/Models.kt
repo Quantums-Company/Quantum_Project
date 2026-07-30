@@ -1,7 +1,7 @@
 package org.bytebloom.domain.model
 
 import org.bytebloom.dataHolder.Priority
-import org.bytebloom.logic.quickSortCargo
+import org.bytebloom.logic.quickSortCargoByWeight
 
 class Warehouse(
     val id: String,
@@ -23,7 +23,7 @@ class Warehouse(
         get() = _stationedVehicles
 
     fun sortCargoByWeight() {
-        quickSortCargo(_cargoQueue)
+        quickSortCargoByWeight(_cargoQueue)
     }
 
     fun addPackage(pkg: Package) {

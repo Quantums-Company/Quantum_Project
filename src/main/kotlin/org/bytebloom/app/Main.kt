@@ -17,7 +17,7 @@ import org.bytebloom.dataHolder.packageRaw
 import org.bytebloom.dataHolder.routeRaw
 import org.bytebloom.dataHolder.warehouseRaw
 import org.bytebloom.logic.printTopPackages
-import org.bytebloom.logic.quickSortCargo
+import org.bytebloom.logic.quickSortCargoByWeight
 import org.bytebloom.readers.readPackages
 import org.bytebloom.logic.selectionSortPackagesByUrgency
 
@@ -49,20 +49,23 @@ fun main() {
     val warehouseA = Warehouse("W1", "Main Warehouse", "Zone A", 0.0, 0.0)
     val warehouseB = Warehouse("W2", "Secondary Warehouse", "Zone B", 0.0, 0.0)
 
-    // 2. إنشاء طرد تجريبي للاختبار
     val samplePackage = Package(
         id = "PKG-001",
         weight = 12.5,
-        priority = org.bytebloom.dataHolder.Priority.STANDARD, // أو حسب تعريف الـ Priority عندك
+        priority = org.bytebloom.dataHolder.Priority.STANDARD,
         origin = warehouseA,
         destination = warehouseB
     )
 
-
     val routesList = listOf(
-        Route("R1", warehouseA, warehouseB, distanceKm = 45.0, typicalDelayMin = 10)
+        Route(
+            routeId = "R1",
+            origin = warehouseA,
+            destination = warehouseB,
+            distanceKm = 45.0,
+            typicalDelayMin = 10
+        )
     )
-
     val pricingEngine = RoutePricingEngine(EcoStrategy())
     val ecoCost = pricingEngine.calculatePackageCost(samplePackage, routesList)
     println("Eco Shipping Cost: $ecoCost")
