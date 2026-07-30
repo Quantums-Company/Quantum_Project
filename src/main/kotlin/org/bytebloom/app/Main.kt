@@ -10,4 +10,5 @@ fun main() {
     selectionSortPackagesByUrgency(packages)
 
     printTopPackages(packages, 3)
+
 }
