@@ -22,7 +22,7 @@ class Warehouse(
     val stationedVehicles: List<Vehicle>
         get() = _stationedVehicles
 
-    fun sortCargo() {
+    fun sortCargoByWeight() {
         quickSortCargo(_cargoQueue)
     }
 

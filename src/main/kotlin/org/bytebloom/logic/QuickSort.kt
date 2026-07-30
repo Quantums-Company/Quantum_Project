@@ -2,19 +2,19 @@ package org.bytebloom.logic
 
 import org.bytebloom.domain.model.Package
 
-fun quickSortCargo(packages: MutableList<Package>) {
-    quickSort(packages, 0, packages.size - 1)
+fun quickSortCargoByWeight(packages: MutableList<Package>) {
+    sortRangeByWeight(packages, 0, packages.size - 1)
 }
 
-fun quickSort(packages: MutableList<Package>, low: Int, high: Int) {
+fun sortRangeByWeight(packages: MutableList<Package>, low: Int, high: Int) {
     if(low < high) {
-        val pivotIndex = partition(packages, low, high)
-        quickSort(packages, low, pivotIndex - 1)
-        quickSort(packages, pivotIndex + 1, high)
+        val pivotIndex = placePivotAndRearrange(packages, low, high)
+        sortRangeByWeight(packages, low, pivotIndex - 1)
+        sortRangeByWeight(packages, pivotIndex + 1, high)
     }
 }
 
-fun partition(packages: MutableList<Package>, low: Int, high: Int): Int {
+fun placePivotAndRearrange(packages: MutableList<Package>, low: Int, high: Int): Int {
     val pivot = packages[high].weight
     var greaterIndex = low - 1
 
