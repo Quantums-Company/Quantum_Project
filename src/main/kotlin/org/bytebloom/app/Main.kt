@@ -28,7 +28,7 @@ fun main() {
 
    // printTopPackages(packages, 3)
 
-    val warehouseRaws = readWarehouses("warehouse.csv")
+    val warehouseRaws = readWarehouses("warehouses.csv")
     val packageRaws = readPackages("packages.csv")
     val routeRaws = readRoutes("routes.csv")
     val vehicleRaws = readVehicles("fleet.csv")
@@ -41,7 +41,7 @@ fun main() {
     )
 
     val firstWarehouse = graph.warehouses[0]
-    firstWarehouse.sortCargo()
+    firstWarehouse.sortCargoByWeight()
     firstWarehouse.cargoQueue.forEach {
         println("${it.id} - ${it.weight}")
     }
