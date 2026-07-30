@@ -20,9 +20,7 @@ class ExpressStrategy : DispatchStrategy {
                 (pkg.weight * WEIGHT_MULTIPLIER) +
                 (route.typicalDelayMin * DELAY_WEIGHT)
     }
-    override fun getPriorityMultiplier(pkg: Package): Double {
-        return PRIORITY_BOOST
-    }
+    override fun getPriorityMultiplier(pkg: Package): Double = PRIORITY_BOOST
 }
 
 class EcoStrategy : DispatchStrategy {
@@ -35,9 +33,7 @@ class EcoStrategy : DispatchStrategy {
         return (route.distanceKm * RATE_PER_KM) +
                 (pkg.weight * WEIGHT_MULTIPLIER)
     }
-    override fun getPriorityMultiplier(pkg: Package): Double {
-        return STANDARD_PRIORITY
-    }
+    override fun getPriorityMultiplier(pkg: Package): Double = STANDARD_PRIORITY
 }
 
 class FragileStrategy : DispatchStrategy {
@@ -51,19 +47,37 @@ class FragileStrategy : DispatchStrategy {
                 (pkg.weight * WEIGHT_MULTIPLIER) +
                 (route.typicalDelayMin * 0.5)
     }
-    override fun getPriorityMultiplier(pkg: Package): Double {
-        return FRAGILE_PRIORITY
-    }
+    override fun getPriorityMultiplier(pkg: Package): Double = FRAGILE_PRIORITY
 }
 
 class RoutePricingEngine(private var strategy: DispatchStrategy) {
     fun setStrategy(newStrategy: DispatchStrategy) {
         strategy = newStrategy
     }
-    fun calculatePackageCost(pkg: Package, availableRoutes: List<Route>): Double {
-        val matchingRoute = availableRoutes.find {
-            it.origin.id == pkg.origin.id && it.destination.id == pkg.destination.id
-        } ?: throw IllegalArgumentException("No direct route found between ${pkg.origin.id} and ${pkg.destination.id}")
-        return strategy.calculateTransitCost(matchingRoute, pkg)
+
+    private fun findRoute(
+        pkg: Package,
+        availableRoutes: List<Route>
+    ): Route {
+        val route = requireNotNull(
+            availableRoutes.find {
+                it.origin.id == pkg.origin.id &&
+                        it.destination.id == pkg.destination.id
+            }
+        ) {
+            "No direct route found between ${pkg.origin.id} and ${pkg.destination.id}"
+        }
+        return route
+    }
+
+    fun calculateShippingCost(
+        pkg: Package,
+        availableRoutes: List<Route>
+    ): Double {
+        val matchingRoute = findRoute(pkg,availableRoutes)
+
+        val baseCost = strategy.calculateTransitCost(matchingRoute, pkg)
+
+        return baseCost * strategy.getPriorityMultiplier(pkg)
     }
 }
