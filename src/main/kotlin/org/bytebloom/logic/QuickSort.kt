@@ -16,26 +16,26 @@ fun sortRangeByWeight(packages: MutableList<Package>, low: Int, high: Int) {
 
 fun placePivotAndRearrange(packages: MutableList<Package>, low: Int, high: Int): Int {
     val pivot = packages[high].weight
-    var greaterIndex = low - 1
+    var greaterIndex = low
 
-    for (index in low until high){
-        if (packages[index].weight >= pivot){
+    for (index in low until high) {
+        if (packages[index].weight >= pivot) {
+            val temp = packages[index]
+
+            for (k in index downTo greaterIndex + 1) {
+                packages[k] = packages[k - 1]
+            }
+
+            packages[greaterIndex] = temp
             greaterIndex++
-
-            val swappedPackage = packages[greaterIndex]
-            packages[greaterIndex] = packages[index]
-            packages[index] = swappedPackage
         }
     }
-    val swappedPackage = packages[greaterIndex + 1]
-    packages[greaterIndex + 1] = packages[high]
-    packages[high] = swappedPackage
 
-    return greaterIndex + 1
+    val tempPivot = packages[high]
+    for (k in high downTo greaterIndex + 1) {
+        packages[k] = packages[k - 1]
+    }
+    packages[greaterIndex] = tempPivot
 
+    return greaterIndex
 }
-
-
-
-
-
