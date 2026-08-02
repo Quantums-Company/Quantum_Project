@@ -82,10 +82,10 @@ object DomainGraphBuilder {
     private fun buildPackages(
         packageRaws: List<packageRaw>,
         warehouseMap: Map<String, Warehouse>
-    ): List<Package>{
+    ): List<Package> {
         return packageRaws.mapNotNull { raw ->
-            val origin = findWarehouse(warehouseMap,raw.originHubId,"Package")
-            val destination = findWarehouse(warehouseMap,raw.destinationHubId,"Package")
+            val origin = findWarehouse(warehouseMap, raw.originHubId, "Package")
+            val destination = findWarehouse(warehouseMap, raw.destinationHubId, "Package")
 
             if (origin == null || destination == null) {
                 return@mapNotNull null
@@ -100,10 +100,10 @@ object DomainGraphBuilder {
     private fun buildRoutes(
         routeRaws: List<routeRaw>,
         warehouseMap: Map<String, Warehouse>
-    ): List<Route>{
+    ): List<Route> {
         return routeRaws.mapNotNull { raw ->
-            val origin = findWarehouse(warehouseMap,raw.originHubId,"Route")
-            val destination = findWarehouse(warehouseMap,raw.destinationHubId,"Route")
+            val origin = findWarehouse(warehouseMap, raw.originHubId, "Route")
+            val destination = findWarehouse(warehouseMap, raw.destinationHubId, "Route")
 
             if (origin == null || destination == null) {
                 return@mapNotNull null
