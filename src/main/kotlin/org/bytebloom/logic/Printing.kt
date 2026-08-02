@@ -28,19 +28,19 @@ fun printPackagesForFirstWarehouse(firstWarehouse: Warehouse) {
     firstWarehouse.cargoQueue.forEach(::println)
     println("\n======================================================================================================================\n")
 }
-
-fun printPackages(packages: List<Package>) {
-    packages.forEach(::println)
-}
-
-fun printWarehouses(Warehouses: List<Warehouse>) {
-    Warehouses.forEach(::println)
-}
-
-fun printVehicles(Vehicles: List<Vehicle>) {
-    Vehicles.forEach(::println)
-}
-
-fun printRoutes(Routes: List<Route>) {
-    Routes.forEach(::println)
-}
+//
+//fun printPackages(packages: List<Package>) {
+//    packages.forEach(::println)
+//}
+//
+//fun printWarehouses(Warehouses: List<Warehouse>) {
+//    Warehouses.forEach(::println)
+//}
+//
+//fun printVehicles(Vehicles: List<Vehicle>) {
+//    Vehicles.forEach(::println)
+//}
+//
+//fun printRoutes(Routes: List<Route>) {
+//    Routes.forEach(::println)
+//}
