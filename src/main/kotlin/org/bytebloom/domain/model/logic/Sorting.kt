@@ -1,7 +1,7 @@
 package org.bytebloom.domain.model.logic
 
-import org.bytebloom.domain.model.dataHolder.Priority
-import org.bytebloom.domain.model.dataHolder.packageRaw
+import org.bytebloom.data.dataHolder.Priority
+import org.bytebloom.data.dataHolder.packageRaw
 
 private fun getPriorityValue(priority: Priority): Int {
     return when (priority) {

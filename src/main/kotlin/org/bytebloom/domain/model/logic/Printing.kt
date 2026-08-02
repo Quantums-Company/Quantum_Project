@@ -1,6 +1,6 @@
 package org.bytebloom.domain.model.logic
 
-import org.bytebloom.domain.model.dataHolder.packageRaw
+import org.bytebloom.data.dataHolder.packageRaw
 import org.bytebloom.domain.model.Warehouse
 
 fun printTopPackagesRaw(packages: List<packageRaw>, count: Int) {

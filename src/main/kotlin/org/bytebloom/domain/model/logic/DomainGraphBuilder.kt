@@ -1,9 +1,9 @@
 package org.bytebloom.domain.model.logic
 
-import org.bytebloom.domain.model.dataHolder.packageRaw
-import org.bytebloom.domain.model.dataHolder.routeRaw
-import org.bytebloom.domain.model.dataHolder.vehicleRaw
-import org.bytebloom.domain.model.dataHolder.warehouseRaw
+import org.bytebloom.data.dataHolder.packageRaw
+import org.bytebloom.data.dataHolder.routeRaw
+import org.bytebloom.data.dataHolder.vehicleRaw
+import org.bytebloom.data.dataHolder.warehouseRaw
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle

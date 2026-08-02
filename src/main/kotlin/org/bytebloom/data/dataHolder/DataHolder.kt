@@ -1,4 +1,4 @@
-package org.bytebloom.domain.model.dataHolder
+package org.bytebloom.data.dataHolder
 
 data class packageRaw(
     val id: String,
