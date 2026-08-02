@@ -1,10 +1,10 @@
-package org.bytebloom.domain.model.readers
+package org.bytebloom.data.readers
 
-import org.bytebloom.domain.model.dataHolder.Priority
-import org.bytebloom.domain.model.dataHolder.packageRaw
-import org.bytebloom.domain.model.dataHolder.routeRaw
-import org.bytebloom.domain.model.dataHolder.vehicleRaw
-import org.bytebloom.domain.model.dataHolder.warehouseRaw
+import org.bytebloom.data.dataHolder.Priority
+import org.bytebloom.data.dataHolder.packageRaw
+import org.bytebloom.data.dataHolder.routeRaw
+import org.bytebloom.data.dataHolder.vehicleRaw
+import org.bytebloom.data.dataHolder.warehouseRaw
 import java.io.File
 import java.io.IOException
 

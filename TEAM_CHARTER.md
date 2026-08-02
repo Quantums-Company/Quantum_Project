@@ -35,7 +35,7 @@ All commits must follow the **Conventional Commits** specification: `type(scope)
 
 ### 3.2 Function & Code Quality
 * **Single Responsibility (SRP):** Each function performs one action; otherwise, split it.
-* **Limit Parameters:** Max 3 parameters; wrap extra data in a `data class` within `org.bytebloom.org.bytebloom.app.app.models/`.
+* **Limit Parameters:** Max 3 parameters; wrap extra data in a `data class` within `org.bytebloom.org.bytebloom.domain.model.app.app.models/`.
 * **Clean Layout:** 4-space indentation, max 120 chars per line, and logical whitespace.
 * **Comments:** Explain the "Why", not the "What".
 
@@ -63,7 +63,7 @@ Every review must verify:
 ## 5. Hadeel Hejazy – Architecture & .gitignore
 
 ### 5.1 Project Architecture
-We follow a professional modular architecture separating business org.bytebloom.org.bytebloom.app.app.logic, data org.bytebloom.org.bytebloom.app.app.models, and entry points.
+We follow a professional modular architecture separating business org.bytebloom.org.bytebloom.domain.model.app.app.logic, data org.bytebloom.org.bytebloom.domain.model.app.app.models, and entry points.
 
 **Standard Directory Structure:**
 ```text

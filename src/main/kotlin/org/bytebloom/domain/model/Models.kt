@@ -1,6 +1,6 @@
 package org.bytebloom.domain.model
 
-import org.bytebloom.domain.model.dataHolder.Priority
+import org.bytebloom.data.dataHolder.Priority
 import org.bytebloom.domain.model.logic.quickSortCargoByWeight
 
 class Warehouse(
