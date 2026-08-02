@@ -1,10 +1,7 @@
-package org.bytebloom.logic
+package org.bytebloom.domain.model.logic
 
-import org.bytebloom.dataHolder.packageRaw
+import org.bytebloom.domain.model.dataHolder.packageRaw
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Route
-import org.bytebloom.domain.model.Vehicle
 
 fun printTopPackagesRaw(packages: List<packageRaw>, count: Int) {
     println("\nTop Priority Packages:\n")
@@ -13,9 +10,9 @@ fun printTopPackagesRaw(packages: List<packageRaw>, count: Int) {
         println("${index + 1}.")
         println("ID: ${packageItem.id}")
         println("Weight: ${packageItem.weight}")
-        println("Origin: ${packageItem.originHubId}")
+        println("Origin: ${packageItem.originWarehouseId}")
         println("Priority: ${packageItem.priority}")
-        println("Destination: ${packageItem.destinationHubId}")
+        println("Destination: ${packageItem.destinationWarehouseId}")
         println()
     }
 }

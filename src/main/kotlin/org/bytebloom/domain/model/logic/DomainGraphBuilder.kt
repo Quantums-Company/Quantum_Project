@@ -1,9 +1,9 @@
-package org.bytebloom.logic
+package org.bytebloom.domain.model.logic
 
-import org.bytebloom.dataHolder.packageRaw
-import org.bytebloom.dataHolder.routeRaw
-import org.bytebloom.dataHolder.vehicleRaw
-import org.bytebloom.dataHolder.warehouseRaw
+import org.bytebloom.domain.model.dataHolder.packageRaw
+import org.bytebloom.domain.model.dataHolder.routeRaw
+import org.bytebloom.domain.model.dataHolder.vehicleRaw
+import org.bytebloom.domain.model.dataHolder.warehouseRaw
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
@@ -84,8 +84,8 @@ object DomainGraphBuilder {
         warehouseMap: Map<String, Warehouse>
     ): List<Package> {
         return packageRaws.mapNotNull { raw ->
-            val origin = findWarehouse(warehouseMap, raw.originHubId, "Package")
-            val destination = findWarehouse(warehouseMap, raw.destinationHubId, "Package")
+            val origin = findWarehouse(warehouseMap, raw.originWarehouseId, "Package")
+            val destination = findWarehouse(warehouseMap, raw.destinationWarehouseId, "Package")
 
             if (origin == null || destination == null) {
                 return@mapNotNull null
@@ -102,8 +102,8 @@ object DomainGraphBuilder {
         warehouseMap: Map<String, Warehouse>
     ): List<Route> {
         return routeRaws.mapNotNull { raw ->
-            val origin = findWarehouse(warehouseMap, raw.originHubId, "Route")
-            val destination = findWarehouse(warehouseMap, raw.destinationHubId, "Route")
+            val origin = findWarehouse(warehouseMap, raw.originWarehouseI, "Route")
+            val destination = findWarehouse(warehouseMap, raw.destinationWarehouseId, "Route")
 
             if (origin == null || destination == null) {
                 return@mapNotNull null

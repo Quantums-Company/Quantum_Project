@@ -1,4 +1,4 @@
-package org.bytebloom.logic
+package org.bytebloom.domain.model.logic
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
@@ -61,11 +61,11 @@ class RoutePricingEngine(private var strategy: DispatchStrategy) {
     ): Route {
         val route = requireNotNull(
             availableRoutes.find {
-                it.origin.id == pkg.origin.id &&
-                        it.destination.id == pkg.destination.id
+                it.originWarehouse.id == pkg.originWarehouse.id &&
+                        it.destinationWarehouse.id == pkg.destinationWarehouse.id
             }
         ) {
-            "No direct route found between ${pkg.origin.id} and ${pkg.destination.id}"
+            "No direct route found between ${pkg.originWarehouse.id} and ${pkg.destinationWarehouse.id}"
         }
         return route
     }

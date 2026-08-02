@@ -1,10 +1,10 @@
-package org.bytebloom.dataHolder
+package org.bytebloom.domain.model.dataHolder
 
 data class packageRaw(
     val id: String,
     val weight: Double,
-    val destinationHubId: String,
-    val originHubId: String,
+    val destinationWarehouseId: String,
+    val originWarehouseId: String,
     val priority: Priority
 )
 
@@ -23,8 +23,8 @@ data class vehicleRaw(
 
 data class routeRaw(
     val id: String,
-    val originHubId: String,
-    val destinationHubId: String,
+    val originWarehouseI: String,
+    val destinationWarehouseId: String,
     val distanceKm: Double,
     val typicalDelayMin: Int
 )
