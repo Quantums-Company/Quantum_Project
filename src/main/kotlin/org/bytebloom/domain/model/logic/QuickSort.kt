@@ -1,4 +1,4 @@
-package org.bytebloom.logic
+package org.bytebloom.domain.model.logic
 
 import org.bytebloom.domain.model.Package
 

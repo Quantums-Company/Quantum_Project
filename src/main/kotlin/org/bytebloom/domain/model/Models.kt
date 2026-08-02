@@ -1,7 +1,7 @@
 package org.bytebloom.domain.model
 
-import org.bytebloom.dataHolder.Priority
-import org.bytebloom.logic.quickSortCargoByWeight
+import org.bytebloom.domain.model.dataHolder.Priority
+import org.bytebloom.domain.model.logic.quickSortCargoByWeight
 
 class Warehouse(
     val id: String,
@@ -47,8 +47,8 @@ class Package(
     val id: String,
     val weight: Double,
     val priority: Priority,
-    val origin: Warehouse,
-    val destination: Warehouse
+    val originWarehouse: Warehouse,
+    val destinationWarehouse: Warehouse
 )
 //{
 //    override fun toString(): String {
@@ -60,8 +60,8 @@ class Route(
     val id: String,
     val distanceKm: Double,
     val typicalDelayMin: Int,
-    val origin: Warehouse,
-    val destination: Warehouse
+    val originWarehouse: Warehouse,
+    val destinationWarehouse: Warehouse
 )
 //{
 //    override fun toString(): String {

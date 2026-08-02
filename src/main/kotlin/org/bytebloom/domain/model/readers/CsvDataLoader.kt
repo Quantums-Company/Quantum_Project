@@ -1,10 +1,10 @@
-package org.bytebloom.readers
+package org.bytebloom.domain.model.readers
 
-import org.bytebloom.dataHolder.Priority
-import org.bytebloom.dataHolder.packageRaw
-import org.bytebloom.dataHolder.routeRaw
-import org.bytebloom.dataHolder.vehicleRaw
-import org.bytebloom.dataHolder.warehouseRaw
+import org.bytebloom.domain.model.dataHolder.Priority
+import org.bytebloom.domain.model.dataHolder.packageRaw
+import org.bytebloom.domain.model.dataHolder.routeRaw
+import org.bytebloom.domain.model.dataHolder.vehicleRaw
+import org.bytebloom.domain.model.dataHolder.warehouseRaw
 import java.io.File
 import java.io.IOException
 
@@ -120,8 +120,8 @@ private fun parsePackage(line: String, lineNumber: Int): packageRaw? {
     return packageRaw(
         id = id,
         weight = weight,
-        originHubId = originHubId,
-        destinationHubId = destinationHubId,
+        originWarehouseId = originHubId,
+        destinationWarehouseId = destinationHubId,
         priority = parsePriority(priorityValue)
     )
 }
@@ -228,8 +228,8 @@ private fun parseRoute(
 
     return routeRaw(
         id = routeId,
-        originHubId = originHubId,
-        destinationHubId = destinationHubId,
+        originWarehouseI = originHubId,
+        destinationWarehouseId = destinationHubId,
         distanceKm = distanceKm,
         typicalDelayMin = typicalDelayMin
     )

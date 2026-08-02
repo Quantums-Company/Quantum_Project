@@ -1,21 +1,17 @@
 package org.bytebloom.app
 
 import org.bytebloom.domain.model.Package
-import org.bytebloom.dataHolder.Priority
-import org.bytebloom.logic.DomainGraphBuilder
-import org.bytebloom.logic.EcoStrategy
-import org.bytebloom.logic.ExpressStrategy
-import org.bytebloom.logic.FragileStrategy
-import org.bytebloom.logic.RoutePricingEngine
-import org.bytebloom.logic.printPackages
-import org.bytebloom.logic.printPackagesForFirstWarehouse
-import org.bytebloom.logic.printRoutes
-import org.bytebloom.logic.printVehicles
-import org.bytebloom.logic.printWarehouses
-import org.bytebloom.readers.readPackages
-import org.bytebloom.readers.readWarehouses
-import org.bytebloom.readers.readRoutes
-import org.bytebloom.readers.readVehicles
+import org.bytebloom.domain.model.dataHolder.Priority
+import org.bytebloom.domain.model.logic.DomainGraphBuilder
+import org.bytebloom.domain.model.logic.EcoStrategy
+import org.bytebloom.domain.model.logic.ExpressStrategy
+import org.bytebloom.domain.model.logic.FragileStrategy
+import org.bytebloom.domain.model.logic.RoutePricingEngine
+import org.bytebloom.domain.model.logic.printPackagesForFirstWarehouse
+import org.bytebloom.domain.model.readers.readPackages
+import org.bytebloom.domain.model.readers.readWarehouses
+import org.bytebloom.domain.model.readers.readRoutes
+import org.bytebloom.domain.model.readers.readVehicles
 
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
@@ -49,7 +45,7 @@ fun main() {
 
     println("\n=== Strategy Pattern Validation ===")
     println("Package: ${samplePackage.id}")
-    println("Route: ${samplePackage.origin.id} -> ${samplePackage.destination.id}")
+    println("Route: ${samplePackage.originWarehouse.id} -> ${samplePackage.destinationWarehouse.id}")
 
 
     val ecoCost = pricingEngine.calculateShippingCost(
