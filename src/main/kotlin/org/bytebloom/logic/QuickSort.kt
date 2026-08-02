@@ -3,14 +3,17 @@ package org.bytebloom.logic
 import org.bytebloom.domain.model.Package
 
 fun quickSortCargoByWeight(packages: MutableList<Package>) {
-    sortRangeByWeight(packages, 0, packages.size - 1)
+    val lastIndex = packages.size - 1
+    sortRangeByWeight(packages, 0, lastIndex)
 }
 
 fun sortRangeByWeight(packages: MutableList<Package>, low: Int, high: Int) {
     if(low < high) {
         val pivotIndex = placePivotAndRearrange(packages, low, high)
-        sortRangeByWeight(packages, low, pivotIndex - 1)
-        sortRangeByWeight(packages, pivotIndex + 1, high)
+        val indexBeforePivot = pivotIndex - 1
+        sortRangeByWeight(packages, low, indexBeforePivot)
+        val indexAfterPivot = pivotIndex + 1
+        sortRangeByWeight(packages, indexAfterPivot, high)
     }
 }
 
@@ -27,11 +30,12 @@ fun placePivotAndRearrange(packages: MutableList<Package>, low: Int, high: Int):
             packages[index] = swappedPackage
         }
     }
-    val swappedPackage = packages[greaterIndex + 1]
-    packages[greaterIndex + 1] = packages[high]
+    val correctPivotIndex = greaterIndex + 1
+    val swappedPackage = packages[correctPivotIndex]
+    packages[correctPivotIndex] = packages[high]
     packages[high] = swappedPackage
 
-    return greaterIndex + 1
+    return correctPivotIndex
 
 }
 
