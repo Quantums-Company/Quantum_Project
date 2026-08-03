@@ -1,15 +1,7 @@
 package org.bytebloom.domain.model.logic
 import kotlin.math.abs
 
-object PackageDistributionRing {
-
-    const val CIRCLE_SIZE = 100
-    const val SLOT_TRUCK_A = 15
-    const val SLOT_TRUCK_B = 40
-    const val SLOT_TRUCK_C = 65
-    const val SLOT_TRUCK_D = 90
-
-    val DEFAULT_VEHICLE_SLOTS = setOf(SLOT_TRUCK_A, SLOT_TRUCK_B, SLOT_TRUCK_C, SLOT_TRUCK_D)
+class PackageDistributionRing(val circleSize: Int = 100) {
 
     data class RingVehicle(
         val id: String,
@@ -23,16 +15,16 @@ object PackageDistributionRing {
         val vehicleId: String,
     )
 
-    data class ValidationReport(
-        val allPassed: Boolean,
-        val lines: List<String>,
-        val stableCount: Int,
-        val reroutedCount: Int,
-        val stableSlots: Set<Int>
-    )
+    fun assignSlotsDynamically(vehicleIds: List<String>): List<RingVehicle> {
+        if (vehicleIds.isEmpty()) return emptyList()
+        val distance = circleSize / vehicleIds.size
+        return vehicleIds.mapIndexed { index, id ->
+            RingVehicle(id = id, slot = index * distance)
+        }
+    }
 
     fun mapPackageToSlot(packageId: String): Int {
-        return abs(packageId.hashCode()) % CIRCLE_SIZE
+        return abs(packageId.hashCode()) % circleSize
     }
 
     fun resolveVehicleClockwise(
@@ -84,98 +76,73 @@ object PackageDistributionRing {
             }
         }
     }
-
-    fun validateNonMigration(
-        previousDistribution: Map<String, PackageMapping>,
-        currentDistribution: Map<String, PackageMapping>,
-        brokenVehicleSlot: Int,
-        activeVehicleSlots: Set<Int>,
-    ): ValidationReport {
-        val stableSlots = activeVehicleSlots - brokenVehicleSlot
-
-        val (isSystemStable, auditLogs) = auditAllPackages(
-            previousDistribution,
-            currentDistribution,
-            brokenVehicleSlot,
-            stableSlots
-        )
-
-        val stableCount = previousDistribution.values.count { it.vehicleSlot in stableSlots }
-        val reroutedCount = previousDistribution.values.count { it.vehicleSlot == brokenVehicleSlot }
-
-        return ValidationReport(
-            allPassed = isSystemStable,
-            lines = auditLogs,
-            stableCount = stableCount,
-            reroutedCount = reroutedCount,
-            stableSlots = stableSlots
-        )
-    }
-
-    private fun auditAllPackages(
-        previousDistribution: Map<String, PackageMapping>,
-        currentDistribution: Map<String, PackageMapping>,
-        brokenVehicleSlot: Int,
-        stableSlots: Set<Int>
-    ): Pair<Boolean, List<String>> {
-        var isSystemStable = true
-        val auditLogs = mutableListOf<String>()
-
-        previousDistribution.forEach { (packageId, previous) ->
-            val current = currentDistribution.getValue(packageId)
-
-            if (previous.vehicleSlot == brokenVehicleSlot) {
-                val isProperlyRerouted = current.vehicleSlot != brokenVehicleSlot
-                if (!isProperlyRerouted) isSystemStable = false
-                auditLogs += "${if (isProperlyRerouted) "✓" else "✗"} Re-routed '$packageId' from slot $brokenVehicleSlot → slot ${current.vehicleSlot}"
-
-            } else if (previous.vehicleSlot in stableSlots) {
-                val isUnchanged = current == previous
-                if (!isUnchanged) isSystemStable = false
-                auditLogs += "${if (isUnchanged) "✓" else "✗"} Non-migration: '$packageId' stays on vehicle slot ${previous.vehicleSlot}"
-            }
-        }
-
-        return Pair(isSystemStable, auditLogs)
-    }
 }
-fun main() {
-    val ring = PackageDistributionRing
-    val vehicles = listOf(
-        PackageDistributionRing.RingVehicle("TRUCK-A", PackageDistributionRing.SLOT_TRUCK_A),
-        PackageDistributionRing.RingVehicle("TRUCK-B", PackageDistributionRing.SLOT_TRUCK_B),
-        PackageDistributionRing.RingVehicle("TRUCK-C", PackageDistributionRing.SLOT_TRUCK_C),
-        PackageDistributionRing.RingVehicle("TRUCK-D", PackageDistributionRing.SLOT_TRUCK_D),
-    )
 
+fun main() {
+    println("\n================== Package Distribution Ring ==================")
+
+    // 1. إنشاء الكائن (Instance) من الكلاس الجديد
+    val ringSystem = PackageDistributionRing()
+
+    printSystemInfo(ringSystem)
+
+    val vehicles = initializeVehicles(ringSystem)
     val edgeCaseIds = listOf("EDGE-PKG-195", "EDGE-PKG-94", "EDGE-PKG-44")
     val packageIds = edgeCaseIds + (1..30).map { "PKG-SAMPLE-$it" }
 
-    println("\n================== Package Distribution Ring ==================")
-    println("Circle: ${ring.CIRCLE_SIZE} slots | Vehicles at ${ring.DEFAULT_VEHICLE_SLOTS}")
+    demonstrateEdgeCaseRouting(ringSystem, vehicles, edgeCaseIds)
+    runBreakdownSimulation(ringSystem, vehicles, packageIds)
 
+    println("\n=== All requirements verified successfully ===")
+}
+
+private fun printSystemInfo(ringSystem: PackageDistributionRing) {
+    println("Circle: ${ringSystem.circleSize} slots | Dynamic Vehicle Assignment Active")
+}
+
+private fun initializeVehicles(ringSystem: PackageDistributionRing): List<PackageDistributionRing.RingVehicle> {
+    val vehicleIds = listOf("TRUCK-A", "TRUCK-B", "TRUCK-C", "TRUCK-D")
+    return ringSystem.assignSlotsDynamically(vehicleIds)
+}
+
+private fun demonstrateEdgeCaseRouting(ringSystem: PackageDistributionRing, vehicles: List<PackageDistributionRing.RingVehicle>, edgeCaseIds: List<String>) {
     println("\nEdge-case routing (before breakdown):")
     edgeCaseIds.forEach { id ->
-        val slot = ring.mapPackageToSlot(id)
-        val truck = ring.resolveVehicleClockwise(slot, vehicles)
+        val slot = ringSystem.mapPackageToSlot(id)
+        val truck = ringSystem.resolveVehicleClockwise(slot, vehicles)
         println("  $id → slot $slot → ${truck.id} (slot ${truck.slot})")
     }
+}
 
-    val before = ring.distributeAllPackages(packageIds, vehicles)
-    val brokenSlot = PackageDistributionRing.SLOT_TRUCK_B
-    val remaining = ring.removeVehicleAtSlot(vehicles, brokenSlot)
-    val after = ring.rerouteAfterBreakdown (before, brokenSlot, remaining)
-    val report = ring.validateNonMigration(
-        before, after, brokenSlot, ring.DEFAULT_VEHICLE_SLOTS,
+private fun runBreakdownSimulation(ringSystem: PackageDistributionRing, vehicles: List<PackageDistributionRing.RingVehicle>, packageIds: List<String>) {
+    val before = ringSystem.distributeAllPackages(packageIds, vehicles)
+
+    val brokenVehicle = vehicles[1]
+    val brokenSlot = brokenVehicle.slot
+
+    val remaining = ringSystem.removeVehicleAtSlot(vehicles, brokenSlot)
+    val after = ringSystem.rerouteAfterBreakdown(before, brokenSlot, remaining)
+
+    val activeVehicleSlots = remaining.map { it.slot }.toSet()
+
+    val (allPassed, auditLogs) = auditAllPackages(
+        previousDistribution = before,
+        currentDistribution = after,
+        brokenVehicleSlot = brokenSlot,
+        stableSlots = activeVehicleSlots
     )
 
-    println("\nBreakdown: removed slot $brokenSlot → cargo re-routes to slot ${PackageDistributionRing.SLOT_TRUCK_C}")
-    println("Re-routed packages: ${report.reroutedCount}")
+    val targetRerouteSlot = remaining.firstOrNull { it.slot > brokenSlot }?.slot ?: remaining.first().slot
+
+    val reroutedCount = auditLogs.count { it.contains("Re-routed") && it.startsWith("✓") }
+    val stableCount = auditLogs.count { it.contains("Non-migration") && it.startsWith("✓") }
+
+    println("\nBreakdown: removed slot $brokenSlot → cargo re-routes to slot $targetRerouteSlot")
+    println("Re-routed packages: $reroutedCount")
 
     println("\nNon-migration validation:")
-    println("  Stable vehicles (slots ${report.stableSlots.sorted()}): ${report.stableCount} packages unchanged")
-    println("  Overall: ${if (report.allPassed) "PASSED" else "FAILED"}")
+    println("  Stable vehicles (slots ${activeVehicleSlots.sorted()}): $stableCount packages unchanged")
+    println("  Overall: ${if (allPassed) "PASSED" else "FAILED"}")
 
-    check(report.allPassed) { "Non-migration validation failed." }
-    println("\n=== All requirements verified successfully ===")
+    check(allPassed) { "Non-migration validation failed." }
 }

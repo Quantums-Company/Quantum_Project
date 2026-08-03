@@ -2,16 +2,11 @@ package org.bytebloom.domain.model.app
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.data.dataHolder.Priority
-import org.bytebloom.domain.model.logic.DomainGraphBuilder
-import org.bytebloom.domain.model.logic.EcoStrategy
-import org.bytebloom.domain.model.logic.ExpressStrategy
-import org.bytebloom.domain.model.logic.FragileStrategy
-import org.bytebloom.domain.model.logic.RoutePricingEngine
-import org.bytebloom.domain.model.logic.printPackagesForFirstWarehouse
 import org.bytebloom.data.readers.readPackages
 import org.bytebloom.data.readers.readWarehouses
 import org.bytebloom.data.readers.readRoutes
 import org.bytebloom.data.readers.readVehicles
+import org.bytebloom.domain.model.logic.*
 
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
@@ -70,3 +65,4 @@ fun main() {
     )
     println("Fragile Strategy Cost : $fragileCost")
 }
+
