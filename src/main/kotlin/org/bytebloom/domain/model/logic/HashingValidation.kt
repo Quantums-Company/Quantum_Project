@@ -54,7 +54,6 @@ private fun checkSystemStability(
     }
 }
 
-// أضفنا دالة التدقيق هنا كدالة عامة لتتناسق مع باقي دوال الملف
 fun auditAllPackages(
     previousDistribution: Map<String, PackageMapping>,
     currentDistribution: Map<String, PackageMapping>,

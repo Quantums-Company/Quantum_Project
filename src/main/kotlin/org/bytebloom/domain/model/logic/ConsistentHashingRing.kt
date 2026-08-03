@@ -86,7 +86,6 @@ fun main() {
 
     printSystemInfo(ringSystem)
 
-    // 2. تمرير الكائن لدوال التهيئة
     val vehicles = initializeVehicles(ringSystem)
     val edgeCaseIds = listOf("EDGE-PKG-195", "EDGE-PKG-94", "EDGE-PKG-44")
     val packageIds = edgeCaseIds + (1..30).map { "PKG-SAMPLE-$it" }
@@ -102,7 +101,6 @@ private fun printSystemInfo(ringSystem: PackageDistributionRing) {
 }
 
 private fun initializeVehicles(ringSystem: PackageDistributionRing): List<PackageDistributionRing.RingVehicle> {
-    // هنا نمرر الـ List التي طلبها المشرف، والكلاس سيوزعها تلقائياً
     val vehicleIds = listOf("TRUCK-A", "TRUCK-B", "TRUCK-C", "TRUCK-D")
     return ringSystem.assignSlotsDynamically(vehicleIds)
 }
