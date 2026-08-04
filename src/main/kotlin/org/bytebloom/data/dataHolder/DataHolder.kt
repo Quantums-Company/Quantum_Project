@@ -1,6 +1,6 @@
 package org.bytebloom.data.dataHolder
 
-data class packageRaw(
+data class PackageRaw(
     val id: String,
     val weight: Double,
     val destinationWarehouseId: String,
@@ -14,22 +14,22 @@ enum class Priority {
     LOW
 }
 
-data class vehicleRaw(
+data class VehicleRaw(
     val id: String,
-    val currentHubId: String,
+    val currentWarehouseId: String,
     val maxCapacityKg: Double,
     val costPerKm: Double
 )
 
-data class routeRaw(
+data class RouteRaw(
     val id: String,
-    val originWarehouseI: String,
+    val originWarehouseId: String,
     val destinationWarehouseId: String,
     val distanceKm: Double,
     val typicalDelayMin: Int
 )
 
-data class warehouseRaw(
+data class WarehouseRaw(
     val id: String,
     val name: String,
     val regionalZone: String,

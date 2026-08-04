@@ -16,12 +16,12 @@
     <ID>MagicNumber:Sorting.kt$3</ID>
     <ID>NewLineAtEndOfFile:CsvDataLoader.kt$org.bytebloom.data.readers.CsvDataLoader.kt</ID>
     <ID>NewLineAtEndOfFile:DataHolder.kt$org.bytebloom.data.dataHolder.DataHolder.kt</ID>
-    <ID>NewLineAtEndOfFile:DomainGraphBuilder.kt$org.bytebloom.domain.model.logic.DomainGraphBuilder.kt</ID>
-    <ID>NewLineAtEndOfFile:Main.kt$org.bytebloom.domain.model.app.Main.kt</ID>
+    <ID>NewLineAtEndOfFile:DomainGraphBuilder.kt$org.bytebloom.domain.logic.DomainGraphBuilder.kt</ID>
+    <ID>NewLineAtEndOfFile:Main.kt$org.bytebloom.app.Main.kt</ID>
     <ID>NewLineAtEndOfFile:Models.kt$org.bytebloom.domain.model.Models.kt</ID>
-    <ID>NewLineAtEndOfFile:PricingStrategies.kt$org.bytebloom.domain.model.logic.PricingStrategies.kt</ID>
-    <ID>NewLineAtEndOfFile:Printing.kt$org.bytebloom.domain.model.logic.Printing.kt</ID>
-    <ID>NewLineAtEndOfFile:Sorting.kt$org.bytebloom.domain.model.logic.Sorting.kt</ID>
+    <ID>NewLineAtEndOfFile:PricingStrategies.kt$org.bytebloom.domain.logic.PricingStrategies.kt</ID>
+    <ID>NewLineAtEndOfFile:Printing.kt$org.bytebloom.domain.logic.Printing.kt</ID>
+    <ID>NewLineAtEndOfFile:Sorting.kt$org.bytebloom.domain.logic.Sorting.kt</ID>
     <ID>ReturnCount:CsvDataLoader.kt$private fun parsePackage(line: String, lineNumber: Int): packageRaw?</ID>
     <ID>ReturnCount:CsvDataLoader.kt$private fun parseRoute( line: String, lineNumber: Int ): routeRaw?</ID>
     <ID>ReturnCount:CsvDataLoader.kt$private fun parseVehicle( line: String, lineNumber: Int ): vehicleRaw?</ID>

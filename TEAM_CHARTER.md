@@ -63,22 +63,37 @@ Every review must verify:
 ## 5. Hadeel Hejazy – Architecture & .gitignore
 
 ### 5.1 Project Architecture
-We follow a professional modular architecture separating business org.bytebloom.org.bytebloom.domain.model.app.app.logic, data org.bytebloom.org.bytebloom.domain.model.app.app.models, and entry points.
+We follow a professional modular architecture separating business org.bytebloom.org.bytebloom.app.app.logic, data org.bytebloom.org.bytebloom.app.app.models, and entry points.
 
 **Standard Directory Structure:**
 ```text
 src/main/
 ├── kotlin/
-│   ├── [package_name]/
-│   │   ├── app/            # Application entry point (Main.kt)
-│   │   ├── logic/          # Business logic, parsers, and sorters
-│   │   ├── dataHolder/     # Data holders/Entities (e.g., Models.kt)
-│   │   └── readers/        # Data ingestion (e.g., CsvDataLoader.kt)
-
-
-└── resources/              # Project assets and data sources
+│   └── org/
+│       └── bytebloom/
+│           ├── app/
+│           │   └── Main.kt
+│           ├── data/
+│           │   ├── dataHolder/
+│           │   │   └── DataHolder.kt
+│           │   └── readers/
+│           │       └── CsvDataLoader.kt
+│           └── domain/
+│               ├── logic/
+│               │   ├── ConsistentHashingRing.kt
+│               │   ├── DomainGraphBuilder.kt
+│               │   ├── PricingStrategies.kt
+│               │   ├── Printing.kt
+│               │   ├── QuickSort.kt
+│               │   ├── RingValidation.kt
+│               │   └── Sorting.kt
+│               └── model/
+│                   └── Models.kt
+└── resources/
     ├── fleet.csv
     ├── packages.csv
+    ├── Quantum.png
+    ├── quantum_architecture.png
     ├── routes.csv
     └── warehouses.csv
 ```

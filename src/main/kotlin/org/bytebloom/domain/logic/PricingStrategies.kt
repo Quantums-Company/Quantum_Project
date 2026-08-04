@@ -1,4 +1,4 @@
-package org.bytebloom.domain.model.logic
+package org.bytebloom.domain.logic
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
