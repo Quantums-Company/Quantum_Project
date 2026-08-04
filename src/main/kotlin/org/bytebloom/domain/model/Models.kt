@@ -1,7 +1,7 @@
 package org.bytebloom.domain.model
 
 import org.bytebloom.data.dataHolder.Priority
-import org.bytebloom.domain.model.logic.quickSortCargoByWeight
+import org.bytebloom.domain.logic.quickSortCargoByWeight
 
 class Warehouse(
     val id: String,
@@ -73,7 +73,7 @@ class Vehicle(
     val id: String,
     val maxCapacityKg: Double,
     val costPerKm: Double,
-    val currentHub: Warehouse
+    val currentWarehouse: Warehouse
 )
 //{
 //    override fun toString(): String {

@@ -31,9 +31,9 @@ build/
 .externalNativeBuild/
 captures/
 instant-run/
-org.bytebloom.org.bytebloom.domain.model.app.app/build/
-org.bytebloom.org.bytebloom.domain.model.app.app/.cxx/
-org.bytebloom.org.bytebloom.domain.model.app.app/.externalNativeBuild/
+org.bytebloom.org.bytebloom.app.app/build/
+org.bytebloom.org.bytebloom.app.app/.cxx/
+org.bytebloom.org.bytebloom.app.app/.externalNativeBuild/
 
 # IntelliJ IDEA specific
 .project/

@@ -1,7 +1,7 @@
-package org.bytebloom.domain.model.logic
+package org.bytebloom.domain.logic
 
 import org.bytebloom.data.dataHolder.Priority
-import org.bytebloom.data.dataHolder.packageRaw
+import org.bytebloom.data.dataHolder.PackageRaw
 
 private fun getPriorityValue(priority: Priority): Int {
     return when (priority) {
@@ -11,15 +11,15 @@ private fun getPriorityValue(priority: Priority): Int {
     }
 }
 
-private fun hasHigherPriority(first: packageRaw, second: packageRaw): Boolean {
+private fun hasHigherPriority(first: PackageRaw, second: PackageRaw): Boolean {
     return getPriorityValue(first.priority) > getPriorityValue(second.priority)
 }
 
-private fun hasGreaterWeight(first: packageRaw, second: packageRaw): Boolean {
+private fun hasGreaterWeight(first: PackageRaw, second: PackageRaw): Boolean {
     return first.weight > second.weight
 }
 
-private fun isMoreUrgentThan(first: packageRaw, second: packageRaw): Boolean {
+private fun isMoreUrgentThan(first: PackageRaw, second: PackageRaw): Boolean {
     if (first.priority != second.priority) {
         return hasHigherPriority(first, second)
     }
@@ -29,7 +29,7 @@ private fun isMoreUrgentThan(first: packageRaw, second: packageRaw): Boolean {
 
 //Urgency is defined as the highest priority first,
 //followed by the greater weight (descending) as a secondary rule.
-fun selectionSortPackagesByUrgency(packages: MutableList<packageRaw>) {
+fun selectionSortPackagesByUrgency(packages: MutableList<PackageRaw>) {
     for (i in 0 until packages.size - 1) {
         var bestPackageIndex = i
 
