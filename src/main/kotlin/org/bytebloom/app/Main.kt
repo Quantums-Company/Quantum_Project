@@ -1,23 +1,23 @@
 package org.bytebloom.app
 
-import org.bytebloom.data.readers.readPackages
-import org.bytebloom.data.readers.readRoutes
-import org.bytebloom.data.readers.readVehicles
-import org.bytebloom.data.readers.readWarehouses
-import org.bytebloom.domain.logic.DomainGraphBuilder
-import org.bytebloom.domain.logic.PackageDistributionRing
-import org.bytebloom.domain.logic.createValidationReport
-import org.bytebloom.domain.logic.printResilienceReport
+import org.bytebloom.data.csv.loadPackages
+import org.bytebloom.data.csv.loadRoutes
+import org.bytebloom.data.csv.loadVehicles
+import org.bytebloom.data.csv.loadWarehouses
+import org.bytebloom.domain.graph.DomainGraphBuilder
+import org.bytebloom.domain.hashing.PackageDistributionRing
+import org.bytebloom.domain.hashing.createValidationReport
+import org.bytebloom.domain.printing.printResilienceReport
 
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
     // selectionSortPackagesByUrgency(packages)
     // printTopPackages(packages, 3)
 
-    val warehouseRaws = readWarehouses("warehouses.csv")
-    val packageRaws = readPackages("packages.csv")
-    val routeRaws = readRoutes("routes.csv")
-    val vehicleRaws = readVehicles("fleet.csv")
+    val warehouseRaws = loadWarehouses("warehouses.csv")
+    val packageRaws = loadPackages("packages.csv")
+    val routeRaws = loadRoutes("routes.csv")
+    val vehicleRaws = loadVehicles("fleet.csv")
 
     val graph = DomainGraphBuilder.buildGraph(
         warehouseRaws,
@@ -25,7 +25,6 @@ fun main() {
         routeRaws,
         vehicleRaws
     )
-
 //    val firstWarehouse = graph.warehouses.first()
 //    firstWarehouse.sortCargoByWeight()
 //    printPackagesForFirstWarehouse(firstWarehouse)

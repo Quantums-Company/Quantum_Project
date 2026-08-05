@@ -1,4 +1,4 @@
-package org.bytebloom.domain.logic
+package org.bytebloom.domain.hashing
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
@@ -94,21 +94,14 @@ class PackageDistributionRing(val packages: List<Package>, val vehicles: List<Ve
         }
     }
 
-    fun createSnapshot(): Map<Int, List<String>> {
-        val slotMap = mutableMapOf<Int, MutableList<String>>()
-
-        val allSlots = listOf(15, 40, 65, 90)
-        for (slot in allSlots) {
-            slotMap[slot] = mutableListOf()
+    fun createSnapshot(): Map<Int, List<String>> =
+        DEFAULT_SLOTS.associateWith { slot ->
+            _vehicleRing[slot]
+                ?.let { vehicle ->
+                    _assignments[vehicle]
+                        ?.map(Package::id)
+                        ?.sorted()
+                }
+                ?: emptyList()
         }
-
-        for ((vehicle, pkgs) in _assignments) {
-            val slot = _vehicleRing.entries.find { it.value == vehicle }?.key
-            if (slot != null) {
-                slotMap.getOrPut(slot) { mutableListOf() }.addAll(pkgs.map { it.id })
-            }
-        }
-
-        return slotMap.mapValues { (_, pkgs) -> pkgs.sorted() } // الترتيب يضمن دقة المقارنة
-    }
 }
