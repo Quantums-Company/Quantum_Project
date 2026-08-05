@@ -1,4 +1,4 @@
-package org.bytebloom.domain.logic
+package org.bytebloom.domain.sorting
 
 import org.bytebloom.domain.model.Package
 

@@ -1,4 +1,4 @@
-package org.bytebloom.domain.logic
+package org.bytebloom.domain.hashing
 
 data class VehicleValidation(
     val slot: Int,

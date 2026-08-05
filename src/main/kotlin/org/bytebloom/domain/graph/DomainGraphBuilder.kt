@@ -1,34 +1,32 @@
-package org.bytebloom.domain.logic
+package org.bytebloom.domain.graph
 
-import org.bytebloom.data.dataHolder.PackageRaw
-import org.bytebloom.data.dataHolder.RouteRaw
-import org.bytebloom.data.dataHolder.VehicleRaw
-import org.bytebloom.data.dataHolder.WarehouseRaw
+import org.bytebloom.data.raw.PackageRaw
+import org.bytebloom.data.raw.RouteRaw
+import org.bytebloom.data.raw.VehicleRaw
+import org.bytebloom.data.raw.WarehouseRaw
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.util.Logger
 
-data class DomainGraph(
-    val warehouses: List<Warehouse>,
-    val packages: List<Package>,
-    val routes: List<Route>,
-    val vehicles: List<Vehicle>
-)
+private const val VEHICLE = "Vehicle"
+private const val PACKAGE = "Package"
+private const val ROUTE = "Route"
 
 object DomainGraphBuilder {
 
-    private fun findWarehouse(
+    private fun requireWarehouse(
         warehouseMap: Map<String, Warehouse>,
         warehouseId: String,
-        objectType: String
+        owner: String
     ): Warehouse? {
 
         val warehouse = warehouseMap[warehouseId]
 
         if (warehouse == null) {
-            println(
-                "Warning: $objectType references unknown warehouse '$warehouseId'."
+            Logger.warning(
+                "$owner references unknown warehouse '$warehouseId'."
             )
         }
 
@@ -57,25 +55,22 @@ object DomainGraphBuilder {
         vehicleRaws: List<VehicleRaw>,
         warehouseMap: Map<String, Warehouse>
     ): List<Vehicle> {
+        return vehicleRaws.mapNotNull { raw ->
+            val warehouse = requireWarehouse(
+                warehouseMap = warehouseMap,
+                warehouseId = raw.currentWarehouseId,
+                owner = VEHICLE
+            ) ?: return@mapNotNull null
 
-        val vehiclesByHub = vehicleRaws.groupBy { it.currentWarehouseId }
+            val vehicle = Vehicle(
+                raw.id,
+                raw.maxCapacityKg,
+                raw.costPerKm,
+                warehouse
+            )
 
-        return vehiclesByHub.flatMap { (hubId, rawsForHub) ->
-
-            val hub = findWarehouse(warehouseMap = warehouseMap, warehouseId = hubId, objectType = "Vehicle")
-                ?: return@flatMap emptyList()
-
-            rawsForHub.map { raw ->
-                val vehicle = Vehicle(
-                    raw.id,
-                    raw.maxCapacityKg,
-                    raw.costPerKm,
-                    hub
-                )
-
-                hub.addVehicle(vehicle)
-                vehicle
-            }
+            warehouse.addVehicle(vehicle)
+            vehicle
         }
     }
 
@@ -84,15 +79,25 @@ object DomainGraphBuilder {
         warehouseMap: Map<String, Warehouse>
     ): List<Package> {
         return packageRaws.mapNotNull { raw ->
-            val origin = findWarehouse(warehouseMap, raw.originWarehouseId, "Package")
-            val destination = findWarehouse(warehouseMap, raw.destinationWarehouseId, "Package")
+            val origin = requireWarehouse(
+                warehouseMap,
+                raw.originWarehouseId,
+                PACKAGE)
+            val destination = requireWarehouse(
+                warehouseMap,
+                raw.destinationWarehouseId,
+                PACKAGE)
 
             if (origin == null || destination == null) {
                 return@mapNotNull null
             }
-            val pkg = Package(raw.id, raw.weight, raw.priority, origin, destination)
-
-            origin.addPackage(pkg)
+            val pkg = Package(
+                raw.id,
+                raw.weight,
+                raw.priority,
+                origin,
+                destination).
+                also(origin::addPackage)
             pkg
         }
     }
@@ -102,14 +107,25 @@ object DomainGraphBuilder {
         warehouseMap: Map<String, Warehouse>
     ): List<Route> {
         return routeRaws.mapNotNull { raw ->
-            val origin = findWarehouse(warehouseMap, raw.originWarehouseId, "Route")
-            val destination = findWarehouse(warehouseMap, raw.destinationWarehouseId, "Route")
+            val origin = requireWarehouse(
+                warehouseMap,
+                raw.originWarehouseId,
+                ROUTE)
+            val destination = requireWarehouse(
+                warehouseMap,
+                raw.destinationWarehouseId,
+                ROUTE)
 
             if (origin == null || destination == null) {
                 return@mapNotNull null
             }
-            val route = Route(raw.id, raw.distanceKm, raw.typicalDelayMin, origin, destination)
-            origin.addRoute(route)
+            val route = Route(
+                raw.id,
+                raw.distanceKm,
+                raw.typicalDelayMin,
+                origin,
+                destination).
+                also(origin::addRoute)
             route
         }
     }

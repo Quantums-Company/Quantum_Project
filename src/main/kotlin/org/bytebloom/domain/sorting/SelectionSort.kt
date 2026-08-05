@@ -1,7 +1,7 @@
-package org.bytebloom.domain.logic
+package org.bytebloom.domain.sorting
 
-import org.bytebloom.data.dataHolder.Priority
-import org.bytebloom.data.dataHolder.PackageRaw
+import org.bytebloom.data.raw.Priority
+import org.bytebloom.data.raw.PackageRaw
 
 private fun getPriorityValue(priority: Priority): Int {
     return when (priority) {
