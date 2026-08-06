@@ -5,9 +5,10 @@ import org.bytebloom.data.csv.loadRoutes
 import org.bytebloom.data.csv.loadVehicles
 import org.bytebloom.data.csv.loadWarehouses
 import org.bytebloom.domain.graph.DomainGraphBuilder
-import org.bytebloom.domain.hashing.PackageDistributionRing
+import org.bytebloom.domain.hashing.ConsistentHashingRing
 import org.bytebloom.domain.hashing.createValidationReport
 import org.bytebloom.domain.printing.printResilienceReport
+import org.bytebloom.util.Logger
 
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
@@ -66,19 +67,25 @@ fun main() {
 //    println("Fragile Strategy Cost : $fragileCost")
 
 
-    val ring = PackageDistributionRing(
+    val ring = ConsistentHashingRing(
         graph.packages.take(100),
         graph.vehicles.take(4)
     )
 
-    val beforeSnapshot = ring.createSnapshot()
-    ring.removeVehicle(40)
-    val afterSnapshot = ring.createSnapshot()
+    val beforeSnapshot = ring.captureSnapshot()
+    val brokenSlot =
+        ring.vehicleRing.keys.sorted()[1]
+
+    if(!ring.removeVehicle(brokenSlot)) {
+        Logger.warning("the deletion doesn't happen")
+        return
+    }
+    val afterSnapshot = ring.captureSnapshot()
 
     val report = createValidationReport(
         beforeSnapshot,
         afterSnapshot,
-        brokenSlot = 40
+        brokenSlot = brokenSlot
     )
     printResilienceReport(report)
 }

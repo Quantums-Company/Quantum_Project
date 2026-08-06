@@ -1,5 +1,5 @@
 <div align="center" style="background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); padding: 35px; border-radius: 16px; margin-bottom: 30px; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.6);">
-  <img src="src/main/kotlin/org/bytebloom/data/resources/Quantom.png" alt="Quantum Team Logo" width="170" height="170" style="border-radius: 50%; object-fit: contain; background-color: #0b0f19; padding: 10px; border: 2px solid #58a6ff; box-shadow: 0 0 25px rgba(88, 166, 255, 0.4);">
+  <img src="src/resources/Quantom.png" alt="Quantum Team Logo" width="170" height="170" style="border-radius: 50%; object-fit: contain; background-color: #0b0f19; padding: 10px; border: 2px solid #58a6ff; box-shadow: 0 0 25px rgba(88, 166, 255, 0.4);">
   <h2 style="color: #c9d1d9; margin-top: 18px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: 1.5px; font-weight: 600;">QUANTOM TEAM</h2>
   <p style="color: #8b949e; font-size: 14px; margin: 4px 0 0 0;">Project Team Charter & Architecture</p>
 </div>
@@ -124,7 +124,7 @@ src/main/
     └── warehouses.csv
 ```
 <div align="center" style="background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); padding: 25px; border-radius: 14px; margin: 25px 0; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
-  <img src="src/main/kotlin/org/bytebloom/data/resources/quantom_architecture.png" alt="Quantum Architecture Diagram" width="100%" style="border-radius: 8px; border: 1px solid #58a6ff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+  <img src="src/resources/quantom_architecture.png" alt="Quantum Architecture Diagram" width="100%" style="border-radius: 8px; border: 1px solid #58a6ff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
   <p style="color: #8b949e; font-size: 13px; margin-top: 12px; font-style: italic;">Figure 4.1: High-Level System Architecture & Component Interactions</p>
 </div>
 **This charter is more than just a regulatory document; it is a professional commitment and a moral agreement among the members of Team Quantom. We believe that engineering excellence begins with discipline and precision. Therefore, we pledge to uphold these standards to ensure the delivery of our graduation project with the highest levels of quality and professionalism.**

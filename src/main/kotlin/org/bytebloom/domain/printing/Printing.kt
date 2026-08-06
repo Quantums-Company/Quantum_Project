@@ -54,7 +54,7 @@ fun printResilienceReport(report: ValidationReport) {
             Logger.info("    Packages After  : ${vehicle.packageCountAfter}")
             Logger.info(
                 "    Non-Migration   : ${
-                    if (vehicle.isPassed) "PASSED"
+                    if (vehicle.nonMigrationPassed) "PASSED"
                     else "FAILED"
                 }"
             )
@@ -65,7 +65,7 @@ fun printResilienceReport(report: ValidationReport) {
 
     Logger.info("")
 
-    if (report.passed) {
+    if (report.allChecksPassed) {
 
         Logger.info("SUCCESS")
         Logger.info("Consistent Hashing validation PASSED.")
