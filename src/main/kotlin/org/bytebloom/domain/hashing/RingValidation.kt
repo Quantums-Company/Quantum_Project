@@ -5,14 +5,14 @@ data class VehicleValidation(
     val packageCountBefore: Int,
     val packageCountAfter: Int,
     val isBroken: Boolean,
-    val isPassed: Boolean
+    val nonMigrationPassed: Boolean
 )
 
 data class ValidationReport(
     val brokenSlot: Int,
     val reroutedPackages: Int,
     val vehicles: List<VehicleValidation>,
-    val passed: Boolean
+    val allChecksPassed: Boolean
 )
 
 fun createValidationReport(
@@ -23,12 +23,20 @@ fun createValidationReport(
 
     val validations = mutableListOf<VehicleValidation>()
 
-    var passed = true
+    var passed =  validations
+        .all {
+            it.isBroken || it.nonMigrationPassed
+        }
 
     val reroutedPackages =
-        beforeSnapshot[brokenSlot]?.size ?: 0
+        beforeSnapshot
+            .getOrDefault(brokenSlot, emptyList())
+            .size
 
-    val allSlots = listOf(15, 40, 65, 90)
+    val allSlots =
+        beforeSnapshot.keys
+            .union(afterSnapshot.keys)
+            .sorted()
 
     for (slot in allSlots) {
 
@@ -37,9 +45,9 @@ fun createValidationReport(
             validations += VehicleValidation(
                 slot = slot,
                 packageCountBefore = beforeSnapshot[slot]?.size ?: 0,
-                packageCountAfter = 0,
+                packageCountAfter = afterSnapshot[slot]?.size ?: 0,
                 isBroken = true,
-                isPassed = true
+                nonMigrationPassed = true
             )
 
             continue
@@ -58,7 +66,7 @@ fun createValidationReport(
             packageCountBefore = beforePackages.size,
             packageCountAfter = afterPackages.size,
             isBroken = false,
-            isPassed = unchanged
+            nonMigrationPassed = unchanged
         )
     }
 
@@ -66,6 +74,6 @@ fun createValidationReport(
         brokenSlot = brokenSlot,
         reroutedPackages = reroutedPackages,
         vehicles = validations,
-        passed = passed
+        allChecksPassed = passed
     )
 }

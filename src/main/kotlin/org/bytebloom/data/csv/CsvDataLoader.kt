@@ -8,7 +8,7 @@ import org.bytebloom.util.Logger
 import java.io.File
 import java.io.IOException
 
-const val RESOURCE_PATH = "src/main/kotlin/org/bytebloom/data/resources"
+const val RESOURCE_PATH = "src/resources"
 
 object CsvColumns {
     const val PACKAGE = 5

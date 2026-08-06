@@ -4,24 +4,26 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import kotlin.math.abs
 
+class ConsistentHashingRing(
+    packages: Collection<Package>,
+    vehicles: Collection<Vehicle>
+) {
+    private val packages = packages.toList()
+    private val vehicles = vehicles.toList()
 
-class PackageDistributionRing(val packages: List<Package>, val vehicles: List<Vehicle>) {
-    private companion object {
-        const val CIRCLE_SIZE = 100
-        val DEFAULT_SLOTS =
-            listOf(15,40,65,90)
-    }
+    private val circleSize =
+        maxOf(100, vehicles.size * 2)
 
     private val _vehicleRing = mutableMapOf<Int, Vehicle>()
-    val vehiclesBySlot
+    val vehicleRing: Map<Int, Vehicle>
         get() = _vehicleRing
 
     private val _packageSlots = mutableMapOf<Package, Int>()
-    val packageSlots
+    val packageSlots: Map<Package, Int>
         get() = _packageSlots
 
     private val _assignments = mutableMapOf<Vehicle, MutableList<Package>>()
-    val assignments
+    val assignments: Map<Vehicle, List<Package>>
         get() = _assignments
 
     init {
@@ -30,8 +32,20 @@ class PackageDistributionRing(val packages: List<Package>, val vehicles: List<Ve
         distributeAllPackages()
     }
 
-    fun mapVehiclesToSlots() {
-        DEFAULT_SLOTS
+    private fun generateVehicleSlots(): List<Int>{
+        require(vehicles.isNotEmpty()) {
+            "At least one vehicle is required."
+        }
+
+        val step = circleSize / vehicles.size
+
+        return vehicles.indices.map {
+            it * step
+        }
+    }
+
+    private fun mapVehiclesToSlots() {
+        generateVehicleSlots()
             .zip(vehicles)
             .forEach { (slot, vehicle) ->
                 _vehicleRing[slot] = vehicle
@@ -39,12 +53,12 @@ class PackageDistributionRing(val packages: List<Package>, val vehicles: List<Ve
     }
 
     fun mapPackageToSlot(packageId: String): Int {
-        return abs(packageId.hashCode()) % CIRCLE_SIZE
+        return abs(packageId.hashCode()) % circleSize
     }
 
-    fun mapPackagesToSlots() {
+    private fun mapPackagesToSlots() {
         packages.forEach { pkg ->
-            packageSlots[pkg] = mapPackageToSlot(pkg.id)
+            _packageSlots[pkg] = mapPackageToSlot(pkg.id)
         }
     }
 
@@ -65,7 +79,7 @@ class PackageDistributionRing(val packages: List<Package>, val vehicles: List<Ve
     }
 
 
-    fun distributeAllPackages() {
+    private fun distributeAllPackages() {
         for (vehicle in _vehicleRing.values) {
             _assignments[vehicle] = mutableListOf()
         }
@@ -76,11 +90,13 @@ class PackageDistributionRing(val packages: List<Package>, val vehicles: List<Ve
         }
     }
 
-    fun removeVehicle(slot: Int) {
-        val brokenVehicle = _vehicleRing.remove(slot)
-        if (brokenVehicle != null) {
-            reroutePackages(brokenVehicle)
-        }
+    fun removeVehicle(slot: Int): Boolean {
+        val brokenVehicle =
+            _vehicleRing.remove(slot)
+                ?: return false
+
+        reroutePackages(brokenVehicle)
+        return true
     }
 
     private fun reroutePackages(brokenVehicle: Vehicle) {
@@ -94,8 +110,9 @@ class PackageDistributionRing(val packages: List<Package>, val vehicles: List<Ve
         }
     }
 
-    fun createSnapshot(): Map<Int, List<String>> =
-        DEFAULT_SLOTS.associateWith { slot ->
+    fun captureSnapshot(): Map<Int, List<String>> =
+        _vehicleRing.keys
+            .sorted().associateWith { slot ->
             _vehicleRing[slot]
                 ?.let { vehicle ->
                     _assignments[vehicle]
