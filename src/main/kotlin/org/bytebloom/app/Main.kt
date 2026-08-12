@@ -1,31 +1,39 @@
 package org.bytebloom.app
 
-import org.bytebloom.data.csv.loadPackages
-import org.bytebloom.data.csv.loadRoutes
-import org.bytebloom.data.csv.loadVehicles
-import org.bytebloom.data.csv.loadWarehouses
+//import org.bytebloom.data.csv.loadPackages
+//import org.bytebloom.data.csv.loadRoutes
+//import org.bytebloom.data.csv.loadVehicles
+//import org.bytebloom.data.csv.loadWarehouses
+//import org.bytebloom.domain.printing.printResilienceReport
 import org.bytebloom.domain.graph.DomainGraphBuilder
 import org.bytebloom.domain.hashing.ConsistentHashingRing
 import org.bytebloom.domain.hashing.createValidationReport
-import org.bytebloom.domain.printing.printResilienceReport
 import org.bytebloom.util.Logger
+import org.bytebloom.data.repository.*
+import org.bytebloom.domain.printing.printResilienceReport
+import org.bytebloom.domain.repository.PackageRepository
+import org.bytebloom.domain.repository.RouteRepository
+import org.bytebloom.domain.repository.VehicleRepository
+import org.bytebloom.domain.repository.WarehouseRepository
 
-fun main() {
-    //val packages = readPackages("packages.csv").toMutableList()
-    // selectionSortPackagesByUrgency(packages)
-    // printTopPackages(packages, 3)
+//fun main() {
+//    //val packages = readPackages("packages.csv").toMutableList()
+//    // selectionSortPackagesByUrgency(packages)
+//    // printTopPackages(packages, 3)
+//
+//    val warehouseRaws = loadWarehouses("warehouses.csv")
+//    val packageRaws = loadPackages("packages.csv")
+//    val routeRaws = loadRoutes("routes.csv")
+//    val vehicleRaws = loadVehicles("fleet.csv")
+//
+//    val graph = DomainGraphBuilder.buildGraph(
+//        warehouseRaws,
+//        packageRaws,
+//        routeRaws,
+//        vehicleRaws
+//    )
 
-    val warehouseRaws = loadWarehouses("warehouses.csv")
-    val packageRaws = loadPackages("packages.csv")
-    val routeRaws = loadRoutes("routes.csv")
-    val vehicleRaws = loadVehicles("fleet.csv")
 
-    val graph = DomainGraphBuilder.buildGraph(
-        warehouseRaws,
-        packageRaws,
-        routeRaws,
-        vehicleRaws
-    )
 //    val firstWarehouse = graph.warehouses.first()
 //    firstWarehouse.sortCargoByWeight()
 //    printPackagesForFirstWarehouse(firstWarehouse)
@@ -66,7 +74,23 @@ fun main() {
 //    )
 //    println("Fragile Strategy Cost : $fragileCost")
 
+fun main() {
+    val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
+    val packageRepo: PackageRepository = CsvPackageRepository()
+    val routeRepo: RouteRepository = CsvRouteRepository()
+    val vehicleRepo: VehicleRepository = CsvVehicleRepository()
 
+    val warehouseRaws = warehouseRepo.getAllWarehouses()
+    val packageRaws = packageRepo.getAllPackages()
+    val routeRaws = routeRepo.getAllRoutes()
+    val vehicleRaws = vehicleRepo.getAllVehicles()
+
+    val graph = DomainGraphBuilder.buildGraph(
+        warehouseRaws,
+        packageRaws,
+        routeRaws,
+        vehicleRaws
+    )
     val ring = ConsistentHashingRing(
         graph.packages.take(100),
         graph.vehicles.take(4)
@@ -89,4 +113,7 @@ fun main() {
     )
     printResilienceReport(report)
 }
+
+
+
 
