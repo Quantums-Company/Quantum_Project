@@ -1,44 +1,34 @@
 package org.bytebloom.app
 
-//import org.bytebloom.data.csv.loadPackages
-//import org.bytebloom.data.csv.loadRoutes
-//import org.bytebloom.data.csv.loadVehicles
-//import org.bytebloom.data.csv.loadWarehouses
-//import org.bytebloom.domain.printing.printResilienceReport
+import org.bytebloom.data.repository.CsvPackageRepository
+import org.bytebloom.data.repository.CsvRouteRepository
+import org.bytebloom.data.repository.CsvVehicleRepository
+import org.bytebloom.data.repository.CsvWarehouseRepository
 import org.bytebloom.domain.graph.DomainGraphBuilder
-import org.bytebloom.domain.hashing.ConsistentHashingRing
-import org.bytebloom.domain.hashing.createValidationReport
-import org.bytebloom.util.Logger
-import org.bytebloom.data.repository.*
-import org.bytebloom.domain.printing.printResilienceReport
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.pricing.PackageComponent
-import org.bytebloom.domain.pricing.BasePackageComponent
-import org.bytebloom.domain.pricing.FragileHandlingDecorator
-import org.bytebloom.domain.pricing.ColdChainDecorator
-import org.bytebloom.domain.pricing.ExpressInsuranceDecorator
-import org.bytebloom.domain.pricing.RoutePricingEngine
-import org.bytebloom.domain.pricing.EcoStrategy
+import org.bytebloom.domain.routing.bfs.WarehouseGraphBuilder
+import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
+import org.bytebloom.util.Logger
 
-//fun main() {
-//    //val packages = readPackages("packages.csv").toMutableList()
-//    // selectionSortPackagesByUrgency(packages)
-//    // printTopPackages(packages, 3)
-//
-//    val warehouseRaws = loadWarehouses("warehouses.csv")
-//    val packageRaws = loadPackages("packages.csv")
-//    val routeRaws = loadRoutes("routes.csv")
-//    val vehicleRaws = loadVehicles("fleet.csv")
-//
-//    val graph = DomainGraphBuilder.buildGraph(
-//        warehouseRaws,
-//        packageRaws,
-//        routeRaws,
-//        vehicleRaws
-//    )
+fun main() {
+    //val packages = readPackages("packages.csv").toMutableList()
+    // selectionSortPackagesByUrgency(packages)
+    // printTopPackages(packages, 3)
+
+    val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
+    val packageRepo: PackageRepository = CsvPackageRepository()
+    val routeRepo: RouteRepository = CsvRouteRepository()
+    val vehicleRepo: VehicleRepository = CsvVehicleRepository()
+
+    val graph = DomainGraphBuilder.buildGraph(
+        warehouseRepo,
+        packageRepo,
+        routeRepo,
+        vehicleRepo
+    )
 
 
 //    val firstWarehouse = graph.warehouses.first()
@@ -47,10 +37,10 @@ import org.bytebloom.domain.pricing.EcoStrategy
 //
 //    val samplePackage = Package(
 //        "PKG-001",
-//         12.5,
-//       Priority.STANDARD,
+//        12.5,
+//        Priority.STANDARD,
 //        graph.warehouses[0],
-//         graph.warehouses[1],
+//        graph.warehouses[1],
 //    )
 //    val pricingEngine = RoutePricingEngine(EcoStrategy())
 //
@@ -80,46 +70,84 @@ import org.bytebloom.domain.pricing.EcoStrategy
 //        graph.routes
 //    )
 //    println("Fragile Strategy Cost : $fragileCost")
+//    val packageData = Package(
+//        "PKG-001",
+//        12.5,
+//        Priority.STANDARD,
+//        graph.warehouses[0],
+//        graph.warehouses[1],
+//    )
+////    val packageData = graph.packages.first()
+//
+//    val pricingEngine = RoutePricingEngine(EcoStrategy())
+//
+//    var service: PackageComponent =
+//        BasePackageComponent(
+//            packageData,
+//            graph.routes,
+//            pricingEngine
+//        )
+//
+//    Logger.info("==============================================")
+//    Logger.info("           PACKAGE PRICING REPORT             ")
+//    Logger.info("==============================================")
+//    Logger.info("Package ID      : ${service.getPackage().id}")
+//    Logger.info("Origin          : ${service.getPackage().originWarehouse.id}")
+//    Logger.info("Destination     : ${service.getPackage().destinationWarehouse.id}")
+//    Logger.info("Priority        : ${service.getPackage().priority}")
+//    Logger.info("----------------------------------------------")
+//
+//    Logger.info("Base Rate       : ${service.getTransitRate()}")
+//
+//    service = FragileHandlingDecorator(service, 10.0)
+//
+//    Logger.info("After Fragile   : ${service.getTransitRate()}")
+//
+//    service = ColdChainDecorator(service, 1.25)
+//
+//    Logger.info("After Cold Chain: ${service.getTransitRate()}")
+//
+//    service = ExpressInsuranceDecorator(service, 20.0)
+//
+//    val finalRate = service.getTransitRate()
+//
+//    if (finalRate == null) {
+//        Logger.warning(
+//            "No direct route found for package ${service.getPackage().id}. " +
+//                    "Transit rate cannot be calculated."
+//        )
+//    } else {
+//        Logger.info("Final Transit Rate : %.2f".format(finalRate))
+//    }
+//
+//    Logger.info("==============================================")
 
-fun main() {
-    val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
-    val packageRepo: PackageRepository = CsvPackageRepository()
-    val routeRepo: RouteRepository = CsvRouteRepository()
-    val vehicleRepo: VehicleRepository = CsvVehicleRepository()
-
-    val warehouseRaws = warehouseRepo.getAllWarehouses()
-    val packageRaws = packageRepo.getAllPackages()
-    val routeRaws = routeRepo.getAllRoutes()
-    val vehicleRaws = vehicleRepo.getAllVehicles()
-
-    val graph = DomainGraphBuilder.buildGraph(
-        warehouseRaws,
-        packageRaws,
-        routeRaws,
-        vehicleRaws
+    val graphBuilder = WarehouseGraphBuilder(
+        warehouses = graph.warehouses,
+        routes = graph.routes
     )
 
+    val warehouseGraph = graphBuilder.buildWeightedGraph()
+//
+//    val router = BreadthFirstRouter(warehouseGraph)
+//    val path = router.findShortestPath(
+//        startId = "WH-098",
+//        endId = "WH-099"
+//    )
+//
+//    printGraph(warehouseGraph)
+//
+//    Logger.info("Shortest path:")
+//    Logger.info(path?.joinToString(" -> ") ?: "No path found.")
 
-    val packageData = graph.packages.first()
+    val dijkstraRouter = DijkstraRouter(warehouseGraph)
+    val dijkstraPath = dijkstraRouter.findShortestPath(
+        startId = "WH-098",
+        endId = "WH-099"
+    )
 
-    val pricingEngine = RoutePricingEngine(EcoStrategy())
-
-    var service: PackageComponent =
-        BasePackageComponent(
-            packageData,
-            graph.routes,
-            pricingEngine
-        )
-
-    service = FragileHandlingDecorator(service, 10.0)
-    service = ColdChainDecorator(service, 1.25)
-    service = ExpressInsuranceDecorator(service, 20.0)
-
-    println("Package: ${service.getPackage().id}")
-    println("Final transit rate: ${service.getTransitRate()}")
-
-
-
+    Logger.info("Optimal weighted path (Dijkstra):")
+    Logger.info(dijkstraPath?.joinToString(" -> ") ?: "No path found.")
 }
 
 

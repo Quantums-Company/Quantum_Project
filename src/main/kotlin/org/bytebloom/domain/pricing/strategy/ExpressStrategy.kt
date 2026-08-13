@@ -1,4 +1,4 @@
-package org.bytebloom.domain.pricing
+package org.bytebloom.domain.pricing.strategy
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
@@ -10,7 +10,7 @@ class ExpressStrategy : DispatchStrategy {
         private const val DELAY_WEIGHT = 1.0
         private const val PRIORITY_BOOST = 1.75
     }
-    override fun calculateTransitCost(route: Route, pkg: org.bytebloom.domain.model.Package): Double {
+    override fun calculateTransitCost(route: Route, pkg: Package): Double {
         return (route.distanceKm * RATE_PER_KM) +
                 (pkg.weight * WEIGHT_MULTIPLIER) +
                 (route.typicalDelayMin * DELAY_WEIGHT)

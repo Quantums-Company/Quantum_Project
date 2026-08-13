@@ -1,5 +1,7 @@
 package org.bytebloom.data.raw
 
+import org.bytebloom.util.Logger
+
 enum class Priority {
     URGENT,
     STANDARD,
@@ -7,16 +9,17 @@ enum class Priority {
 
     companion object {
 
-        fun from(value: String): Priority {
-
-            return when(value.trim().uppercase()) {
-
+        fun from(value: String): Priority =
+            when(value.trim().uppercase()) {
                 "URGENT" -> URGENT
-
                 "STANDARD" -> STANDARD
+                "LOW" -> LOW
+                else -> {
+                    Logger.warning("Unknown priority '$value'. Using LOW.")
+                    LOW
+                }
 
-                else -> LOW
             }
         }
-    }
+
 }
