@@ -15,6 +15,13 @@ import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
+import org.bytebloom.domain.pricing.PackageComponent
+import org.bytebloom.domain.pricing.BasePackageComponent
+import org.bytebloom.domain.pricing.FragileHandlingDecorator
+import org.bytebloom.domain.pricing.ColdChainDecorator
+import org.bytebloom.domain.pricing.ExpressInsuranceDecorator
+import org.bytebloom.domain.pricing.RoutePricingEngine
+import org.bytebloom.domain.pricing.EcoStrategy
 
 //fun main() {
 //    //val packages = readPackages("packages.csv").toMutableList()
@@ -91,28 +98,30 @@ fun main() {
         routeRaws,
         vehicleRaws
     )
-    val ring = ConsistentHashingRing(
-        graph.packages.take(100),
-        graph.vehicles.take(4)
-    )
 
-    val beforeSnapshot = ring.captureSnapshot()
-    val brokenSlot =
-        ring.vehicleRing.keys.sorted()[1]
 
-    if(!ring.removeVehicle(brokenSlot)) {
-        Logger.warning("the deletion doesn't happen")
-        return
-    }
-    val afterSnapshot = ring.captureSnapshot()
+    val packageData = graph.packages.first()
 
-    val report = createValidationReport(
-        beforeSnapshot,
-        afterSnapshot,
-        brokenSlot = brokenSlot
-    )
-    printResilienceReport(report)
+    val pricingEngine = RoutePricingEngine(EcoStrategy())
+
+    var service: PackageComponent =
+        BasePackageComponent(
+            packageData,
+            graph.routes,
+            pricingEngine
+        )
+
+    service = FragileHandlingDecorator(service, 10.0)
+    service = ColdChainDecorator(service, 1.25)
+    service = ExpressInsuranceDecorator(service, 20.0)
+
+    println("Package: ${service.getPackage().id}")
+    println("Final transit rate: ${service.getTransitRate()}")
+
+
+
 }
+
 
 
 
