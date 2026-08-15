@@ -1,8 +1,11 @@
 package org.bytebloom.domain.routing.bfs
 
+import org.bytebloom.domain.routing.WarehouseGraph
+import org.bytebloom.domain.routing.common.RouterValidator
+
 class BreadthFirstRouter(
     private val graph: WarehouseGraph
-) {
+) : RouterValidator(graph) {
 
     private data class SearchState(
         val queue: ArrayDeque<String>,
@@ -10,12 +13,23 @@ class BreadthFirstRouter(
         val parent: MutableMap<String, String>
     )
 
-    private fun areValidWarehouses(
+    fun findShortestPath(
         startId: String,
         endId: String
-    ): Boolean =
-        graph.containsWarehouse(startId) &&
-                graph.containsWarehouse(endId)
+    ): List<String>? {
+
+        if (!areValidWarehouses(startId, endId)) {
+            return null
+        }
+
+        if (startId == endId) {
+            return listOf(startId)
+        }
+
+        val state = createSearchState(startId)
+
+        return search(state, endId)
+    }
 
     private fun createSearchState(
         startId: String
@@ -62,49 +76,15 @@ class BreadthFirstRouter(
         current: String,
         state: SearchState
     ) {
-        for (neighbor in graph.neighbors(current)) {
+        for (neighbor in graph.neighbors(current).keys) {
 
-            if (neighbor.key in state.visited) {
+            if (neighbor in state.visited) {
                 continue
             }
 
-            state.visited.add(neighbor.key)
-            state.parent[neighbor.key] = current
-            state.queue.addLast(neighbor.key)
+            state.visited.add(neighbor)
+            state.parent[neighbor] = current
+            state.queue.addLast(neighbor)
         }
-    }
-
-    private fun reconstructPath(
-        parent: Map<String, String>,
-        endId: String
-    ): List<String> {
-
-        val path = mutableListOf<String>()
-        var current: String? = endId
-
-        while (current != null) {
-            path.add(current)
-            current = parent[current]
-        }
-
-        return path.asReversed()
-    }
-
-    fun findShortestPath(
-        startId: String,
-        endId: String
-    ): List<String>? {
-
-        if (!areValidWarehouses(startId, endId)) {
-            return null
-        }
-
-        if (startId == endId) {
-            return listOf(startId)
-        }
-
-        val state = createSearchState(startId)
-
-        return search(state, endId)
     }
 }

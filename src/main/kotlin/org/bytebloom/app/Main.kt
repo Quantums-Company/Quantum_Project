@@ -5,13 +5,14 @@ import org.bytebloom.data.repository.CsvRouteRepository
 import org.bytebloom.data.repository.CsvVehicleRepository
 import org.bytebloom.data.repository.CsvWarehouseRepository
 import org.bytebloom.domain.graph.DomainGraphBuilder
+import org.bytebloom.domain.printing.printRouteComparison
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.routing.bfs.WarehouseGraphBuilder
+import org.bytebloom.domain.routing.WarehouseGraphBuilder
+import org.bytebloom.domain.routing.bfs.BreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
-import org.bytebloom.util.Logger
 
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
@@ -127,27 +128,19 @@ fun main() {
         routes = graph.routes
     )
 
-    val warehouseGraph = graphBuilder.buildWeightedGraph()
-//
-//    val router = BreadthFirstRouter(warehouseGraph)
-//    val path = router.findShortestPath(
-//        startId = "WH-098",
-//        endId = "WH-099"
-//    )
-//
-//    printGraph(warehouseGraph)
-//
-//    Logger.info("Shortest path:")
-//    Logger.info(path?.joinToString(" -> ") ?: "No path found.")
+    val warehouseGraph = graphBuilder.build()
 
+    val start = "WH-001"
+    val destination = "WH-006"
+
+    val bfsRouter = BreadthFirstRouter(warehouseGraph)
     val dijkstraRouter = DijkstraRouter(warehouseGraph)
-    val dijkstraPath = dijkstraRouter.findShortestPath(
-        startId = "WH-098",
-        endId = "WH-099"
-    )
 
-    Logger.info("Optimal weighted path (Dijkstra):")
-    Logger.info(dijkstraPath?.joinToString(" -> ") ?: "No path found.")
+    val bfsPath = bfsRouter.findShortestPath(start, destination) ?: emptyList()
+    val dijkstraPath = dijkstraRouter.findShortestPath(start, destination) ?: emptyList()
+
+
+    printRouteComparison(warehouseGraph, start, destination, bfsPath, dijkstraPath)
 }
 
 

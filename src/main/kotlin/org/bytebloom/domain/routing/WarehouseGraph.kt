@@ -1,10 +1,13 @@
-package org.bytebloom.domain.routing.bfs
+package org.bytebloom.domain.routing
 
 class WarehouseGraph {
 
     private val _adjacencyMap = mutableMapOf<String, MutableMap<String, Double>>()
     val adjacencyMap: Map<String, Map<String, Double>>
         get() = _adjacencyMap
+
+    fun warehouseIds(): Set<String> =
+        adjacencyMap.keys.toSet()
 
     fun addWarehouse(warehouseId: String) {
         _adjacencyMap.putIfAbsent(warehouseId, mutableMapOf())
@@ -15,14 +18,11 @@ class WarehouseGraph {
         addWarehouse(destinationId)
 
         _adjacencyMap.getValue(originId)[destinationId] = distanceKm
-        _adjacencyMap.getValue(destinationId)[originId] = distanceKm
     }
 
-    fun neighbors(warehouseId: String): Map<String, Double> {
-        return _adjacencyMap[warehouseId] ?: emptyMap()
-    }
+    fun neighbors(warehouseId: String): Map<String, Double> =
+        adjacencyMap[warehouseId]?.toMap()
+            ?: emptyMap()
 
-    fun containsWarehouse(warehouseId: String): Boolean {
-        return warehouseId in _adjacencyMap
-    }
+    fun containsWarehouse(warehouseId: String): Boolean = warehouseId in _adjacencyMap
 }

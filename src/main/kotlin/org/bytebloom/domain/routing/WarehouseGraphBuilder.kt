@@ -1,4 +1,4 @@
-package org.bytebloom.domain.routing.bfs
+package org.bytebloom.domain.routing
 
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Warehouse
@@ -9,20 +9,11 @@ class WarehouseGraphBuilder(
     private val routes: List<Route>
 ) {
 
-    fun buildWeightedGraph(): WarehouseGraph {
+    fun build(): WarehouseGraph {
         val graph = WarehouseGraph()
 
         addWarehouses(graph)
-        addValidRoutesForWeighted(graph)
-
-        return graph
-    }
-
-    fun buildUnweightedGraph(): WarehouseGraph {
-        val graph = WarehouseGraph()
-
-        addWarehouses(graph)
-        addValidRoutesForUnweighted(graph)
+        addValidRoutes(graph)
 
         return graph
     }
@@ -33,8 +24,10 @@ class WarehouseGraphBuilder(
         }
     }
 
-    private fun addValidRoutesForWeighted(graph: WarehouseGraph) {
-        val warehouseIds = warehouseIds()
+    private fun addValidRoutes(graph: WarehouseGraph) {
+        val warehouseIds = warehouses
+            .map { it.id }
+            .toSet()
 
         routes.forEach { route ->
             if (isValidRoute(route, warehouseIds)) {
@@ -47,26 +40,11 @@ class WarehouseGraphBuilder(
         }
     }
 
-    private fun addValidRoutesForUnweighted(graph: WarehouseGraph) {
-        val warehouseIds = warehouseIds()
-
-        routes.forEach { route ->
-            if (isValidRoute(route, warehouseIds)) {
-                graph.addRoute(
-                    originId = route.originWarehouse.id,
-                    destinationId = route.destinationWarehouse.id
-                )
-            }
-        }
-    }
-
-    private fun warehouseIds(): Set<String> =
-        warehouses.map { it.id }.toSet()
-
     private fun isValidRoute(
         route: Route,
         warehouseIds: Set<String>
     ): Boolean {
+
         if (route.originWarehouse.id !in warehouseIds ||
             route.destinationWarehouse.id !in warehouseIds
         ) {
