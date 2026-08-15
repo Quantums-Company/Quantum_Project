@@ -8,6 +8,10 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.repository.PackageRepository
+import org.bytebloom.domain.repository.RouteRepository
+import org.bytebloom.domain.repository.VehicleRepository
+import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.util.Logger
 
 private const val VEHICLE = "Vehicle"
@@ -16,7 +20,7 @@ private const val ROUTE = "Route"
 
 object DomainGraphBuilder {
 
-    private fun requireWarehouse(
+    private fun findWarehouse(
         warehouseMap: Map<String, Warehouse>,
         warehouseId: String,
         owner: String
@@ -56,7 +60,7 @@ object DomainGraphBuilder {
         warehouseMap: Map<String, Warehouse>
     ): List<Vehicle> {
         return vehicleRaws.mapNotNull { raw ->
-            val warehouse = requireWarehouse(
+            val warehouse = findWarehouse(
                 warehouseMap = warehouseMap,
                 warehouseId = raw.currentWarehouseId,
                 owner = VEHICLE
@@ -79,11 +83,11 @@ object DomainGraphBuilder {
         warehouseMap: Map<String, Warehouse>
     ): List<Package> {
         return packageRaws.mapNotNull { raw ->
-            val origin = requireWarehouse(
+            val origin = findWarehouse(
                 warehouseMap,
                 raw.originWarehouseId,
                 PACKAGE)
-            val destination = requireWarehouse(
+            val destination = findWarehouse(
                 warehouseMap,
                 raw.destinationWarehouseId,
                 PACKAGE)
@@ -107,11 +111,11 @@ object DomainGraphBuilder {
         warehouseMap: Map<String, Warehouse>
     ): List<Route> {
         return routeRaws.mapNotNull { raw ->
-            val origin = requireWarehouse(
+            val origin = findWarehouse(
                 warehouseMap,
                 raw.originWarehouseId,
                 ROUTE)
-            val destination = requireWarehouse(
+            val destination = findWarehouse(
                 warehouseMap,
                 raw.destinationWarehouseId,
                 ROUTE)
@@ -131,18 +135,34 @@ object DomainGraphBuilder {
     }
 
     fun buildGraph(
-        warehouseRaws: List<WarehouseRaw>,
-        packageRaws: List<PackageRaw>,
-        routeRaws: List<RouteRaw>,
-        vehicleRaws: List<VehicleRaw>
+    warehouseRepository: WarehouseRepository,
+    packageRepository: PackageRepository,
+    routeRepository: RouteRepository,
+    vehicleRepository: VehicleRepository
     ): DomainGraph {
-        val warehouseMap = buildWarehouses(warehouseRaws)
+    val warehouseRaws =
+        warehouseRepository.getAllWarehouses()
 
-        val vehicles = buildVehicles(vehicleRaws, warehouseMap)
+    val packageRaws =
+        packageRepository.getAllPackages()
 
-        val packages = buildPackages(packageRaws, warehouseMap)
+    val routeRaws =
+        routeRepository.getAllRoutes()
 
-        val routes = buildRoutes(routeRaws, warehouseMap)
+    val vehicleRaws =
+        vehicleRepository.getAllVehicles()
+
+    val warehouseMap =
+        buildWarehouses(warehouseRaws)
+
+    val vehicles =
+        buildVehicles(vehicleRaws, warehouseMap)
+
+    val packages =
+        buildPackages(packageRaws, warehouseMap)
+
+    val routes =
+        buildRoutes(routeRaws, warehouseMap)
 
         return DomainGraph(
             warehouses = warehouseMap.values.toList(),

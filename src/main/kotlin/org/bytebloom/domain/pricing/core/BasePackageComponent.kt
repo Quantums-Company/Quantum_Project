@@ -1,4 +1,4 @@
-package org.bytebloom.domain.pricing
+package org.bytebloom.domain.pricing.core
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
@@ -13,8 +13,9 @@ class BasePackageComponent (
         return packageData
     }
 
-    override fun getTransitRate() : Double {
-        return pricingEngine.calculateShippingCost(packageData,
+    override fun getTransitRate(): Double? {
+        return pricingEngine.calculateShippingCost(
+            packageData,
             availableRoutes
         )
     }

@@ -1,4 +1,4 @@
-package org.bytebloom.domain.pricing
+package org.bytebloom.domain.pricing.strategy
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
@@ -9,7 +9,7 @@ class EcoStrategy : DispatchStrategy {
         private const val WEIGHT_MULTIPLIER = 0.5
         private const val STANDARD_PRIORITY = 1.0
     }
-    override fun calculateTransitCost(route: Route, pkg: org.bytebloom.domain.model.Package): Double {
+    override fun calculateTransitCost(route: Route, pkg: Package): Double {
         return (route.distanceKm * RATE_PER_KM) +
                 (pkg.weight * WEIGHT_MULTIPLIER)
     }

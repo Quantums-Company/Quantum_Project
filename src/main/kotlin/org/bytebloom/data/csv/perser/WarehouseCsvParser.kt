@@ -1,5 +1,9 @@
-package org.bytebloom.data.csv
+package org.bytebloom.data.csv.perser
 
+import org.bytebloom.data.csv.CsvColumns
+import org.bytebloom.data.csv.hasExpectedColumns
+import org.bytebloom.data.csv.hasRequiredValues
+import org.bytebloom.data.csv.toValidDouble
 import org.bytebloom.data.raw.WarehouseRaw
 
 fun parseWarehouse(

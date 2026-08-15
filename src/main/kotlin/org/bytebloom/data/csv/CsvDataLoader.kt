@@ -1,5 +1,9 @@
 package org.bytebloom.data.csv
 
+import org.bytebloom.data.csv.perser.parsePackage
+import org.bytebloom.data.csv.perser.parseRoute
+import org.bytebloom.data.csv.perser.parseVehicle
+import org.bytebloom.data.csv.perser.parseWarehouse
 import org.bytebloom.data.raw.PackageRaw
 import org.bytebloom.data.raw.RouteRaw
 import org.bytebloom.data.raw.VehicleRaw
@@ -10,20 +14,13 @@ import java.io.IOException
 
 const val RESOURCE_PATH = "src/resources"
 
-object CsvColumns {
-    const val PACKAGE = 5
-    const val ROUTE = 5
-    const val VEHICLE = 4
-    const val WAREHOUSE = 5
-}
+fun loadPackages(): List<PackageRaw>  = loadCsv(CsvTablesName.PACKAGE, ::parsePackage)
 
-fun loadPackages(fileName: String): List<PackageRaw>  = loadCsv(fileName, ::parsePackage)
+fun loadVehicles(): List<VehicleRaw> = loadCsv(CsvTablesName.FLEET, ::parseVehicle)
 
-fun loadVehicles(fileName: String): List<VehicleRaw> = loadCsv(fileName, ::parseVehicle)
+fun loadRoutes(): List<RouteRaw> = loadCsv(CsvTablesName.ROUTE, ::parseRoute)
 
-fun loadRoutes(fileName: String): List<RouteRaw> = loadCsv(fileName, ::parseRoute)
-
-fun loadWarehouses(fileName: String): List<WarehouseRaw> = loadCsv(fileName, ::parseWarehouse)
+fun loadWarehouses(): List<WarehouseRaw> = loadCsv(CsvTablesName.WAREHOUSE, ::parseWarehouse)
 
 private fun <T> loadCsv(
     fileName:String,

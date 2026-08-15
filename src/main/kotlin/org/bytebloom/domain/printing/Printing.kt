@@ -3,6 +3,7 @@ package org.bytebloom.domain.printing
 import org.bytebloom.data.raw.PackageRaw
 import org.bytebloom.domain.hashing.ValidationReport
 import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.routing.WarehouseGraph
 import org.bytebloom.util.Logger
 
 fun printTopPackagesRaw(packages: List<PackageRaw>, count: Int) {
@@ -79,6 +80,44 @@ fun printResilienceReport(report: ValidationReport) {
     Logger.info("==================================================================")
 }
 
+fun calculatePathDistance(graph: WarehouseGraph, path: List<String>): Double {
+    if (path.size < 2) return 0.0
+
+    var totalDistance = 0.0
+    val map = graph.adjacencyMap
+
+    for (i in 0 until path.size - 1) {
+        val current = path[i]
+        val next = path[i + 1]
+
+        // Get the distance from the neighbor map of the current warehouse
+        val distance = map[current]?.get(next) ?: 0.0
+        totalDistance += distance
+    }
+
+    return totalDistance
+}
+
+
+fun printRouteComparison(graph: WarehouseGraph, start: String, destination: String, bfsPath: List<String>, dijkstraPath: List<String>) {
+    val bfsDistance = calculatePathDistance(graph, bfsPath)
+    val dijkstraDistance = calculatePathDistance(graph, dijkstraPath)
+
+    println("=== Route Algorithm Comparison ===")
+    println("Start: $start | Destination: $destination")
+    println()
+
+    println("--- BFS Result (Fewest Hops) ---")
+    println("Path: ${bfsPath.joinToString(" -> ")}")
+    println("Total Hops: ${bfsPath.size - 1}")
+    println("Total Distance: %.2f km".format(bfsDistance))
+    println()
+
+    println("--- Dijkstra Result (Shortest Distance) ---")
+    println("Path: ${dijkstraPath.joinToString(" -> ")}")
+    println("Total Hops: ${dijkstraPath.size - 1}")
+    println("Total Distance: %.2f km".format(dijkstraDistance))
+}
 //
 //fun printPackages(packages: List<Package>) {
 //    packages.forEach(::println)
