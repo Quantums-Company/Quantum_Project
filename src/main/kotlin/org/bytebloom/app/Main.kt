@@ -13,6 +13,17 @@ import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.routing.WarehouseGraphBuilder
 import org.bytebloom.domain.routing.bfs.BreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
+import org.bytebloom.util.Logger
+import org.bytebloom.domain.pricing.decorator.FragileHandlingDecorator
+import org.bytebloom.domain.pricing.decorator.ExpressInsuranceDecorator
+import org.bytebloom.domain.pricing.decorator.ColdChainDecorator
+import org.bytebloom.data.raw.Priority
+import org.bytebloom.domain.pricing.core.RoutePricingEngine
+import org.bytebloom.domain.pricing.core.PackageComponent
+import org.bytebloom.domain.pricing.strategy.EcoStrategy
+import org.bytebloom.domain.pricing.core.BasePackageComponent
+import org.bytebloom.domain.model.Package
+
 
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
@@ -78,50 +89,50 @@ fun main() {
 //        graph.warehouses[0],
 //        graph.warehouses[1],
 //    )
-////    val packageData = graph.packages.first()
-//
-//    val pricingEngine = RoutePricingEngine(EcoStrategy())
-//
-//    var service: PackageComponent =
-//        BasePackageComponent(
-//            packageData,
-//            graph.routes,
-//            pricingEngine
-//        )
-//
-//    Logger.info("==============================================")
-//    Logger.info("           PACKAGE PRICING REPORT             ")
-//    Logger.info("==============================================")
-//    Logger.info("Package ID      : ${service.getPackage().id}")
-//    Logger.info("Origin          : ${service.getPackage().originWarehouse.id}")
-//    Logger.info("Destination     : ${service.getPackage().destinationWarehouse.id}")
-//    Logger.info("Priority        : ${service.getPackage().priority}")
-//    Logger.info("----------------------------------------------")
-//
-//    Logger.info("Base Rate       : ${service.getTransitRate()}")
-//
-//    service = FragileHandlingDecorator(service, 10.0)
-//
-//    Logger.info("After Fragile   : ${service.getTransitRate()}")
-//
-//    service = ColdChainDecorator(service, 1.25)
-//
-//    Logger.info("After Cold Chain: ${service.getTransitRate()}")
-//
-//    service = ExpressInsuranceDecorator(service, 20.0)
-//
-//    val finalRate = service.getTransitRate()
-//
-//    if (finalRate == null) {
-//        Logger.warning(
-//            "No direct route found for package ${service.getPackage().id}. " +
-//                    "Transit rate cannot be calculated."
-//        )
-//    } else {
-//        Logger.info("Final Transit Rate : %.2f".format(finalRate))
-//    }
-//
-//    Logger.info("==============================================")
+    val packageData = graph.packages.first()
+
+    val pricingEngine = RoutePricingEngine(EcoStrategy())
+
+    var service: PackageComponent =
+        BasePackageComponent(
+            packageData,
+            graph.routes,
+            pricingEngine
+        )
+
+    Logger.info("==============================================")
+    Logger.info("           PACKAGE PRICING REPORT             ")
+    Logger.info("==============================================")
+    Logger.info("Package ID      : ${service.getPackage().id}")
+    Logger.info("Origin          : ${service.getPackage().originWarehouse.id}")
+    Logger.info("Destination     : ${service.getPackage().destinationWarehouse.id}")
+    Logger.info("Priority        : ${service.getPackage().priority}")
+    Logger.info("----------------------------------------------")
+
+    Logger.info("Base Rate       : ${service.getTransitRate()}")
+
+    service = FragileHandlingDecorator(service, 10.0)
+
+    Logger.info("After Fragile   : ${service.getTransitRate()}")
+
+    service = ColdChainDecorator(service, 1.25)
+
+    Logger.info("After Cold Chain: ${service.getTransitRate()}")
+
+    service = ExpressInsuranceDecorator(service, 20.0)
+
+    val finalRate = service.getTransitRate()
+
+    if (finalRate == null) {
+        Logger.warning(
+            "No direct route found for package ${service.getPackage().id}. " +
+                    "Transit rate cannot be calculated."
+        )
+    } else {
+        Logger.info("Final Transit Rate : %.2f".format(finalRate))
+    }
+
+    Logger.info("==============================================")
 
     val graphBuilder = WarehouseGraphBuilder(
         warehouses = graph.warehouses,
