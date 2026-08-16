@@ -1,10 +1,19 @@
 package org.bytebloom.app
 
+import org.bytebloom.data.raw.Priority
 import org.bytebloom.data.repository.CsvPackageRepository
 import org.bytebloom.data.repository.CsvRouteRepository
 import org.bytebloom.data.repository.CsvVehicleRepository
 import org.bytebloom.data.repository.CsvWarehouseRepository
 import org.bytebloom.domain.graph.DomainGraphBuilder
+import org.bytebloom.domain.model.Package
+import org.bytebloom.domain.pricing.core.BasePackageComponent
+import org.bytebloom.domain.pricing.core.PackageComponent
+import org.bytebloom.domain.pricing.core.RoutePricingEngine
+import org.bytebloom.domain.pricing.decorator.ColdChainDecorator
+import org.bytebloom.domain.pricing.decorator.ExpressInsuranceDecorator
+import org.bytebloom.domain.pricing.decorator.FragileHandlingDecorator
+import org.bytebloom.domain.pricing.strategy.EcoStrategy
 import org.bytebloom.domain.printing.printRouteComparison
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.RouteRepository
@@ -14,15 +23,6 @@ import org.bytebloom.domain.routing.WarehouseGraphBuilder
 import org.bytebloom.domain.routing.bfs.BreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.util.Logger
-import org.bytebloom.domain.pricing.decorator.FragileHandlingDecorator
-import org.bytebloom.domain.pricing.decorator.ExpressInsuranceDecorator
-import org.bytebloom.domain.pricing.decorator.ColdChainDecorator
-import org.bytebloom.data.raw.Priority
-import org.bytebloom.domain.pricing.core.RoutePricingEngine
-import org.bytebloom.domain.pricing.core.PackageComponent
-import org.bytebloom.domain.pricing.strategy.EcoStrategy
-import org.bytebloom.domain.pricing.core.BasePackageComponent
-import org.bytebloom.domain.model.Package
 
 
 fun main() {
@@ -82,14 +82,14 @@ fun main() {
 //        graph.routes
 //    )
 //    println("Fragile Strategy Cost : $fragileCost")
-//    val packageData = Package(
-//        "PKG-001",
-//        12.5,
-//        Priority.STANDARD,
-//        graph.warehouses[0],
-//        graph.warehouses[1],
-//    )
-    val packageData = graph.packages.first()
+    val packageData = Package(
+        "PKG-001",
+        12.5,
+        Priority.STANDARD,
+        graph.warehouses[0],
+        graph.warehouses[1],
+    )
+//    val packageData = graph.packages.first()
 
     val pricingEngine = RoutePricingEngine(EcoStrategy())
 
@@ -100,7 +100,7 @@ fun main() {
             pricingEngine
         )
 
-    Logger.info("==============================================")
+    Logger.info("\n\n==============================================")
     Logger.info("           PACKAGE PRICING REPORT             ")
     Logger.info("==============================================")
     Logger.info("Package ID      : ${service.getPackage().id}")
@@ -109,15 +109,15 @@ fun main() {
     Logger.info("Priority        : ${service.getPackage().priority}")
     Logger.info("----------------------------------------------")
 
-    Logger.info("Base Rate       : ${service.getTransitRate()}")
+    Logger.info("Base Rate       : %.2f".format(service.getTransitRate()))
 
     service = FragileHandlingDecorator(service, 10.0)
 
-    Logger.info("After Fragile   : ${service.getTransitRate()}")
+    Logger.info("After Fragile   :  %.2f".format(service.getTransitRate()))
 
     service = ColdChainDecorator(service, 1.25)
 
-    Logger.info("After Cold Chain: ${service.getTransitRate()}")
+    Logger.info("After Cold Chain: %.2f".format(service.getTransitRate()))
 
     service = ExpressInsuranceDecorator(service, 20.0)
 

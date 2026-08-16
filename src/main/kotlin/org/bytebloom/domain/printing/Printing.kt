@@ -103,7 +103,7 @@ fun printRouteComparison(graph: WarehouseGraph, start: String, destination: Stri
     val bfsDistance = calculatePathDistance(graph, bfsPath)
     val dijkstraDistance = calculatePathDistance(graph, dijkstraPath)
 
-    println("=== Route Algorithm Comparison ===")
+    println("\n\n=== Route Algorithm Comparison ===")
     println("Start: $start | Destination: $destination")
     println()
 
