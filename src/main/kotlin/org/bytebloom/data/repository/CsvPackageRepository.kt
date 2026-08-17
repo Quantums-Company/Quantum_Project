@@ -1,15 +1,39 @@
 package org.bytebloom.data.repository
 
 import org.bytebloom.data.csv.loadPackages
+import org.bytebloom.data.lookup.findWarehouse
 import org.bytebloom.data.mapper.toDomain
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository
 
 class CsvPackageRepository(
-    private val warehouseMap: Map<String, Warehouse>
+    private val warehousesById: Map<String, Warehouse>
 ) : PackageRepository {
     override fun getAllPackages(): List<Package> {
-        return loadPackages().mapNotNull { it.toDomain(warehouseMap) }
+
+        return loadPackages().mapNotNull { raw ->
+
+            val origin = warehousesById.findWarehouse(
+                warehouseId = raw.originWarehouseId,
+                owner = "Package",
+                ownerId = raw.id
+            )
+
+            val destination = warehousesById.findWarehouse(
+                warehouseId = raw.destinationWarehouseId,
+                owner = "Package",
+                ownerId = raw.id
+            )
+
+            if (origin == null || destination == null) {
+                return@mapNotNull null
+            }
+
+            raw.toDomain(
+                originWarehouse = origin,
+                destinationWarehouse = destination
+            )
+        }
     }
 }

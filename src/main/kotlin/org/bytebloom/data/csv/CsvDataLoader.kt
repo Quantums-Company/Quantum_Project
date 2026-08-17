@@ -1,9 +1,9 @@
 package org.bytebloom.data.csv
 
-import org.bytebloom.data.csv.perser.parsePackage
-import org.bytebloom.data.csv.perser.parseRoute
-import org.bytebloom.data.csv.perser.parseVehicle
-import org.bytebloom.data.csv.perser.parseWarehouse
+import org.bytebloom.data.csv.parser.parsePackage
+import org.bytebloom.data.csv.parser.parseRoute
+import org.bytebloom.data.csv.parser.parseVehicle
+import org.bytebloom.data.csv.parser.parseWarehouse
 import org.bytebloom.data.raw.PackageRaw
 import org.bytebloom.data.raw.RouteRaw
 import org.bytebloom.data.raw.VehicleRaw

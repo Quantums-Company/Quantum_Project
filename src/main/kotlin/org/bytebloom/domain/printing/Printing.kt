@@ -6,6 +6,8 @@ import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
 import org.bytebloom.util.Logger
 
+private const val SEPARATOR_WIDTH = 120
+
 fun printTopPackagesRaw(packages: List<PackageRaw>, count: Int) {
     Logger.info("\nTop Priority Packages:\n")
 
@@ -21,63 +23,59 @@ fun printTopPackagesRaw(packages: List<PackageRaw>, count: Int) {
 }
 
 fun printPackagesForFirstWarehouse(firstWarehouse: Warehouse) {
-    Logger.info("\n======================================================================================================================")
-    Logger.info("\"=== Cargo Queue for $firstWarehouse.name ===\"")
-    Logger.info("======================================================================================================================\n")
+    val separator = "=".repeat(SEPARATOR_WIDTH)
+    Logger.info("\n$separator")
+    Logger.info("=== Cargo Queue for ${firstWarehouse.name} ===")
+    Logger.info("$separator\n")
 
-    firstWarehouse.cargoQueue.forEach(::println)
-    Logger.info("\n======================================================================================================================\n")
+    firstWarehouse.cargoQueue.forEach { Logger.info(it.toString()) }
+    Logger.info("\n$separator\n")
 }
 
 fun printResilienceReport(report: ValidationReport) {
-
     Logger.info("==================================================================")
     Logger.info("          PACKAGE ASSIGNMENT RING: RESILIENCE AUDIT REPORT")
     Logger.info("==================================================================")
-
     Logger.info("Broken Vehicle Slot : ${report.brokenSlot}")
     Logger.info("Affected Packages   : ${report.reroutedPackages}")
-
     Logger.info("")
 
     report.vehicles.forEach { vehicle ->
-
         if (vehicle.isBroken) {
-
-            Logger.info("[X] Vehicle Slot ${vehicle.slot}")
-            Logger.info("    Status : BROKEN")
-            Logger.info("    Packages Before : ${vehicle.packageCountBefore}")
-
+            printBrokenVehicle(vehicle)
         } else {
-
-            Logger.info("[✓] Vehicle Slot ${vehicle.slot}")
-            Logger.info("    Packages Before : ${vehicle.packageCountBefore}")
-            Logger.info("    Packages After  : ${vehicle.packageCountAfter}")
-            Logger.info(
-                "    Non-Migration   : ${
-                    if (vehicle.nonMigrationPassed) "PASSED"
-                    else "FAILED"
-                }"
-            )
+            printHealthyVehicle(vehicle)
         }
-
         Logger.info("----------------------------------------------------------")
     }
 
     Logger.info("")
+    printValidationResult(report.allChecksPassed)
+    Logger.info("==================================================================")
+}
 
-    if (report.allChecksPassed) {
+private fun printBrokenVehicle(vehicle: org.bytebloom.domain.hashing.VehicleValidation) {
+    Logger.info("[X] Vehicle Slot ${vehicle.slot}")
+    Logger.info("    Status : BROKEN")
+    Logger.info("    Packages Before : ${vehicle.packageCountBefore}")
+}
 
+private fun printHealthyVehicle(vehicle: org.bytebloom.domain.hashing.VehicleValidation) {
+    Logger.info("[✓] Vehicle Slot ${vehicle.slot}")
+    Logger.info("    Packages Before : ${vehicle.packageCountBefore}")
+    Logger.info("    Packages After  : ${vehicle.packageCountAfter}")
+    val status = if (vehicle.nonMigrationPassed) "PASSED" else "FAILED"
+    Logger.info("    Non-Migration   : $status")
+}
+
+private fun printValidationResult(allChecksPassed: Boolean) {
+    if (allChecksPassed) {
         Logger.info("SUCCESS")
         Logger.info("Consistent Hashing validation PASSED.")
-
     } else {
-
         Logger.info("FAILURE")
         Logger.info("Cargo migration detected.")
     }
-
-    Logger.info("==================================================================")
 }
 
 fun calculatePathDistance(graph: WarehouseGraph, path: List<String>): Double {
@@ -89,8 +87,6 @@ fun calculatePathDistance(graph: WarehouseGraph, path: List<String>): Double {
     for (i in 0 until path.size - 1) {
         val current = path[i]
         val next = path[i + 1]
-
-        // Get the distance from the neighbor map of the current warehouse
         val distance = map[current]?.get(next) ?: 0.0
         totalDistance += distance
     }
@@ -98,39 +94,28 @@ fun calculatePathDistance(graph: WarehouseGraph, path: List<String>): Double {
     return totalDistance
 }
 
-
-fun printRouteComparison(graph: WarehouseGraph, start: String, destination: String, bfsPath: List<String>, dijkstraPath: List<String>) {
+fun printRouteComparison(
+    graph: WarehouseGraph,
+    start: String,
+    destination: String,
+    bfsPath: List<String>,
+    dijkstraPath: List<String>
+) {
     val bfsDistance = calculatePathDistance(graph, bfsPath)
     val dijkstraDistance = calculatePathDistance(graph, dijkstraPath)
 
-    println("\n\n=== Route Algorithm Comparison ===")
-    println("Start: $start | Destination: $destination")
-    println()
+    Logger.info("\n\n=== Route Algorithm Comparison ===")
+    Logger.info("Start: $start | Destination: $destination")
+    Logger.info("")
 
-    println("--- BFS Result (Fewest Hops) ---")
-    println("Path: ${bfsPath.joinToString(" -> ")}")
-    println("Total Hops: ${bfsPath.size - 1}")
-    println("Total Distance: %.2f km".format(bfsDistance))
-    println()
+    Logger.info("--- BFS Result (Fewest Hops) ---")
+    Logger.info("Path: ${bfsPath.joinToString(" -> ")}")
+    Logger.info("Total Hops: ${bfsPath.size - 1}")
+    Logger.info("Total Distance: %.2f km".format(bfsDistance))
+    Logger.info("")
 
-    println("--- Dijkstra Result (Shortest Distance) ---")
-    println("Path: ${dijkstraPath.joinToString(" -> ")}")
-    println("Total Hops: ${dijkstraPath.size - 1}")
-    println("Total Distance: %.2f km".format(dijkstraDistance))
+    Logger.info("--- Dijkstra Result (Shortest Distance) ---")
+    Logger.info("Path: ${dijkstraPath.joinToString(" -> ")}")
+    Logger.info("Total Hops: ${dijkstraPath.size - 1}")
+    Logger.info("Total Distance: %.2f km".format(dijkstraDistance))
 }
-//
-//fun printPackages(packages: List<Package>) {
-//    packages.forEach(::println)
-//}
-//
-//fun printWarehouses(Warehouses: List<Warehouse>) {
-//    Warehouses.forEach(::println)
-//}
-//
-//fun printVehicles(Vehicles: List<Vehicle>) {
-//    Vehicles.forEach(::println)
-//}
-//
-//fun printRoutes(Routes: List<Route>) {
-//    Routes.forEach(::println)
-//}
