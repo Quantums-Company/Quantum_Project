@@ -20,36 +20,149 @@ private const val ROUTE = "Route"
 
 object DomainGraphBuilder {
 
+    private fun findWarehouse(
+        warehouseMap: Map<String, Warehouse>,
+        warehouseId: String,
+        owner: String
+    ): Warehouse? {
+
+        val warehouse = warehouseMap[warehouseId]
+
+        if (warehouse == null) {
+            Logger.warning(
+                "$owner references unknown warehouse '$warehouseId'."
+            )
+        }
+
+        return warehouse
+    }
+
+    private fun buildWarehouses(
+        warehouseRaws: List<WarehouseRaw>
+    ): Map<String, Warehouse> {
+
+        return warehouseRaws.associateBy(
+            keySelector = { it.id },
+            valueTransform = { raw ->
+                Warehouse(
+                    raw.id,
+                    raw.name,
+                    raw.regionalZone,
+                    raw.longitude,
+                    raw.latitude,
+                )
+            }
+        )
+    }
+
+    private fun buildVehicles(
+        vehicleRaws: List<VehicleRaw>,
+        warehouseMap: Map<String, Warehouse>
+    ): List<Vehicle> {
+        return vehicleRaws.mapNotNull { raw ->
+            val warehouse = findWarehouse(
+                warehouseMap = warehouseMap,
+                warehouseId = raw.currentWarehouseId,
+                owner = VEHICLE
+            ) ?: return@mapNotNull null
+
+            val vehicle = Vehicle(
+                raw.id,
+                raw.maxCapacityKg,
+                raw.costPerKm,
+                warehouse
+            )
+
+            warehouse.addVehicle(vehicle)
+            vehicle
+        }
+    }
+
+    private fun buildPackages(
+        packageRaws: List<PackageRaw>,
+        warehouseMap: Map<String, Warehouse>
+    ): List<Package> {
+        return packageRaws.mapNotNull { raw ->
+            val origin = findWarehouse(
+                warehouseMap,
+                raw.originWarehouseId,
+                PACKAGE)
+            val destination = findWarehouse(
+                warehouseMap,
+                raw.destinationWarehouseId,
+                PACKAGE)
+
+            if (origin == null || destination == null) {
+                return@mapNotNull null
+            }
+            val pkg = Package(
+                raw.id,
+                raw.weight,
+                raw.priority,
+                origin,
+                destination).
+            also(origin::addPackage)
+            pkg
+        }
+    }
+
+    private fun buildRoutes(
+        routeRaws: List<RouteRaw>,
+        warehouseMap: Map<String, Warehouse>
+    ): List<Route> {
+        return routeRaws.mapNotNull { raw ->
+            val origin = findWarehouse(
+                warehouseMap,
+                raw.originWarehouseId,
+                ROUTE)
+            val destination = findWarehouse(
+                warehouseMap,
+                raw.destinationWarehouseId,
+                ROUTE)
+
+            if (origin == null || destination == null) {
+                return@mapNotNull null
+            }
+            val route = Route(
+                raw.id,
+                raw.distanceKm,
+                raw.typicalDelayMin,
+                origin,
+                destination).
+            also(origin::addRoute)
+            route
+        }
+    }
 
     fun buildGraph(
-    warehouseRepository: WarehouseRepository,
-    packageRepository: PackageRepository,
-    routeRepository: RouteRepository,
-    vehicleRepository: VehicleRepository
+        warehouseRepository: WarehouseRepository,
+        packageRepository: PackageRepository,
+        routeRepository: RouteRepository,
+        vehicleRepository: VehicleRepository
     ): DomainGraph {
-    val warehouseRaws =
-        warehouseRepository.getAllWarehouses()
+        val warehouseRaws =
+            warehouseRepository.getAllWarehouses()
 
-    val packageRaws =
-        packageRepository.getAllPackages()
+        val packageRaws =
+            packageRepository.getAllPackages()
 
-    val routeRaws =
-        routeRepository.getAllRoutes()
+        val routeRaws =
+            routeRepository.getAllRoutes()
 
-    val vehicleRaws =
-        vehicleRepository.getAllVehicles()
+        val vehicleRaws =
+            vehicleRepository.getAllVehicles()
 
-    val warehouseMap =
-        buildWarehouses(warehouseRaws)
+        val warehouseMap =
+            buildWarehouses(warehouseRaws)
 
-    val vehicles =
-        buildVehicles(vehicleRaws, warehouseMap)
+        val vehicles =
+            buildVehicles(vehicleRaws, warehouseMap)
 
-    val packages =
-        buildPackages(packageRaws, warehouseMap)
+        val packages =
+            buildPackages(packageRaws, warehouseMap)
 
-    val routes =
-        buildRoutes(routeRaws, warehouseMap)
+        val routes =
+            buildRoutes(routeRaws, warehouseMap)
 
         return DomainGraph(
             warehouses = warehouseMap.values.toList(),
