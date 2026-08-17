@@ -1,12 +1,12 @@
 package org.bytebloom.app
 
-import org.bytebloom.data.raw.Priority
 import org.bytebloom.data.repository.CsvPackageRepository
 import org.bytebloom.data.repository.CsvRouteRepository
 import org.bytebloom.data.repository.CsvVehicleRepository
 import org.bytebloom.data.repository.CsvWarehouseRepository
 import org.bytebloom.domain.graph.DomainGraphBuilder
 import org.bytebloom.domain.model.Package
+import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.pricing.core.BasePackageComponent
 import org.bytebloom.domain.pricing.core.PackageComponent
 import org.bytebloom.domain.pricing.core.RoutePricingEngine
@@ -20,7 +20,7 @@ import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.routing.WarehouseGraphBuilder
-import org.bytebloom.domain.routing.bfs.BreadthFirstRouter
+import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.util.Logger
 
@@ -143,12 +143,16 @@ fun main() {
 
     val warehouseGraph = graphBuilder.build()
 
-    val start = "WH-001"
-    val destination = "WH-006"
+    val start = warehousesById["WH-001"]
+    val destination = warehousesById["WH-006"]
 
-    val bfsRouter = BreadthFirstRouter(warehouseGraph)
+    val bfsRouter = UnidirectionalBreadthFirstRouter(warehouseGraph)
     val dijkstraRouter = DijkstraRouter(warehouseGraph)
 
+    if (start == null || destination == null) {
+        Logger.warning("there is no warehouse with id = [WH-001] or = [WH-006]")
+        return
+    }
     val bfsPath = bfsRouter.findShortestPath(start, destination) ?: emptyList()
     val dijkstraPath = dijkstraRouter.findShortestPath(start, destination) ?: emptyList()
 

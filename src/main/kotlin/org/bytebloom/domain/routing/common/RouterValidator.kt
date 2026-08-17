@@ -1,23 +1,24 @@
 package org.bytebloom.domain.routing.common
 
+import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
 
 open class RouterValidator (private val graph: WarehouseGraph){
     protected fun areValidWarehouses(
-        startId: String,
-        endId: String
+        startWarehouse: Warehouse,
+        endWarehouse: Warehouse
     ): Boolean =
-        graph.containsWarehouse(startId) &&
-                graph.containsWarehouse(endId)
+        graph.containsWarehouse(startWarehouse) &&
+                graph.containsWarehouse(endWarehouse)
 
 
     protected fun reconstructPath(
-        parent: Map<String, String>,
-        endId: String
-    ): List<String> {
+        parent: Map<Warehouse, Warehouse>,
+        endWarehouse: Warehouse
+    ): List<Warehouse> {
 
-        val path = mutableListOf<String>()
-        var current: String? = endId
+        val path = mutableListOf<Warehouse>()
+        var current: Warehouse? = endWarehouse
 
         while (current != null) {
             path.add(current)

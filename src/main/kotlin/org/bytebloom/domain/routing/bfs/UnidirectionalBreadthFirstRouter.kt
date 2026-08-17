@@ -1,45 +1,46 @@
 package org.bytebloom.domain.routing.bfs
 
+import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
 import org.bytebloom.domain.routing.common.RouterValidator
 
-class BreadthFirstRouter(
+class UnidirectionalBreadthFirstRouter(
     private val graph: WarehouseGraph
 ) : RouterValidator(graph) {
 
     private data class SearchState(
-        val queue: ArrayDeque<String>,
-        val visited: MutableSet<String>,
-        val parent: MutableMap<String, String>
+        val queue: ArrayDeque<Warehouse>,
+        val visited: MutableSet<Warehouse>,
+        val parent: MutableMap<Warehouse, Warehouse>
     )
 
     fun findShortestPath(
-        startId: String,
-        endId: String
-    ): List<String>? {
+        startWarehouse: Warehouse,
+        endWarehouse: Warehouse
+    ): List<Warehouse>? {
 
-        if (!areValidWarehouses(startId, endId)) {
+        if (!areValidWarehouses(startWarehouse, endWarehouse)) {
             return null
         }
 
-        if (startId == endId) {
-            return listOf(startId)
+        if (startWarehouse.id == endWarehouse.id) {
+            return listOf(startWarehouse)
         }
 
-        val state = createSearchState(startId)
+        val state = createSearchState(startWarehouse)
 
-        return search(state, endId)
+        return search(state, endWarehouse)
     }
 
     private fun createSearchState(
-        startId: String
+        startWarehouse: Warehouse
     ): SearchState {
 
-        val queue = ArrayDeque<String>()
-        val visited = mutableSetOf<String>()
+        val queue = ArrayDeque<Warehouse>()
+        val visited = mutableSetOf<Warehouse>()
 
-        queue.addLast(startId)
-        visited.add(startId)
+        queue.addLast(startWarehouse)
+        visited.add(startWarehouse)
 
         return SearchState(
             queue = queue,
@@ -50,16 +51,16 @@ class BreadthFirstRouter(
 
     private fun search(
         state: SearchState,
-        endId: String
-    ): List<String>? {
+        endWarehouse: Warehouse
+    ): List<Warehouse>? {
 
         while (state.queue.isNotEmpty()) {
             val current = state.queue.removeFirst()
 
-            if (current == endId) {
+            if (current.id == endWarehouse.id) {
                 return reconstructPath(
                     state.parent,
-                    endId
+                    endWarehouse
                 )
             }
 
@@ -73,17 +74,17 @@ class BreadthFirstRouter(
     }
 
     private fun visitNeighbors(
-        current: String,
+        currentWarehouse: Warehouse,
         state: SearchState
     ) {
-        for (neighbor in graph.neighbors(current).keys) {
+        for (neighbor in graph.neighbors(currentWarehouse).keys) {
 
             if (neighbor in state.visited) {
                 continue
             }
 
             state.visited.add(neighbor)
-            state.parent[neighbor] = current
+            state.parent[neighbor] = currentWarehouse
             state.queue.addLast(neighbor)
         }
     }

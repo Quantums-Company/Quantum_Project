@@ -1,5 +1,6 @@
 package org.bytebloom.domain.routing.dijkstra
 
+import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
 import org.bytebloom.domain.routing.common.RouterValidator
 
@@ -8,41 +9,41 @@ class DijkstraRouter(
 ): RouterValidator(graph) {
 
     private data class DijkstraState(
-        val distances: MutableMap<String, Double>,
-        val visited: MutableSet<String>,
-        val parent: MutableMap<String, String>
+        val distances: MutableMap<Warehouse, Double>,
+        val visited: MutableSet<Warehouse>,
+        val parent: MutableMap<Warehouse, Warehouse>
     )
 
     fun findShortestPath(
-        startId: String,
-        endId: String
-    ): List<String>? {
+        startWarehouse: Warehouse,
+        endWarehouse: Warehouse
+    ): List<Warehouse>? {
 
-        if (!areValidWarehouses(startId, endId)) {
+        if (!areValidWarehouses(startWarehouse, endWarehouse)) {
             return null
         }
 
-        if (startId == endId) {
-            return listOf(startId)
+        if (startWarehouse.id == endWarehouse.id) {
+            return listOf(startWarehouse)
         }
 
-        val state = createInitialState(startId)
+        val state = createInitialState(startWarehouse)
 
-        return search(state, endId)
+        return search(state, endWarehouse)
     }
 
     private fun createInitialState(
-        startId: String
+        startWarehouse: Warehouse
     ): DijkstraState {
 
-        val distances = mutableMapOf<String, Double>()
+        val distances = mutableMapOf<Warehouse, Double>()
 
-        for (warehouseId in graph.warehouseIds()) {
-            distances[warehouseId] =
+        for (warehouse in graph.warehouses()) {
+            distances[warehouse] =
                 Double.POSITIVE_INFINITY
         }
 
-        distances[startId] = 0.0
+        distances[startWarehouse] = 0.0
 
         return DijkstraState(
             distances = distances,
@@ -52,11 +53,11 @@ class DijkstraRouter(
     }
 
     private fun findLowestUnvisitedNode(
-        distances: Map<String, Double>,
-        visited: Set<String>
-    ): String? {
+        distances: Map<Warehouse, Double>,
+        visited: Set<Warehouse>
+    ): Warehouse? {
 
-        var lowestNode: String? = null
+        var lowestNode: Warehouse? = null
         var lowestDistance = Double.POSITIVE_INFINITY
 
         for ((node, distance) in distances) {
@@ -75,7 +76,7 @@ class DijkstraRouter(
     }
 
     private fun relaxNeighbors(
-        current: String,
+        current: Warehouse,
         currentDistance: Double,
         state: DijkstraState
     ) {
@@ -100,8 +101,8 @@ class DijkstraRouter(
 
     private fun search(
         state: DijkstraState,
-        endId: String
-    ): List<String>? {
+        endWarehouse: Warehouse
+    ): List<Warehouse>? {
 
         while (true) {
 
@@ -111,10 +112,10 @@ class DijkstraRouter(
                     state.visited
                 ) ?: return null
 
-            if (current == endId) {
+            if (current.id == endWarehouse.id) {
                 return reconstructPath(
                     state.parent,
-                    endId
+                    endWarehouse
                 )
             }
 

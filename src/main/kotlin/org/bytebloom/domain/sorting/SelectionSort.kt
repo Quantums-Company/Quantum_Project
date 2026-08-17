@@ -1,6 +1,6 @@
 package org.bytebloom.domain.sorting
 
-import org.bytebloom.data.raw.Priority
+import org.bytebloom.domain.model.Priority
 import org.bytebloom.data.raw.PackageRaw
 
 private fun getPriorityValue(priority: Priority): Int {

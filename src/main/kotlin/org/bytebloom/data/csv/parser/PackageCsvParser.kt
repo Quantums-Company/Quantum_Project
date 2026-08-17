@@ -5,7 +5,7 @@ import org.bytebloom.data.csv.hasExpectedColumns
 import org.bytebloom.data.csv.hasRequiredValues
 import org.bytebloom.data.csv.toValidDouble
 import org.bytebloom.data.raw.PackageRaw
-import org.bytebloom.data.raw.Priority
+import org.bytebloom.domain.model.Priority
 
 private const val ID_INDEX = 0
 private const val WEIGHT_INDEX = 1

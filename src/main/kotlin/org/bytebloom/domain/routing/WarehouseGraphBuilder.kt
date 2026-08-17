@@ -20,40 +20,28 @@ class WarehouseGraphBuilder(
 
     private fun addWarehouses(graph: WarehouseGraph) {
         warehouses.forEach { warehouse ->
-            graph.addWarehouse(warehouse.id)
+            graph.addWarehouse(warehouse)
         }
     }
 
     private fun addValidRoutes(graph: WarehouseGraph) {
-        val warehouseIds = warehouses
-            .map { it.id }
-            .toSet()
+        val warehouseMap = warehouses.associateBy { it.id }
 
         routes.forEach { route ->
-            if (isValidRoute(route, warehouseIds)) {
+            val originWarehouse = warehouseMap[route.originWarehouse.id]
+            val destinationWarehouse = warehouseMap[route.destinationWarehouse.id]
+
+            if (originWarehouse != null && destinationWarehouse != null) {
                 graph.addRoute(
-                    originId = route.originWarehouse.id,
-                    destinationId = route.destinationWarehouse.id,
+                    originWarehouse = originWarehouse,
+                    destinationWarehouse = destinationWarehouse,
                     distanceKm = route.distanceKm
+                )
+            } else {
+                Logger.warning(
+                    "Skipping route '${route.id}' because it references an unknown warehouse."
                 )
             }
         }
-    }
-
-    private fun isValidRoute(
-        route: Route,
-        warehouseIds: Set<String>
-    ): Boolean {
-
-        if (route.originWarehouse.id !in warehouseIds ||
-            route.destinationWarehouse.id !in warehouseIds
-        ) {
-            Logger.warning(
-                "Skipping route '${route.id}' because it references an unknown warehouse."
-            )
-            return false
-        }
-
-        return true
     }
 }

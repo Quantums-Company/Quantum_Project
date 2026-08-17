@@ -1,7 +1,5 @@
 package org.bytebloom.domain.model
 
-import org.bytebloom.data.raw.Priority
-
 class Package(
     val id: String,
     val weight: Double,
