@@ -101,7 +101,7 @@ object DomainGraphBuilder {
                 raw.priority,
                 origin,
                 destination).
-                also(origin::addPackage)
+            also(origin::addPackage)
             pkg
         }
     }
@@ -129,40 +129,40 @@ object DomainGraphBuilder {
                 raw.typicalDelayMin,
                 origin,
                 destination).
-                also(origin::addRoute)
+            also(origin::addRoute)
             route
         }
     }
 
     fun buildGraph(
-    warehouseRepository: WarehouseRepository,
-    packageRepository: PackageRepository,
-    routeRepository: RouteRepository,
-    vehicleRepository: VehicleRepository
+        warehouseRepository: WarehouseRepository,
+        packageRepository: PackageRepository,
+        routeRepository: RouteRepository,
+        vehicleRepository: VehicleRepository
     ): DomainGraph {
-    val warehouseRaws =
-        warehouseRepository.getAllWarehouses()
+        val warehouseRaws =
+            warehouseRepository.getAllWarehouses()
 
-    val packageRaws =
-        packageRepository.getAllPackages()
+        val packageRaws =
+            packageRepository.getAllPackages()
 
-    val routeRaws =
-        routeRepository.getAllRoutes()
+        val routeRaws =
+            routeRepository.getAllRoutes()
 
-    val vehicleRaws =
-        vehicleRepository.getAllVehicles()
+        val vehicleRaws =
+            vehicleRepository.getAllVehicles()
 
-    val warehouseMap =
-        buildWarehouses(warehouseRaws)
+        val warehouseMap =
+            buildWarehouses(warehouseRaws)
 
-    val vehicles =
-        buildVehicles(vehicleRaws, warehouseMap)
+        val vehicles =
+            buildVehicles(vehicleRaws, warehouseMap)
 
-    val packages =
-        buildPackages(packageRaws, warehouseMap)
+        val packages =
+            buildPackages(packageRaws, warehouseMap)
 
-    val routes =
-        buildRoutes(routeRaws, warehouseMap)
+        val routes =
+            buildRoutes(routeRaws, warehouseMap)
 
         return DomainGraph(
             warehouses = warehouseMap.values.toList(),

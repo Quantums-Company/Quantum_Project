@@ -1,7 +1,7 @@
 package org.bytebloom.domain.repository
 
-import org.bytebloom.data.raw.RouteRaw
+import org.bytebloom.domain.model.Route
 
 interface RouteRepository {
-    fun getAllRoutes(): List<RouteRaw>
+    fun getAllRoutes(): List<Route>
 }
