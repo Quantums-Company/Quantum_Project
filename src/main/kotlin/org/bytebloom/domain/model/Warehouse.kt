@@ -4,10 +4,10 @@ import org.bytebloom.domain.sorting.quickSortCargoByWeight
 
 class Warehouse(
     val id: String,
-    val name: String?,
-    val regionalZone: String?,
-    val longitude: Double?,
-    val latitude: Double?
+    val name: String,
+    val regionalZone: String,
+    val longitude: Double,
+    val latitude: Double
 ) {
     private val _cargoQueue = mutableListOf<Package>()
     val cargoQueue: List<Package>
