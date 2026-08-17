@@ -1,7 +1,7 @@
 package org.bytebloom.domain.repository
 
-import org.bytebloom.data.raw.VehicleRaw
+import org.bytebloom.domain.model.Vehicle
 
 interface VehicleRepository {
-    fun getAllVehicles(): List<VehicleRaw>
+    fun getAllVehicles(): List<Vehicle>
 }

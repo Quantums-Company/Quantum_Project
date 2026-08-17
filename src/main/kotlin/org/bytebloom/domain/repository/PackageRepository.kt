@@ -1,7 +1,7 @@
 package org.bytebloom.domain.repository
 
-import org.bytebloom.data.raw.PackageRaw
+import org.bytebloom.domain.model.Package
 
 interface PackageRepository {
-    fun getAllPackages(): List<PackageRaw>
+    fun getAllPackages(): List<Package>
 }

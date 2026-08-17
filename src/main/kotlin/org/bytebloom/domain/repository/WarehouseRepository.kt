@@ -1,7 +1,7 @@
 package org.bytebloom.domain.repository
 
-import org.bytebloom.data.raw.WarehouseRaw
+import org.bytebloom.domain.model.Warehouse
 
 interface WarehouseRepository {
-    fun getAllWarehouses (): List<WarehouseRaw>
+    fun getAllWarehouses (): List<Warehouse>
 }
