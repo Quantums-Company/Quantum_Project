@@ -31,9 +31,11 @@ fun main() {
     // printTopPackages(packages, 3)
 
     val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
-    val packageRepo: PackageRepository = CsvPackageRepository()
-    val routeRepo: RouteRepository = CsvRouteRepository()
-    val vehicleRepo: VehicleRepository = CsvVehicleRepository()
+    val warehousesById = warehouseRepo.getAllWarehouses().associateBy { it.id }
+
+    val packageRepo: PackageRepository = CsvPackageRepository(warehousesById)
+    val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
+    val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
 
     val graph = DomainGraphBuilder.buildGraph(
         warehouseRepo,

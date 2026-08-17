@@ -4,6 +4,9 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import kotlin.math.abs
 
+private const val MIN_RING_SIZE = 100
+private const val VEHICLE_SLOT_MULTIPLIER = 2
+
 class ConsistentHashingRing(
     packages: Collection<Package>,
     vehicles: Collection<Vehicle>
@@ -12,7 +15,7 @@ class ConsistentHashingRing(
     private val vehicles = vehicles.toList()
 
     private val circleSize =
-        maxOf(100, vehicles.size * 2)
+        maxOf(MIN_RING_SIZE, vehicles.size * VEHICLE_SLOT_MULTIPLIER)
 
     private val _vehicleRing = mutableMapOf<Int, Vehicle>()
     val vehicleRing: Map<Int, Vehicle>
@@ -32,7 +35,7 @@ class ConsistentHashingRing(
         distributeAllPackages()
     }
 
-    private fun generateVehicleSlots(): List<Int>{
+    private fun generateVehicleSlots(): List<Int> {
         require(vehicles.isNotEmpty()) {
             "At least one vehicle is required."
         }
@@ -65,19 +68,15 @@ class ConsistentHashingRing(
     fun resolveVehicleClockwise(packageSlot: Int): Vehicle {
         require(_vehicleRing.isNotEmpty()) { "Vehicle ring cannot be empty." }
 
-        _vehicleRing[packageSlot]?.let { return it }
-
-        val sortedSlots = _vehicleRing.keys.sorted()
-
-        for (slot in sortedSlots) {
-            if (slot > packageSlot) {
-                return _vehicleRing[slot]!!
-            }
-        }
-
-        return _vehicleRing[sortedSlots.first()]!!
+        return _vehicleRing[packageSlot]
+            ?: findNextClockwiseVehicle(packageSlot)
     }
 
+    private fun findNextClockwiseVehicle(packageSlot: Int): Vehicle {
+        val sortedSlots = _vehicleRing.keys.sorted()
+        val nextSlot = sortedSlots.firstOrNull { it > packageSlot } ?: sortedSlots.first()
+        return _vehicleRing.getValue(nextSlot)
+    }
 
     private fun distributeAllPackages() {
         for (vehicle in _vehicleRing.values) {
@@ -113,12 +112,12 @@ class ConsistentHashingRing(
     fun captureSnapshot(): Map<Int, List<String>> =
         _vehicleRing.keys
             .sorted().associateWith { slot ->
-            _vehicleRing[slot]
-                ?.let { vehicle ->
-                    _assignments[vehicle]
-                        ?.map(Package::id)
-                        ?.sorted()
-                }
-                ?: emptyList()
-        }
+                _vehicleRing[slot]
+                    ?.let { vehicle ->
+                        _assignments[vehicle]
+                            ?.map(Package::id)
+                            ?.sorted()
+                    }
+                    ?: emptyList()
+            }
 }
