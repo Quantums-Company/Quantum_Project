@@ -1,8 +1,7 @@
-package org.bytebloom.domain.routing.bidirectional
+package org.bytebloom.domain.routing.bfs
 
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
-import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.common.RouterValidator
 
 class BidirectionalBreadthFirstRouter(
