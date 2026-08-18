@@ -5,26 +5,17 @@ import org.bytebloom.data.repository.CsvRouteRepository
 import org.bytebloom.data.repository.CsvVehicleRepository
 import org.bytebloom.data.repository.CsvWarehouseRepository
 import org.bytebloom.domain.graph.DomainGraphBuilder
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.pricing.core.BasePackageComponent
-import org.bytebloom.domain.pricing.core.PackageComponent
-import org.bytebloom.domain.pricing.core.RoutePricingEngine
-import org.bytebloom.domain.pricing.decorator.ColdChainDecorator
-import org.bytebloom.domain.pricing.decorator.ExpressInsuranceDecorator
-import org.bytebloom.domain.pricing.decorator.FragileHandlingDecorator
-import org.bytebloom.domain.pricing.strategy.EcoStrategy
 import org.bytebloom.domain.printing.printRouteComparison
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.routing.WarehouseGraphBuilder
+import org.bytebloom.domain.routing.bfs.BfsBenchmark
+import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.util.Logger
-import org.bytebloom.domain.routing.bfs.BfsBenchmark
-
 
 fun main() {
     //val packages = readPackages("packages.csv").toMutableList()
@@ -44,7 +35,6 @@ fun main() {
         routeRepo,
         vehicleRepo
     )
-
 
 //    val firstWarehouse = graph.warehouses.first()
 //    firstWarehouse.sortCargoByWeight()
@@ -85,57 +75,57 @@ fun main() {
 //        graph.routes
 //    )
 //    println("Fragile Strategy Cost : $fragileCost")
-    val packageData = Package(
-        "PKG-001",
-        12.5,
-        Priority.STANDARD,
-        graph.warehouses[0],
-        graph.warehouses[1],
-    )
+//    val packageData = Package(
+//        "PKG-001",
+//        12.5,
+//        Priority.STANDARD,
+//        graph.warehouses[0],
+//        graph.warehouses[1],
+//    )
 //    val packageData = graph.packages.first()
 
-    val pricingEngine = RoutePricingEngine(EcoStrategy())
-
-    var service: PackageComponent =
-        BasePackageComponent(
-            packageData,
-            graph.routes,
-            pricingEngine
-        )
-
-    Logger.info("\n\n==============================================")
-    Logger.info("           PACKAGE PRICING REPORT             ")
-    Logger.info("==============================================")
-    Logger.info("Package ID      : ${service.getPackage().id}")
-    Logger.info("Origin          : ${service.getPackage().originWarehouse.id}")
-    Logger.info("Destination     : ${service.getPackage().destinationWarehouse.id}")
-    Logger.info("Priority        : ${service.getPackage().priority}")
-    Logger.info("----------------------------------------------")
-
-    Logger.info("Base Rate       : %.2f".format(service.getTransitRate()))
-
-    service = FragileHandlingDecorator(service, 10.0)
-
-    Logger.info("After Fragile   :  %.2f".format(service.getTransitRate()))
-
-    service = ColdChainDecorator(service, 1.25)
-
-    Logger.info("After Cold Chain: %.2f".format(service.getTransitRate()))
-
-    service = ExpressInsuranceDecorator(service, 20.0)
-
-    val finalRate = service.getTransitRate()
-
-    if (finalRate == null) {
-        Logger.warning(
-            "No direct route found for package ${service.getPackage().id}. " +
-                    "Transit rate cannot be calculated."
-        )
-    } else {
-        Logger.info("Final Transit Rate : %.2f".format(finalRate))
-    }
-
-    Logger.info("==============================================")
+//    val pricingEngine = RoutePricingEngine(EcoStrategy())
+//
+//    var service: PackageComponent =
+//        BasePackageComponent(
+//            packageData,
+//            graph.routes,
+//            pricingEngine
+//        )
+//
+//    Logger.info("\n\n==============================================")
+//    Logger.info("           PACKAGE PRICING REPORT             ")
+//    Logger.info("==============================================")
+//    Logger.info("Package ID      : ${service.getPackage().id}")
+//    Logger.info("Origin          : ${service.getPackage().originWarehouse.id}")
+//    Logger.info("Destination     : ${service.getPackage().destinationWarehouse.id}")
+//    Logger.info("Priority        : ${service.getPackage().priority}")
+//    Logger.info("----------------------------------------------")
+//
+//    Logger.info("Base Rate       : %.2f".format(service.getTransitRate()))
+//
+//    service = FragileHandlingDecorator(service, 10.0)
+//
+//    Logger.info("After Fragile   :  %.2f".format(service.getTransitRate()))
+//
+//    service = ColdChainDecorator(service, 1.25)
+//
+//    Logger.info("After Cold Chain: %.2f".format(service.getTransitRate()))
+//
+//    service = ExpressInsuranceDecorator(service, 20.0)
+//
+//    val finalRate = service.getTransitRate()
+//
+//    if (finalRate == null) {
+//        Logger.warning(
+//            "No direct route found for package ${service.getPackage().id}. " +
+//                    "Transit rate cannot be calculated."
+//        )
+//    } else {
+//        Logger.info("Final Transit Rate : %.2f".format(finalRate))
+//    }
+//
+//    Logger.info("==============================================")
 
     val graphBuilder = WarehouseGraphBuilder(
         warehouses = graph.warehouses,
@@ -144,48 +134,25 @@ fun main() {
 
     val warehouseGraph = graphBuilder.build()
 
-    val start = warehousesById["WH-001"]
-    val destination = warehousesById["WH-006"]
-
-    println("Start object: ${start}")
-    println("Start in graph: ${warehouseGraph.containsWarehouse(start!!)}")
-    println("Graph warehouses:")
-
-    warehouseGraph.warehouses().forEach {
-        println("${it.id} -> ${it === start}")
-    }
-
-    val bfsRouter = UnidirectionalBreadthFirstRouter(warehouseGraph)
+    val unidirectionalBfsRouter = UnidirectionalBreadthFirstRouter(warehouseGraph)
     val dijkstraRouter = DijkstraRouter(warehouseGraph)
+    val bidirectionalBfsRouter = BidirectionalBreadthFirstRouter(warehouseGraph)
 
-    println("Start object: ${start}")
-    println("Start in graph: ${warehouseGraph.containsWarehouse(start!!)}")
-    println("Graph warehouses:")
-
-    warehouseGraph.warehouses().forEach {
-        println("${it.id} -> ${it === start}")
-    }
+    val start = warehousesById["WH-031"]
+    val destination = warehousesById["WH-091"]
 
     if (start == null || destination == null) {
         Logger.warning("there is no warehouse with id = [WH-001] or = [WH-006]")
         return
     }
-    val bfsPath = bfsRouter.findShortestPath(start, destination) ?: emptyList()
+    val unidirectionalBfsPath = unidirectionalBfsRouter.findShortestPath(start, destination) ?: emptyList()
     val dijkstraPath = dijkstraRouter.findShortestPath(start, destination) ?: emptyList()
+    val bidirectionalBfsPath = bidirectionalBfsRouter.findShortestPath(start, destination) ?: emptyList()
 
+    printRouteComparison(warehouseGraph, start, destination, unidirectionalBfsPath,bidirectionalBfsPath, dijkstraPath)
 
-    printRouteComparison(warehouseGraph, start, destination, bfsPath, dijkstraPath)
-
-
-
-    val startWarehouse = graph.warehouses.firstOrNull()
-    val endWarehouse = graph.warehouses.lastOrNull()
-
-    if (startWarehouse != null && endWarehouse != null) {
-        val benchmark = BfsBenchmark(warehouseGraph)
-        benchmark.runAndCompare(startWarehouse, endWarehouse)
-    }
-
+    val benchmark = BfsBenchmark(warehouseGraph)
+    benchmark.runAndCompare(start, destination)
 }
 
 
