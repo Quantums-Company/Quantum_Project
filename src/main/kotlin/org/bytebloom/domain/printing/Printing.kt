@@ -78,7 +78,7 @@ private fun printValidationResult(allChecksPassed: Boolean) {
     }
 }
 
-fun calculatePathDistance(graph: WarehouseGraph, path: List<String>): Double {
+fun calculatePathDistance(graph: WarehouseGraph, path: List<Warehouse>): Double {
     if (path.size < 2) return 0.0
 
     var totalDistance = 0.0
@@ -96,26 +96,26 @@ fun calculatePathDistance(graph: WarehouseGraph, path: List<String>): Double {
 
 fun printRouteComparison(
     graph: WarehouseGraph,
-    start: String,
-    destination: String,
-    bfsPath: List<String>,
-    dijkstraPath: List<String>
+    start: Warehouse,
+    destination: Warehouse,
+    bfsPath: List<Warehouse>,
+    dijkstraPath: List<Warehouse>
 ) {
     val bfsDistance = calculatePathDistance(graph, bfsPath)
     val dijkstraDistance = calculatePathDistance(graph, dijkstraPath)
 
     Logger.info("\n\n=== Route Algorithm Comparison ===")
-    Logger.info("Start: $start | Destination: $destination")
+    Logger.info("Start: ${start.id} | Destination: ${destination.id}")
     Logger.info("")
 
     Logger.info("--- BFS Result (Fewest Hops) ---")
-    Logger.info("Path: ${bfsPath.joinToString(" -> ")}")
+    Logger.info("Path: ${bfsPath.joinToString(" -> "){it.id}}")
     Logger.info("Total Hops: ${bfsPath.size - 1}")
     Logger.info("Total Distance: %.2f km".format(bfsDistance))
     Logger.info("")
 
     Logger.info("--- Dijkstra Result (Shortest Distance) ---")
-    Logger.info("Path: ${dijkstraPath.joinToString(" -> ")}")
+    Logger.info("Path: ${dijkstraPath.joinToString(" -> "){it.id}}")
     Logger.info("Total Hops: ${dijkstraPath.size - 1}")
     Logger.info("Total Distance: %.2f km".format(dijkstraDistance))
 }

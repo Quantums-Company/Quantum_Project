@@ -1,28 +1,42 @@
 package org.bytebloom.domain.routing
 
+import org.bytebloom.domain.model.Warehouse
+
 class WarehouseGraph {
 
-    private val _adjacencyMap = mutableMapOf<String, MutableMap<String, Double>>()
-    val adjacencyMap: Map<String, Map<String, Double>>
+    private val _adjacencyMap = mutableMapOf<Warehouse, MutableMap<Warehouse, Double>>()
+    val adjacencyMap: Map<Warehouse, Map<Warehouse, Double>>
         get() = _adjacencyMap
 
-    fun warehouseIds(): Set<String> =
+    private val _reverseAdjacencyMap =
+        mutableMapOf<Warehouse, MutableMap<Warehouse, Double>>()
+
+    fun warehouses(): Set<Warehouse> =
         adjacencyMap.keys.toSet()
 
-    fun addWarehouse(warehouseId: String) {
-        _adjacencyMap.putIfAbsent(warehouseId, mutableMapOf())
+    fun addWarehouse(warehouse: Warehouse) {
+        _adjacencyMap.putIfAbsent(warehouse, mutableMapOf())
+        _reverseAdjacencyMap.putIfAbsent(warehouse, mutableMapOf()
+        )
     }
 
-    fun addRoute(originId: String, destinationId: String, distanceKm: Double = 1.0) {
-        addWarehouse(originId)
-        addWarehouse(destinationId)
+    fun addRoute(originWarehouse: Warehouse, destinationWarehouse: Warehouse, distanceKm: Double) {
+        addWarehouse(originWarehouse)
+        addWarehouse(destinationWarehouse)
 
-        _adjacencyMap.getValue(originId)[destinationId] = distanceKm
+        _adjacencyMap.getValue(originWarehouse)[destinationWarehouse] = distanceKm
+        _reverseAdjacencyMap.getValue(destinationWarehouse)[originWarehouse] = distanceKm
     }
 
-    fun neighbors(warehouseId: String): Map<String, Double> =
-        adjacencyMap[warehouseId]?.toMap()
+    fun neighbors(warehouse: Warehouse): Map<Warehouse, Double> =
+        adjacencyMap[warehouse]?.toMap()
             ?: emptyMap()
 
-    fun containsWarehouse(warehouseId: String): Boolean = warehouseId in _adjacencyMap
+    fun predecessors(
+        warehouse: Warehouse
+    ): Map<Warehouse, Double> =
+        _reverseAdjacencyMap[warehouse]?.toMap()
+            ?: emptyMap()
+
+    fun containsWarehouse(warehouse: Warehouse): Boolean = warehouse in _adjacencyMap
 }

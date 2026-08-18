@@ -1,4 +1,4 @@
-package org.bytebloom.data.raw
+package org.bytebloom.domain.model
 
 import org.bytebloom.util.Logger
 
