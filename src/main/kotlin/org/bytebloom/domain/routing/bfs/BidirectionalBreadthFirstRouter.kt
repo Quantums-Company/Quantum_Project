@@ -10,13 +10,11 @@ class BidirectionalBreadthFirstRouter(
 
     var evaluatedWarehouses = 0
 
-
-
-    private data class SearchState(
-        val queue: ArrayDeque<Warehouse>,
-        val visited: MutableSet<Warehouse>,
-        val parent: MutableMap<Warehouse, Warehouse>
-    )
+    private class SearchState(start: Warehouse){
+        val queue = ArrayDeque<Warehouse>().apply { addLast(start) }
+        val visited = mutableSetOf(start)
+        val parent = mutableMapOf<Warehouse, Warehouse>()
+    }
 
     fun findShortestPath(
         startWarehouse: Warehouse,
@@ -33,169 +31,80 @@ class BidirectionalBreadthFirstRouter(
             return listOf(startWarehouse)
         }
 
-        val forwardState =
-            createSearchState(startWarehouse)
+        val forward = SearchState(startWarehouse)
+        val backward = SearchState(endWarehouse)
 
-        val backwardState =
-            createSearchState(endWarehouse)
+        val meetingPoint = search(forward, backward)?: return null
 
-        val meetingPoint = search(
-            forwardState = forwardState,
-            backwardState = backwardState
-        )
-
-
-
-        return if (meetingPoint != null) {
-            reconstructBidirectionalPath(
+        return reconstructPath(
                 meetingPoint = meetingPoint,
-                forwardParent = forwardState.parent,
-                backwardParent = backwardState.parent
+                forwardParent = forward.parent,
+                backwardParent = backward.parent
             )
-        } else {
-            null
-        }
+
     }
 
-    private fun createSearchState(
-        startWarehouse: Warehouse
-    ): SearchState {
+    private fun search(forward: SearchState, backward: SearchState): Warehouse? {
+        while (forward.queue.isNotEmpty() && backward.queue.isNotEmpty()) {
 
-        val queue = ArrayDeque<Warehouse>()
-        val visited = mutableSetOf<Warehouse>()
+            expandLevel(forward, backward.visited, direction = Direction.FORWARD)
+                ?.let { return it }
 
-        queue.addLast(startWarehouse)
-        visited.add(startWarehouse)
-
-        return SearchState(
-            queue = queue,
-            visited = visited,
-            parent = mutableMapOf()
-        )
-    }
-
-    private fun search(
-        forwardState: SearchState,
-        backwardState: SearchState
-    ): Warehouse? {
-
-        while (
-            forwardState.queue.isNotEmpty() &&
-            backwardState.queue.isNotEmpty()
-        ) {
-
-            val forwardMeetingPoint =
-                expandForward(
-                    forwardState,
-                    backwardState.visited
-                )
-
-            if (forwardMeetingPoint != null) {
-                return forwardMeetingPoint
-            }
-
-            val backwardMeetingPoint =
-                expandBackward(
-                    backwardState,
-                    forwardState.visited
-                )
-
-            if (backwardMeetingPoint != null) {
-                return backwardMeetingPoint
-            }
+            expandLevel(backward, forward.visited, direction = Direction.BACKWARD)
+                ?.let { return it }
         }
 
         return null
     }
 
-    private fun expandForward(
-        state: SearchState,
-        backwardVisited: Set<Warehouse>
+    private enum class Direction { FORWARD, BACKWARD }
+
+    private fun expandLevel(
+        frontier: SearchState,
+        otherVisited: Set<Warehouse>,
+        direction: Direction
     ): Warehouse? {
 
-        val levelSize = state.queue.size
+        val levelSize = frontier.queue.size
 
         repeat(levelSize) {
-
-            val current = state.queue.removeFirst()
+            val current = frontier.queue.removeFirst()
             evaluatedWarehouses++
 
-            for (neighbor in graph.neighbors(current).keys) {
+            val adjacent = when (direction) {
+                Direction.FORWARD -> graph.neighbors(current).keys
+                Direction.BACKWARD -> graph.predecessors(current).keys
+            }
 
-                if(neighbor in state.visited){
-                    continue
-                }
+            for (next in adjacent) {
+                if (next in frontier.visited) continue
 
-                state.visited.add(neighbor)
-                state.parent[neighbor] = current
-                state.queue.addLast(neighbor)
+                frontier.visited.add(next)
+                frontier.parent[next] = current
+                frontier.queue.addLast(next)
 
-                if (neighbor in backwardVisited) {
-                    return neighbor
-                }
+                if (next in otherVisited) return next
             }
         }
 
         return null
     }
 
-    private fun expandBackward(
-        state: SearchState,
-        forwardVisited: Set<Warehouse>
-    ): Warehouse? {
-
-        val levelSize = state.queue.size
-
-        repeat(levelSize) {
-
-            val current = state.queue.removeFirst()
-            evaluatedWarehouses++
-
-            for (neighbor in graph.predecessors(current).keys) {
-
-                if (neighbor in state.visited) {
-                    continue
-                }
-
-                state.visited.add(neighbor)
-                state.parent[neighbor] = current
-                state.queue.addLast(neighbor)
-
-                if (neighbor in forwardVisited) {
-                    return neighbor
-                }
-            }
-        }
-
-        return null
-    }
-
-    private fun reconstructBidirectionalPath(
+    private fun reconstructPath(
         meetingPoint: Warehouse,
         forwardParent: Map<Warehouse, Warehouse>,
         backwardParent: Map<Warehouse, Warehouse>
     ): List<Warehouse> {
 
-        val forwardPath = mutableListOf<Warehouse>()
+        val forwardHalf =
+            generateSequence(meetingPoint) { forwardParent[it] }
+                .toList()
+                .asReversed()
 
-        var current: Warehouse? = meetingPoint
+        val backwardHalf =
+            generateSequence(backwardParent[meetingPoint]) { backwardParent[it] }
+                .toList()
 
-        while (current != null) {
-            forwardPath.add(current)
-            current = forwardParent[current]
-        }
-
-        forwardPath.reverse()
-
-        val backwardPath = mutableListOf<Warehouse>()
-
-        current = backwardParent[meetingPoint]
-
-        while (current != null) {
-            backwardPath.add(current)
-            current = backwardParent[current]
-        }
-
-        return forwardPath + backwardPath
+        return forwardHalf + backwardHalf
     }
 }

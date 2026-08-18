@@ -10,11 +10,11 @@ class UnidirectionalBreadthFirstRouter(
 
     var evaluatedWarehouses = 0
 
-    private data class SearchState(
-        val queue: ArrayDeque<Warehouse>,
-        val visited: MutableSet<Warehouse>,
-        val parent: MutableMap<Warehouse, Warehouse>
-    )
+    private class SearchState(start: Warehouse) {
+        val queue = ArrayDeque<Warehouse>().apply { addLast(start) }
+        val visited = mutableSetOf(start)
+        val parent = mutableMapOf<Warehouse, Warehouse>()
+    }
 
     fun findShortestPath(
         startWarehouse: Warehouse,
@@ -31,26 +31,7 @@ class UnidirectionalBreadthFirstRouter(
             return listOf(startWarehouse)
         }
 
-        val state = createSearchState(startWarehouse)
-
-        return search(state, endWarehouse)
-    }
-
-    private fun createSearchState(
-        startWarehouse: Warehouse
-    ): SearchState {
-
-        val queue = ArrayDeque<Warehouse>()
-        val visited = mutableSetOf<Warehouse>()
-
-        queue.addLast(startWarehouse)
-        visited.add(startWarehouse)
-
-        return SearchState(
-            queue = queue,
-            visited = visited,
-            parent = mutableMapOf()
-        )
+        return search(SearchState(startWarehouse), endWarehouse)
     }
 
     private fun search(
@@ -69,10 +50,7 @@ class UnidirectionalBreadthFirstRouter(
                 )
             }
 
-            visitNeighbors(
-                current,
-                state
-            )
+            visitNeighbors(current, state)
         }
 
         return null
@@ -83,10 +61,7 @@ class UnidirectionalBreadthFirstRouter(
         state: SearchState
     ) {
         for (neighbor in graph.neighbors(currentWarehouse).keys) {
-
-            if (neighbor in state.visited) {
-                continue
-            }
+            if (neighbor in state.visited) continue
 
             state.visited.add(neighbor)
             state.parent[neighbor] = currentWarehouse

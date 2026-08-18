@@ -98,20 +98,28 @@ fun printRouteComparison(
     graph: WarehouseGraph,
     start: Warehouse,
     destination: Warehouse,
-    bfsPath: List<Warehouse>,
+    unidirectionalBfsPath: List<Warehouse>,
+    bidirectionalBfsPath: List<Warehouse>,
     dijkstraPath: List<Warehouse>
 ) {
-    val bfsDistance = calculatePathDistance(graph, bfsPath)
+    val unidirectionalBfsDistance = calculatePathDistance(graph, unidirectionalBfsPath)
+    val bidirectionalBfsDistance = calculatePathDistance(graph, bidirectionalBfsPath)
     val dijkstraDistance = calculatePathDistance(graph, dijkstraPath)
 
     Logger.info("\n\n=== Route Algorithm Comparison ===")
     Logger.info("Start: ${start.id} | Destination: ${destination.id}")
     Logger.info("")
 
-    Logger.info("--- BFS Result (Fewest Hops) ---")
-    Logger.info("Path: ${bfsPath.joinToString(" -> "){it.id}}")
-    Logger.info("Total Hops: ${bfsPath.size - 1}")
-    Logger.info("Total Distance: %.2f km".format(bfsDistance))
+    Logger.info("--- Unidirectional BFS Result (Fewest Hops) ---")
+    Logger.info("Path: ${unidirectionalBfsPath.joinToString(" -> "){it.id}}")
+    Logger.info("Total Hops: ${unidirectionalBfsPath.size - 1}")
+    Logger.info("Total Distance: %.2f km".format(unidirectionalBfsDistance))
+    Logger.info("")
+
+    Logger.info("--- Bidirectional BFS Result (Fewest Hops) ---")
+    Logger.info("Path: ${bidirectionalBfsPath.joinToString(" -> "){it.id}}")
+    Logger.info("Total Hops: ${bidirectionalBfsPath.size - 1}")
+    Logger.info("Total Distance: %.2f km".format(bidirectionalBfsDistance))
     Logger.info("")
 
     Logger.info("--- Dijkstra Result (Shortest Distance) ---")
