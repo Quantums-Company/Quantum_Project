@@ -22,4 +22,5 @@ class BfsBenchmark(
         println("Bidirectional Path Length: ${bidirectionalPath?.size ?: 0}")
         println("========================================\n")
     }
+
 }
