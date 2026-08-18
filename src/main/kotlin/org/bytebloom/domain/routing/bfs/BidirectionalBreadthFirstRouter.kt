@@ -8,8 +8,9 @@ class BidirectionalBreadthFirstRouter(
     private val graph: WarehouseGraph
 ) : RouterValidator(graph) {
 
-    private val fallbackRouter =
-        UnidirectionalBreadthFirstRouter(graph)
+    var evaluatedWarehouses = 0
+
+
 
     private data class SearchState(
         val queue: ArrayDeque<Warehouse>,
@@ -21,6 +22,8 @@ class BidirectionalBreadthFirstRouter(
         startWarehouse: Warehouse,
         endWarehouse: Warehouse
     ): List<Warehouse>? {
+
+        evaluatedWarehouses = 0
 
         if (!areValidWarehouses(startWarehouse, endWarehouse)) {
             return null
@@ -41,6 +44,8 @@ class BidirectionalBreadthFirstRouter(
             backwardState = backwardState
         )
 
+
+
         return if (meetingPoint != null) {
             reconstructBidirectionalPath(
                 meetingPoint = meetingPoint,
@@ -48,10 +53,7 @@ class BidirectionalBreadthFirstRouter(
                 backwardParent = backwardState.parent
             )
         } else {
-            fallbackRouter.findShortestPath(
-                startWarehouse,
-                endWarehouse
-            )
+            null
         }
     }
 
@@ -116,6 +118,7 @@ class BidirectionalBreadthFirstRouter(
         repeat(levelSize) {
 
             val current = state.queue.removeFirst()
+            evaluatedWarehouses++
 
             for (neighbor in graph.neighbors(current).keys) {
 
@@ -146,6 +149,7 @@ class BidirectionalBreadthFirstRouter(
         repeat(levelSize) {
 
             val current = state.queue.removeFirst()
+            evaluatedWarehouses++
 
             for (neighbor in graph.predecessors(current).keys) {
 

@@ -8,6 +8,8 @@ class UnidirectionalBreadthFirstRouter(
     private val graph: WarehouseGraph
 ) : RouterValidator(graph) {
 
+    var evaluatedWarehouses = 0
+
     private data class SearchState(
         val queue: ArrayDeque<Warehouse>,
         val visited: MutableSet<Warehouse>,
@@ -18,6 +20,8 @@ class UnidirectionalBreadthFirstRouter(
         startWarehouse: Warehouse,
         endWarehouse: Warehouse
     ): List<Warehouse>? {
+
+        evaluatedWarehouses = 0
 
         if (!areValidWarehouses(startWarehouse, endWarehouse)) {
             return null
@@ -56,6 +60,7 @@ class UnidirectionalBreadthFirstRouter(
 
         while (state.queue.isNotEmpty()) {
             val current = state.queue.removeFirst()
+            evaluatedWarehouses++
 
             if (current.id == endWarehouse.id) {
                 return reconstructPath(

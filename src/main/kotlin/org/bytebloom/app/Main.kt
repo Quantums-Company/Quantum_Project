@@ -23,6 +23,7 @@ import org.bytebloom.domain.routing.WarehouseGraphBuilder
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.util.Logger
+import org.bytebloom.domain.routing.bfs.BfsBenchmark
 
 
 fun main() {
@@ -171,6 +172,17 @@ fun main() {
 
 
     printRouteComparison(warehouseGraph, start, destination, bfsPath, dijkstraPath)
+
+
+
+    val startWarehouse = graph.warehouses.firstOrNull()
+    val endWarehouse = graph.warehouses.lastOrNull()
+
+    if (startWarehouse != null && endWarehouse != null) {
+        val benchmark = BfsBenchmark(warehouseGraph)
+        benchmark.runAndCompare(startWarehouse, endWarehouse)
+    }
+
 }
 
 
