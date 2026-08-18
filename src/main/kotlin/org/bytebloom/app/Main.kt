@@ -44,6 +44,22 @@ fun main() {
         vehicleRepo
     )
 
+    var start = warehousesById["WH-001"]
+    var destination = warehousesById["WH-006"]
+
+//    for (w in graph.warehouses) {
+//        if(w.id == "WH-001")
+//        {
+//            start = w
+//        }
+//    }
+//
+//    for (w in graph.warehouses) {
+//        if(w.id == "WH-006")
+//        {
+//            destination = w
+//        }
+//    }
 
 //    val firstWarehouse = graph.warehouses.first()
 //    firstWarehouse.sortCargoByWeight()
@@ -143,27 +159,8 @@ fun main() {
 
     val warehouseGraph = graphBuilder.build()
 
-    val start = warehousesById["WH-001"]
-    val destination = warehousesById["WH-006"]
-
-    println("Start object: ${start}")
-    println("Start in graph: ${warehouseGraph.containsWarehouse(start!!)}")
-    println("Graph warehouses:")
-
-    warehouseGraph.warehouses().forEach {
-        println("${it.id} -> ${it === start}")
-    }
-
     val bfsRouter = UnidirectionalBreadthFirstRouter(warehouseGraph)
     val dijkstraRouter = DijkstraRouter(warehouseGraph)
-
-    println("Start object: ${start}")
-    println("Start in graph: ${warehouseGraph.containsWarehouse(start!!)}")
-    println("Graph warehouses:")
-
-    warehouseGraph.warehouses().forEach {
-        println("${it.id} -> ${it === start}")
-    }
 
     if (start == null || destination == null) {
         Logger.warning("there is no warehouse with id = [WH-001] or = [WH-006]")

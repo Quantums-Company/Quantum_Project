@@ -40,4 +40,18 @@ class Warehouse(
     override fun toString(): String {
         return "Warehouse(id='$id', name=$name, regionalZone=$regionalZone, longitude:$longitude, latitude=$latitude)"
     }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+
+        if (other !is Warehouse) return false
+
+        return id == other.id && name == other.name
+    }
 }
