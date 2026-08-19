@@ -7,8 +7,3 @@ class Route(
     val originWarehouse: Warehouse,
     val destinationWarehouse: Warehouse
 )
-//{
-//    override fun toString(): String {
-//        return "Route(id='$id', distanceKm=$distanceKm, typicalDelayMin=$typicalDelayMin, origin:${origin.id}, destination=${destination.id})"
-//    }
-//}
