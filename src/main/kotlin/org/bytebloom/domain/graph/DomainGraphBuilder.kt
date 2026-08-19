@@ -12,10 +12,10 @@ object DomainGraphBuilder {
         routeRepository: RouteRepository,
         vehicleRepository: VehicleRepository
     ): DomainGraph {
-        val warehouses = warehouseRepository.getAllWarehouses()
-        val packages = packageRepository.getAllPackages()
-        val routes = routeRepository.getAllRoutes()
-        val vehicles = vehicleRepository.getAllVehicles()
+        val warehouses = warehouseRepository.getAll()
+        val packages = packageRepository.getAll()
+        val routes = routeRepository.getAll()
+        val vehicles = vehicleRepository.getAll()
 
         packages.forEach { packageItem ->
             packageItem.originWarehouse.addPackage(packageItem)

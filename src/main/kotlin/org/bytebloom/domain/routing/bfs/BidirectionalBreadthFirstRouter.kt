@@ -60,15 +60,15 @@ class BidirectionalBreadthFirstRouter(
     private enum class Direction { FORWARD, BACKWARD }
 
     private fun expandLevel(
-        frontier: SearchState,
+        state: SearchState,
         otherVisited: Set<Warehouse>,
         direction: Direction
     ): Warehouse? {
 
-        val levelSize = frontier.queue.size
+        val levelSize = state.queue.size
 
         repeat(levelSize) {
-            val current = frontier.queue.removeFirst()
+            val current = state.queue.removeFirst()
             evaluatedWarehouses++
 
             val adjacent = when (direction) {
@@ -77,11 +77,11 @@ class BidirectionalBreadthFirstRouter(
             }
 
             for (next in adjacent) {
-                if (next in frontier.visited) continue
+                if (next in state.visited) continue
 
-                frontier.visited.add(next)
-                frontier.parent[next] = current
-                frontier.queue.addLast(next)
+                state.visited.add(next)
+                state.parent[next] = current
+                state.queue.addLast(next)
 
                 if (next in otherVisited) return next
             }

@@ -12,38 +12,44 @@ import org.bytebloom.util.Logger
 import java.io.File
 import java.io.IOException
 
-const val RESOURCE_PATH = "src/resources"
+const val DEFAULT_CSV_DIRECTORY = "src/resources"
 
-fun loadPackages(): List<PackageRaw>  = loadCsv(CsvTablesName.PACKAGE, ::parsePackage)
+fun loadPackages(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<PackageRaw> =
+    loadCsv(csvDirectory, CsvTablesName.PACKAGE, ::parsePackage)
 
-fun loadVehicles(): List<VehicleRaw> = loadCsv(CsvTablesName.FLEET, ::parseVehicle)
+fun loadVehicles(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<VehicleRaw> =
+    loadCsv(csvDirectory, CsvTablesName.FLEET, ::parseVehicle)
 
-fun loadRoutes(): List<RouteRaw> = loadCsv(CsvTablesName.ROUTE, ::parseRoute)
+fun loadRoutes(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<RouteRaw> =
+    loadCsv(csvDirectory, CsvTablesName.ROUTE, ::parseRoute)
 
-fun loadWarehouses(): List<WarehouseRaw> = loadCsv(CsvTablesName.WAREHOUSE, ::parseWarehouse)
+fun loadWarehouses(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<WarehouseRaw> =
+    loadCsv(csvDirectory, CsvTablesName.WAREHOUSE, ::parseWarehouse)
 
 private fun <T> loadCsv(
-    fileName:String,
-    parser:(String,Int)->T?
-):List<T>{
+    csvDirectory: String,
+    fileName: String,
+    parser: (String, Int) -> T?
+): List<T> {
     val raws = mutableListOf<T>()
 
-    loadCsvFile(fileName) { line, lineNumber ->
+    loadCsvFile(csvDirectory, fileName) { line, lineNumber ->
         parser(line, lineNumber)?.let(raws::add)
     }
 
-    Logger.info("Successfully parsed routes: ${raws.size}")
+    Logger.info("Successfully parsed $fileName: ${raws.size} row(s).")
     return raws
 }
 
 private fun loadCsvFile(
+    csvDirectory: String,
     fileName: String,
     processLine: (String, Int) -> Unit
 ) {
-    val file = File(RESOURCE_PATH, fileName)
+    val file = File(csvDirectory, fileName)
 
     if (!file.exists()) {
-        Logger.warning("File '$fileName' was not found!")
+        Logger.warning("File '$fileName' was not found in '$csvDirectory'.")
         return
     }
 

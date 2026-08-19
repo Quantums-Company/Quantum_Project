@@ -6,8 +6,3 @@ class Vehicle(
     val costPerKm: Double,
     val currentWarehouse: Warehouse
 )
-//{
-//    override fun toString(): String {
-//        return "Vehicle(id='$id', maxCapacityKg=$maxCapacityKg, costPerKm=$costPerKm, currentHub:${currentHub.id})"
-//    }
-//}

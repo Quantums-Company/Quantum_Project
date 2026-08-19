@@ -1,5 +1,6 @@
 package org.bytebloom.data.repository
 
+import org.bytebloom.data.csv.DEFAULT_CSV_DIRECTORY
 import org.bytebloom.data.csv.loadRoutes
 import org.bytebloom.data.lookup.findWarehouse
 import org.bytebloom.data.mapper.toDomain
@@ -8,11 +9,13 @@ import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.RouteRepository
 
 class CsvRouteRepository(
-    private val warehousesById: Map<String, Warehouse>
+    private val warehousesById: Map<String, Warehouse>,
+    private val csvDirectory: String = DEFAULT_CSV_DIRECTORY
 ) : RouteRepository {
-    override fun getAllRoutes(): List<Route> {
 
-        return loadRoutes().mapNotNull{ raw ->
+    override fun getAll(): List<Route> {
+
+        return loadRoutes(csvDirectory).mapNotNull { raw ->
 
             val origin = warehousesById.findWarehouse(
                 warehouseId = raw.originWarehouseId,

@@ -7,8 +7,3 @@ class Package(
     val originWarehouse: Warehouse,
     val destinationWarehouse: Warehouse
 )
-//{
-//    override fun toString(): String {
-//        return "Package(id='$id', weight=$weight, priority=$priority, origin:${origin.id}, destination=${destination.id})"
-//    }
-//}
