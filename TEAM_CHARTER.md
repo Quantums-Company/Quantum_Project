@@ -66,7 +66,7 @@ Every review must verify:
 ## 4. Hadeel Hejazy – Architecture & .gitignore
 
 ### 4.1 Project Architecture
-We follow a professional modular architecture separating business org.bytebloom.org.bytebloom.app.app.logic, data org.bytebloom.org.bytebloom.app.app.models, and entry points.
+We follow a professional modular architecture separating business org.bytebloom.org.bytebloom.presentation.app.logic, data org.bytebloom.org.bytebloom.presentation.app.models, and entry points.
 
 **Standard Directory Structure:**
 ```text

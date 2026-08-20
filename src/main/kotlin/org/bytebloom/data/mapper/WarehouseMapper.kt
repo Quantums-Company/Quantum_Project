@@ -13,3 +13,6 @@ fun WarehouseRaw.toDomain(): Warehouse {
     )
 }
 
+fun List<WarehouseRaw>.toDomain(): List<Warehouse> {
+    return this.map { it.toDomain() }
+}

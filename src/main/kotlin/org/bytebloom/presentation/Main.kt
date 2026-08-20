@@ -1,4 +1,4 @@
-package org.bytebloom.app
+package org.bytebloom.presentation
 
 import org.bytebloom.data.repository.CsvPackageRepository
 import org.bytebloom.data.repository.CsvRouteRepository
@@ -35,13 +35,6 @@ private const val COLD_CHAIN_MULTIPLIER = 1.25
 private const val EXPRESS_INSURANCE_SURCHARGE = 20.0
 
 fun main() {
-    val graph = buildDomainGraph()
-
-//    runPricingDemo(graph)
-    runRoutingDemo(graph)
-}
-
-private fun buildDomainGraph(): DomainGraph {
     val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
     val warehousesById = warehouseRepo.getAll().associateBy { it.id }
 
@@ -49,54 +42,53 @@ private fun buildDomainGraph(): DomainGraph {
     val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
     val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
 
-    return DomainGraphBuilder.buildGraph(
+    val graph = DomainGraphBuilder(
         warehouseRepo,
         packageRepo,
         routeRepo,
         vehicleRepo
-    )
+    ).buildGraph()
+
+    runPricingDemo(graph,routeRepo)
+    runRoutingDemo(graph)
 }
 
-private fun runPricingDemo(graph: DomainGraph) {
-        val packageData = Package(
-            "PKG-001",
-            12.5,
-            Priority.STANDARD,
-            graph.warehouses[0],
-            graph.warehouses[1],
-        )
-
-    val pricingEngine = RoutePricingEngine(EcoStrategy())
-
-    var service: PackageComponent = BasePackageComponent(
-        packageData,
-        graph.routes,
-        pricingEngine
+private fun runPricingDemo(graph: DomainGraph, routeRepository: RouteRepository) {
+    val packageData = Package(
+        "PKG-001",
+        12.5,
+        Priority.STANDARD,
+        graph.warehouses[0],
+        graph.warehouses[1],
     )
+
+    val pricingEngine = RoutePricingEngine(EcoStrategy(), routeRepository)
+
+    var service: PackageComponent = BasePackageComponent(pricingEngine)
 
     Logger.info("\n==============================================")
     Logger.info("           PACKAGE PRICING REPORT             ")
     Logger.info("==============================================")
-    Logger.info("Package ID      : ${service.getPackage().id}")
-    Logger.info("Origin          : ${service.getPackage().originWarehouse.id}")
-    Logger.info("Destination     : ${service.getPackage().destinationWarehouse.id}")
-    Logger.info("Priority        : ${service.getPackage().priority}")
+    Logger.info("Package ID      : ${packageData.id}")
+    Logger.info("Origin          : ${packageData.originWarehouse.id}")
+    Logger.info("Destination     : ${packageData.destinationWarehouse.id}")
+    Logger.info("Priority        : ${packageData.priority}")
     Logger.info("----------------------------------------------")
 
-    Logger.info("Base Rate       : %.2f".format(service.getTransitRate()))
+    Logger.info("Base Rate       : %.2f".format(service.getTransitRate(packageData)))
 
     service = FragileHandlingDecorator(service, FRAGILE_HANDLING_SURCHARGE)
-    Logger.info("After Fragile   : %.2f".format(service.getTransitRate()))
+    Logger.info("After Fragile   : %.2f".format(service.getTransitRate(packageData)))
 
     service = ColdChainDecorator(service, COLD_CHAIN_MULTIPLIER)
-    Logger.info("After Cold Chain: %.2f".format(service.getTransitRate()))
+    Logger.info("After Cold Chain: %.2f".format(service.getTransitRate(packageData)))
 
     service = ExpressInsuranceDecorator(service, EXPRESS_INSURANCE_SURCHARGE)
-    val finalRate = service.getTransitRate()
+    val finalRate = service.getTransitRate(packageData)
 
     if (finalRate == null) {
         Logger.warning(
-            "No direct route found for package ${service.getPackage().id}. " +
+            "No direct route found for package ${packageData.id}. " +
                     "Transit rate cannot be calculated."
         )
     } else {

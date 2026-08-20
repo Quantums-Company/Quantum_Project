@@ -1,4 +1,4 @@
-package org.bytebloom.domain.hashing
+package org.bytebloom.domain.vehicleReshuffling
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
