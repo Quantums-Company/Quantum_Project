@@ -1,7 +1,7 @@
 package org.bytebloom.domain.printing
 
 import org.bytebloom.data.raw.PackageRaw
-import org.bytebloom.domain.hashing.ValidationReport
+import org.bytebloom.domain.vehicleReshuffling.ValidationReport
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
 import org.bytebloom.util.Logger
@@ -54,13 +54,13 @@ fun printResilienceReport(report: ValidationReport) {
     Logger.info("==================================================================")
 }
 
-private fun printBrokenVehicle(vehicle: org.bytebloom.domain.hashing.VehicleValidation) {
+private fun printBrokenVehicle(vehicle: org.bytebloom.domain.vehicleReshuffling.VehicleValidation) {
     Logger.info("[X] Vehicle Slot ${vehicle.slot}")
     Logger.info("    Status : BROKEN")
     Logger.info("    Packages Before : ${vehicle.packageCountBefore}")
 }
 
-private fun printHealthyVehicle(vehicle: org.bytebloom.domain.hashing.VehicleValidation) {
+private fun printHealthyVehicle(vehicle: org.bytebloom.domain.vehicleReshuffling.VehicleValidation) {
     Logger.info("[✓] Vehicle Slot ${vehicle.slot}")
     Logger.info("    Packages Before : ${vehicle.packageCountBefore}")
     Logger.info("    Packages After  : ${vehicle.packageCountAfter}")

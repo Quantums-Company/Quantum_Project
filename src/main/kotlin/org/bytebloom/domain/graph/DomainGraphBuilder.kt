@@ -5,13 +5,13 @@ import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 
-object DomainGraphBuilder {
-    fun buildGraph(
-        warehouseRepository: WarehouseRepository,
-        packageRepository: PackageRepository,
-        routeRepository: RouteRepository,
-        vehicleRepository: VehicleRepository
-    ): DomainGraph {
+class DomainGraphBuilder(
+    val warehouseRepository: WarehouseRepository,
+    val packageRepository: PackageRepository,
+    val routeRepository: RouteRepository,
+    val vehicleRepository: VehicleRepository
+) {
+    fun buildGraph(): DomainGraph {
         val warehouses = warehouseRepository.getAll()
         val packages = packageRepository.getAll()
         val routes = routeRepository.getAll()

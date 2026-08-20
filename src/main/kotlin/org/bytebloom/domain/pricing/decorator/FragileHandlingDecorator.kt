@@ -1,5 +1,6 @@
 package org.bytebloom.domain.pricing.decorator
 
+import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.pricing.core.PackageComponent
 
 class FragileHandlingDecorator(
@@ -13,7 +14,7 @@ class FragileHandlingDecorator(
         }
     }
 
-    override fun getTransitRate(): Double? {
-        return super.getTransitRate()?.plus(fee)
+    override fun getTransitRate(pkg: Package): Double? {
+        return super.getTransitRate(pkg)?.plus(fee)
     }
 }

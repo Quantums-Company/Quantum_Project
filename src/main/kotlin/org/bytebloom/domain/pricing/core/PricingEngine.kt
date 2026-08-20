@@ -2,6 +2,6 @@ package org.bytebloom.domain.pricing.core
 
 import org.bytebloom.domain.model.Package
 
-interface PackageComponent {
-    fun getTransitRate(pkg: Package): Double?
+interface PricingEngine {
+    fun calculateShippingCost(pkg: Package): Double?
 }

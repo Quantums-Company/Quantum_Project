@@ -1,4 +1,4 @@
-package org.bytebloom.domain.hashing
+package org.bytebloom.domain.vehicleReshuffling
 
 data class VehicleValidation(
     val slot: Int,

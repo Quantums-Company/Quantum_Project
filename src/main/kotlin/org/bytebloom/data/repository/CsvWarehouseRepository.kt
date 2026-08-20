@@ -9,5 +9,5 @@ import org.bytebloom.domain.repository.WarehouseRepository
 class CsvWarehouseRepository (private val csvDirectory: String = DEFAULT_CSV_DIRECTORY)
     : WarehouseRepository {
     override fun getAll(): List<Warehouse> =
-        loadWarehouses(csvDirectory).map{it.toDomain()}
+        loadWarehouses(csvDirectory).toDomain()
 }

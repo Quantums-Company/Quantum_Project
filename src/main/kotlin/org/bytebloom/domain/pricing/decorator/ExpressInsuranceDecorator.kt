@@ -1,5 +1,6 @@
 package org.bytebloom.domain.pricing.decorator
 
+import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.pricing.core.PackageComponent
 
 class ExpressInsuranceDecorator(
@@ -13,7 +14,7 @@ class ExpressInsuranceDecorator(
         }
     }
 
-    override fun getTransitRate(): Double? {
-        return super.getTransitRate()?.plus(premium)
+    override fun getTransitRate(pkg: Package): Double? {
+        return super.getTransitRate(pkg)?.plus(premium)
     }
 }
