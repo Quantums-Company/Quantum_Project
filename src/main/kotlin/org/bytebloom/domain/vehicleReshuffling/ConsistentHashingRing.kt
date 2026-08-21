@@ -3,6 +3,7 @@ package org.bytebloom.domain.vehicleReshuffling
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import kotlin.math.abs
+import  org.bytebloom.util.Logger
 
 private const val MIN_RING_SIZE = 100
 private const val VEHICLE_SLOT_MULTIPLIER = 2
@@ -36,8 +37,10 @@ class ConsistentHashingRing(
     }
 
     private fun generateVehicleSlots(): List<Int> {
-        require(vehicles.isNotEmpty()) {
-            "At least one vehicle is required."
+
+        if (vehicles.isEmpty()) {
+            Logger.warning("At least one vehicle is required. No vehicle slots will be generated.")
+            return emptyList()
         }
 
         val step = circleSize / vehicles.size
@@ -65,9 +68,11 @@ class ConsistentHashingRing(
         }
     }
 
-    fun resolveVehicleClockwise(packageSlot: Int): Vehicle {
-        require(_vehicleRing.isNotEmpty()) { "Vehicle ring cannot be empty." }
-
+    fun resolveVehicleClockwise(packageSlot: Int): Vehicle?{
+        if (_vehicleRing.isEmpty()) {
+            Logger.warning("Vehicle ring cannot be empty.")
+            return null
+        }
         return _vehicleRing[packageSlot]
             ?: findNextClockwiseVehicle(packageSlot)
     }
@@ -85,7 +90,9 @@ class ConsistentHashingRing(
 
         for ((pkg, slot) in _packageSlots) {
             val targetVehicle = resolveVehicleClockwise(slot)
-            _assignments.getValue(targetVehicle).add(pkg)
+            if (targetVehicle != null) {
+                _assignments.getValue(targetVehicle).add(pkg)
+            }
         }
     }
 
@@ -105,8 +112,15 @@ class ConsistentHashingRing(
         for (pkg in orphanedPackages) {
             val slot = requireNotNull(_packageSlots[pkg])
             val nextVehicle = resolveVehicleClockwise(slot)
-            _assignments.getOrPut(nextVehicle) { mutableListOf() }.add(pkg)
-        }
+            if (nextVehicle != null) {
+                _assignments
+                    .getOrPut(nextVehicle) { mutableListOf() }
+                    .add(pkg)
+            } else {
+                Logger.warning(
+                    "No vehicle available to reroute package ${pkg.id}."
+                )
+            }        }
     }
 
     fun captureSnapshot(): Map<Int, List<String>> =
