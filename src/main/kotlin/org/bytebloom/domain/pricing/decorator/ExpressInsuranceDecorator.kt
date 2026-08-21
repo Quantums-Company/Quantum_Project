@@ -2,16 +2,18 @@ package org.bytebloom.domain.pricing.decorator
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.pricing.core.PackageComponent
+import org.bytebloom.util.Logger
 
 class ExpressInsuranceDecorator(
     component: PackageComponent,
-    private val premium: Double
+    premium: Double
 ) : PackageDecorator(component) {
 
-    init {
-        require(premium >= 0) {
-            "Insurance premium cannot be negative."
-        }
+    private val premium: Double = if(premium < 0.0) {
+        Logger.warning("Express insurance premium cannot be negative. Using 0.0 instead.")
+        0.0
+    } else {
+        premium
     }
 
     override fun getTransitRate(pkg: Package): Double? {
