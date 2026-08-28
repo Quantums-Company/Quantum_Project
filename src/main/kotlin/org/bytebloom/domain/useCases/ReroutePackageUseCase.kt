@@ -5,8 +5,8 @@ import org.bytebloom.domain.model.Warehouse
 
 
 class ReroutePackageUseCase {
-    operator fun invoke(pkg: Package, newWarehouse: Warehouse): Warehouse {
-        newWarehouse.addPackage(pkg)
-        return newWarehouse
+    operator fun invoke(pkg: Package, warehouse: Warehouse): Warehouse {
+        warehouse.addPackage(pkg)
+        return warehouse
     }
 }
