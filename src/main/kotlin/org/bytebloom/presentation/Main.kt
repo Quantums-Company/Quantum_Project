@@ -8,8 +8,6 @@ import org.bytebloom.domain.graph.DomainGraph
 import org.bytebloom.domain.graph.DomainGraphBuilder
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.performance.AVLTree
-import org.bytebloom.domain.performance.BST
 import org.bytebloom.domain.pricing.core.BasePackageComponent
 import org.bytebloom.domain.pricing.core.PackageComponent
 import org.bytebloom.domain.pricing.core.RoutePricingEngine
@@ -28,8 +26,8 @@ import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.util.Logger
-import org.bytebloom.domain.performance.PackageTrackingIdGenerator
-import org.bytebloom.domain.performance.TreePerformanceReport
+import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
+import org.bytebloom.domain.usecase.GetNetworkStatisticsUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -38,92 +36,31 @@ private const val FRAGILE_HANDLING_SURCHARGE = 10.0
 private const val COLD_CHAIN_MULTIPLIER = 1.25
 private const val EXPRESS_INSURANCE_SURCHARGE = 20.0
 
-class AnalyzeTreePerformanceUseCase(
-    private val trackingIdGenerator: PackageTrackingIdGenerator,
-    private val binarySearchTree: BST,
-    private val avlTree: AVLTree
-) {
-
-    operator fun invoke(
-        packageCount: Int,
-        targetTrackingId: String
-    ): TreePerformanceReport {
-
-        val trackingIds =
-            trackingIdGenerator.generate(packageCount)
-
-        trackingIds.forEach { trackingId ->
-            binarySearchTree.insert(trackingId)
-            avlTree.insert(trackingId)
-        }
-
-        return TreePerformanceReport(
-            totalPackages = packageCount,
-            trackingId = targetTrackingId,
-            binarySearchTreeSteps =
-                binarySearchTree.search(targetTrackingId),
-            avlTreeSteps =
-                avlTree.search(targetTrackingId)
-        )
-    }
-}
-
 fun main() {
-//    val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
-//    val warehousesById = warehouseRepo.getAll().associateBy { it.id }
-//
-//    val packageRepo: PackageRepository = CsvPackageRepository(warehousesById)
-//    val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
-//    val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
-//
-//    val graph = DomainGraphBuilder(
-//        warehouseRepo,
-//        packageRepo,
-//        routeRepo,
-//        vehicleRepo
-//    ).buildGraph()
-//
-//    runPricingDemo(graph,routeRepo)
-//    runRoutingDemo(graph)
+    val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
+    val warehousesById = warehouseRepo.getAll().associateBy { it.id }
 
+    val packageRepo: PackageRepository = CsvPackageRepository(warehousesById)
+    val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
+    val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
 
-    val trackingIdGenerator =
-        PackageTrackingIdGenerator()
+    val graph = DomainGraphBuilder(
+        warehouseRepo,
+        packageRepo,
+        routeRepo,
+        vehicleRepo
+    ).buildGraph()
 
-    val binarySearchTree =
-        BST()
+    runPricingDemo(graph,routeRepo)
+    runRoutingDemo(graph)
 
-    val avlTree =
-        AVLTree()
-
-    val analyzeTreePerformance =
-        AnalyzeTreePerformanceUseCase(
-            trackingIdGenerator = trackingIdGenerator,
-            binarySearchTree = binarySearchTree,
-            avlTree = avlTree
-        )
-
-    val report =
-        analyzeTreePerformance(
-            packageCount = 1000,
-            targetTrackingId = "PKG-001000"
-        )
-
-    println()
-    println("==============================================")
-    println("          TREE PERFORMANCE ANALYSIS")
-    println("==============================================")
-    println("Packages                  : ${report.totalPackages}")
-    println("Target Tracking ID        : ${report.trackingId}")
-    println(
-        "Unbalanced BST steps      : " +
-                report.binarySearchTreeSteps
+    runPackageWeightDemo(packageRepo)
+    runNetworkStatisticsDemo(
+        warehouseRepo,
+        packageRepo,
+        vehicleRepo
     )
-    println(
-        "AVL Tree steps            : " +
-                report.avlTreeSteps
-    )
-    println("==============================================")
+
 }
 
 private fun runPricingDemo(graph: DomainGraph, routeRepository: RouteRepository) {
@@ -171,6 +108,7 @@ private fun runPricingDemo(graph: DomainGraph, routeRepository: RouteRepository)
     Logger.info("==============================================")
 }
 
+
 private fun runRoutingDemo(graph: DomainGraph) {
     val warehousesById = graph.warehouses.associateBy { it.id }
 
@@ -211,4 +149,45 @@ private fun runRoutingDemo(graph: DomainGraph) {
 }
 
 
+private fun runPackageWeightDemo(packageRepository: PackageRepository) {
+    val findPackagesAboveWeight = FindPackagesAboveWeightUseCase(packageRepository)
 
+    val heavyPackages = findPackagesAboveWeight(20.0)
+
+    Logger.info("\n==============================================")
+    Logger.info("       PACKAGES ABOVE WEIGHT REPORT          ")
+    Logger.info("==============================================")
+    Logger.info("Minimum Weight : 20.0 kg")
+    Logger.info("Matching Packages:")
+
+    heavyPackages.forEach {
+        Logger.info("${it.id} : ${it.weight} kg")
+    }
+
+    Logger.info("Total Found : ${heavyPackages.size}")
+    Logger.info("==============================================")
+}
+
+private fun runNetworkStatisticsDemo(
+    warehouseRepository: WarehouseRepository,
+    packageRepository: PackageRepository,
+    vehicleRepository: VehicleRepository
+) {
+    val getNetworkStatistics = GetNetworkStatisticsUseCase(
+        warehouseRepository,
+        packageRepository,
+        vehicleRepository
+    )
+
+    val statistics = getNetworkStatistics()
+
+    Logger.info("\n==============================================")
+    Logger.info("           NETWORK STATISTICS REPORT          ")
+    Logger.info("==============================================")
+    Logger.info("Warehouses           : ${statistics.warehouseCount}")
+    Logger.info("Packages             : ${statistics.packageCount}")
+    Logger.info("Vehicles             : ${statistics.vehicleCount}")
+    Logger.info("Total Package Weight : ${statistics.totalPackageWeight} kg")
+    Logger.info("Total Vehicle Capacity: ${statistics.totalVehicleCapacity} kg")
+    Logger.info("==============================================")
+}
