@@ -8,6 +8,8 @@ import org.bytebloom.domain.graph.DomainGraph
 import org.bytebloom.domain.graph.DomainGraphBuilder
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
+import org.bytebloom.domain.performance.AVLTree
+import org.bytebloom.domain.performance.BST
 import org.bytebloom.domain.pricing.core.BasePackageComponent
 import org.bytebloom.domain.pricing.core.PackageComponent
 import org.bytebloom.domain.pricing.core.RoutePricingEngine
@@ -26,6 +28,8 @@ import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.util.Logger
+import org.bytebloom.domain.performance.PackageTrackingIdGenerator
+import org.bytebloom.domain.performance.TreePerformanceReport
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -34,23 +38,92 @@ private const val FRAGILE_HANDLING_SURCHARGE = 10.0
 private const val COLD_CHAIN_MULTIPLIER = 1.25
 private const val EXPRESS_INSURANCE_SURCHARGE = 20.0
 
+class AnalyzeTreePerformanceUseCase(
+    private val trackingIdGenerator: PackageTrackingIdGenerator,
+    private val binarySearchTree: BST,
+    private val avlTree: AVLTree
+) {
+
+    operator fun invoke(
+        packageCount: Int,
+        targetTrackingId: String
+    ): TreePerformanceReport {
+
+        val trackingIds =
+            trackingIdGenerator.generate(packageCount)
+
+        trackingIds.forEach { trackingId ->
+            binarySearchTree.insert(trackingId)
+            avlTree.insert(trackingId)
+        }
+
+        return TreePerformanceReport(
+            totalPackages = packageCount,
+            trackingId = targetTrackingId,
+            binarySearchTreeSteps =
+                binarySearchTree.search(targetTrackingId),
+            avlTreeSteps =
+                avlTree.search(targetTrackingId)
+        )
+    }
+}
+
 fun main() {
-    val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
-    val warehousesById = warehouseRepo.getAll().associateBy { it.id }
+//    val warehouseRepo: WarehouseRepository = CsvWarehouseRepository()
+//    val warehousesById = warehouseRepo.getAll().associateBy { it.id }
+//
+//    val packageRepo: PackageRepository = CsvPackageRepository(warehousesById)
+//    val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
+//    val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
+//
+//    val graph = DomainGraphBuilder(
+//        warehouseRepo,
+//        packageRepo,
+//        routeRepo,
+//        vehicleRepo
+//    ).buildGraph()
+//
+//    runPricingDemo(graph,routeRepo)
+//    runRoutingDemo(graph)
 
-    val packageRepo: PackageRepository = CsvPackageRepository(warehousesById)
-    val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
-    val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
 
-    val graph = DomainGraphBuilder(
-        warehouseRepo,
-        packageRepo,
-        routeRepo,
-        vehicleRepo
-    ).buildGraph()
+    val trackingIdGenerator =
+        PackageTrackingIdGenerator()
 
-    runPricingDemo(graph,routeRepo)
-    runRoutingDemo(graph)
+    val binarySearchTree =
+        BST()
+
+    val avlTree =
+        AVLTree()
+
+    val analyzeTreePerformance =
+        AnalyzeTreePerformanceUseCase(
+            trackingIdGenerator = trackingIdGenerator,
+            binarySearchTree = binarySearchTree,
+            avlTree = avlTree
+        )
+
+    val report =
+        analyzeTreePerformance(
+            packageCount = 1000,
+            targetTrackingId = "PKG-001000"
+        )
+
+    println()
+    println("==============================================")
+    println("          TREE PERFORMANCE ANALYSIS")
+    println("==============================================")
+    println("Packages                  : ${report.totalPackages}")
+    println("Target Tracking ID        : ${report.trackingId}")
+    println(
+        "Unbalanced BST steps      : " +
+                report.binarySearchTreeSteps
+    )
+    println(
+        "AVL Tree steps            : " +
+                report.avlTreeSteps
+    )
+    println("==============================================")
 }
 
 private fun runPricingDemo(graph: DomainGraph, routeRepository: RouteRepository) {
