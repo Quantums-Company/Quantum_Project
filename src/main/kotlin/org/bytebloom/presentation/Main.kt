@@ -4,8 +4,7 @@ import org.bytebloom.data.repository.CsvPackageRepository
 import org.bytebloom.data.repository.CsvRouteRepository
 import org.bytebloom.data.repository.CsvVehicleRepository
 import org.bytebloom.data.repository.CsvWarehouseRepository
-import org.bytebloom.domain.graph.DomainGraph
-import org.bytebloom.domain.graph.DomainGraphBuilder
+import org.bytebloom.domain.model.DomainGraph
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.tree.binary.AVLTree
@@ -86,12 +85,12 @@ fun main() {
     val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
     val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
 
-    val graph = DomainGraphBuilder(
-        warehouseRepo,
-        packageRepo,
-        routeRepo,
-        vehicleRepo
-    ).buildGraph()
+    val graph = DomainGraph(
+        warehouseRepo.getAll(),
+        packageRepo.getAll(),
+        routeRepo.getAll(),
+        vehicleRepo.getAll(),
+    )
 
     runPricingDemo(graph,routeRepo)
     runRoutingDemo(graph)
