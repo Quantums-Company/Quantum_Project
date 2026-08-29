@@ -1,16 +1,11 @@
 package org.bytebloom.domain.usecase
 
+import NetworkStatistics
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 
-data class NetworkStatistics(
-    val warehouseCount: Int,
-    val packageCount: Int,
-    val vehicleCount: Int,
-    val totalPackageWeight: Double,
-    val totalVehicleCapacity: Double
-)
+
 
 class GetNetworkStatisticsUseCase(
     private val warehouseRepository: WarehouseRepository,
