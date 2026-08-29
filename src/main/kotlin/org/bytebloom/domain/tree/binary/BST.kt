@@ -1,17 +1,19 @@
-package org.bytebloom.domain.performance
+package org.bytebloom.domain.tree.binary
 
-class BST {
+import org.bytebloom.domain.tree.Node
 
-    private var root: Node<String>? = null
+class BST<T : Comparable<T>> {
 
-    fun insert(value: String) {
+    private var root: Node<T>? = null
+
+    fun insert(value: T) {
         root = insert(root, value)
     }
 
     private fun insert(
-        node: Node<String>?,
-        value: String
-    ): Node<String> {
+        node: Node<T>?,
+        value: T
+    ): Node<T> {
 
         if (node == null) {
             return Node(value)
@@ -26,7 +28,7 @@ class BST {
         return node
     }
 
-    fun search(value: String): Int {
+    fun search(value: T): Int {
 
         var current = root
         var steps = 0

@@ -1,4 +1,4 @@
-package org.bytebloom.domain.performance
+package org.bytebloom.domain.tree
 
 class Node<T : Comparable<T>>(
     val value: T

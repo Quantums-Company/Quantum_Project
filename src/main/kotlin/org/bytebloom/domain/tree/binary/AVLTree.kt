@@ -1,17 +1,19 @@
-package org.bytebloom.domain.performance
+package org.bytebloom.domain.tree.binary
 
-class AVLTree {
+import org.bytebloom.domain.tree.Node
 
-    private var root: Node<String>? = null
+class AVLTree<T : Comparable<T>> {
 
-    fun insert(value: String) {
+    private var root: Node<T>? = null
+
+    fun insert(value: T) {
         root = insert(root, value)
     }
 
     private fun insert(
-        node: Node<String>?,
-        value: String
-    ): Node<String> {
+        node: Node<T>?,
+        value: T
+    ): Node<T> {
 
         if (node == null) {
             return Node(value)
@@ -34,13 +36,13 @@ class AVLTree {
         return rebalance(node)
     }
 
-    private fun updateHeight(node: Node<String>) {
+    private fun updateHeight(node: Node<T>) {
         node.height = 1 + maxHeight(node.left, node.right)
     }
 
     private fun maxHeight(
-        left: Node<String>?,
-        right: Node<String>?
+        left: Node<T>?,
+        right: Node<T>?
     ): Int {
         return maxOf(
             height(left),
@@ -48,13 +50,13 @@ class AVLTree {
         )
     }
 
-    private fun height(node: Node<String>?): Int =
+    private fun height(node: Node<T>?): Int =
         node?.height ?: 0
 
-    private fun balanceFactor(node: Node<String>): Int =
+    private fun balanceFactor(node: Node<T>): Int =
         height(node.left) - height(node.right)
 
-    private fun rebalance(node: Node<String>): Node<String> {
+    private fun rebalance(node: Node<T>): Node<T> {
 
         val balance = balanceFactor(node)
 
@@ -77,7 +79,7 @@ class AVLTree {
         return node
     }
 
-    private fun rotateRight(node: Node<String>): Node<String> {
+    private fun rotateRight(node: Node<T>): Node<T> {
 
         val newRoot = node.left!!
         val movedSubtree = newRoot.right
@@ -91,7 +93,7 @@ class AVLTree {
         return newRoot
     }
 
-    private fun rotateLeft(node: Node<String>): Node<String> {
+    private fun rotateLeft(node: Node<T>): Node<T> {
 
         val newRoot = node.right!!
         val movedSubtree = newRoot.left
@@ -105,7 +107,7 @@ class AVLTree {
         return newRoot
     }
 
-    fun search(value: String): Int {
+    fun search(value: T): Int {
 
         var current = root
         var steps = 0
