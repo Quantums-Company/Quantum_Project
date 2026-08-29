@@ -1,11 +1,17 @@
 package org.bytebloom.domain.usecase
 
 import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.tree.hierarchicalHub.HubTree
 
+class TraceHubLineageUseCase(
+    private val hubTree: HubTree
+) {
+    operator fun invoke(warehouse: Warehouse): List<Warehouse> {
+        val node = hubTree.findNode(warehouse)
+            ?: return emptyList()
 
-class TraceHubLineageUseCase{
-    operator fun invoke(startWarehouse: Warehouse, targetWarehouse: Warehouse): List<Warehouse> =
-        listOf(startWarehouse) + startWarehouse.outgoingRoutes
-            .map { it.destinationWarehouse }
-            .filter { it.id == targetWarehouse.id }
+        return generateSequence(node) { it.parent }
+            .map { it.warehouse }
+            .toList()
+    }
 }
