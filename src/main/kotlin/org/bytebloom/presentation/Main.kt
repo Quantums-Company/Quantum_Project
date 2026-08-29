@@ -26,6 +26,8 @@ import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.util.Logger
+import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
+import org.bytebloom.domain.usecase.GetNetworkStatisticsUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -51,6 +53,14 @@ fun main() {
 
     runPricingDemo(graph,routeRepo)
     runRoutingDemo(graph)
+
+    runPackageWeightDemo(packageRepo)
+    runNetworkStatisticsDemo(
+        warehouseRepo,
+        packageRepo,
+        vehicleRepo
+    )
+
 }
 
 private fun runPricingDemo(graph: DomainGraph, routeRepository: RouteRepository) {
@@ -98,6 +108,7 @@ private fun runPricingDemo(graph: DomainGraph, routeRepository: RouteRepository)
     Logger.info("==============================================")
 }
 
+
 private fun runRoutingDemo(graph: DomainGraph) {
     val warehousesById = graph.warehouses.associateBy { it.id }
 
@@ -138,4 +149,45 @@ private fun runRoutingDemo(graph: DomainGraph) {
 }
 
 
+private fun runPackageWeightDemo(packageRepository: PackageRepository) {
+    val findPackagesAboveWeight = FindPackagesAboveWeightUseCase(packageRepository)
 
+    val heavyPackages = findPackagesAboveWeight(20.0)
+
+    Logger.info("\n==============================================")
+    Logger.info("       PACKAGES ABOVE WEIGHT REPORT          ")
+    Logger.info("==============================================")
+    Logger.info("Minimum Weight : 20.0 kg")
+    Logger.info("Matching Packages:")
+
+    heavyPackages.forEach {
+        Logger.info("${it.id} : ${it.weight} kg")
+    }
+
+    Logger.info("Total Found : ${heavyPackages.size}")
+    Logger.info("==============================================")
+}
+
+private fun runNetworkStatisticsDemo(
+    warehouseRepository: WarehouseRepository,
+    packageRepository: PackageRepository,
+    vehicleRepository: VehicleRepository
+) {
+    val getNetworkStatistics = GetNetworkStatisticsUseCase(
+        warehouseRepository,
+        packageRepository,
+        vehicleRepository
+    )
+
+    val statistics = getNetworkStatistics()
+
+    Logger.info("\n==============================================")
+    Logger.info("           NETWORK STATISTICS REPORT          ")
+    Logger.info("==============================================")
+    Logger.info("Warehouses           : ${statistics.warehouseCount}")
+    Logger.info("Packages             : ${statistics.packageCount}")
+    Logger.info("Vehicles             : ${statistics.vehicleCount}")
+    Logger.info("Total Package Weight : ${statistics.totalPackageWeight} kg")
+    Logger.info("Total Vehicle Capacity: ${statistics.totalVehicleCapacity} kg")
+    Logger.info("==============================================")
+}
