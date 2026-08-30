@@ -1,7 +1,8 @@
-data class NetworkStatistics(
-    val warehouseCount: Int,
+package org.bytebloom.domain.usecase
+
+data class WarehouseReport(
+    val warehouseId: String,
     val packageCount: Int,
-    val vehicleCount: Int,
     val totalPackageWeight: Double,
     val totalVehicleCapacity: Double
 )
