@@ -5,5 +5,5 @@ class Package(
     val weight: Double,
     val priority: Priority,
     val originWarehouse: Warehouse,
-    val destinationWarehouse: Warehouse
+    var destinationWarehouse: Warehouse
 )
