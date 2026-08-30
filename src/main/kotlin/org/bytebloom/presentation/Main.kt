@@ -106,32 +106,11 @@ fun main() {
         EstimateShipmentDeliveryUseCase(
             packageRepository = packageRepo,
             routeRepository = routeRepo,
-            warehouseRepository = warehouseRepo
+            findOptimalPath = findOptimalPathUseCase
         )
 
-    val startWarehouse = graph.warehouses.first {
-        it.id.equals("WH-098", ignoreCase = true)
-    }
-
-    val endWarehouse = graph.warehouses.first {
-        it.id.equals("WH-099", ignoreCase = true)
-    }
-
-    val optimalPath = findOptimalPathUseCase(
-        startWarehouse,
-        endWarehouse
-    )
-
-    Logger.info(
-        "Optimal Path: ${
-            optimalPath
-                ?.joinToString(" -> ") { it.id }
-                ?: "No path found"
-        }"
-    )
-
     val estimatedTime =
-        estimateShipmentDeliveryUseCase("PKG-001")
+        estimateShipmentDeliveryUseCase("PKG-000005")
 
     Logger.info(
         "Estimated Delivery Time: ${
