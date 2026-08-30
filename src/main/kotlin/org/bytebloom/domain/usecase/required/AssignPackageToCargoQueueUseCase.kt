@@ -1,8 +1,7 @@
-package org.bytebloom.domain.usecase
+package org.bytebloom.domain.usecase.required
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.sorting.quickSortCargoByWeight
 
 class AssignPackageToCargoQueueUseCase {
 

@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase
+package org.bytebloom.domain.usecase.required
 
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse

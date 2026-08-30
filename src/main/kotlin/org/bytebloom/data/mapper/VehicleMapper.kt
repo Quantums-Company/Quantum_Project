@@ -10,16 +10,19 @@ class VehicleMapper(
     private fun VehicleRaw.toDomain(
         currentWarehouse: Warehouse
     ): Vehicle {
-        return Vehicle(
+        val vehicle = Vehicle(
             id = id,
             maxCapacityKg = maxCapacityKg,
             costPerKm = costPerKm,
             currentWarehouse = currentWarehouse
         )
+
+        vehicle.currentWarehouse.addVehicle(vehicle)
+
+        return vehicle
     }
 
     private fun map(raw: VehicleRaw): Vehicle? {
-
         val currentWarehouse = warehouseMapper.map(
             raw.currentWarehouseId,
             "Vehicle",
