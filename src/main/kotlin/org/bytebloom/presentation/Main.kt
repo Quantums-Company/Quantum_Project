@@ -29,10 +29,14 @@ import org.bytebloom.domain.routing.bfs.BfsBenchmark
 import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
+import org.bytebloom.domain.tree.hierarchicalHub.HubTree
+import org.bytebloom.domain.tree.hierarchicalHub.HubTreeNode
+import org.bytebloom.domain.tree.hierarchicalHub.HubType
 import org.bytebloom.domain.usecase.EstimateShipmentDeliveryUseCase
 import org.bytebloom.util.Logger
 import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
 import org.bytebloom.domain.usecase.GetWarehouseReportUseCase
+import org.bytebloom.domain.usecase.TraceHubLineageUseCase
 import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
@@ -96,42 +100,20 @@ fun main() {
 
     runPricingDemo(graph,routeRepo)
     runRoutingDemo(graph)
-
     val findOptimalPathUseCase = FindOptimalPathUseCase(
         warehouseRepository = warehouseRepo,
         routeRepository = routeRepo
     )
-
+    runHubTreeDemo(graph)
     val estimateShipmentDeliveryUseCase =
         EstimateShipmentDeliveryUseCase(
             packageRepository = packageRepo,
             routeRepository = routeRepo,
-            warehouseRepository = warehouseRepo
+            findOptimalPath = findOptimalPathUseCase
         )
 
-    val startWarehouse = graph.warehouses.first {
-        it.id.equals("WH-098", ignoreCase = true)
-    }
-
-    val endWarehouse = graph.warehouses.first {
-        it.id.equals("WH-099", ignoreCase = true)
-    }
-
-    val optimalPath = findOptimalPathUseCase(
-        startWarehouse,
-        endWarehouse
-    )
-
-    Logger.info(
-        "Optimal Path: ${
-            optimalPath
-                ?.joinToString(" -> ") { it.id }
-                ?: "No path found"
-        }"
-    )
-
     val estimatedTime =
-        estimateShipmentDeliveryUseCase("PKG-001")
+        estimateShipmentDeliveryUseCase("PKG-000005")
 
     Logger.info(
         "Estimated Delivery Time: ${
@@ -139,6 +121,8 @@ fun main() {
                 ?: "Unable to estimate"
         }"
     )
+
+
 
 //    val useCase =
 //        AnalyzeTreePerformanceUseCase(
@@ -304,6 +288,57 @@ private fun runWarehouseReportDemo(
     Logger.info("Package Count          : ${report.packageCount}")
     Logger.info("Total Package Weight   : ${report.totalPackageWeight} kg")
     Logger.info("Total Vehicle Capacity : ${report.totalVehicleCapacity} kg")
+    Logger.info("==============================================")
+}
+private fun runHubTreeDemo(graph: DomainGraph) {
+    if (graph.warehouses.size < 3) {
+        Logger.warning(
+            "Cannot run hub tree demo: at least 3 warehouses are required."
+        )
+        return
+    }
+    val globalWarehouse = graph.warehouses[0]
+    val regionalWarehouse = graph.warehouses[1]
+    val localWarehouse = graph.warehouses[2]
+
+    val globalNode = HubTreeNode(
+        globalWarehouse,
+        HubType.GLOBAL
+    )
+
+    val regionalNode = HubTreeNode(
+        regionalWarehouse,
+        HubType.REGIONAL
+    )
+
+    val localNode = HubTreeNode(
+        localWarehouse,
+        HubType.LOCAL
+    )
+
+    val hubTree = HubTree(globalNode)
+
+    hubTree.addChild(globalNode, regionalNode)
+    hubTree.addChild(regionalNode, localNode)
+
+    val traceHubLineage = TraceHubLineageUseCase(hubTree)
+
+    val lineage = traceHubLineage(localWarehouse)
+
+    Logger.info("\n==============================================")
+    Logger.info("             HUB LINEAGE REPORT")
+    Logger.info("==============================================")
+
+    lineage.forEach { warehouse ->
+        Logger.info("${warehouse.id} - ${warehouse.name}")
+    }
+
+    val invalidAddition = hubTree.addChild(
+        globalNode,
+        localNode
+    )
+
+    Logger.info("Invalid GLOBAL → LOCAL addition: $invalidAddition")
     Logger.info("==============================================")
 }
 
