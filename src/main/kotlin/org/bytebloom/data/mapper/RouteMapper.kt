@@ -11,13 +11,17 @@ class RouteMapper(
         originWarehouse: Warehouse,
         destinationWarehouse: Warehouse
     ): Route {
-        return Route(
+        val route = Route(
             id = id,
             distanceKm = distanceKm,
             typicalDelayMin = typicalDelayMin,
             originWarehouse = originWarehouse,
             destinationWarehouse = destinationWarehouse
         )
+
+        route.originWarehouse.addRoute(route)
+
+        return route
     }
 
     private fun map(raw: RouteRaw): Route? {

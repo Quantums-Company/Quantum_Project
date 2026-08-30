@@ -4,8 +4,7 @@ import org.bytebloom.data.repository.CsvPackageRepository
 import org.bytebloom.data.repository.CsvRouteRepository
 import org.bytebloom.data.repository.CsvVehicleRepository
 import org.bytebloom.data.repository.CsvWarehouseRepository
-import org.bytebloom.domain.graph.DomainGraph
-import org.bytebloom.domain.graph.DomainGraphBuilder
+import org.bytebloom.domain.model.DomainGraph
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.tree.binary.AVLTree
@@ -30,9 +29,11 @@ import org.bytebloom.domain.routing.bfs.BfsBenchmark
 import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
+import org.bytebloom.domain.usecase.EstimateShipmentDeliveryUseCase
 import org.bytebloom.util.Logger
 import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
 import org.bytebloom.domain.usecase.GetNetworkStatisticsUseCase
+import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -86,48 +87,91 @@ fun main() {
     val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
     val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
 
-    val graph = DomainGraphBuilder(
-        warehouseRepo,
-        packageRepo,
-        routeRepo,
-        vehicleRepo
-    ).buildGraph()
+    val graph = DomainGraph(
+        warehouseRepo.getAll(),
+        packageRepo.getAll(),
+        routeRepo.getAll(),
+        vehicleRepo.getAll(),
+    )
 
     runPricingDemo(graph,routeRepo)
     runRoutingDemo(graph)
 
-    val useCase =
-        AnalyzeTreePerformanceUseCase(
-            PackageTrackingIdGenerator(),
-            BST<String>(),
-            AVLTree<String>()
-        )
-    val report =
-        useCase.invoke(
-            packageCount = 1000,
-            listOf(
-                "PKG-000001",
-                "PKG-000500",
-                "PKG-001000"
-            )
+    val findOptimalPathUseCase = FindOptimalPathUseCase(
+        warehouseRepository = warehouseRepo,
+        routeRepository = routeRepo
+    )
+
+    val estimateShipmentDeliveryUseCase =
+        EstimateShipmentDeliveryUseCase(
+            packageRepository = packageRepo,
+            routeRepository = routeRepo,
+            warehouseRepository = warehouseRepo
         )
 
-    println()
-    println("========================================")
-    println("       TREE PERFORMANCE ANALYSIS")
-    println("========================================")
-    println()
-    println("Packages: ${report.totalPackages}")
-
-    report.results.forEach { result ->
-        println()
-        println("Target: ${result.trackingId}")
-        println("BST steps: ${result.binarySearchTreeSteps}")
-        println("AVL steps: ${result.avlTreeSteps}")
+    val startWarehouse = graph.warehouses.first {
+        it.id.equals("WH-098", ignoreCase = true)
     }
 
-    println()
-    println("========================================")
+    val endWarehouse = graph.warehouses.first {
+        it.id.equals("WH-099", ignoreCase = true)
+    }
+
+    val optimalPath = findOptimalPathUseCase(
+        startWarehouse,
+        endWarehouse
+    )
+
+    Logger.info(
+        "Optimal Path: ${
+            optimalPath
+                ?.joinToString(" -> ") { it.id }
+                ?: "No path found"
+        }"
+    )
+
+    val estimatedTime =
+        estimateShipmentDeliveryUseCase("PKG-001")
+
+    Logger.info(
+        "Estimated Delivery Time: ${
+            estimatedTime?.let { "$it minutes" }
+                ?: "Unable to estimate"
+        }"
+    )
+
+//    val useCase =
+//        AnalyzeTreePerformanceUseCase(
+//            PackageTrackingIdGenerator(),
+//            BST<String>(),
+//            AVLTree<String>()
+//        )
+//    val report =
+//        useCase.invoke(
+//            packageCount = 1000,
+//            listOf(
+//                "PKG-000001",
+//                "PKG-000500",
+//                "PKG-001000"
+//            )
+//        )
+//
+//    println()
+//    println("========================================")
+//    println("       TREE PERFORMANCE ANALYSIS")
+//    println("========================================")
+//    println()
+//    println("Packages: ${report.totalPackages}")
+//
+//    report.results.forEach { result ->
+//        println()
+//        println("Target: ${result.trackingId}")
+//        println("BST steps: ${result.binarySearchTreeSteps}")
+//        println("AVL steps: ${result.avlTreeSteps}")
+//    }
+//
+//    println()
+//    println("========================================")
 
 }
 

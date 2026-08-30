@@ -12,13 +12,16 @@ class PackageMapper(
         originWarehouse: Warehouse,
         destinationWarehouse: Warehouse
     ): Package {
-        return Package(
+        val pkg = Package(
             id = id,
             weight = weight,
             priority = priority,
             originWarehouse = originWarehouse,
             destinationWarehouse = destinationWarehouse
         )
+
+        pkg.originWarehouse.addPackage(pkg)
+        return pkg
     }
 
     private fun map(raw: PackageRaw): Package? {
