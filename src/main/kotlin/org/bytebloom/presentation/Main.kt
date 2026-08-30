@@ -32,7 +32,7 @@ import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.domain.usecase.EstimateShipmentDeliveryUseCase
 import org.bytebloom.util.Logger
 import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
-import org.bytebloom.domain.usecase.GetNetworkStatisticsUseCase
+import org.bytebloom.domain.usecase.GetWarehouseReportUseCase
 import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
@@ -279,27 +279,31 @@ private fun runPackageWeightDemo(packageRepository: PackageRepository) {
     Logger.info("Total Found : ${heavyPackages.size}")
     Logger.info("==============================================")
 }
-
-private fun runNetworkStatisticsDemo(
+private fun runWarehouseReportDemo(
     warehouseRepository: WarehouseRepository,
     packageRepository: PackageRepository,
     vehicleRepository: VehicleRepository
 ) {
-    val getNetworkStatistics = GetNetworkStatisticsUseCase(
+    val getWarehouseReport = GetWarehouseReportUseCase(
         warehouseRepository,
         packageRepository,
         vehicleRepository
     )
 
-    val statistics = getNetworkStatistics()
+    val report = getWarehouseReport("WH-001")
+
+    if (report == null) {
+        Logger.warning("Warehouse 'WH-001' was not found.")
+        return
+    }
 
     Logger.info("\n==============================================")
-    Logger.info("           NETWORK STATISTICS REPORT          ")
+    Logger.info("            WAREHOUSE REPORT")
     Logger.info("==============================================")
-    Logger.info("Warehouses           : ${statistics.warehouseCount}")
-    Logger.info("Packages             : ${statistics.packageCount}")
-    Logger.info("Vehicles             : ${statistics.vehicleCount}")
-    Logger.info("Total Package Weight : ${statistics.totalPackageWeight} kg")
-    Logger.info("Total Vehicle Capacity: ${statistics.totalVehicleCapacity} kg")
+    Logger.info("Warehouse ID           : ${report.warehouseId}")
+    Logger.info("Package Count          : ${report.packageCount}")
+    Logger.info("Total Package Weight   : ${report.totalPackageWeight} kg")
+    Logger.info("Total Vehicle Capacity : ${report.totalVehicleCapacity} kg")
     Logger.info("==============================================")
 }
+
