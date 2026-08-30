@@ -8,31 +8,29 @@ import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.routing.WarehouseGraphBuilder
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
+import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
+
 
 class EstimateShipmentDeliveryUseCase(
     private val packageRepository: PackageRepository,
     private val routeRepository: RouteRepository,
-    private val warehouseRepository: WarehouseRepository
+    private val findOptimalPath: FindOptimalPathUseCase
 ) {
 
     operator fun invoke(packageId: String): Double? {
 
         val packageData = packageRepository
             .getAll()
-            .find { it.id.equals(packageId, ignoreCase = true) }
+            .find {
+                it.id.equals(packageId, ignoreCase = true)
+            }
             ?: return null
 
-        val warehouseGraph = WarehouseGraphBuilder(
-            warehouses = warehouseRepository.getAll(),
-            routes = routeRepository.getAll()
-        ).build()
-
-        val dijkstraRouter = DijkstraRouter(warehouseGraph)
-
-        val path = dijkstraRouter.findShortestPath(
+        val path = findOptimalPath(
             packageData.originWarehouse,
             packageData.destinationWarehouse
-        ) ?: return null
+        )
+            ?: return null
 
         return calculateEstimatedTime(path)
     }
@@ -46,14 +44,24 @@ class EstimateShipmentDeliveryUseCase(
         return path
             .zipWithNext()
             .sumOf { (origin, destination) ->
-                routes
-                    .find {
-                        it.originWarehouse.id == origin.id &&
-                                it.destinationWarehouse.id == destination.id
-                    }
-                    ?.typicalDelayMin
-                    ?.toDouble()
-                    ?: 0.0
+                findRoute(
+                    routes,
+                    origin,
+                    destination
+                )?.typicalDelayMin?.toDouble()
+                    ?: return@sumOf 0.0
             }
+    }
+
+    private fun findRoute(
+        routes: List<Route>,
+        origin: Warehouse,
+        destination: Warehouse
+    ): Route? {
+
+        return routes.find {
+            it.originWarehouse.id == origin.id &&
+                    it.destinationWarehouse.id == destination.id
+        }
     }
 }
