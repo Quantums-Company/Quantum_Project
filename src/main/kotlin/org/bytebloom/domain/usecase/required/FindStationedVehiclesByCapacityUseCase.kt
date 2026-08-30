@@ -6,8 +6,8 @@ import org.bytebloom.domain.model.Vehicle
 
 class FindStationedVehiclesByCapacityUseCase() {
 
-        operator fun invoke(warehouse: Warehouse, requiredCapacity: Double): List<Vehicle> =
-            warehouse.stationedVehicles
-                .filter { it.maxCapacityKg >= requiredCapacity }
-                .sortedByDescending { it.maxCapacityKg }
+    operator fun invoke(vehicle: List<Vehicle>, requiredCapacity: Double): List<Vehicle> {//warehouse: Warehouse,
+        val vehicle = vehicle.filter { it.maxCapacityKg >= requiredCapacity }
+        return vehicle
     }
+}
