@@ -2,6 +2,7 @@ package org.bytebloom.domain.usecase
 
 import org.bytebloom.domain.model.DomainGraph
 import org.bytebloom.domain.model.Package
+import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 
 data class BackhaulOpportunity(
@@ -15,15 +16,13 @@ class FindBackhaulOpportunitiesUseCase(
 ) {
 
     operator fun invoke(): List<BackhaulOpportunity> {
-        val packagesByCorridor = graph.packages
-            .groupBy { it.originWarehouse.id to it.destinationWarehouse.id }
-        val vehiclesByHub = graph.vehicles
-            .groupBy { it.currentWarehouse.id }
+        val packagesByCorridor = getPackagesByCorridor()
+        val vehiclesByHub = getVehiclesByHub()
 
         return graph.routes.mapNotNull { route ->
-            val vehicles = vehiclesByHub[route.originWarehouse.id].orEmpty()
+            val vehicles = vehicleList(vehiclesByHub, route)
             val returning = packagesByCorridor[
-                route.destinationWarehouse.id to route.originWarehouse.id
+                getReturnCorridor(route)
             ].orEmpty()
             if (vehicles.isEmpty() || returning.isEmpty()) {
                 null
@@ -40,4 +39,17 @@ class FindBackhaulOpportunitiesUseCase(
             .distinctBy { it.outboundHubId to it.returnHubId }
             .sortedByDescending { it.deadheadCapacityKg }
     }
+
+    private fun vehicleList(
+        vehiclesByHub: Map<String, List<Vehicle>>,
+        route: Route
+    ) = vehiclesByHub[route.originWarehouse.id].orEmpty()
+
+    private fun getReturnCorridor(route: Route) = route.destinationWarehouse.id to route.originWarehouse.id
+
+    private fun getVehiclesByHub() = graph.vehicles
+        .groupBy { it.currentWarehouse.id }
+
+    private fun getPackagesByCorridor() = graph.packages
+        .groupBy { it.originWarehouse.id to it.destinationWarehouse.id }
 }
