@@ -1,9 +1,11 @@
 package org.bytebloom.domain.usecase
 
-import org.bytebloom.domain.model.DomainGraph
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.repository.PackageRepository
+import org.bytebloom.domain.repository.RouteRepository
+import org.bytebloom.domain.repository.VehicleRepository
 
 data class BackhaulOpportunity(
     val outboundHubId: String,
@@ -12,14 +14,28 @@ data class BackhaulOpportunity(
 )
 
 class FindBackhaulOpportunitiesUseCase(
-    private val graph: DomainGraph
+    private val routeRepository: RouteRepository,
+    private val vehicleRepository: VehicleRepository,
+    private val packageRepository: PackageRepository
 ) {
 
     operator fun invoke(): List<BackhaulOpportunity> {
-        val packagesByCorridor = getPackagesByCorridor()
-        val vehiclesByHub = getVehiclesByHub()
+        val routes = routeRepository.getAll()
+        val vehicles = vehicleRepository.getAll()
+        val packages = packageRepository.getAll()
 
-        return graph.routes.mapNotNull { route ->
+        val vehiclesByHub =
+            vehicles.groupBy {
+                it.currentWarehouse.id
+            }
+
+        val packagesByCorridor =
+            packages.groupBy {
+                it.originWarehouse.id to
+                        it.destinationWarehouse.id
+            }
+
+        return routes.mapNotNull { route ->
             val vehicles = vehicleList(vehiclesByHub, route)
             val returning = packagesByCorridor[
                 getReturnCorridor(route)
@@ -46,10 +62,4 @@ class FindBackhaulOpportunitiesUseCase(
     ) = vehiclesByHub[route.originWarehouse.id].orEmpty()
 
     private fun getReturnCorridor(route: Route) = route.destinationWarehouse.id to route.originWarehouse.id
-
-    private fun getVehiclesByHub() = graph.vehicles
-        .groupBy { it.currentWarehouse.id }
-
-    private fun getPackagesByCorridor() = graph.packages
-        .groupBy { it.originWarehouse.id to it.destinationWarehouse.id }
 }

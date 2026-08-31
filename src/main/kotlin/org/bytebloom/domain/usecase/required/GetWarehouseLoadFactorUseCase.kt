@@ -7,16 +7,16 @@ class GetWarehouseLoadFactorUseCase {
 
     operator fun invoke(warehouse: Warehouse): Double {
 
-        val totalCargoWeight =
+        val cargoWeight =
             warehouse.cargoQueue.sumOf { it.weight }
 
-        val totalFleetCapacity =
+        val fleetCapacity =
             warehouse.stationedVehicles.sumOf { it.maxCapacityKg }
 
-        if (totalFleetCapacity <= 0.0) {
-            return 0.0
+        return if (fleetCapacity > 0.0) {
+            cargoWeight / fleetCapacity
+        } else {
+            0.0
         }
-
-        return totalCargoWeight / totalFleetCapacity
     }
 }

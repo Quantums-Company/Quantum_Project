@@ -30,7 +30,7 @@ import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.domain.tree.hierarchicalHub.HubTreeBuilder
-import org.bytebloom.domain.usecase.BestVehicleByCostCapacityUseCase
+import org.bytebloom.domain.usecase.FindBestVehicleByCostCapacityUseCase
 import org.bytebloom.domain.usecase.EstimateShipmentDeliveryUseCase
 import org.bytebloom.util.Logger
 import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
@@ -133,7 +133,7 @@ fun main() {
         packageRepo.getAll()[0], packageRepo.getAll()[1], packageRepo.getAll()[2]
     )
 
-    val bestVehicleUseCase = BestVehicleByCostCapacityUseCase(vehicleRepo)
+    val bestVehicleUseCase = FindBestVehicleByCostCapacityUseCase(vehicleRepo)
     val bestVehicles = bestVehicleUseCase(packages)
 
     Logger.info("Best vehicles : ")
@@ -177,6 +177,8 @@ fun main() {
 
     val hubTree =
         hubTreeBuilder.build(graph.warehouses)
+
+    hubTree.printTree()
 
     val traceHubLineageUseCase =
         TraceHubLineageUseCase(hubTree)
