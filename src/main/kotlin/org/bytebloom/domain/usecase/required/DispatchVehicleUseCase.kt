@@ -4,14 +4,30 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 
-
 class DispatchVehicleUseCase {
-    fun theAvailableVehcles(vehicle: Vehicle, warehouse: Warehouse): List<Vehicle>{
-        val availableVehicles = warehouse.stationedVehicles.filter { it.id != vehicle.id }
-        return availableVehicles
+
+    operator fun invoke(
+        pkg: Package,
+        vehicle: Vehicle,
+        warehouse: Warehouse
+    ): Boolean {
+
+        if (!canDispatch(pkg, vehicle, warehouse)) {
+            return false
+        }
+
+        warehouse.cargoQueue.remove(pkg)
+        warehouse.stationedVehicles.remove(vehicle)
+
+        return true
     }
-    operator fun invoke(pkg: Package, availableVehicles: List<Vehicle>): List<Vehicle> {
-        val available = availableVehicles.filter { pkg.weight <= it.maxCapacityKg }//.filter {  }
-        return available
-    }
+
+    private fun canDispatch(
+        pkg: Package,
+        vehicle: Vehicle,
+        warehouse: Warehouse
+    ): Boolean =
+        pkg in warehouse.cargoQueue &&
+                vehicle in warehouse.stationedVehicles &&
+                pkg.weight <= vehicle.maxCapacityKg
 }
