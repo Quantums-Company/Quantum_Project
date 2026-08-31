@@ -33,6 +33,7 @@ import org.bytebloom.domain.tree.hierarchicalHub.HubTree
 import org.bytebloom.domain.tree.hierarchicalHub.HubTreeBuilder
 import org.bytebloom.domain.tree.hierarchicalHub.HubTreeNode
 import org.bytebloom.domain.tree.hierarchicalHub.HubType
+import org.bytebloom.domain.usecase.BestVehicleByCostCapacityUseCase
 import org.bytebloom.domain.usecase.EstimateShipmentDeliveryUseCase
 import org.bytebloom.util.Logger
 import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
@@ -131,7 +132,22 @@ fun main() {
     }
     Logger.info("=========================================================")
 
+    val packages = listOf(
+        packageRepo.getAll()[0], packageRepo.getAll()[1], packageRepo.getAll()[2]
+    )
 
+    val bestVehicleUseCase = BestVehicleByCostCapacityUseCase(vehicleRepo)
+    val bestVehicles = bestVehicleUseCase(packages)
+
+    Logger.info("Best vehicles : ")
+
+    bestVehicles.forEach {
+        Logger.info(
+            "Vehicle: ${it.id}," +
+                    " Capacity: ${it.maxCapacityKg}," +
+                    " Cost: ${it.costPerKm}"
+        )
+    }
 
 //    runPricingDemo(graph,routeRepo)
 //    runRoutingDemo(graph)
