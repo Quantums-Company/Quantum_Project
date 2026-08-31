@@ -39,6 +39,7 @@ import org.bytebloom.domain.usecase.GetWarehouseReportUseCase
 import org.bytebloom.domain.usecase.TraceHubLineageUseCase
 import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.FindAllPairsShortestPathUseCase
+import org.bytebloom.domain.usecase.BestVehicleByCostCapacityUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -129,7 +130,22 @@ fun main() {
     }
     Logger.info("=========================================================")
 
+    val packages = listOf(
+        packageRepo.getAll()[0], packageRepo.getAll()[1], packageRepo.getAll()[2]
+    )
 
+    val bestVehicleUseCase = BestVehicleByCostCapacityUseCase(vehicleRepo)
+    val bestVehicles = bestVehicleUseCase(packages)
+
+    Logger.info("Best vehicles : ")
+
+    bestVehicles.forEach {
+        Logger.info(
+            "Vehicle: ${it.id}," +
+                " Capacity: ${it.maxCapacityKg}," +
+                " Cost: ${it.costPerKm}"
+        )
+    }
 
     runPricingDemo(graph,routeRepo)
     runRoutingDemo(graph)
