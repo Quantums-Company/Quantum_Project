@@ -29,10 +29,7 @@ import org.bytebloom.domain.routing.bfs.BfsBenchmark
 import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
-import org.bytebloom.domain.tree.hierarchicalHub.HubTree
 import org.bytebloom.domain.tree.hierarchicalHub.HubTreeBuilder
-import org.bytebloom.domain.tree.hierarchicalHub.HubTreeNode
-import org.bytebloom.domain.tree.hierarchicalHub.HubType
 import org.bytebloom.domain.usecase.BestVehicleByCostCapacityUseCase
 import org.bytebloom.domain.usecase.EstimateShipmentDeliveryUseCase
 import org.bytebloom.util.Logger
@@ -42,7 +39,6 @@ import org.bytebloom.domain.usecase.TraceHubLineageUseCase
 import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.FindAllPairsShortestPathUseCase
 import org.bytebloom.domain.usecase.required.GetWarehouseLoadFactorUseCase
-import org.bytebloom.domain.usecase.BestVehicleByCostCapacityUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
