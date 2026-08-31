@@ -6,9 +6,9 @@ import org.bytebloom.domain.model.Warehouse
 class AddVehicleToHubUseCase {
 
     operator fun invoke(vehicle: Vehicle): Warehouse {
-        vehicle.currentWarehouse.addVehicle(vehicle)
-
-        return vehicle.currentWarehouse
+        val warehouse = vehicle.currentWarehouse
+        warehouse.addVehicle(vehicle)
+        return warehouse
     }
 
 }
