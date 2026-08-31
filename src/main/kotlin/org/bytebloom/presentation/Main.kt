@@ -30,6 +30,7 @@ import org.bytebloom.domain.routing.bfs.BidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.bfs.UnidirectionalBreadthFirstRouter
 import org.bytebloom.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.domain.tree.hierarchicalHub.HubTree
+import org.bytebloom.domain.tree.hierarchicalHub.HubTreeBuilder
 import org.bytebloom.domain.tree.hierarchicalHub.HubTreeNode
 import org.bytebloom.domain.tree.hierarchicalHub.HubType
 import org.bytebloom.domain.usecase.EstimateShipmentDeliveryUseCase
@@ -39,6 +40,7 @@ import org.bytebloom.domain.usecase.GetWarehouseReportUseCase
 import org.bytebloom.domain.usecase.TraceHubLineageUseCase
 import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.FindAllPairsShortestPathUseCase
+import org.bytebloom.domain.usecase.required.GetWarehouseLoadFactorUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -131,13 +133,12 @@ fun main() {
 
 
 
-    runPricingDemo(graph,routeRepo)
-    runRoutingDemo(graph)
+//    runPricingDemo(graph,routeRepo)
+//    runRoutingDemo(graph)
     val findOptimalPathUseCase = FindOptimalPathUseCase(
         warehouseRepository = warehouseRepo,
         routeRepository = routeRepo
     )
-    runHubTreeDemo(graph)
     val estimateShipmentDeliveryUseCase =
         EstimateShipmentDeliveryUseCase(
             packageRepository = packageRepo,
@@ -155,7 +156,36 @@ fun main() {
         }"
     )
 
+    val loadFactorUseCase =
+        GetWarehouseLoadFactorUseCase()
 
+    val hubTreeBuilder =
+        HubTreeBuilder(loadFactorUseCase)
+
+    val hubTree =
+        hubTreeBuilder.build(graph.warehouses)
+
+    val traceHubLineageUseCase =
+        TraceHubLineageUseCase(hubTree)
+
+    val warehouse =
+        graph.warehouses.first()
+
+
+    val lineage = traceHubLineageUseCase(warehouse)
+
+    println("Hub Lineage")
+    println("-----------")
+
+    lineage.forEachIndexed { index, hub ->
+        val type = hubTree.findNode(hub)?.type
+
+        if (index > 0) {
+            println("    ↓")
+        }
+
+        println("${hub.id} [$type]")
+    }
 
 //    val useCase =
 //        AnalyzeTreePerformanceUseCase(
@@ -322,57 +352,6 @@ private fun runWarehouseReportDemo(
     Logger.info("Package Count          : ${report.packageCount}")
     Logger.info("Total Package Weight   : ${report.totalPackageWeight} kg")
     Logger.info("Total Vehicle Capacity : ${report.totalVehicleCapacity} kg")
-    Logger.info("==============================================")
-}
-private fun runHubTreeDemo(graph: DomainGraph) {
-    if (graph.warehouses.size < 3) {
-        Logger.warning(
-            "Cannot run hub tree demo: at least 3 warehouses are required."
-        )
-        return
-    }
-    val globalWarehouse = graph.warehouses[0]
-    val regionalWarehouse = graph.warehouses[1]
-    val localWarehouse = graph.warehouses[2]
-
-    val globalNode = HubTreeNode(
-        globalWarehouse,
-        HubType.GLOBAL
-    )
-
-    val regionalNode = HubTreeNode(
-        regionalWarehouse,
-        HubType.REGIONAL
-    )
-
-    val localNode = HubTreeNode(
-        localWarehouse,
-        HubType.LOCAL
-    )
-
-    val hubTree = HubTree(globalNode)
-
-    hubTree.addChild(globalNode, regionalNode)
-    hubTree.addChild(regionalNode, localNode)
-
-    val traceHubLineage = TraceHubLineageUseCase(hubTree)
-
-    val lineage = traceHubLineage(localWarehouse)
-
-    Logger.info("\n==============================================")
-    Logger.info("             HUB LINEAGE REPORT")
-    Logger.info("==============================================")
-
-    lineage.forEach { warehouse ->
-        Logger.info("${warehouse.id} - ${warehouse.name}")
-    }
-
-    val invalidAddition = hubTree.addChild(
-        globalNode,
-        localNode
-    )
-
-    Logger.info("Invalid GLOBAL → LOCAL addition: $invalidAddition")
     Logger.info("==============================================")
 }
 
