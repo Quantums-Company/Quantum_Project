@@ -2,11 +2,12 @@ package org.bytebloom.domain.routing.bfs
 
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
+import org.bytebloom.domain.routing.common.RouteFinder
 import org.bytebloom.domain.routing.common.RouterValidator
 
 class BidirectionalBreadthFirstRouter(
     private val graph: WarehouseGraph
-) : RouterValidator(graph) {
+) : RouterValidator(graph), RouteFinder {
 
     var evaluatedWarehouses = 0
 
@@ -16,23 +17,23 @@ class BidirectionalBreadthFirstRouter(
         val parent = mutableMapOf<Warehouse, Warehouse>()
     }
 
-    fun findShortestPath(
-        startWarehouse: Warehouse,
-        endWarehouse: Warehouse
+    override fun findShortestPath(
+        start: Warehouse,
+        destination: Warehouse
     ): List<Warehouse>? {
 
         evaluatedWarehouses = 0
 
-        if (!areValidWarehouses(startWarehouse, endWarehouse)) {
+        if (!areValidWarehouses(start, destination)) {
             return null
         }
 
-        if (startWarehouse.id == endWarehouse.id) {
-            return listOf(startWarehouse)
+        if (start.id == destination.id) {
+            return listOf(start)
         }
 
-        val forward = SearchState(startWarehouse)
-        val backward = SearchState(endWarehouse)
+        val forward = SearchState(start)
+        val backward = SearchState(destination)
 
         val meetingPoint = search(forward, backward)?: return null
 

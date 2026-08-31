@@ -2,11 +2,12 @@ package org.bytebloom.domain.routing.dijkstra
 
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
+import org.bytebloom.domain.routing.common.RouteFinder
 import org.bytebloom.domain.routing.common.RouterValidator
 
 class DijkstraRouter(
     private val graph: WarehouseGraph
-): RouterValidator(graph) {
+): RouterValidator(graph), RouteFinder {
 
     private data class DijkstraState(
         val distances: MutableMap<Warehouse, Double>,
@@ -14,22 +15,22 @@ class DijkstraRouter(
         val parent: MutableMap<Warehouse, Warehouse>
     )
 
-    fun findShortestPath(
-        startWarehouse: Warehouse,
-        endWarehouse: Warehouse
+    override fun findShortestPath(
+        start: Warehouse,
+        destination: Warehouse
     ): List<Warehouse>? {
 
-        if (!areValidWarehouses(startWarehouse, endWarehouse)) {
+        if (!areValidWarehouses(start, destination)) {
             return null
         }
 
-        if (startWarehouse.id == endWarehouse.id) {
-            return listOf(startWarehouse)
+        if (start.id == destination.id) {
+            return listOf(start)
         }
 
-        val state = createInitialState(startWarehouse)
+        val state = createInitialState(start)
 
-        return search(state, endWarehouse)
+        return search(state, destination)
     }
 
     private fun createInitialState(
