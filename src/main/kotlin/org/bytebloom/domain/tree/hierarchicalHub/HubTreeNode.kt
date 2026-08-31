@@ -15,20 +15,20 @@ class HubTreeNode(
         private set
 
     fun addChild(child: HubTreeNode): Boolean {
-        if (!canAddChild(child) || child.parent != null) {
+        if (child.parent != null || !canAddChild(child)) {
             return false
         }
 
         _children.add(child)
         child.parent = this
+
         return true
     }
 
-    fun canAddChild(child: HubTreeNode): Boolean {
-        return when (type) {
+    private fun canAddChild(child: HubTreeNode): Boolean =
+        when (type) {
             HubType.GLOBAL -> child.type == HubType.REGIONAL
             HubType.REGIONAL -> child.type == HubType.LOCAL
             HubType.LOCAL -> false
         }
-    }
 }
