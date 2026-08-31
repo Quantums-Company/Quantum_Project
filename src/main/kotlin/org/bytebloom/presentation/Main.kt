@@ -42,6 +42,7 @@ import org.bytebloom.domain.usecase.TraceHubLineageUseCase
 import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.FindAllPairsShortestPathUseCase
 import org.bytebloom.domain.usecase.required.GetWarehouseLoadFactorUseCase
+import org.bytebloom.domain.usecase.BestVehicleByCostCapacityUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -144,8 +145,8 @@ fun main() {
     bestVehicles.forEach {
         Logger.info(
             "Vehicle: ${it.id}," +
-                    " Capacity: ${it.maxCapacityKg}," +
-                    " Cost: ${it.costPerKm}"
+                " Capacity: ${it.maxCapacityKg}," +
+                " Cost: ${it.costPerKm}"
         )
     }
 
