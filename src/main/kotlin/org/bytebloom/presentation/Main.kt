@@ -38,6 +38,7 @@ import org.bytebloom.domain.usecase.FindPackagesAboveWeightUseCase
 import org.bytebloom.domain.usecase.GetWarehouseReportUseCase
 import org.bytebloom.domain.usecase.TraceHubLineageUseCase
 import org.bytebloom.domain.usecase.required.FindOptimalPathUseCase
+import org.bytebloom.domain.usecase.FindAllPairsShortestPathUseCase
 
 private const val DEMO_ROUTE_ORIGIN_ID = "WH-031"
 private const val DEMO_ROUTE_DESTINATION_ID = "WH-091"
@@ -97,6 +98,38 @@ fun main() {
         routeRepo.getAll(),
         vehicleRepo.getAll(),
     )
+
+
+    val warehouses = warehouseRepo.getAll()
+    val selectionWarehouses = warehouses.take(5)
+    val findAllPairsShortestPathUseCase = FindAllPairsShortestPathUseCase(
+        routeRepo
+    )
+    val allPairsShortestPaths = findAllPairsShortestPathUseCase(warehouses)
+
+    Logger.info("\n================ALL PAIRS SHORTEST PATHS==================")
+
+
+    Logger.info("origin".padEnd(12) +
+            selectionWarehouses.joinToString("") { it.id.padStart(12) }
+    )
+
+    selectionWarehouses.forEach { origin ->
+        val row = buildString {
+            append(origin.id.padEnd(12))
+            selectionWarehouses.forEach { destination ->
+                val distance = allPairsShortestPaths[origin]?.get(destination)
+
+                append(
+                    String.format("%12.2f", distance)
+                )
+            }
+        }
+        Logger.info(row)
+    }
+    Logger.info("=========================================================")
+
+
 
     runPricingDemo(graph,routeRepo)
     runRoutingDemo(graph)
@@ -167,6 +200,7 @@ private fun runPricingDemo(graph: DomainGraph, routeRepository: RouteRepository)
         graph.warehouses[0],
         graph.warehouses[1],
     )
+    
 
     val pricingEngine = RoutePricingEngine(EcoStrategy(), routeRepository)
 
