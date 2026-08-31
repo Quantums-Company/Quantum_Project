@@ -7,7 +7,6 @@ class AssignPackageToCargoQueueUseCase {
 
     operator fun invoke(warehouse: Warehouse, pkg: Package): Warehouse {
         warehouse.addPackage(pkg)
-        warehouse.sortCargoByWeight()
 
         return warehouse
     }
