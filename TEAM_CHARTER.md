@@ -70,58 +70,135 @@ We follow a professional modular architecture separating business org.bytebloom.
 
 **Standard Directory Structure:**
 ```text
-src/main/
-├── kotlin/
-│   └── org/
-│       └── bytebloom/
-│           ├── app/
-│           │   └── Main.kt
-│           ├── data/
-│           │   ├── csv/
-│           │   │   ├── CsvDataLoader.kt
-│           │   │   ├── CsvValidator.kt
-│           │   │   ├── PackageCsvParser.kt
-│           │   │   ├── RouteCsvParser.kt
-│           │   │   ├── VehicleCsvParser.kt
-│           │   │   └── WarehouseCsvParser.kt
-│           │   └── raw/
-│           │       ├── PackageRaw.kt
-│           │       ├── Priority.kt
-│           │       ├── RouteRaw.kt
-│           │       ├── VehicleRaw.kt
-│           │       └── WarehouseRaw.kt
-│           └── domain/
-│               ├── graph/
-│               │   ├── DomainGraph.kt
-│               │   └── DomainGraphBuilder.kt
-│               ├── hashing/
-│               │   ├── ConsistentHashingRing.kt
-│               │   └── RingValidation.kt
-│               ├── model/
-│               │   ├── Package.kt
-│               │   ├── Route.kt
-│               │   ├── Vehicle.kt
-│               │   └── Warehouse.kt
-│               ├── pricing/
-│               │   ├── DispatchStrategy.kt
-│               │   ├── EcoStrategy.kt
-│               │   ├── ExpressStrategy.kt
-│               │   ├── FragileStrategy.kt
-│               │   └── RoutePricingEngine.kt
-│               ├── printing/
-│               │   └── Printing.kt
-│               ├── sorting/
-│               │   ├── QuickSort.kt
-│               │   └── SelectionSort.kt
-│               └── util/
-│                   └── Logger.kt
-└── resources/
-    ├── fleet.csv
-    ├── packages.csv
-    ├── Quantum.png
-    ├── quantum_architecture.png
-    ├── routes.csv
-    └── warehouses.csv
+Quantum_Project/
+├── config/
+├── gradle/
+├── out/
+└── src/
+    └── main/
+        ├── kotlin/
+        │   └── org/
+        │       └── bytebloom/
+        │           ├── data/
+        │           │
+        │           ├── domain/
+        │           │   ├── commandPattern/
+        │           │   │   ├── AssignPackageToQueueCommand.kt
+        │           │   │   ├── Command.kt
+        │           │   │   ├── CommandIntegration.kt
+        │           │   │   ├── CommandInvoker.kt
+        │           │   │   └── DispatchVehicleCommand.kt
+        │           │   │
+        │           │   ├── model/
+        │           │   │   ├── Package.kt
+        │           │   │   ├── Priority.kt
+        │           │   │   ├── Route.kt
+        │           │   │   ├── ShipmentEstimate.kt
+        │           │   │   ├── Vehicle.kt
+        │           │   │   └── Warehouse.kt
+        │           │   │
+        │           │   ├── performance/
+        │           │   │   ├── PackageTrackingIdGenerator.kt
+        │           │   │   ├── TreePerformanceReport.kt
+        │           │   │   └── TreeSearchResult.kt
+        │           │   │
+        │           │   ├── pricing/
+        │           │   │   ├── core/
+        │           │   │   │   ├── BasePackageComponent.kt
+        │           │   │   │   ├── PackageComponent.kt
+        │           │   │   │   ├── PricingEngine.kt
+        │           │   │   │   └── RoutePricingEngine.kt
+        │           │   │   ├── decorator/
+        │           │   │   │   ├── ColdChainDecorator.kt
+        │           │   │   │   ├── ExpressInsuranceDecorator.kt
+        │           │   │   │   ├── FragileHandlingDecorator.kt
+        │           │   │   │   └── PackageDecorator.kt
+        │           │   │   └── strategy/
+        │           │   │       ├── DispatchStrategy.kt
+        │           │   │       ├── EcoStrategy.kt
+        │           │   │       ├── ExpressStrategy.kt
+        │           │   │       └── FragileStrategy.kt
+        │           │   │
+        │           │   ├── printing/
+        │           │   │   └── Printing.kt
+        │           │   │
+        │           │   ├── repository/
+        │           │   │   ├── PackageRepository.kt
+        │           │   │   ├── RouteRepository.kt
+        │           │   │   ├── VehicleRepository.kt
+        │           │   │   └── WarehouseRepository.kt
+        │           │   │
+        │           │   ├── routing/
+        │           │   │   ├── bfs/
+        │           │   │   │   ├── BfsBenchmark.kt
+        │           │   │   │   ├── BidirectionalBreadthFirstRouter.kt
+        │           │   │   │   └── UnidirectionalBreadthFirstRouter.kt
+        │           │   │   ├── common/
+        │           │   │   │   ├── EmptyHubFinder.kt
+        │           │   │   │   ├── RouteFinder.kt
+        │           │   │   │   └── RouterValidator.kt
+        │           │   │   ├── dijkstra/
+        │           │   │   │   ├── DijkstraRouter.kt
+        │           │   │   │   ├── BidirectionalBFSConnectivityChecker.kt
+        │           │   │   │   ├── GraphEmptyHubFinder.kt
+        │           │   │   │   ├── WarehouseGraph.kt
+        │           │   │   │   └── WarehouseGraphBuilder.kt
+        │           │   │   └── sorting/
+        │           │   │       ├── QuickSort.kt
+        │           │   │       └── SelectionSort.kt
+        │           │   │
+        │           │   ├── tree/
+        │           │   │   ├── binary/
+        │           │   │   │   ├── AVLTree.kt
+        │           │   │   │   └── BST.kt
+        │           │   │   └── hierarchicalHub/
+        │           │   │       ├── HubTree.kt
+        │           │   │       ├── HubTreeBuilder.kt
+        │           │   │       ├── HubTreeNode.kt
+        │           │   │       ├── HubType.kt
+        │           │   │       ├── HubTypeResolver.kt
+        │           │   │       └── Node.kt
+        │           │   │
+        │           │   └── usecase/
+        │           │       ├── required/
+        │           │       │   ├── AddVehicleToHubUseCase.kt
+        │           │       │   ├── AssignPackageToCargoQueueUseCase.kt
+        │           │       │   ├── CalculatePricingUseCase.kt
+        │           │       │   ├── DispatchVehicleUseCase.kt
+        │           │       │   ├── EstimateShipmentDeliveryUseCase.kt
+        │           │       │   ├── FindAllPairsShortestPathUseCase.kt
+        │           │       │   ├── FindBackhaulOpportunitiesUseCase.kt
+        │           │       │   ├── FindBestVehicleByCostCapacityUseCase.kt
+        │           │       │   ├── FindFewestHopsRouteUseCase.kt
+        │           │       │   ├── FindNearestEmptyHubUseCase.kt
+        │           │       │   ├── FindOptimalPathUseCase.kt
+        │           │       │   ├── FindPackagesAboveWeightUseCase.kt
+        │           │       │   ├── FindPackagesByPriorityUseCase.kt
+        │           │       │   ├── FindStationedVehiclesByCapacityUseCase.kt
+        │           │       │   ├── GetWarehouseLoadFactorUseCase.kt
+        │           │       │   ├── GetWarehouseReportUseCase.kt
+        │           │       │   ├── RecoverCargoAfterVehicleFailureUseCase.kt
+        │           │       │   ├── ReroutePackageUseCase.kt
+        │           │       │   ├── TraceHubLineageUseCase.kt
+        │           │       │   ├── VerifyHubLinkUseCase.kt
+        │           │       │   └── WarehouseReport.kt
+        │           │       └── vehicleReshuffling/
+        │           │           ├── ConsistentHashingRing.kt
+        │           │           └── RingValidation.kt
+        │           │
+        │           ├── presentation/
+        │           │   └── Main.kt
+        │           │
+        │           └── util/
+        │               └── Logger.kt
+        │
+        └── resources/
+            ├── fleet.csv
+            ├── packages.csv
+            ├── Quantom.png
+            ├── quantom_architecture.png
+            ├── routes.csv
+            └── warehouses.csv
 ```
 <div align="center" style="background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); padding: 25px; border-radius: 14px; margin: 25px 0; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
   <img src="src/resources/quantom_architecture.png" alt="Quantum Architecture Diagram" width="100%" style="border-radius: 8px; border: 1px solid #58a6ff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
