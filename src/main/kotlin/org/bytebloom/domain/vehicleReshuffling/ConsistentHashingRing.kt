@@ -12,21 +12,24 @@ class ConsistentHashingRing(
     packages: Collection<Package>,
     vehicles: Collection<Vehicle>
 ) {
-    private val packages = packages.toList()
-    private val vehicles = vehicles.toList()
+    private val packagesList = packages.toList()
+    private val vehiclesList = vehicles.toList()
 
     private val circleSize =
-        maxOf(MIN_RING_SIZE, vehicles.size * VEHICLE_SLOT_MULTIPLIER)
+        maxOf(
+            MIN_RING_SIZE,
+            vehiclesList.size * VEHICLE_SLOT_MULTIPLIER
+        )
 
     private val _vehicleRing = mutableMapOf<Int, Vehicle>()
     val vehicleRing: Map<Int, Vehicle>
         get() = _vehicleRing
 
     private val _packageSlots = mutableMapOf<Package, Int>()
-    val packageSlots: Map<Package, Int>
-        get() = _packageSlots
 
-    private val _assignments = mutableMapOf<Vehicle, MutableList<Package>>()
+    private val _assignments =
+        mutableMapOf<Vehicle, MutableList<Package>>()
+
     val assignments: Map<Vehicle, List<Package>>
         get() = _assignments
 
@@ -36,102 +39,142 @@ class ConsistentHashingRing(
         distributeAllPackages()
     }
 
+    fun findSlotForVehicle(vehicleId: String): Int? =
+        _vehicleRing.entries
+            .firstOrNull {
+                it.value.id.equals(vehicleId, ignoreCase = true)
+            }
+            ?.key
+
+    fun getAssignedPackages(vehicle: Vehicle): List<Package> =
+        _assignments[vehicle].orEmpty()
+
+    fun findVehicleForPackage(packageId: String): Vehicle =
+        _assignments.entries
+            .first { (_, packages) ->
+                packages.any {
+                    it.id.equals(packageId, ignoreCase = true)
+                }
+            }
+            .key
+
+    fun removeVehicle(slot: Int): Boolean {
+        val removedVehicle =
+            _vehicleRing.remove(slot)
+                ?: return false
+
+        reroutePackages(removedVehicle)
+
+        return true
+    }
+
     private fun generateVehicleSlots(): List<Int> {
 
-        if (vehicles.isEmpty()) {
-            Logger.warning("At least one vehicle is required. No vehicle slots will be generated.")
+        if (vehiclesList.isEmpty()) {
+            Logger.warning(
+                "At least one vehicle is required. " +
+                        "No vehicle slots generated."
+            )
             return emptyList()
         }
 
-        val step = circleSize / vehicles.size
+        val step =
+            circleSize / vehiclesList.size
 
-        return vehicles.indices.map {
-            it * step
-        }
+        return vehiclesList.indices
+            .map { it * step }
     }
 
     private fun mapVehiclesToSlots() {
         generateVehicleSlots()
-            .zip(vehicles)
+            .zip(vehiclesList)
             .forEach { (slot, vehicle) ->
                 _vehicleRing[slot] = vehicle
             }
     }
 
-    fun mapPackageToSlot(packageId: String): Int {
-        return abs(packageId.hashCode()) % circleSize
-    }
-
     private fun mapPackagesToSlots() {
-        packages.forEach { pkg ->
-            _packageSlots[pkg] = mapPackageToSlot(pkg.id)
+        packagesList.forEach { pkg ->
+            _packageSlots[pkg] =
+                abs(pkg.id.hashCode()) % circleSize
         }
     }
 
-    fun resolveVehicleClockwise(packageSlot: Int): Vehicle?{
+    private fun resolveVehicleClockwise(
+        packageSlot: Int
+    ): Vehicle? {
+
         if (_vehicleRing.isEmpty()) {
-            Logger.warning("Vehicle ring cannot be empty.")
+            Logger.warning(
+                "Vehicle ring cannot be empty."
+            )
             return null
         }
+
         return _vehicleRing[packageSlot]
             ?: findNextClockwiseVehicle(packageSlot)
     }
 
-    private fun findNextClockwiseVehicle(packageSlot: Int): Vehicle {
-        val sortedSlots = _vehicleRing.keys.sorted()
-        val nextSlot = sortedSlots.firstOrNull { it > packageSlot } ?: sortedSlots.first()
+    private fun findNextClockwiseVehicle(
+        packageSlot: Int
+    ): Vehicle {
+
+        val sortedSlots =
+            _vehicleRing.keys.sorted()
+
+        val nextSlot =
+            sortedSlots.firstOrNull {
+                it > packageSlot
+            } ?: sortedSlots.first()
+
         return _vehicleRing.getValue(nextSlot)
     }
 
     private fun distributeAllPackages() {
-        for (vehicle in _vehicleRing.values) {
+
+        _vehicleRing.values.forEach { vehicle ->
             _assignments[vehicle] = mutableListOf()
         }
 
-        for ((pkg, slot) in _packageSlots) {
-            val targetVehicle = resolveVehicleClockwise(slot)
-            if (targetVehicle != null) {
-                _assignments.getValue(targetVehicle).add(pkg)
-            }
+        _packageSlots.forEach { (pkg, slot) ->
+            resolveVehicleClockwise(slot)
+                ?.let { vehicle ->
+                    _assignments
+                        .getValue(vehicle)
+                        .add(pkg)
+                }
         }
     }
 
-    fun removeVehicle(slot: Int): Boolean {
-        val brokenVehicle =
-            _vehicleRing.remove(slot)
-                ?: return false
+    private fun reroutePackages(
+        brokenVehicle: Vehicle
+    ) {
 
-        reroutePackages(brokenVehicle)
-        return true
-    }
+        val orphanedPackages =
+            _assignments
+                .remove(brokenVehicle)
+                .orEmpty()
 
-    private fun reroutePackages(brokenVehicle: Vehicle) {
-        val orphanedPackages = _assignments[brokenVehicle] ?: mutableListOf()
-        _assignments.remove(brokenVehicle)
+        orphanedPackages.forEach { pkg ->
 
-        for (pkg in orphanedPackages) {
-            val slot = requireNotNull(_packageSlots[pkg])
-            val nextVehicle = resolveVehicleClockwise(slot)
+            val slot =
+                requireNotNull(_packageSlots[pkg])
+
+            val nextVehicle =
+                resolveVehicleClockwise(slot)
+
             if (nextVehicle != null) {
                 _assignments
-                    .getOrPut(nextVehicle) { mutableListOf() }
+                    .getOrPut(nextVehicle) {
+                        mutableListOf()
+                    }
                     .add(pkg)
             } else {
                 Logger.warning(
-                    "No vehicle available to reroute package ${pkg.id}."
+                    "No vehicle available to reroute " +
+                            "package ${pkg.id}."
                 )
-            }        }
-    }
-
-    fun captureSnapshot(): Map<Int, List<String>> =
-        _vehicleRing.keys
-            .sorted().associateWith { slot ->
-                _vehicleRing[slot]
-                    ?.let { vehicle ->
-                        _assignments[vehicle]
-                            ?.map(Package::id)
-                            ?.sorted()
-                    }
-                    ?: emptyList()
             }
+        }
+    }
 }

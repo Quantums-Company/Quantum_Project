@@ -1,7 +1,9 @@
 package org.bytebloom.domain.usecase
 
-import org.bytebloom.domain.model.DomainGraph
+import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.repository.PackageRepository
+import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.vehicleReshuffling.ConsistentHashingRing
 
 private const val MIN_HUB_VEHICLES = 2
@@ -11,37 +13,62 @@ data class CargoRecoveryReport(
     val rescueVehicleByPackageId: Map<String, String>
 )
 
-class RecoverCargoAfterVehicleFailureUseCase(
-    private val graph: DomainGraph
-) {
+class RecoverCargoAfterVehicleFailureUseCase {
 
-    operator fun invoke(failedVehicleId: String): CargoRecoveryReport? =
-        graph.vehicles
-            .firstOrNull { it.id.equals(failedVehicleId, ignoreCase = true) }
-            ?.let(::recover)
+    operator fun invoke(
+        failedVehicle: Vehicle
+    ): CargoRecoveryReport? {
 
-    private fun recover(failed: Vehicle): CargoRecoveryReport? {
-        val hubId = failed.currentWarehouse.id
-        val hubVehicles = graph.vehicles.filter { it.currentWarehouse.id == hubId }
-        val hubPackages = graph.packages.filter { it.originWarehouse.id == hubId }
-        if (hubVehicles.size < MIN_HUB_VEHICLES || hubPackages.isEmpty()) return null
+        val warehouse = failedVehicle.currentWarehouse
+        val vehicles = warehouse.stationedVehicles
+        val packages = warehouse.cargoQueue
 
-        val ring = ConsistentHashingRing(hubPackages, hubVehicles)
-        val slot = ring.vehicleRing.entries
-            .firstOrNull { it.value.id.equals(failed.id, ignoreCase = true) }
-            ?.key
-        val orphanedIds = ring.assignments[failed].orEmpty().map { it.id }
-
-        return slot?.let {
-            ring.removeVehicle(it)
-            CargoRecoveryReport(
-                failedVehicleId = failed.id,
-                rescueVehicleByPackageId = orphanedIds.associateWith { packageId ->
-                    ring.assignments.entries
-                        .first { (_, cargo) -> cargo.any { it.id == packageId } }
-                        .key.id
-                }
-            )
+        if (!canRecoverCargo(vehicles, packages)) {
+            return null
         }
+
+        return redistributeCargo(
+            failedVehicle = failedVehicle,
+            vehicles = vehicles,
+            packages = packages
+        )
+    }
+
+    private fun canRecoverCargo(
+        vehicles: List<Vehicle>,
+        packages: List<Package>
+    ): Boolean =
+        vehicles.size >= MIN_HUB_VEHICLES &&
+                packages.isNotEmpty()
+
+    private fun redistributeCargo(
+        failedVehicle: Vehicle,
+        vehicles: List<Vehicle>,
+        packages: List<Package>
+    ): CargoRecoveryReport? {
+
+        val ring = ConsistentHashingRing(
+            packages = packages,
+            vehicles = vehicles
+        )
+
+        val failedSlot =
+            ring.findSlotForVehicle(failedVehicle.id)
+                ?: return null
+
+        val orphanedPackages =
+            ring.getAssignedPackages(failedVehicle)
+
+        ring.removeVehicle(failedSlot)
+
+        val assignments =
+            orphanedPackages.associate { pkg ->
+                pkg.id to ring.findVehicleForPackage(pkg.id).id
+            }
+
+        return CargoRecoveryReport(
+            failedVehicleId = failedVehicle.id,
+            rescueVehicleByPackageId = assignments
+        )
     }
 }
