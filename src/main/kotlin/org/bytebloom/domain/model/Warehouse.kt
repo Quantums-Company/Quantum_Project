@@ -21,13 +21,12 @@ class Warehouse(
     val stationedVehicles: List<Vehicle>
         get() = _stationedVehicles
 
-    fun sortCargoByWeight() {
-        quickSortCargoByWeight(_cargoQueue)
-    }
-
     fun addPackage(pkg: Package) {
         _cargoQueue.add(pkg)
     }
+
+    fun removePackage(pkg: Package): Boolean =
+        _cargoQueue.remove(pkg)
 
     fun addRoute(route: Route) {
         _outgoingRoutes.add(route)
@@ -37,8 +36,21 @@ class Warehouse(
         _stationedVehicles.add(vehicle)
     }
 
+    fun removeVehicle(vehicle: Vehicle): Boolean =
+        _stationedVehicles.remove(vehicle)
+
+    fun sortCargoByWeight() {
+        quickSortCargoByWeight(_cargoQueue)
+    }
+
     override fun toString(): String {
-        return "Warehouse(id='$id', name=$name, regionalZone=$regionalZone, longitude:$longitude, latitude=$latitude)"
+        return "Warehouse(" +
+                "id='$id', " +
+                "name=$name, " +
+                "regionalZone=$regionalZone, " +
+                "longitude=$longitude, " +
+                "latitude=$latitude" +
+                ")"
     }
 
     override fun hashCode(): Int {
@@ -49,9 +61,9 @@ class Warehouse(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-
         if (other !is Warehouse) return false
 
-        return id == other.id && name == other.name
+        return id == other.id &&
+                name == other.name
     }
 }

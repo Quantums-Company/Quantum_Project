@@ -12,22 +12,21 @@ class DispatchVehicleUseCase {
         warehouse: Warehouse
     ): Boolean {
 
-        if (!canDispatch(pkg, vehicle, warehouse)) {
+        if (pkg !in warehouse.cargoQueue) {
             return false
         }
 
-        warehouse.cargoQueue.remove(pkg)
-        warehouse.stationedVehicles.remove(vehicle)
+        if (vehicle !in warehouse.stationedVehicles) {
+            return false
+        }
+
+        if (pkg.weight > vehicle.maxCapacityKg) {
+            return false
+        }
+
+        warehouse.removePackage(pkg)
+        warehouse.removeVehicle(vehicle)
 
         return true
     }
-
-    private fun canDispatch(
-        pkg: Package,
-        vehicle: Vehicle,
-        warehouse: Warehouse
-    ): Boolean =
-        pkg in warehouse.cargoQueue &&
-                vehicle in warehouse.stationedVehicles &&
-                pkg.weight <= vehicle.maxCapacityKg
 }
