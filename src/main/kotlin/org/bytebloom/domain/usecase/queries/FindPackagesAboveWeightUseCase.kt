@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase
+package org.bytebloom.domain.usecase.queries
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository

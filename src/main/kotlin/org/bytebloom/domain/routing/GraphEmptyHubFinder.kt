@@ -1,5 +1,6 @@
 package org.bytebloom.domain.routing
 
+import org.bytebloom.domain.model.DomainGraph
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository

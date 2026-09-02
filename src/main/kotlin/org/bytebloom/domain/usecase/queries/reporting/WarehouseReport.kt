@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase
+package org.bytebloom.domain.usecase.queries.reporting
 
 data class WarehouseReport(
     val warehouseId: String,

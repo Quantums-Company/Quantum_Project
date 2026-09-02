@@ -2,6 +2,7 @@ package org.bytebloom.domain.vehicleReshuffling
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.usecase.queries.planing.CargoRecoveryPlan
 import kotlin.math.abs
 import  org.bytebloom.util.Logger
 
@@ -22,8 +23,9 @@ class ConsistentHashingRing(
         )
 
     private val _vehicleRing = mutableMapOf<Int, Vehicle>()
+
     val vehicleRing: Map<Int, Vehicle>
-        get() = _vehicleRing
+        get() = _vehicleRing.toMap()
 
     private val _packageSlots = mutableMapOf<Package, Int>()
 
@@ -31,7 +33,9 @@ class ConsistentHashingRing(
         mutableMapOf<Vehicle, MutableList<Package>>()
 
     val assignments: Map<Vehicle, List<Package>>
-        get() = _assignments
+        get() = _assignments.mapValues { (_, packages) ->
+            packages.toList()
+        }
 
     init {
         mapVehiclesToSlots()
@@ -41,22 +45,26 @@ class ConsistentHashingRing(
 
     fun findSlotForVehicle(vehicleId: String): Int? =
         _vehicleRing.entries
-            .firstOrNull {
-                it.value.id.equals(vehicleId, ignoreCase = true)
+            .firstOrNull { (_, vehicle) ->
+                vehicle.id.equals(vehicleId, ignoreCase = true)
             }
             ?.key
 
-    fun getAssignedPackages(vehicle: Vehicle): List<Package> =
-        _assignments[vehicle].orEmpty()
+    fun getAssignedPackages(
+        vehicle: Vehicle
+    ): List<Package> =
+        _assignments[vehicle].orEmpty().toList()
 
-    fun findVehicleForPackage(packageId: String): Vehicle =
+    fun findVehicleForPackage(
+        packageId: String
+    ): Vehicle? =
         _assignments.entries
-            .first { (_, packages) ->
+            .firstOrNull { (_, packages) ->
                 packages.any {
                     it.id.equals(packageId, ignoreCase = true)
                 }
             }
-            .key
+            ?.key
 
     fun removeVehicle(slot: Int): Boolean {
         val removedVehicle =
@@ -66,6 +74,54 @@ class ConsistentHashingRing(
         reroutePackages(removedVehicle)
 
         return true
+    }
+
+    fun createRecoveryPlan(
+        failedVehicle: Vehicle
+    ): CargoRecoveryPlan? {
+
+        val failedSlot =
+            findSlotForVehicle(failedVehicle.id)
+                ?: run {
+                    Logger.warning(
+                        "Failed vehicle '${failedVehicle.id}' " +
+                                "does not exist in the hashing ring."
+                    )
+                    return null
+                }
+
+        val affectedPackages =
+            getAssignedPackages(failedVehicle)
+
+        val healthyVehicles =
+            _vehicleRing.values.filterNot {
+                it.id.equals(
+                    failedVehicle.id,
+                    ignoreCase = true
+                )
+            }
+
+        if (healthyVehicles.isEmpty()) {
+            Logger.warning(
+                "No healthy vehicle is available to recover " +
+                        "cargo from vehicle '${failedVehicle.id}'."
+            )
+            return null
+        }
+
+        removeVehicle(failedSlot)
+
+        val assignments =
+            affectedPackages.mapNotNull { pkg ->
+                findVehicleForPackage(pkg.id)?.let { vehicle ->
+                    pkg.id to vehicle.id
+                }
+            }.toMap()
+
+        return CargoRecoveryPlan(
+            failedVehicleId = failedVehicle.id,
+            rescueVehicleByPackageId = assignments
+        )
     }
 
     private fun generateVehicleSlots(): List<Int> {
@@ -78,11 +134,10 @@ class ConsistentHashingRing(
             return emptyList()
         }
 
-        val step =
-            circleSize / vehiclesList.size
+        val step = circleSize / vehiclesList.size
 
         return vehiclesList.indices
-            .map { it * step }
+            .map { index -> index * step }
     }
 
     private fun mapVehiclesToSlots() {
@@ -94,6 +149,7 @@ class ConsistentHashingRing(
     }
 
     private fun mapPackagesToSlots() {
+
         packagesList.forEach { pkg ->
             _packageSlots[pkg] =
                 abs(pkg.id.hashCode()) % circleSize
@@ -137,6 +193,7 @@ class ConsistentHashingRing(
         }
 
         _packageSlots.forEach { (pkg, slot) ->
+
             resolveVehicleClockwise(slot)
                 ?.let { vehicle ->
                     _assignments
@@ -155,26 +212,38 @@ class ConsistentHashingRing(
                 .remove(brokenVehicle)
                 .orEmpty()
 
+        if (orphanedPackages.isEmpty()) {
+            return
+        }
+
         orphanedPackages.forEach { pkg ->
 
-            val slot =
-                requireNotNull(_packageSlots[pkg])
+            val packageSlot =
+                _packageSlots[pkg]
+
+            if (packageSlot == null) {
+                Logger.warning(
+                    "No hash slot found for package '${pkg.id}'."
+                )
+                return@forEach
+            }
 
             val nextVehicle =
-                resolveVehicleClockwise(slot)
+                resolveVehicleClockwise(packageSlot)
 
-            if (nextVehicle != null) {
-                _assignments
-                    .getOrPut(nextVehicle) {
-                        mutableListOf()
-                    }
-                    .add(pkg)
-            } else {
+            if (nextVehicle == null) {
                 Logger.warning(
                     "No vehicle available to reroute " +
-                            "package ${pkg.id}."
+                            "package '${pkg.id}'."
                 )
+                return@forEach
             }
+
+            _assignments
+                .getOrPut(nextVehicle) {
+                    mutableListOf()
+                }
+                .add(pkg)
         }
     }
 }

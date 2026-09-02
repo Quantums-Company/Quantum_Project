@@ -1,10 +1,10 @@
-package org.bytebloom.domain.usecase
+package org.bytebloom.domain.usecase.queries
 
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 
-class FindBestVehicleByCostCapacityUseCase(
+class FindCheapestSuitableVehicleUseCase(
     private val vehicleRepository: VehicleRepository
 ) {
 
