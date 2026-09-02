@@ -43,6 +43,14 @@ class Warehouse(
         quickSortCargoByWeight(_cargoQueue)
     }
 
+    fun restorePackage(pkg: Package, index: Int) {
+        _cargoQueue.add(index, pkg)
+    }
+
+    fun restoreVehicle(vehicle: Vehicle, index: Int) {
+        _stationedVehicles.add(index, vehicle)
+    }
+
     override fun toString(): String {
         return "Warehouse(" +
                 "id='$id', " +
