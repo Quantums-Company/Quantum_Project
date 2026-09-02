@@ -18,11 +18,20 @@ class DispatchVehicleCommand (
     override fun execute() {
         val packageIndex = warehouse.cargoQueue.indexOf(pkg)
         val vehicleIndex = warehouse.stationedVehicles.indexOf(vehicle)
-        if (packageIndex == -1 || vehicleIndex == -1) return
+
+        if (packageIndex == -1) throw IllegalStateException("Package not found in warehouse")
+        if (vehicleIndex == -1) throw IllegalStateException("Vehicle not stationed here")
+        if (!vehicle.available) throw IllegalStateException("Vehicle is not available")
+        if (vehicle.cargo.sumOf { it.weight } + pkg.weight > vehicle.maxCapacityKg) {
+            throw IllegalStateException("Exceeds vehicle capacity")
+        }
 
         previousState = DispatchState(
             packageIndex = packageIndex,
-            vehicleIndex = vehicleIndex
+            vehicleIndex = vehicleIndex,
+            previousWarehouse = vehicle.currentWarehouse,
+            previousCargo = vehicle.cargo,
+            wasAvailable = vehicle.available
         )
         wasExecuted = dispatchVehicleUseCase(pkg, vehicle, warehouse)
     }
@@ -40,6 +49,9 @@ class DispatchVehicleCommand (
 
     private data class DispatchState(
         val packageIndex: Int,
-        val vehicleIndex: Int
+        val vehicleIndex: Int,
+        val previousWarehouse: Warehouse?,
+        val previousCargo: List<Package>,
+        val wasAvailable: Boolean
     )
 }
