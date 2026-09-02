@@ -2,9 +2,15 @@ package org.bytebloom.domain.commandPattern
 
 class CommandInvoker {
     private val history = ArrayDeque<Command>()
-    fun execute(command: Command) {
-        command.execute()
-        history.addLast(command)
+    fun execute(command: Command):Boolean {
+        return try {
+            command.execute()
+            history.addLast(command)
+            true
+        }
+        catch (e: Exception){
+            throw e
+        }
     }
     fun undo(): Boolean {
         if (history.isEmpty()) {
@@ -22,4 +28,3 @@ class CommandInvoker {
     }
 
     }
-
