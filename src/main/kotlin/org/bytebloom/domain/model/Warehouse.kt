@@ -43,6 +43,10 @@ class Warehouse(
         quickSortCargoByWeight(_cargoQueue)
     }
 
+    fun containsPackage(pkg: Package): Boolean = pkg in _cargoQueue
+
+    fun hasVehicle(vehicle: Vehicle): Boolean = vehicle in _stationedVehicles
+
     override fun toString(): String {
         return "Warehouse(" +
                 "id='$id', " +
