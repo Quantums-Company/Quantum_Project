@@ -1,6 +1,5 @@
 package org.bytebloom.domain.usecase.queries.planing
 
-import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.vehicleReshuffling.ConsistentHashingRing
 

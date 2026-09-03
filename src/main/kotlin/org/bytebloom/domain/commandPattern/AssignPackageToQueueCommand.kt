@@ -2,27 +2,31 @@ package org.bytebloom.domain.commandPattern
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.usecase.required.AssignPackageToCargoQueueUseCase
+import org.bytebloom.domain.usecase.commands.AssignPackageToCargoQueueUseCase
+import org.bytebloom.util.Logger
 
 class AssignPackageToQueueCommand(
     private val warehouse: Warehouse,
-    private val packageData: Package,
+    private val packageItem: Package,
     private val assignPackageToQueue: AssignPackageToCargoQueueUseCase
 ) : Command {
 
-    private var executed = false
+    override fun execute(): Boolean {
+        if (!assignPackageToQueue(warehouse, packageItem)){
+            Logger.error("Failed to assign package '${packageItem.id}' " +
+                        "to warehouse '${warehouse.id}'.")
+            return false
 
-    override fun execute() {
-        if (executed) return
-
-        assignPackageToQueue(warehouse, packageData)
-        executed = true
+        }
+        return true
     }
 
     override fun undo() {
-        if (!executed) return
-
-        warehouse.removePackage(packageData)
-        executed = false
+        if (!warehouse.removePackage(packageItem)) {
+            Logger.error(
+                "Cannot undo package assignment: " +
+                        "package '${packageItem.id}' is not in the cargo queue."
+            )
+        }
     }
 }

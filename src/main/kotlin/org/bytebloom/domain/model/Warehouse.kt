@@ -21,23 +21,25 @@ class Warehouse(
     val stationedVehicles: List<Vehicle>
         get() = _stationedVehicles
 
-    fun addPackage(pkg: Package) {
+    fun addPackage(pkg: Package): Boolean =
         _cargoQueue.add(pkg)
-    }
 
     fun removePackage(pkg: Package): Boolean =
         _cargoQueue.remove(pkg)
 
-    fun addRoute(route: Route) {
+    fun addRoute(route: Route) : Boolean =
         _outgoingRoutes.add(route)
-    }
 
-    fun addVehicle(vehicle: Vehicle) {
+
+    fun addVehicle(vehicle: Vehicle) : Boolean =
         _stationedVehicles.add(vehicle)
-    }
 
     fun removeVehicle(vehicle: Vehicle): Boolean =
         _stationedVehicles.remove(vehicle)
+
+    fun containsPackage(pkg: Package): Boolean = pkg in _cargoQueue
+
+    fun hasVehicle(vehicle: Vehicle): Boolean = vehicle in _stationedVehicles
 
     fun sortCargoByWeight() {
         quickSortCargoByWeight(_cargoQueue)

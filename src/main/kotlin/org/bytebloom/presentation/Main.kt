@@ -65,6 +65,5 @@ fun main() {
     val packageRepo: PackageRepository = CsvPackageRepository(warehousesById)
     val routeRepo: RouteRepository = CsvRouteRepository(warehousesById)
     val vehicleRepo: VehicleRepository = CsvVehicleRepository(warehousesById)
-
 }
 
