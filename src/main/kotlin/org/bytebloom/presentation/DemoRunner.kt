@@ -300,10 +300,10 @@ class DemoRunner(
         printSection("ROUTING")
 
         val origin =
-            warehouses.getOrNull(0)
+            warehouses.getOrNull(10)
 
         val destination =
-            warehouses.getOrNull(1)
+            warehouses.getOrNull(20)
 
         if (origin == null || destination == null) {
             printResult(
