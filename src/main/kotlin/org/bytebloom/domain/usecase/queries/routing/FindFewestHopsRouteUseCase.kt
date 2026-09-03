@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase
+package org.bytebloom.domain.usecase.queries.routing
 
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.common.RouteFinder

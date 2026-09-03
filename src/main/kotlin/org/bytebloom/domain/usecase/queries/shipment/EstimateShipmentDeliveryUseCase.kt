@@ -33,20 +33,27 @@ class EstimateShipmentDeliveryUseCase(
         path: List<Warehouse>
     ): Double? {
 
-        val routeByCorridor = routeRepository.getAll().associateBy {
-            it.originWarehouse.id to it.destinationWarehouse.id
+        val routeByCorridor =
+            routeRepository
+                .getAll()
+                .associateBy {
+                    it.originWarehouse.id to
+                            it.destinationWarehouse.id
+                }
+
+        val delays =
+            path
+                .zipWithNext()
+                .map { (origin, destination) ->
+                    routeByCorridor[
+                        origin.id to destination.id
+                    ]?.typicalDelayMin
+                }
+
+        return if (delays.any { it == null }) {
+            null
+        } else {
+            delays.filterNotNull().sum().toDouble()
         }
-
-        var totalDelay = 0.0
-
-        for ((origin, destination) in path.zipWithNext()) {
-            val route = routeByCorridor[
-                origin.id to destination.id
-            ] ?: return null
-
-            totalDelay += route.typicalDelayMin
-        }
-
-        return totalDelay
     }
 }

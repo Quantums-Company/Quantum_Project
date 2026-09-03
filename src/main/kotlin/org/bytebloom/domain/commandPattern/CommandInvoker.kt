@@ -5,9 +5,12 @@ class CommandInvoker {
     private val history = ArrayDeque<Command>()
 
     fun execute(command: Command): Boolean {
-        command.execute()
-        history.addLast(command)
-        return true
+        if(command.execute()){
+            history.addLast(command)
+            return true
+        }
+
+        return false
     }
 
     fun undo(): Boolean {

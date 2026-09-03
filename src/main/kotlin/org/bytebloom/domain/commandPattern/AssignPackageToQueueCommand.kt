@@ -21,12 +21,14 @@ class AssignPackageToQueueCommand(
         return true
     }
 
-    override fun undo() {
+    override fun undo(): Boolean {
         if (!warehouse.removePackage(packageItem)) {
             Logger.error(
                 "Cannot undo package assignment: " +
                         "package '${packageItem.id}' is not in the cargo queue."
             )
+            return false
         }
+        return true
     }
 }

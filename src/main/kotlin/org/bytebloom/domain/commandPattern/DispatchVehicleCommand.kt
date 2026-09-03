@@ -20,7 +20,7 @@ class DispatchVehicleCommand(
         return true
     }
 
-    override fun undo() {
+    override fun undo():Boolean {
         packages.forEach { packageItem ->
             warehouse.addPackage(packageItem)
         }
@@ -32,5 +32,6 @@ class DispatchVehicleCommand(
                     "${packages.size} package(s) restored to " +
                     "warehouse '${warehouse.id}'."
         )
+        return true
     }
 }
