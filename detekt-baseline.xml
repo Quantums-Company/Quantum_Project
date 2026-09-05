@@ -2,31 +2,15 @@
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
   <CurrentIssues>
-    <ID>ClassNaming:DataHolder.kt$packageRaw</ID>
-    <ID>ClassNaming:DataHolder.kt$routeRaw</ID>
-    <ID>ClassNaming:DataHolder.kt$vehicleRaw</ID>
-    <ID>ClassNaming:DataHolder.kt$warehouseRaw</ID>
-    <ID>LongMethod:CsvDataLoader.kt$private fun parsePackage(line: String, lineNumber: Int): packageRaw?</ID>
-    <ID>LongMethod:CsvDataLoader.kt$private fun parseRoute( line: String, lineNumber: Int ): routeRaw?</ID>
-    <ID>LongMethod:CsvDataLoader.kt$private fun parseVehicle( line: String, lineNumber: Int ): vehicleRaw?</ID>
-    <ID>LongMethod:CsvDataLoader.kt$private fun parseWarehouse( line: String, lineNumber: Int ): warehouseRaw?</ID>
-    <ID>MagicNumber:CsvDataLoader.kt$3</ID>
-    <ID>MagicNumber:CsvDataLoader.kt$4</ID>
-    <ID>MagicNumber:Main.kt$3</ID>
-    <ID>MagicNumber:Sorting.kt$3</ID>
-    <ID>NewLineAtEndOfFile:CsvDataLoader.kt$org.bytebloom.data.csv.CsvDataLoader.kt</ID>
-    <ID>NewLineAtEndOfFile:DataHolder.kt$org.bytebloom.data.raw.DataHolder.kt</ID>
-    <ID>NewLineAtEndOfFile:DomainGraphBuilder.kt$org.bytebloom.domain.printing.DomainGraphBuilder.kt</ID>
-    <ID>NewLineAtEndOfFile:Main.kt$org.bytebloom.presentation.Main.kt</ID>
-    <ID>NewLineAtEndOfFile:Models.kt$org.bytebloom.domain.model.Models.kt</ID>
-    <ID>NewLineAtEndOfFile:PricingStrategies.kt$org.bytebloom.domain.printing.PricingStrategies.kt</ID>
-    <ID>NewLineAtEndOfFile:Printing.kt$org.bytebloom.domain.printing.Printing.kt</ID>
-    <ID>NewLineAtEndOfFile:Sorting.kt$org.bytebloom.domain.printing.Sorting.kt</ID>
-    <ID>ReturnCount:CsvDataLoader.kt$private fun parsePackage(line: String, lineNumber: Int): packageRaw?</ID>
-    <ID>ReturnCount:CsvDataLoader.kt$private fun parseRoute( line: String, lineNumber: Int ): routeRaw?</ID>
-    <ID>ReturnCount:CsvDataLoader.kt$private fun parseVehicle( line: String, lineNumber: Int ): vehicleRaw?</ID>
-    <ID>ReturnCount:CsvDataLoader.kt$private fun parseWarehouse( line: String, lineNumber: Int ): warehouseRaw?</ID>
-    <ID>TooManyFunctions:CsvDataLoader.kt$org.bytebloom.data.csv.CsvDataLoader.kt</ID>
-    <ID>UnusedPrivateMember:CsvDataLoader.kt$private fun parseWarehouse( line: String, lineNumber: Int ): warehouseRaw?</ID>
+    <ID>MagicNumber:BfsBenchmark.kt$BfsBenchmark$100.0</ID>
+    <ID>MagicNumber:BfsBenchmark.kt$BfsBenchmark$1_000_000.0</ID>
+    <ID>MagicNumber:DemoRunner.kt$DemoRunner$10</ID>
+    <ID>MagicNumber:DemoRunner.kt$DemoRunner$100</ID>
+    <ID>MagicNumber:DemoRunner.kt$DemoRunner$1000</ID>
+    <ID>MagicNumber:DemoRunner.kt$DemoRunner$72</ID>
+    <ID>MagicNumber:FragileStrategy.kt$FragileStrategy$0.5</ID>
+    <ID>MagicNumber:PackageTrackingIdGenerator.kt$PackageTrackingIdGenerator$6</ID>
+    <ID>MagicNumber:SelectionSort.kt$3</ID>
+    <ID>UnusedPrivateProperty:FindCargoRecoveryPlanUseCase.kt$private const val MIN_HUB_VEHICLES = 2</ID>
   </CurrentIssues>
 </SmellBaseline>

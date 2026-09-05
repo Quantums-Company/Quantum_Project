@@ -38,6 +38,10 @@ org.bytebloom.org.bytebloom.app.app/.externalNativeBuild/
 # IntelliJ IDEA specific
 .project/
 
+# JetBrains IDEs (.idea folder settings)
+.idea/gradle.xml
+.idea/misc.xml
+
 # JVM
 *.class
 *.war
