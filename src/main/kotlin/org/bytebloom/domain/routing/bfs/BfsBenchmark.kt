@@ -7,6 +7,11 @@ import org.bytebloom.util.Logger
 class BfsBenchmark(
     private val graph: WarehouseGraph) {
 
+    companion object {
+        private const val NANOS_PER_MILLISECOND = 1_000_000.0
+        private const val PERCENTAGE_MULTIPLIER = 100.0
+    }
+
     private data class RunResult(
         val label: String,
         val path: List<Warehouse>?,
@@ -64,7 +69,7 @@ class BfsBenchmark(
 
     private fun logRow(result: RunResult) {
         val pathLength = result.path?.size ?: 0
-        val elapsedMs = result.elapsedNanos / 1_000_000.0
+        val elapsedMs = result.elapsedNanos / NANOS_PER_MILLISECOND
 
         Logger.info(
             String.format(
@@ -83,7 +88,8 @@ class BfsBenchmark(
         }
 
         val reduction =
-            100.0 * (1.0 - bidirectional.evaluatedWarehouses.toDouble() / unidirectional.evaluatedWarehouses)
+            PERCENTAGE_MULTIPLIER *
+                    (1.0 - bidirectional.evaluatedWarehouses.toDouble() / unidirectional.evaluatedWarehouses)
 
         Logger.info(
             "Bidirectional BFS evaluated %.1f%% fewer warehouses than Unidirectional BFS."

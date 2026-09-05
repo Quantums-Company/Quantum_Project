@@ -3,11 +3,15 @@ package org.bytebloom.domain.sorting
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.data.raw.PackageRaw
 
+private const val PRIORITY_URGENT_VALUE = 3
+private const val PRIORITY_STANDARD_VALUE = 2
+private const val PRIORITY_LOW_VALUE = 1
+
 private fun getPriorityValue(priority: Priority): Int {
     return when (priority) {
-        Priority.URGENT -> 3
-        Priority.STANDARD -> 2
-        Priority.LOW -> 1
+        Priority.URGENT -> PRIORITY_URGENT_VALUE
+        Priority.STANDARD -> PRIORITY_STANDARD_VALUE
+        Priority.LOW -> PRIORITY_LOW_VALUE
     }
 }
 
