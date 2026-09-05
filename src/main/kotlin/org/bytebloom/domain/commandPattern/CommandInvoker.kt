@@ -70,6 +70,9 @@ class CommandInvoker {
     fun canRedo(): Boolean =
         redoStack.isNotEmpty()
 
+    fun undoAvailable(): Int = undoStack.size
+    fun redoAvailable(): Int = redoStack.size
+
     fun clearHistory() {
         undoStack.clear()
         redoStack.clear()
