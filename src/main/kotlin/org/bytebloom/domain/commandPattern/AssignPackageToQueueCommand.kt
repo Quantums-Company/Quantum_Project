@@ -11,24 +11,32 @@ class AssignPackageToQueueCommand(
     private val assignPackageToQueue: AssignPackageToCargoQueueUseCase
 ) : Command {
 
-    override fun execute(): Boolean {
-        if (!assignPackageToQueue(warehouse, packageItem)){
-            Logger.error("Failed to assign package '${packageItem.id}' " +
-                        "to warehouse '${warehouse.id}'.")
-            return false
-
+    override fun execute(): Boolean =
+        assignPackageToQueue(
+            warehouse,
+            packageItem
+        ).also { success ->
+            if (!success) {
+                Logger.error(
+                    "Failed to assign package '${packageItem.id}' " +
+                            "to warehouse '${warehouse.id}'."
+                )
+            }
         }
-        return true
-    }
 
     override fun undo(): Boolean {
-        if (!warehouse.removePackage(packageItem)) {
+
+        val removed =
+            warehouse.removePackage(packageItem)
+
+        if (!removed) {
             Logger.error(
                 "Cannot undo package assignment: " +
-                        "package '${packageItem.id}' is not in the cargo queue."
+                        "package '${packageItem.id}' " +
+                        "is not in warehouse '${warehouse.id}'."
             )
-            return false
         }
-        return true
+
+        return removed
     }
 }
