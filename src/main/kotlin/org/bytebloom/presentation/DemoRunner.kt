@@ -46,6 +46,12 @@ class DemoRunner(
     private val routeRepository: RouteRepository,
     private val vehicleRepository: VehicleRepository
 ) {
+    companion object {
+        private const val CONSOLE_WIDTH = 72
+        private const val TRACKING_ID_COUNT = 1000
+        private const val DISPLAYED_PAIRS_LIMIT = 10
+        private const val PERCENTAGE_MULTIPLIER = 100.0
+    }
 
     private val warehouses =
         warehouseRepository.getAll()
@@ -225,7 +231,7 @@ class DemoRunner(
         printResult(
             "Find Packages Above Weight",
             findPackagesAboveWeight(
-                minimumWeightKg = 100.0
+                minimumWeightKg = PERCENTAGE_MULTIPLIER
             ).formatPackages()
         )
 
@@ -631,7 +637,7 @@ class DemoRunner(
 
         val trackingIds =
             PackageTrackingIdGenerator()
-                .generate(1000)
+                .generate(TRACKING_ID_COUNT)
 
         val bst =
             BST<String>()
@@ -860,27 +866,27 @@ class DemoRunner(
     private fun printHeader() {
 
         println()
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
         println("                 QUANTUM LOGISTICS")
         println("              USE CASE DEMONSTRATION")
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
         println()
     }
 
     private fun printFooter() {
 
         println()
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
         println("                 DEMO COMPLETED")
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
     }
 
     private fun printSection(title: String) {
 
         println()
-        println("─".repeat(72))
+        println("─".repeat(CONSOLE_WIDTH))
         println(title)
-        println("─".repeat(72))
+        println("─".repeat(CONSOLE_WIDTH))
     }
 
     private fun printSubSection(title: String) {
@@ -927,7 +933,7 @@ class DemoRunner(
                 .filter { (_, pair) ->
                     pair.isFinite()
                 }
-                .take(10)
+                .take(DISPLAYED_PAIRS_LIMIT)
 
         return buildString {
             appendLine("Computed pairs: ${paths.values.sumOf { it.size }}")
@@ -1009,5 +1015,5 @@ class DemoRunner(
     private fun formatPercent(
         value: Double
     ): String =
-        "${"%.2f".format(value * 100)}%"
+        "${"%.2f".format(value * PERCENTAGE_MULTIPLIER)}%"
 }
