@@ -1,33 +1,13 @@
-package org.bytebloom.data.csv
+package org.bytebloom.data.local.csv.common
 
-import org.bytebloom.data.csv.parser.parsePackage
-import org.bytebloom.data.csv.parser.parseRoute
-import org.bytebloom.data.csv.parser.parseVehicle
-import org.bytebloom.data.csv.parser.parseWarehouse
-import org.bytebloom.data.raw.PackageRaw
-import org.bytebloom.data.raw.RouteRaw
-import org.bytebloom.data.raw.VehicleRaw
-import org.bytebloom.data.raw.WarehouseRaw
 import org.bytebloom.util.Logger
 import java.io.File
 import java.io.IOException
 
 const val DEFAULT_CSV_DIRECTORY = "src/resources"
 
-fun loadPackages(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<PackageRaw> =
-    loadCsv(csvDirectory, CsvTablesName.PACKAGE, ::parsePackage)
-
-fun loadVehicles(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<VehicleRaw> =
-    loadCsv(csvDirectory, CsvTablesName.FLEET, ::parseVehicle)
-
-fun loadRoutes(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<RouteRaw> =
-    loadCsv(csvDirectory, CsvTablesName.ROUTE, ::parseRoute)
-
-fun loadWarehouses(csvDirectory: String = DEFAULT_CSV_DIRECTORY): List<WarehouseRaw> =
-    loadCsv(csvDirectory, CsvTablesName.WAREHOUSE, ::parseWarehouse)
-
-private fun <T> loadCsv(
-    csvDirectory: String,
+fun <T> loadCsv(
+    csvDirectory: String = DEFAULT_CSV_DIRECTORY,
     fileName: String,
     parser: (String, Int) -> T?
 ): List<T> {
