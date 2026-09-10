@@ -3,8 +3,6 @@ package org.bytebloom.domain.usecase.queries.planing
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.vehicleReshuffling.ConsistentHashingRing
 
-private const val MIN_HUB_VEHICLES = 2
-
 class FindCargoRecoveryPlanUseCase {
 
     operator fun invoke(

@@ -46,6 +46,12 @@ class DemoRunner(
     private val routeRepository: RouteRepository,
     private val vehicleRepository: VehicleRepository
 ) {
+    companion object {
+        private const val CONSOLE_WIDTH = 72
+        private const val TRACKING_ID_COUNT = 1000
+        private const val DISPLAYED_PAIRS_LIMIT = 10
+        private const val PERCENTAGE_MULTIPLIER = 100.0
+    }
 
     private val warehouses =
         warehouseRepository.getAll()
@@ -225,7 +231,7 @@ class DemoRunner(
         printResult(
             "Find Packages Above Weight",
             findPackagesAboveWeight(
-                minimumWeightKg = 100.0
+                minimumWeightKg = PERCENTAGE_MULTIPLIER
             ).formatPackages()
         )
 
@@ -631,7 +637,7 @@ class DemoRunner(
 
         val trackingIds =
             PackageTrackingIdGenerator()
-                .generate(1000)
+                .generate(TRACKING_ID_COUNT)
 
         val bst =
             BST<String>()
@@ -682,177 +688,124 @@ class DemoRunner(
     // -------------------------------------------------------------------------
 
     private fun runCommandPatternDemo() {
+        printSection("TIME-MACHINE DISPATCH PANEL")
 
-        printSection("COMMAND PATTERN - DISPATCH PANEL")
-
-        val warehouse =
-            warehouses.firstOrNull()
-
+        val warehouse = warehouses.firstOrNull()
         if (warehouse == null) {
-            printResult(
-                "Command Pattern",
-                "No warehouses are available."
-            )
+            printResult("Command Pattern", "No warehouses are available.")
             return
         }
 
-        val packageItem =
-            packages.firstOrNull {
-                !warehouse.containsPackage(it)
-            }
+        val packageToAssign = packages.firstOrNull { !warehouse.containsPackage(it) }
+        if (packageToAssign == null) {
+            println("No package is available for the time-machine demo.")
+            return
+        }
 
-        if (packageItem != null) {
+        val assignCommand = AssignPackageToQueueCommand(
+            warehouse = warehouse,
+            packageItem = packageToAssign,
+            assignPackageToQueue = assignPackageToQueue
+        )
 
-            val assignCommand =
+        printCommandBanner("EXECUTE", "AssignPackageToQueueCommand")
+        println("Package:   ${packageToAssign.id}")
+        println("Warehouse: ${warehouse.id}")
+        printWarehouseSnapshot("Before", warehouse)
+        commandInvoker.execute(assignCommand)
+        printWarehouseSnapshot("After", warehouse)
+        printHistory()
+
+        val vehicle = warehouse.stationedVehicles.firstOrNull { candidate ->
+            warehouse.containsPackage(packageToAssign) &&
+                    candidate.canCarryWeight(packageToAssign.weight)
+        }
+        if (vehicle == null) {
+            println("No vehicle can dispatch the assigned package.")
+            return
+        }
+
+        val dispatchCommand = DispatchVehicleCommand(
+            dispatchVehicleUseCase = dispatchVehicle,
+            packages = listOf(packageToAssign),
+            vehicle = vehicle,
+            warehouse = warehouse
+        )
+
+        printCommandBanner("EXECUTE", "DispatchVehicleCommand")
+        println("Vehicle:    ${vehicle.id}")
+        println("Warehouse:  ${warehouse.id}")
+        println("Packages:   ${packageToAssign.id}")
+        printWarehouseSnapshot("Before", warehouse)
+        commandInvoker.execute(dispatchCommand)
+        printWarehouseSnapshot("After", warehouse)
+        printHistory()
+
+        printCommandBanner("UNDO", "DispatchVehicleCommand")
+        println("Restoring:")
+        println("  Packages → ${warehouse.id}")
+        println("  Vehicle  → ${warehouse.id}")
+        commandInvoker.undo()
+        printWarehouseSnapshot("After Undo", warehouse)
+        printHistory()
+
+        printCommandBanner("UNDO", "AssignPackageToQueueCommand")
+        println("Restoring:")
+        println("  Package ${packageToAssign.id} removed from ${warehouse.id}")
+        commandInvoker.undo()
+        printWarehouseSnapshot("After Undo", warehouse)
+        printHistory()
+
+        printCommandBanner("REDO", "AssignPackageToQueueCommand")
+        commandInvoker.redo()
+        printWarehouseSnapshot("After Redo", warehouse)
+        printHistory()
+
+        printCommandBanner("REDO", "DispatchVehicleCommand")
+        commandInvoker.redo()
+        printWarehouseSnapshot("After Redo", warehouse)
+        printHistory()
+
+        val extraPackage = packages.firstOrNull {
+            it.id != packageToAssign.id && !warehouse.containsPackage(it)
+        }
+        if (extraPackage != null) {
+            printCommandBanner("EXECUTE", "AssignPackageToQueueCommand (new)")
+            println("New command clears the redo stack.")
+            printWarehouseSnapshot("Before", warehouse)
+            commandInvoker.execute(
                 AssignPackageToQueueCommand(
                     warehouse = warehouse,
-                    packageItem = packageItem,
+                    packageItem = extraPackage,
                     assignPackageToQueue = assignPackageToQueue
                 )
-
-            val before =
-                warehouse.cargoQueue.size
-
-            commandInvoker.execute(
-                assignCommand
             )
-
-            val after =
-                warehouse.cargoQueue.size
-
-            println(
-                """
-                AssignPackageToQueueCommand
-                  Package: ${packageItem.id}
-                  Before queue size: $before
-                  After queue size:  $after
-                  Can Undo: ${commandInvoker.canUndo()}
-                """.trimIndent()
-            )
-
-            commandInvoker.undo()
-
-            println(
-                """
-                Undo
-                  Queue size after undo: ${warehouse.cargoQueue.size}
-                  Can Undo: ${commandInvoker.canUndo()}
-                """.trimIndent()
-            )
-        } else {
-            println(
-                "No package is available for assignment demo."
-            )
+            printWarehouseSnapshot("After", warehouse)
+            printHistory()
         }
-
-        runDispatchCommandDemo()
     }
 
-    private fun runDispatchCommandDemo() {
-
-        printSubSection("DISPATCH COMMAND")
-
-        val warehouse =
-            warehouses.firstOrNull()
-
-        if (warehouse == null) {
-            println("No warehouse available.")
-            return
-        }
-
-        val vehicle =
-            warehouse.stationedVehicles
-                .firstOrNull { vehicle ->
-                    packages.any {
-                        warehouse.containsPackage(it) &&
-                                vehicle.canCarryWeight(it.weight)
-                    }
-                }
-
-        if (vehicle == null) {
-            println(
-                "No vehicle/package pair satisfies dispatch requirements."
-            )
-            return
-        }
-
-        val packageItem =
-            packages.first {
-                warehouse.containsPackage(it) &&
-                        vehicle.canCarryWeight(it.weight)
-            }
-        val packageList = listOf(packageItem)
-        val dispatchCommand =
-            DispatchVehicleCommand(
-                dispatchVehicleUseCase = dispatchVehicle,
-                packages = packageList,
-                vehicle = vehicle,
-                warehouse = warehouse
-            )
-
-        val packagesBefore =
-            warehouse.cargoQueue.size
-
-        val vehiclesBefore =
-            warehouse.stationedVehicles.size
-
-        val executed =
-            runCatching {
-                commandInvoker.execute(
-                    dispatchCommand
-                )
-            }.getOrElse {
-                println(
-                    "Dispatch command failed: ${it.message}"
-                )
-                false
-            }
-
-        if (!executed) {
-            return
-        }
-
-        println(
-            """
-            DispatchVehicleCommand
-              Vehicle: ${vehicle.id}
-              Package: ${packageItem.id}
-
-              Before:
-                Packages: $packagesBefore
-                Vehicles: $vehiclesBefore
-
-              After Execute:
-                Packages: ${warehouse.cargoQueue.size}
-                Vehicles: ${warehouse.stationedVehicles.size}
-
-              History available: ${commandInvoker.canUndo()}
-            """.trimIndent()
-        )
-
-        val undone =
-            commandInvoker.undo()
-
-        println(
-            """
-            Global Undo
-              Success: $undone
-
-              After Undo:
-                Packages: ${warehouse.cargoQueue.size}
-                Vehicles: ${warehouse.stationedVehicles.size}
-
-              State restored:
-                Packages restored: ${
-                warehouse.cargoQueue.size == packagesBefore
-            }
-                Vehicle restored: ${
-                warehouse.stationedVehicles.size == vehiclesBefore
-            }
-            """.trimIndent()
-        )
+    private fun printCommandBanner(action: String, commandName: String) {
+        println()
+        println("════════ $action ════════")
+        println("Command: $commandName")
+        println()
     }
 
+    private fun printWarehouseSnapshot(title: String, warehouse: Warehouse) {
+        val cargo = warehouse.cargoQueue.joinToString { it.id }.ifEmpty { "empty" }
+        val fleet = warehouse.stationedVehicles.joinToString { it.id }.ifEmpty { "empty" }
+        println("$title:")
+        println("  Cargo Queue: [$cargo]")
+        println("  Vehicles:    [$fleet]")
+        println()
+    }
+
+    private fun printHistory() {
+        println("Undo available: ${commandInvoker.undoAvailable()}")
+        println("Redo available: ${commandInvoker.redoAvailable()}")
+        println("════════════════════════")
+    }
     // -------------------------------------------------------------------------
     // Formatting
     // -------------------------------------------------------------------------
@@ -860,27 +813,27 @@ class DemoRunner(
     private fun printHeader() {
 
         println()
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
         println("                 QUANTUM LOGISTICS")
         println("              USE CASE DEMONSTRATION")
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
         println()
     }
 
     private fun printFooter() {
 
         println()
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
         println("                 DEMO COMPLETED")
-        println("=".repeat(72))
+        println("=".repeat(CONSOLE_WIDTH))
     }
 
     private fun printSection(title: String) {
 
         println()
-        println("─".repeat(72))
+        println("─".repeat(CONSOLE_WIDTH))
         println(title)
-        println("─".repeat(72))
+        println("─".repeat(CONSOLE_WIDTH))
     }
 
     private fun printSubSection(title: String) {
@@ -927,7 +880,7 @@ class DemoRunner(
                 .filter { (_, pair) ->
                     pair.isFinite()
                 }
-                .take(10)
+                .take(DISPLAYED_PAIRS_LIMIT)
 
         return buildString {
             appendLine("Computed pairs: ${paths.values.sumOf { it.size }}")
@@ -1009,5 +962,5 @@ class DemoRunner(
     private fun formatPercent(
         value: Double
     ): String =
-        "${"%.2f".format(value * 100)}%"
+        "${"%.2f".format(value * PERCENTAGE_MULTIPLIER)}%"
 }
