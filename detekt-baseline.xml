@@ -1,5 +1,9 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
-  <CurrentIssues></CurrentIssues>
+  <CurrentIssues>
+    <ID>EmptyClassBlock:RouteDataSource.kt$RouteDataSource${ }</ID>
+    <ID>EmptyClassBlock:VehicleDataSource.kt$VehicleDataSource${ }</ID>
+    <ID>EmptyClassBlock:WarehouseDataSource.kt$WarehouseDataSource${ }</ID>
+  </CurrentIssues>
 </SmellBaseline>

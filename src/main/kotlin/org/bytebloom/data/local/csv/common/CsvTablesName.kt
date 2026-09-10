@@ -1,4 +1,4 @@
-package org.bytebloom.data.csv
+package org.bytebloom.data.local.csv.common
 
 object CsvTablesName {
     const val PACKAGE = "packages.csv"

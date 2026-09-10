@@ -8,10 +8,14 @@ import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
+import org.bytebloom.data.local.csv.CsvPackageDataSource
+import org.bytebloom.data.local.csv.CsvRouteDataSource
+import org.bytebloom.data.local.csv.CsvVehicleDataSource
+import org.bytebloom.data.local.csv.CsvWarehouseDataSource
 
 fun main() {
     val warehouseRepo: WarehouseRepository =
-        CsvWarehouseRepository()
+        CsvWarehouseRepository(CsvWarehouseDataSource())
 
     val warehousesById =
         warehouseRepo
@@ -19,13 +23,13 @@ fun main() {
             .associateBy { it.id }
 
     val packageRepo: PackageRepository =
-        CsvPackageRepository(warehousesById)
+        CsvPackageRepository(warehousesById, CsvPackageDataSource())
 
     val routeRepo: RouteRepository =
-        CsvRouteRepository(warehousesById)
+        CsvRouteRepository(warehousesById, CsvRouteDataSource())
 
     val vehicleRepo: VehicleRepository =
-        CsvVehicleRepository(warehousesById)
+        CsvVehicleRepository(warehousesById, CsvVehicleDataSource())
 
     DemoRunner(
         warehouseRepository = warehouseRepo,
