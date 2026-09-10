@@ -54,3 +54,18 @@ hs_err_pid*
 # Docker
 *.log
 !docker-compose.yml
+
+# Android
+app/build/
+app/.cxx/
+app/.externalNativeBuild/
+
+/frontend/admin-desktop-app/schemas/edu.bytebloom.platform.data.local.AdminDatabase/1.json
+/frontend/mentee-app/schemas/edu.bytebloom.platform.data.local.AppDatabase/1.json
+/frontend/mentor-desktop-app/schemas/edu.bytebloom.platform.data.local.MentorDatabase/1.json
+/frontend/mentee-app/schemas/edu.bytebloom.platform.data.local.AppDatabase/2.json
+/frontend/mentee-app/schemas/edu.bytebloom.platform.data.local.AppDatabase/3.json
+/frontend/mentee-app/release/mentee-app-release.apk
+/frontend/mentee-app/release/baselineProfiles/0/mentee-app-release.dm
+/frontend/mentee-app/release/baselineProfiles/1/mentee-app-release.dm
+/frontend/mentee-app/release/output-metadata.json
