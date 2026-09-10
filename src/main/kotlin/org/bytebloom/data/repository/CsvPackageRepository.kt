@@ -13,22 +13,23 @@ class CsvPackageRepository(
     private val warehousesById: Map<String, Warehouse>,
     private val csvDirectory: String = DEFAULT_CSV_DIRECTORY
 ) : PackageRepository {
-    private var achedPackages= listOf<Package>()
+    private var cachedPackages = listOf<Package>()
 
-    private fun loadAll():List<Package>{
+    private fun loadAll(): List<Package> {
         val packageMapper = PackageMapper(WarehouseReferenceMapper(warehousesById))
         val packageRaws = loadPackages(csvDirectory)
 
         return packageMapper.toDomain(packageRaws)
     }
 
-    fun refresh(){
-        achedPackages = loadAll()
+    fun refresh() {
+        cachedPackages = loadAll()
     }
 
     init {
         Logger.info("Loading packages in init...")
-        achedPackages = loadAll()
+        cachedPackages = loadAll()
     }
-    override fun getAll(): List<Package>  = achedPackages
+
+    override fun getAll(): List<Package> = cachedPackages
 }

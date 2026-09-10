@@ -13,7 +13,7 @@ class CsvVehicleRepository(
     private val warehousesById: Map<String, Warehouse>,
     private val csvDirectory: String = DEFAULT_CSV_DIRECTORY
 ) : VehicleRepository {
-    private var achedVehicles= listOf<Vehicle>()
+    private var cachedVehicles= listOf<Vehicle>()
 
     private fun loadAll():List<Vehicle>{
         val vehicleMapper = VehicleMapper(WarehouseReferenceMapper(warehousesById))
@@ -23,12 +23,12 @@ class CsvVehicleRepository(
     }
 
     fun refresh(){
-        achedVehicles = loadAll()
+        cachedVehicles = loadAll()
     }
 
     init {
         Logger.info("Loading vehicles in init...")
-        achedVehicles = loadAll()
+        cachedVehicles = loadAll()
     }
-    override fun getAll(): List<Vehicle> = achedVehicles
+    override fun getAll(): List<Vehicle> = cachedVehicles
 }
