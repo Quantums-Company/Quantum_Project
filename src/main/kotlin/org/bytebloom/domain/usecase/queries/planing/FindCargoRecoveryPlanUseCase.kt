@@ -23,7 +23,7 @@ class FindCargoRecoveryPlanUseCase {
 
         val ring = ConsistentHashingRing(
             packages = packages,
-            vehicles = vehicles
+            vehicles = availableVehicles
         )
 
         return ring.createRecoveryPlan(failedVehicle)

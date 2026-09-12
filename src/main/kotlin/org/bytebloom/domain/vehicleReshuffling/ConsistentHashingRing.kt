@@ -4,7 +4,7 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.usecase.queries.planing.CargoRecoveryPlan
 import kotlin.math.abs
-import  org.bytebloom.util.Logger
+import org.bytebloom.util.Logger
 
 private const val MIN_RING_SIZE = 100
 private const val VEHICLE_SLOT_MULTIPLIER = 2
@@ -152,7 +152,7 @@ class ConsistentHashingRing(
 
         packagesList.forEach { pkg ->
             _packageSlots[pkg] =
-                abs(pkg.id.hashCode()) % circleSize
+                Math.floorMod(pkg.id.hashCode(), circleSize)
         }
     }
 

@@ -11,7 +11,7 @@ class AddVehicleToHubUseCase {
     ){
         warehouse.addVehicle(vehicle)
         vehicle.currentWarehouse = warehouse
-        //ToDO("we should update the resource data")
+
     }
 
 }

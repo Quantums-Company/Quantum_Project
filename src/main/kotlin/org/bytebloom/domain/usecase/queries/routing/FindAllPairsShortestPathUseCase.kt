@@ -1,6 +1,5 @@
 package org.bytebloom.domain.usecase.queries.routing
 
-import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
 import org.bytebloom.domain.routing.common.RouteFinder

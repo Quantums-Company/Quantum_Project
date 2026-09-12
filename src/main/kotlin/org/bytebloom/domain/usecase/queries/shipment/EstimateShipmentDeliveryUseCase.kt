@@ -26,10 +26,10 @@ class EstimateShipmentDeliveryUseCase(
         )
             ?: return null
 
-        return calculateEstimatedTime(path)
+        return calculateTotalDelay(path)
     }
 
-    private fun calculateEstimatedTime(
+    private fun calculateTotalDelay(
         path: List<Warehouse>
     ): Double? {
 

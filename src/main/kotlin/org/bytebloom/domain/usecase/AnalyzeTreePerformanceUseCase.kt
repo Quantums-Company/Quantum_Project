@@ -20,25 +20,32 @@ class AnalyzeTreePerformanceUseCase(
         val trackingIds =
             trackingIdGenerator.generate(packageCount)
 
-        trackingIds.forEach {
-            binarySearchTree.insert(it)
-            avlTree.insert(it)
-        }
+        insertTrackingIds(trackingIds)
 
-        val results =
-            targetTrackingIds.map { trackingId ->
-                TreeSearchResult(
-                    trackingId = trackingId,
-                    binarySearchTreeSteps =
-                        binarySearchTree.search(trackingId),
-                    avlTreeSteps =
-                        avlTree.search(trackingId)
-                )
-            }
+        val results = analyzeSearchResults(targetTrackingIds)
 
         return TreePerformanceReport(
             totalPackages = packageCount,
             results = results
         )
     }
+
+    private fun insertTrackingIds(trackingIds: List<String>) {
+        trackingIds.forEach {
+            binarySearchTree.insert(it)
+            avlTree.insert(it)
+        }
+    }
+
+    private fun analyzeSearchResults(
+        targetTrackingIds: List<String>
+    ): List<TreeSearchResult> =
+        targetTrackingIds.map { trackingId ->
+            TreeSearchResult(
+                trackingId = trackingId,
+                binarySearchTreeSteps = binarySearchTree.search(trackingId),
+                avlTreeSteps = avlTree.search(trackingId)
+            )
+        }
+
 }
