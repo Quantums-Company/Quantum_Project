@@ -11,23 +11,38 @@ class DispatchVehicleUseCase {
         vehicle: Vehicle,
         warehouse: Warehouse
     ): Boolean {
-        var packagesWeight = 0.0
-        packages.forEach { pkg ->
-            packagesWeight += pkg.weight
-            if (!warehouse.containsPackage(pkg)) return false
-        }
+        val totalWeight = calculateTotalWeight(packages)
 
-        if (!warehouse.hasVehicle(vehicle)) return false
-
-        if (!vehicle.canCarryWeight(packagesWeight)) {
+        if (!canDispatch(packages, vehicle, warehouse, totalWeight)) {
             return false
         }
 
-        packages.forEach { pkg ->
-            warehouse.removePackage(pkg)
-        }
-        warehouse.removeVehicle(vehicle)
-
+        dispatch(packages, vehicle, warehouse)
         return true
+
     }
+
+    private fun calculateTotalWeight(packages: List<Package>): Double =
+        packages.sumOf { it.weight }
+
+    private fun canDispatch(
+        packages: List<Package>,
+        vehicle: Vehicle,
+        warehouse: Warehouse,
+        totalWeight: Double
+    ): Boolean =
+        packages.all { warehouse.containsPackage(it) } &&
+                warehouse.hasVehicle(vehicle) &&
+                vehicle.canCarryWeight(totalWeight)
+
+
+    private fun dispatch(
+        packages: List<Package>,
+        vehicle: Vehicle,
+        warehouse: Warehouse
+    ) {
+        packages.forEach { warehouse.removePackage(it) }
+        warehouse.removeVehicle(vehicle)
+    }
+
 }

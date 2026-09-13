@@ -12,13 +12,13 @@ class FindCheapestSuitableVehicleUseCase(
         packages: List<Package>
     ): Vehicle? {
 
-        val requiredCapacity =
+        val requiredCapacityKg =
             packages.sumOf(Package::weight)
 
         return vehicleRepository
             .getAll()
             .asSequence()
-            .filter { it.maxCapacityKg >= requiredCapacity }
+            .filter { it.maxCapacityKg >= requiredCapacityKg }
             .minByOrNull(Vehicle::costPerKm)
     }
 }

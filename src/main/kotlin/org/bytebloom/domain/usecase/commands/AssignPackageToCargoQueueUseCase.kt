@@ -7,5 +7,5 @@ class AssignPackageToCargoQueueUseCase {
 
     operator fun invoke(warehouse: Warehouse, pkg: Package): Boolean =
         warehouse.addPackage(pkg)
-        //ToDO("We should add the pkg to data and update data")
+
 }

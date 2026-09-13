@@ -11,7 +11,7 @@ class VerifyHubLinkUseCase(
         origin: Warehouse,
         destination: Warehouse
     ): Boolean =
-         routeFinder.findShortestPath(
+        routeFinder.findShortestPath(
             origin,
             destination
         ) != null

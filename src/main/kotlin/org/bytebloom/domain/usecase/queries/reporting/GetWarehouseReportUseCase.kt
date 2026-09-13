@@ -12,7 +12,7 @@ class GetWarehouseReportUseCase(
         warehouseId: String
     ): WarehouseReport? {
         val warehousesById = warehouseRepository.getAll().associateBy { it.id }
-        val warehouse = warehousesById[warehouseId]?: return null
+        val warehouse = warehousesById[warehouseId] ?: return null
 
         val packages = warehouse.cargoQueue
 

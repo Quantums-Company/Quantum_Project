@@ -19,7 +19,7 @@ class CalculatePricingUseCase(
 
         val strategy = strategyFactory.getStrategy(options.strategy)
 
-        if(strategy == null){
+        if (strategy == null) {
             Logger.error("Unknown strategy: ${options.strategy}")
             return null
         }
