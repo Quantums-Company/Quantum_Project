@@ -1,11 +1,11 @@
-package org.bytebloom.data.remote.dto
+package org.bytebloom.data.remote.dto.VehicleDto
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 
-data class VehicleDto(
+data class VehicleRequestDto(
     @SerialName("id")
     val id: String = "",
     @SerialName("currentWarehouseId")
