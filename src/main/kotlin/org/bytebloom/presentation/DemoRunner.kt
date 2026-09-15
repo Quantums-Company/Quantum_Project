@@ -53,128 +53,68 @@ class DemoRunner(
         private const val PERCENTAGE_MULTIPLIER = 100.0
     }
 
-    private val warehouses =
-        warehouseRepository.getAll()
+    private val findStationedVehicles = FindStationedVehiclesByCapacityUseCase()
+    private val findCheapestVehicle = FindCheapestSuitableVehicleUseCase(vehicleRepository)
+    private val findPackagesAboveWeight = FindPackagesAboveWeightUseCase(packageRepository)
+    private val findPackagesByDestination = FindPackagesByDestinationUseCase(packageRepository)
+    private val findPackagesByPriority = FindPackagesByPriorityUseCase(packageRepository)
+    private val getWarehouseLoadFactor = GetWarehouseLoadFactorUseCase()
+    private val getWarehouseReport = GetWarehouseReportUseCase(warehouseRepository)
+    private val findBackhaulOpportunity = FindBackhaulOpportunityUseCase(packageRepository)
+    private val findCargoRecoveryPlan = FindCargoRecoveryPlanUseCase()
+    private val addVehicleToHub = AddVehicleToHubUseCase()
+    private val assignPackageToQueue = AssignPackageToCargoQueueUseCase()
+    private val dispatchVehicle = DispatchVehicleUseCase()
+    private val reroutePackage = ReroutePackageUseCase()
+    private val commandInvoker = CommandInvoker()
 
-    private val packages =
-        packageRepository.getAll()
+    suspend fun run() {
+        printHeader()
 
-    private val vehicles =
-        vehicleRepository.getAll()
+        val warehouses = warehouseRepository.getAll()
+        val packages = packageRepository.getAll()
+        val vehicles = vehicleRepository.getAll()
+        val routes = routeRepository.getAll()
 
-    private val routes =
-        routeRepository.getAll()
-
-    private val warehouseGraph =
-        WarehouseGraphBuilder(
+        val warehouseGraph = WarehouseGraphBuilder(
             warehouses = warehouses,
             routes = routes
         ).build()
 
-    private val dijkstraRouter: RouteFinder =
-        DijkstraRouter(warehouseGraph)
+        val dijkstraRouter: RouteFinder = DijkstraRouter(warehouseGraph)
+        val bfsRouter: RouteFinder = BidirectionalBreadthFirstRouter(warehouseGraph)
 
-    private val bfsRouter: RouteFinder =
-        BidirectionalBreadthFirstRouter(warehouseGraph)
+        val findOptimalPath = FindOptimalPathUseCase(dijkstraRouter)
+        val findFewestHops = FindFewestHopsRouteUseCase(bfsRouter)
+        val verifyHubLink = VerifyHubLinkUseCase(dijkstraRouter)
 
-    private val findOptimalPath =
-        FindOptimalPathUseCase(dijkstraRouter)
-
-    private val findFewestHops =
-        FindFewestHopsRouteUseCase(bfsRouter)
-
-    private val verifyHubLink =
-        VerifyHubLinkUseCase(dijkstraRouter)
-
-    private val findAllPairsShortestPath =
-        FindAllPairsShortestPathUseCase(
+        val findAllPairsShortestPath = FindAllPairsShortestPathUseCase(
             routeFinder = dijkstraRouter,
             graph = warehouseGraph
         )
 
-    private val findStationedVehicles =
-        FindStationedVehiclesByCapacityUseCase()
-
-    private val findCheapestVehicle =
-        FindCheapestSuitableVehicleUseCase(
-            vehicleRepository
-        )
-
-    private val findPackagesAboveWeight =
-        FindPackagesAboveWeightUseCase(
-            packageRepository
-        )
-
-    private val findPackagesByDestination =
-        FindPackagesByDestinationUseCase(
-            packageRepository
-        )
-
-    private val findPackagesByPriority =
-        FindPackagesByPriorityUseCase(
-            packageRepository
-        )
-
-    private val getWarehouseLoadFactor =
-        GetWarehouseLoadFactorUseCase()
-
-    private val getWarehouseReport =
-        GetWarehouseReportUseCase(
-            warehouseRepository
-        )
-
-    private val findBackhaulOpportunity =
-        FindBackhaulOpportunityUseCase(
-            packageRepository
-        )
-
-    private val findCargoRecoveryPlan =
-        FindCargoRecoveryPlanUseCase()
-
-    private val estimateShipmentDelivery =
-        EstimateShipmentDeliveryUseCase(
+        val estimateShipmentDelivery = EstimateShipmentDeliveryUseCase(
             packageRepository = packageRepository,
             routeRepository = routeRepository,
             findOptimalPath = findOptimalPath
         )
 
-    private val traceHubLineage =
-        TraceHubLineageUseCase(
-            HubTreeBuilder(
-                getWarehouseLoadFactor
-            ).build(warehouses)
+        val traceHubLineage = TraceHubLineageUseCase(
+            HubTreeBuilder(getWarehouseLoadFactor).build(warehouses)
         )
 
-    private val addVehicleToHub =
-        AddVehicleToHubUseCase()
-
-    private val assignPackageToQueue =
-        AssignPackageToCargoQueueUseCase()
-
-    private val dispatchVehicle =
-        DispatchVehicleUseCase()
-
-    private val reroutePackage =
-        ReroutePackageUseCase()
-
-    private val commandInvoker =
-        CommandInvoker()
-
-    fun run() {
-        printHeader()
-
-        runWarehouseQueries()
-        runPackageQueries()
-        runVehicleQueries()
-        runRoutingQueries()
-        runShipmentQueries()
-        runBackhaulQuery()
-        runRecoveryQuery()
-        runReportingQuery()
-        runTreeDemo()
-        runCommandPatternDemo()
-        runAddVehicleToHubDemo()
-        runReroutePackageDemo()
+        runWarehouseQueries(warehouses)
+        runPackageQueries(warehouses)
+        runVehicleQueries(warehouses, packages)
+        runRoutingQueries(warehouses, findOptimalPath, findFewestHops, verifyHubLink, findAllPairsShortestPath)
+        runShipmentQueries(packages, estimateShipmentDelivery)
+        runBackhaulQuery(vehicles, warehouses)
+        runRecoveryQuery(vehicles)
+        runReportingQuery(warehouses)
+        runTreeDemo(warehouses, traceHubLineage)
+        runCommandPatternDemo(warehouses, packages)
+        runAddVehicleToHubDemo(warehouses, vehicles)
+        runReroutePackageDemo(packages, warehouses)
 
         printFooter()
     }
@@ -183,18 +123,13 @@ class DemoRunner(
     // Warehouse Queries
     // -------------------------------------------------------------------------
 
-    private fun runWarehouseQueries() {
-
+    private suspend fun runWarehouseQueries(warehouses: List<Warehouse>) {
         printSection("WAREHOUSE QUERIES")
 
-        val warehouse =
-            warehouses.firstOrNull()
+        val warehouse = warehouses.firstOrNull()
 
         if (warehouse == null) {
-            printResult(
-                "Warehouse Queries",
-                "No warehouses are available."
-            )
+            printResult("Warehouse Queries", "No warehouses are available.")
             return
         }
 
@@ -224,19 +159,16 @@ class DemoRunner(
     // -------------------------------------------------------------------------
     // Package Queries
     // -------------------------------------------------------------------------
-    private fun runPackageQueries() {
 
+    private suspend fun runPackageQueries(warehouses: List<Warehouse>) {
         printSection("PACKAGE QUERIES")
 
         printResult(
             "Find Packages Above Weight",
-            findPackagesAboveWeight(
-                minimumWeightKg = PERCENTAGE_MULTIPLIER
-            ).formatPackages()
+            findPackagesAboveWeight(minimumWeightKg = PERCENTAGE_MULTIPLIER).formatPackages()
         )
 
-        val destinationWarehouse =
-            warehouses.getOrNull(1)
+        val destinationWarehouse = warehouses.getOrNull(1)
 
         printResult(
             "Find Packages By Destination",
@@ -247,34 +179,25 @@ class DemoRunner(
 
         printResult(
             "Find Packages By Priority",
-            findPackagesByPriority(
-                priority = Priority.URGENT
-            ).formatPackages()
+            findPackagesByPriority(priority = Priority.URGENT).formatPackages()
         )
     }
+
     // -------------------------------------------------------------------------
     // Vehicle Queries
     // -------------------------------------------------------------------------
 
-    private fun runVehicleQueries() {
-
+    private suspend fun runVehicleQueries(warehouses: List<Warehouse>, packages: List<Package>) {
         printSection("VEHICLE QUERIES")
 
-        val warehouse =
-            warehouses.firstOrNull()
+        val warehouse = warehouses.firstOrNull()
 
         if (warehouse == null) {
-            printResult(
-                "Vehicle Queries",
-                "No warehouses are available."
-            )
+            printResult("Vehicle Queries", "No warehouses are available.")
             return
         }
 
-        val requiredCapacityKg =
-            packages
-                .take(2)
-                .sumOf(Package::weight)
+        val requiredCapacityKg = packages.take(2).sumOf(Package::weight)
 
         printResult(
             "Find Stationed Vehicles By Capacity",
@@ -284,15 +207,11 @@ class DemoRunner(
             ).formatVehicles()
         )
 
-        val candidatePackages =
-            packages
-                .take(2)
+        val candidatePackages = packages.take(2)
 
         printResult(
             "Find Cheapest Suitable Vehicle",
-            findCheapestVehicle(
-                packages = candidatePackages
-            )?.formatVehicle()
+            findCheapestVehicle(packages = candidatePackages)?.formatVehicle()
                 ?: "No suitable vehicle found."
         )
     }
@@ -301,45 +220,30 @@ class DemoRunner(
     // Routing
     // -------------------------------------------------------------------------
 
-    private fun runRoutingQueries() {
-
+    private fun runRoutingQueries(
+        warehouses: List<Warehouse>,
+        findOptimalPath: FindOptimalPathUseCase,
+        findFewestHops: FindFewestHopsRouteUseCase,
+        verifyHubLink: VerifyHubLinkUseCase,
+        findAllPairsShortestPath: FindAllPairsShortestPathUseCase
+    ) {
         printSection("ROUTING")
 
-        val origin =
-            warehouses.getOrNull(10)
-
-        val destination =
-            warehouses.getOrNull(20)
+        val origin = warehouses.getOrNull(10)
+        val destination = warehouses.getOrNull(20)
 
         if (origin == null || destination == null) {
-            printResult(
-                "Routing",
-                "At least two warehouses are required."
-            )
+            printResult("Routing", "At least two warehouses are required.")
             return
         }
 
-        val optimalPath =
-            findOptimalPath(
-                origin,
-                destination
-            )
+        val optimalPath = findOptimalPath(origin, destination)
 
-        printResult(
-            "Find Optimal Path - Dijkstra",
-            optimalPath.formatPath()
-        )
+        printResult("Find Optimal Path - Dijkstra", optimalPath.formatPath())
 
-        val fewestHopsPath =
-            findFewestHops(
-                origin,
-                destination
-            )
+        val fewestHopsPath = findFewestHops(origin, destination)
 
-        printResult(
-            "Find Fewest Hops Route - BFS",
-            fewestHopsPath.formatPath()
-        )
+        printResult("Find Fewest Hops Route - BFS", fewestHopsPath.formatPath())
 
         printResult(
             "Verify Hub Link",
@@ -350,30 +254,23 @@ class DemoRunner(
             }
         )
 
-        val allPairs =
-            findAllPairsShortestPath()
+        val allPairs = findAllPairsShortestPath()
 
-        printResult(
-            "Find All Pairs Shortest Paths",
-            formatAllPairs(allPairs)
-        )
+        printResult("Find All Pairs Shortest Paths", formatAllPairs(allPairs))
     }
-// -------------------------------------------------------------------------
-// Add Vehicle To Hub
-// -------------------------------------------------------------------------
 
-    private fun runAddVehicleToHubDemo() {
+    // -------------------------------------------------------------------------
+    // Add Vehicle To Hub
+    // -------------------------------------------------------------------------
 
+    private fun runAddVehicleToHubDemo(warehouses: List<Warehouse>, vehicles: List<Vehicle>) {
         printSection("ADD VEHICLE TO HUB")
 
         val warehouse = warehouses.firstOrNull()
         val vehicle = vehicles.firstOrNull { it.currentWarehouse.id != warehouse?.id }
 
         if (warehouse == null || vehicle == null) {
-            printResult(
-                "Add Vehicle To Hub",
-                "No warehouse or vehicle available for demo."
-            )
+            printResult("Add Vehicle To Hub", "No warehouse or vehicle available for demo.")
             return
         }
 
@@ -388,36 +285,32 @@ class DemoRunner(
         printResult(
             "Add Vehicle To Hub",
             """
-        Vehicle: ${vehicle.id}
-        Capacity: ${formatKg(vehicle.maxCapacityKg)}
-        Cost per Km: ${"%.2f".format(vehicle.costPerKm)}
-        
-        From Warehouse: $oldWarehouseId
-        To Warehouse: ${warehouse.id}
-        
-        Before: $oldVehicleCount vehicles stationed
-        After:  $newVehicleCount vehicles stationed
-        Success: ${if (vehicleAdded) "✅ Vehicle added successfully" else "❌ Failed to add vehicle"}
-        """.trimIndent()
+            Vehicle: ${vehicle.id}
+            Capacity: ${formatKg(vehicle.maxCapacityKg)}
+            Cost per Km: ${"%.2f".format(vehicle.costPerKm)}
+            
+            From Warehouse: $oldWarehouseId
+            To Warehouse: ${warehouse.id}
+            
+            Before: $oldVehicleCount vehicles stationed
+            After:  $newVehicleCount vehicles stationed
+            Success: ${if (vehicleAdded) "✅ Vehicle added successfully" else "❌ Failed to add vehicle"}
+            """.trimIndent()
         )
     }
 
-// -------------------------------------------------------------------------
-// Reroute Package
-// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Reroute Package
+    // -------------------------------------------------------------------------
 
-    private fun runReroutePackageDemo() {
-
+    private fun runReroutePackageDemo(packages: List<Package>, warehouses: List<Warehouse>) {
         printSection("REROUTE PACKAGE")
 
         val packageItem = packages.firstOrNull()
         val newDestination = warehouses.firstOrNull { it.id != packageItem?.destinationWarehouse?.id }
 
         if (packageItem == null || newDestination == null) {
-            printResult(
-                "Reroute Package",
-                "No package or alternative destination available."
-            )
+            printResult("Reroute Package", "No package or alternative destination available.")
             return
         }
 
@@ -428,40 +321,36 @@ class DemoRunner(
         printResult(
             "Reroute Package",
             """
-        Package: ${updatedPackage.id}
-        Weight: ${formatKg(updatedPackage.weight)}
-        Priority: ${updatedPackage.priority}
-        
-        Original Destination: $oldDestinationId
-        New Destination: ${updatedPackage.destinationWarehouse.id}
-        
-        Status: ✅ Package rerouted successfully
-        """.trimIndent()
+            Package: ${updatedPackage.id}
+            Weight: ${formatKg(updatedPackage.weight)}
+            Priority: ${updatedPackage.priority}
+            
+            Original Destination: $oldDestinationId
+            New Destination: ${updatedPackage.destinationWarehouse.id}
+            
+            Status: ✅ Package rerouted successfully
+            """.trimIndent()
         )
     }
+
     // -------------------------------------------------------------------------
     // Shipment
     // -------------------------------------------------------------------------
 
-    private fun runShipmentQueries() {
-
+    private suspend fun runShipmentQueries(
+        packages: List<Package>,
+        estimateShipmentDelivery: EstimateShipmentDeliveryUseCase
+    ) {
         printSection("SHIPMENT")
 
-        val packageItem =
-            packages.firstOrNull()
+        val packageItem = packages.firstOrNull()
 
         if (packageItem == null) {
-            printResult(
-                "Estimate Shipment Delivery",
-                "No packages are available."
-            )
+            printResult("Estimate Shipment Delivery", "No packages are available.")
             return
         }
 
-        val estimatedTime =
-            estimateShipmentDelivery(
-                packageItem.id
-            )
+        val estimatedTime = estimateShipmentDelivery(packageItem.id)
 
         printResult(
             "Estimate Shipment Delivery",
@@ -478,31 +367,18 @@ class DemoRunner(
     // Backhaul
     // -------------------------------------------------------------------------
 
-    private fun runBackhaulQuery() {
-
+    private suspend fun runBackhaulQuery(vehicles: List<Vehicle>, warehouses: List<Warehouse>) {
         printSection("BACKHAUL")
 
-        val vehicle =
-            vehicles.firstOrNull()
-
-        val destination =
-            warehouses.firstOrNull {
-                it.id != vehicle?.currentWarehouse?.id
-            }
+        val vehicle = vehicles.firstOrNull()
+        val destination = warehouses.firstOrNull { it.id != vehicle?.currentWarehouse?.id }
 
         if (vehicle == null || destination == null) {
-            printResult(
-                "Find Backhaul Opportunity",
-                "No suitable vehicle/destination pair is available."
-            )
+            printResult("Find Backhaul Opportunity", "No suitable vehicle/destination pair is available.")
             return
         }
 
-        val opportunity =
-            findBackhaulOpportunity(
-                vehicle,
-                destination
-            )
+        val opportunity = findBackhaulOpportunity(vehicle, destination)
 
         printResult(
             "Find Backhaul Opportunity",
@@ -519,25 +395,17 @@ class DemoRunner(
     // Cargo Recovery
     // -------------------------------------------------------------------------
 
-    private fun runRecoveryQuery() {
-
+    private fun runRecoveryQuery(vehicles: List<Vehicle>) {
         printSection("CARGO RECOVERY")
 
-        val failedVehicle =
-            vehicles.firstOrNull()
+        val failedVehicle = vehicles.firstOrNull()
 
         if (failedVehicle == null) {
-            printResult(
-                "Find Cargo Recovery Plan",
-                "No vehicles are available."
-            )
+            printResult("Find Cargo Recovery Plan", "No vehicles are available.")
             return
         }
 
-        val recoveryPlan =
-            findCargoRecoveryPlan(
-                failedVehicle
-            )
+        val recoveryPlan = findCargoRecoveryPlan(failedVehicle)
 
         printResult(
             "Find Cargo Recovery Plan",
@@ -562,25 +430,17 @@ class DemoRunner(
     // Reporting
     // -------------------------------------------------------------------------
 
-    private fun runReportingQuery() {
-
+    private suspend fun runReportingQuery(warehouses: List<Warehouse>) {
         printSection("REPORTING")
 
-        val warehouse =
-            warehouses.firstOrNull()
+        val warehouse = warehouses.firstOrNull()
 
         if (warehouse == null) {
-            printResult(
-                "Warehouse Report",
-                "No warehouses are available."
-            )
+            printResult("Warehouse Report", "No warehouses are available.")
             return
         }
 
-        val report =
-            getWarehouseReport(
-                warehouse.id
-            )
+        val report = getWarehouseReport(warehouse.id)
 
         printResult(
             "Warehouse Report",
@@ -599,32 +459,24 @@ class DemoRunner(
     // Sub-Task 3 + 4
     // -------------------------------------------------------------------------
 
-    private fun runTreeDemo() {
-
+    private fun runTreeDemo(warehouses: List<Warehouse>, traceHubLineage: TraceHubLineageUseCase) {
         printSection("HIERARCHICAL HUB TREE")
 
-        val warehouse =
-            warehouses.lastOrNull()
+        val warehouse = warehouses.lastOrNull()
 
         if (warehouse == null) {
-            printResult(
-                "Trace Hub Lineage",
-                "No warehouses are available."
-            )
+            printResult("Trace Hub Lineage", "No warehouses are available.")
             return
         }
 
-        val lineage =
-            traceHubLineage(warehouse)
+        val lineage = traceHubLineage(warehouse)
 
         printResult(
             "Trace Hub Lineage",
             if (lineage.isEmpty()) {
                 "No lineage found for ${warehouse.id}."
             } else {
-                lineage.joinToString(
-                    separator = " -> "
-                ) { it.id }
+                lineage.joinToString(separator = " -> ") { it.id }
             }
         )
 
@@ -632,38 +484,26 @@ class DemoRunner(
     }
 
     private fun runBalancedTreePerformanceDemo() {
-
         printSubSection("BST vs AVL PERFORMANCE")
 
-        val trackingIds =
-            PackageTrackingIdGenerator()
-                .generate(TRACKING_ID_COUNT)
-
-        val bst =
-            BST<String>()
-
-        val avl =
-            AVLTree<String>()
+        val trackingIds = PackageTrackingIdGenerator().generate(TRACKING_ID_COUNT)
+        val bst = BST<String>()
+        val avl = AVLTree<String>()
 
         trackingIds.forEach { trackingId ->
             bst.insert(trackingId)
             avl.insert(trackingId)
         }
 
-        val targetIds =
-            listOf(
-                "PKG-000001",
-                "PKG-000500",
-                "PKG-001000"
-            )
+        val targetIds = listOf(
+            "PKG-000001",
+            "PKG-000500",
+            "PKG-001000"
+        )
 
         targetIds.forEach { trackingId ->
-
-            val bstSteps =
-                bst.search(trackingId)
-
-            val avlSteps =
-                avl.search(trackingId)
+            val bstSteps = bst.search(trackingId)
+            val avlSteps = avl.search(trackingId)
 
             println(
                 """
@@ -687,7 +527,7 @@ class DemoRunner(
     // Sub-Task 5
     // -------------------------------------------------------------------------
 
-    private fun runCommandPatternDemo() {
+    private fun runCommandPatternDemo(warehouses: List<Warehouse>, packages: List<Package>) {
         printSection("TIME-MACHINE DISPATCH PANEL")
 
         val warehouse = warehouses.firstOrNull()
@@ -806,12 +646,12 @@ class DemoRunner(
         println("Redo available: ${commandInvoker.redoAvailable()}")
         println("════════════════════════")
     }
+
     // -------------------------------------------------------------------------
     // Formatting
     // -------------------------------------------------------------------------
 
     private fun printHeader() {
-
         println()
         println("=".repeat(CONSOLE_WIDTH))
         println("                 QUANTUM LOGISTICS")
@@ -821,7 +661,6 @@ class DemoRunner(
     }
 
     private fun printFooter() {
-
         println()
         println("=".repeat(CONSOLE_WIDTH))
         println("                 DEMO COMPLETED")
@@ -829,7 +668,6 @@ class DemoRunner(
     }
 
     private fun printSection(title: String) {
-
         println()
         println("─".repeat(CONSOLE_WIDTH))
         println(title)
@@ -837,70 +675,44 @@ class DemoRunner(
     }
 
     private fun printSubSection(title: String) {
-
         println()
         println("[$title]")
         println(".".repeat(title.length + 2))
     }
 
-    private fun printResult(
-        operation: String,
-        result: String
-    ) {
-
+    private fun printResult(operation: String, result: String) {
         println()
         println("▶ $operation")
         println(result)
     }
 
     private fun List<Warehouse>?.formatPath(): String =
-        this?.joinToString(
-            separator = " -> "
-        ) { it.id }
-            ?: "No route found."
+        this?.joinToString(separator = " -> ") { it.id } ?: "No route found."
 
-    private fun formatAllPairs(
-        paths: Map<Warehouse, Map<Warehouse, Double>>
-    ): String {
-
+    private fun formatAllPairs(paths: Map<Warehouse, Map<Warehouse, Double>>): String {
         if (paths.isEmpty()) {
             return "No route data available."
         }
 
-        val entries =
-            paths
-                .flatMap { (origin, destinations) ->
-                    destinations
-                        .map { (destination, distance) ->
-                            origin.id to
-                                    destination.id to
-                                    distance
-                        }
+        val entries = paths
+            .flatMap { (origin, destinations) ->
+                destinations.map { (destination, distance) ->
+                    origin.id to destination.id to distance
                 }
-                .filter { (_, pair) ->
-                    pair.isFinite()
-                }
-                .take(DISPLAYED_PAIRS_LIMIT)
+            }
+            .filter { (_, pair) -> pair.isFinite() }
+            .take(DISPLAYED_PAIRS_LIMIT)
 
         return buildString {
             appendLine("Computed pairs: ${paths.values.sumOf { it.size }}")
             appendLine("Showing first ${entries.size} reachable pairs:")
 
             entries.forEach { entry ->
+                val origin = entry.first.first
+                val destination = entry.first.second
+                val distance = entry.second
 
-                val origin =
-                    entry.first.first
-
-                val destination =
-                    entry.first.second
-
-                val distance =
-                    entry.second
-
-                appendLine(
-                    "  $origin -> $destination : " +
-                            "${"%.2f".format(distance)} km"
-                )
+                appendLine("  $origin -> $destination : ${"%.2f".format(distance)} km")
             }
         }.trimEnd()
     }
@@ -910,10 +722,7 @@ class DemoRunner(
             "No packages found."
         } else {
             this.joinToString("\n") {
-                "  ${it.id} | ${formatKg(it.weight)} | " +
-                        "${it.originWarehouse.id} -> " +
-                        it.destinationWarehouse.id +
-                        " | ${it.priority}"
+                "  ${it.id} | ${formatKg(it.weight)} | ${it.originWarehouse.id} -> ${it.destinationWarehouse.id} | ${it.priority}"
             }
         }
 
@@ -922,8 +731,7 @@ class DemoRunner(
             "No suitable vehicles found."
         } else {
             this.joinToString("\n") {
-                "  ${it.id} | capacity=${formatKg(it.maxCapacityKg)} | " +
-                        "cost/km=${"%.2f".format(it.costPerKm)}"
+                "  ${it.id} | capacity=${formatKg(it.maxCapacityKg)} | cost/km=${"%.2f".format(it.costPerKm)}"
             }
         }
 
@@ -947,20 +755,12 @@ class DemoRunner(
         Packages:
         ${
             packages.joinToString("\n") {
-                "  ${it.id} | ${formatKg(it.weight)} | " +
-                        "${it.originWarehouse.id} -> " +
-                        it.destinationWarehouse.id
+                "  ${it.id} | ${formatKg(it.weight)} | ${it.originWarehouse.id} -> ${it.destinationWarehouse.id}"
             }
         }
         """.trimIndent()
 
-    private fun formatKg(
-        value: Double
-    ): String =
-        "${"%.2f".format(value)} kg"
+    private fun formatKg(value: Double): String = "${"%.2f".format(value)} kg"
 
-    private fun formatPercent(
-        value: Double
-    ): String =
-        "${"%.2f".format(value * PERCENTAGE_MULTIPLIER)}%"
+    private fun formatPercent(value: Double): String = "${"%.2f".format(value * PERCENTAGE_MULTIPLIER)}%"
 }

@@ -29,20 +29,20 @@ class CsvVehicleRepository(
         Logger.info("Loading vehicles in init...")
         cachedVehicles = loadAll()
     }
-    override fun getAll(): List<Vehicle> = cachedVehicles
-    override fun getById(id: String): Vehicle? {
+    override suspend fun getAll(): List<Vehicle> = cachedVehicles
+    override suspend fun getById(id: String): Vehicle? {
         TODO("Not yet implemented")
     }
 
-    override fun create(vehicle: Vehicle): Vehicle {
+    override suspend fun create(vehicle: Vehicle): Vehicle {
         TODO("Not yet implemented")
     }
 
-    override fun update(vehicle: Vehicle): Vehicle {
+    override suspend fun update(vehicle: Vehicle): Vehicle {
         TODO("Not yet implemented")
     }
 
-    override fun delete(id: String): Boolean {
+    override suspend fun delete(id: String): Boolean {
         TODO("Not yet implemented")
     }
 }

@@ -5,7 +5,7 @@ import org.bytebloom.domain.repository.PackageRepository
 class DeletePackageUseCase(
     private val packageRepository: PackageRepository
 ) {
-    operator fun invoke(id: String): Boolean {
+    suspend operator fun invoke(id: String): Boolean {
         return packageRepository.delete(id)
     }
 }

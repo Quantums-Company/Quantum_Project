@@ -6,7 +6,7 @@ import org.bytebloom.domain.repository.PackageRepository
 class CreatePackageUseCase(
     private val packageRepository: PackageRepository
 ) {
-    operator fun invoke(pkg: Package): Package {
+    suspend operator fun invoke(pkg: Package): Package {
         return packageRepository.create(pkg)
     }
 }

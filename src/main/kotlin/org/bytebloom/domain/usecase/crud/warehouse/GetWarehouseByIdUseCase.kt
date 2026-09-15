@@ -6,7 +6,7 @@ import org.bytebloom.domain.repository.WarehouseRepository
 class GetWarehouseByIdUseCase(
     private val warehouseRepository: WarehouseRepository
 ) {
-    operator fun invoke(id: String): Warehouse? {
+    suspend operator fun invoke(id: String): Warehouse? {
         return warehouseRepository.getById(id)
     }
 }

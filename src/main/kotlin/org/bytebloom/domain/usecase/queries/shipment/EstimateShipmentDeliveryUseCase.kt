@@ -11,7 +11,7 @@ class EstimateShipmentDeliveryUseCase(
     private val findOptimalPath: FindOptimalPathUseCase
 ) {
 
-    operator fun invoke(packageId: String): Double? {
+    suspend operator fun invoke(packageId: String): Double? {
 
         val packageData = packageRepository
             .getAll()
@@ -29,7 +29,7 @@ class EstimateShipmentDeliveryUseCase(
         return calculateTotalDelay(path)
     }
 
-    private fun calculateTotalDelay(
+    private suspend fun calculateTotalDelay(
         path: List<Warehouse>
     ): Double? {
 

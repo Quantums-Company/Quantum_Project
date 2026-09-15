@@ -7,7 +7,7 @@ class FindPackagesAboveWeightUseCase(
     private val packageRepository: PackageRepository
 ) {
 
-    operator fun invoke(minimumWeightKg: Double): List<Package> {
+    suspend operator fun invoke(minimumWeightKg: Double): List<Package> {
 
         return packageRepository
             .getAll()

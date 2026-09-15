@@ -6,7 +6,7 @@ import org.bytebloom.domain.repository.WarehouseRepository
 class CreateWarehouseUseCase(
     private val warehouseRepository: WarehouseRepository
 ) {
-    operator fun invoke(warehouse: Warehouse): Warehouse {
+    suspend operator fun invoke(warehouse: Warehouse): Warehouse {
         return warehouseRepository.create(warehouse)
     }
 }

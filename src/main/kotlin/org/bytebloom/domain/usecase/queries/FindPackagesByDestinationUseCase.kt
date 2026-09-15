@@ -8,7 +8,7 @@ class FindPackagesByDestinationUseCase(
     private val packageRepository: PackageRepository
 ) {
 
-    operator fun invoke(
+    suspend operator fun invoke(
         destinationWarehouse: Warehouse
     ): List<Package> =
         packageRepository

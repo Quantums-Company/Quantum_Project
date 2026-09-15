@@ -69,3 +69,4 @@ app/.externalNativeBuild/
 /frontend/mentee-app/release/baselineProfiles/0/mentee-app-release.dm
 /frontend/mentee-app/release/baselineProfiles/1/mentee-app-release.dm
 /frontend/mentee-app/release/output-metadata.json
+.run/

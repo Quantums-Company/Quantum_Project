@@ -8,7 +8,7 @@ class FindCheapestSuitableVehicleUseCase(
     private val vehicleRepository: VehicleRepository
 ) {
 
-    operator fun invoke(
+    suspend operator fun invoke(
         packages: List<Package>
     ): Vehicle? {
 
