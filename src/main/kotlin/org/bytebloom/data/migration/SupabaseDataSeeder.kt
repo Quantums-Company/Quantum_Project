@@ -1,14 +1,15 @@
 package org.bytebloom.data.migration
 
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.from
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.data.remote.client.SupabaseHttpClient
 import org.bytebloom.data.remote.mapper.DomainToRequestMapper
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Package
 
 class SupabaseDataSeeder(
-    private val supabase: SupabaseHttpClient
+    private val supabase: SupabaseClient
 ) {
 
     suspend fun seedWarehouses(
@@ -17,7 +18,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toWarehouseRequests(warehouses)
 
         if (data.isNotEmpty()) {
-            supabase.insert("warehouses", data)
+            supabase.from("warehouses").insert(data)
         }
     }
 
@@ -27,7 +28,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toVehicleRequests(vehicles)
 
         if (data.isNotEmpty()) {
-            supabase.insert("vehicles", data)
+            supabase.from("vehicles").insert(data)
         }
     }
 
@@ -37,7 +38,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toRouteRequests(routes)
 
         if (data.isNotEmpty()) {
-            supabase.insert("routes", data)
+            supabase.from("routes").insert(data)
         }
     }
 
@@ -47,7 +48,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toPackageRequests(packages)
 
         if (data.isNotEmpty()) {
-            supabase.insert("packages", data)
+            supabase.from("packages").insert(data)
         }
     }
 
