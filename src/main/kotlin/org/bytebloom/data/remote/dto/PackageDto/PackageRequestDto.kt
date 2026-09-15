@@ -1,12 +1,11 @@
-package org.bytebloom.data.remote.dto
+package org.bytebloom.data.remote.dto.PackageDto
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-
+import kotlinx.serialization.Serializable
 
 @Serializable
 
-data class PackageDto(
+data class PackageRequestDto(
     @SerialName("id")
     val id: String = "",
     @SerialName("weight")
