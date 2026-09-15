@@ -1,4 +1,9 @@
 package org.bytebloom.data.remote.client
 
-class SupabaseConfig {
+data class SupabaseConfig(
+    val projectUrl: String,
+    val apiKey: String
+) {
+    val restUrl: String
+        get() = projectUrl.trimEnd('/') + "/rest/v1"
 }
