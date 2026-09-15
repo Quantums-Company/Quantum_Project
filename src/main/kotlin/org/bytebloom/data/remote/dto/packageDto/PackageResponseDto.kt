@@ -1,19 +1,19 @@
-package org.bytebloom.data.remote.dto.RouteDto
+package org.bytebloom.data.remote.dto.packageDto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 
-data class RouteResponseDto(
+data class PackageResponseDto(
     @SerialName("id")
     val id: String = "",
+    @SerialName("weight")
+    val weight: Double = 0.0,
     @SerialName("originWarehouseId")
     val originWarehouseId: String = "",
     @SerialName("destinationWarehouseId")
     val destinationWarehouseId: String = "",
-    @SerialName("distanceKm")
-    val distanceKm: Double = 0.0,
-    @SerialName("typicalDelayMin")
-    val typicalDelayMin: Int = 0
+    @SerialName("priority")
+    val priority: String = ""
 )

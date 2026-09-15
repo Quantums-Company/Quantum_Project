@@ -1,8 +1,8 @@
 package org.bytebloom.data.remote.mapper
 
-import org.bytebloom.data.remote.dto.PackageDto.PackageRequestDto
-import org.bytebloom.data.remote.dto.RouteDto.RouteRequestDto
-import org.bytebloom.data.remote.dto.VehicleDto.VehicleRequestDto
+import org.bytebloom.data.remote.dto.packageDto.PackageRequestDto
+import org.bytebloom.data.remote.dto.routeDto.RouteRequestDto
+import org.bytebloom.data.remote.dto.vehicleDto.VehicleRequestDto
 import org.bytebloom.data.remote.dto.WarehouseRequestDto
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Route

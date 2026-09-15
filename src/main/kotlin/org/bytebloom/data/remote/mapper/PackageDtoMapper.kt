@@ -1,6 +1,6 @@
 package org.bytebloom.data.remote.mapper
 
-import org.bytebloom.data.remote.dto.PackageDto.PackageResponseDto
+import org.bytebloom.data.remote.dto.packageDto.PackageResponseDto
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse

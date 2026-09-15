@@ -1,4 +1,4 @@
-package org.bytebloom.data.remote.dto.VehicleDto
+package org.bytebloom.data.remote.dto.vehicleDto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

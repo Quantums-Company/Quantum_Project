@@ -1,6 +1,6 @@
 package org.bytebloom.data.remote.mapper
 
-import org.bytebloom.data.remote.dto.VehicleDto.VehicleResponseDto
+import org.bytebloom.data.remote.dto.vehicleDto.VehicleResponseDto
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 

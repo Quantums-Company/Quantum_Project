@@ -1,6 +1,6 @@
 package org.bytebloom.data.remote.mapper
 
-import org.bytebloom.data.remote.dto.RouteDto.RouteResponseDto
+import org.bytebloom.data.remote.dto.routeDto.RouteResponseDto
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Warehouse
 
