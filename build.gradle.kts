@@ -18,6 +18,11 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("io.github.jan-tennert.supabase:supabase-kt:3.8.0")
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.postgrest)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.kotlinx.serialization.json)
 }
 
 kotlin {

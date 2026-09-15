@@ -1,28 +1,26 @@
 package org.bytebloom.data.remote.client
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.accept
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.runBlocking
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 class SupabaseHttpClient(
-    private val config: SupabaseConfig
+    val config: SupabaseConfig
 ) {
-    private val httpClient = HttpClient(CIO) {
+    @PublishedApi
+    internal val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(
                 Json {
                     ignoreUnknownKeys = true
                     isLenient = true
+                    encodeDefaults = true
                 }
             )
         }
@@ -33,10 +31,22 @@ class SupabaseHttpClient(
         }
     }
 
-    fun getTableJson(table: String): String = runBlocking {
-        httpClient
+    suspend fun getTableJson(table: String): String {
+        return httpClient
             .get("${config.restUrl}/$table")
             .bodyAsText()
+    }
+
+    suspend inline fun <reified T> insert(
+        table: String,
+        data: T
+    ): HttpResponse {
+        return httpClient
+            .post("${config.restUrl}/$table") {
+                contentType(ContentType.Application.Json)
+                header("Prefer", "return=minimal")
+                setBody(data)
+            }
     }
 
     fun close() {

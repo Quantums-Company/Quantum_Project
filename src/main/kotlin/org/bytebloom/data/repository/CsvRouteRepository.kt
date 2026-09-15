@@ -31,4 +31,19 @@ class CsvRouteRepository(
     }
 
     override fun getAll(): List<Route> = cachedRoutes
+    override fun getById(id: String): Route? {
+        TODO("Not yet implemented")
+    }
+
+    override fun create(route: Route): Route {
+        TODO("Not yet implemented")
+    }
+
+    override fun update(route: Route): Route {
+        TODO("Not yet implemented")
+    }
+
+    override fun delete(id: String): Boolean {
+        TODO("Not yet implemented")
+    }
 }

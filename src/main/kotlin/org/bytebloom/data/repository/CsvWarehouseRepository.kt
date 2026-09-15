@@ -21,4 +21,19 @@ class CsvWarehouseRepository (
     }
 
     override fun getAll(): List<Warehouse> = cachedWarehouses
+    override fun getById(id: String): Warehouse? {
+        TODO("Not yet implemented")
+    }
+
+    override fun create(warehouse: Warehouse): Warehouse {
+        TODO("Not yet implemented")
+    }
+
+    override fun update(warehouse: Warehouse): Warehouse {
+        TODO("Not yet implemented")
+    }
+
+    override fun delete(id: String): Boolean {
+        TODO("Not yet implemented")
+    }
 }

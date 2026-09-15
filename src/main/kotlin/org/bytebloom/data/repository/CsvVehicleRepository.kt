@@ -30,4 +30,19 @@ class CsvVehicleRepository(
         cachedVehicles = loadAll()
     }
     override fun getAll(): List<Vehicle> = cachedVehicles
+    override fun getById(id: String): Vehicle? {
+        TODO("Not yet implemented")
+    }
+
+    override fun create(vehicle: Vehicle): Vehicle {
+        TODO("Not yet implemented")
+    }
+
+    override fun update(vehicle: Vehicle): Vehicle {
+        TODO("Not yet implemented")
+    }
+
+    override fun delete(id: String): Boolean {
+        TODO("Not yet implemented")
+    }
 }
