@@ -31,4 +31,19 @@ class CsvPackageRepository(
     }
 
     override fun getAll(): List<Package> = cachedPackages
+    override fun getById(id: String): Package? {
+        TODO("Not yet implemented")
+    }
+
+    override fun create(pkg: Package): Package {
+        TODO("Not yet implemented")
+    }
+
+    override fun update(pkg: Package): Package {
+        TODO("Not yet implemented")
+    }
+
+    override fun delete(id: String): Boolean {
+        TODO("Not yet implemented")
+    }
 }
