@@ -20,6 +20,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("io.github.jan-tennert.supabase:supabase-kt:3.8.0")
+    implementation("org.slf4j:slf4j-simple:2.0.9")
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.postgrest)
     implementation(libs.ktor.client.cio)
