@@ -1,6 +1,6 @@
 package org.bytebloom.data.remote.mapper
 
-import org.bytebloom.data.remote.dto.PackageDto
+import org.bytebloom.data.remote.dto.PackageDto.PackageResponseDto
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
@@ -8,7 +8,7 @@ import org.bytebloom.domain.model.Warehouse
 object PackageDtoMapper {
 
     fun toDomain(
-        dto: PackageDto,
+        dto: PackageResponseDto,
         warehousesById: Map<String, Warehouse>
     ): Package? {
         val origin = warehousesById[dto.originWarehouseId] ?: return null
@@ -24,7 +24,7 @@ object PackageDtoMapper {
     }
 
     fun toDomainList(
-        dtos: List<PackageDto>,
+        dtos: List<PackageResponseDto>,
         warehousesById: Map<String, Warehouse>
     ): List<Package> =
         dtos.mapNotNull { toDomain(it, warehousesById) }

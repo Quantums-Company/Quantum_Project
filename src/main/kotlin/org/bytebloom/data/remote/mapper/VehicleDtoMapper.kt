@@ -1,13 +1,13 @@
 package org.bytebloom.data.remote.mapper
 
-import org.bytebloom.data.remote.dto.VehicleDto
+import org.bytebloom.data.remote.dto.VehicleDto.VehicleResponseDto
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 
 object VehicleDtoMapper {
 
     fun toDomain(
-        dto: VehicleDto,
+        dto: VehicleResponseDto,
         warehousesById: Map<String, Warehouse>
     ): Vehicle? {
         val currentWarehouse = warehousesById[dto.currentWarehouseId] ?: return null
@@ -21,7 +21,7 @@ object VehicleDtoMapper {
     }
 
     fun toDomainList(
-        dtos: List<VehicleDto>,
+        dtos: List<VehicleResponseDto>,
         warehousesById: Map<String, Warehouse>
     ): List<Vehicle> =
         dtos.mapNotNull { toDomain(it, warehousesById) }

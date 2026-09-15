@@ -1,11 +1,11 @@
 package org.bytebloom.data.remote.mapper
 
-import org.bytebloom.data.remote.dto.WarehouseDto
+import org.bytebloom.data.remote.dto.WarehouseDto.WarehouseResponseDto
 import org.bytebloom.domain.model.Warehouse
 
 object WarehouseDtoMapper {
 
-    fun toDomain(dto: WarehouseDto): Warehouse =
+    fun toDomain(dto: WarehouseResponseDto): Warehouse =
         Warehouse(
             id = dto.id,
             name = dto.name,
@@ -14,6 +14,6 @@ object WarehouseDtoMapper {
             latitude = dto.latitude
         )
 
-    fun toDomainList(dtos: List<WarehouseDto>): List<Warehouse> =
+    fun toDomainList(dtos: List<WarehouseResponseDto>): List<Warehouse> =
         dtos.map(::toDomain)
 }
