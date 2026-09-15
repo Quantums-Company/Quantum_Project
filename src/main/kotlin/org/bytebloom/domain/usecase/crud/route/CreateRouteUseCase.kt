@@ -6,7 +6,7 @@ import org.bytebloom.domain.repository.RouteRepository
 class CreateRouteUseCase(
     private val routeRepository: RouteRepository
 ) {
-    operator fun invoke(route: Route): Route {
+    suspend operator fun invoke(route: Route): Route {
         return routeRepository.create(route)
     }
 }

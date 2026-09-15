@@ -13,14 +13,14 @@ class RoutePricingEngine(
         strategy = newStrategy
     }
 
-    private fun findRoute(pkg: Package): Route? {
+    private suspend fun findRoute(pkg: Package): Route? {
         return routeRepository.getAll().firstOrNull {
             it.originWarehouse.id == pkg.originWarehouse.id &&
                     it.destinationWarehouse.id == pkg.destinationWarehouse.id
         }
     }
 
-    override fun calculateShippingCost(pkg: Package): Double? {
+    override suspend fun calculateShippingCost(pkg: Package): Double? {
         val matchingRoute = findRoute(pkg) ?: return null
 
         val baseCost = strategy.calculateTransitCost(matchingRoute, pkg)

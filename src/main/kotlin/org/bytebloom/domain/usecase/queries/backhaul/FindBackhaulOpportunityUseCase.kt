@@ -8,7 +8,7 @@ import org.bytebloom.domain.repository.PackageRepository
 class FindBackhaulOpportunityUseCase(
     private val packageRepository: PackageRepository
 ) {
-    operator fun invoke(vehicle: Vehicle, destinationWarehouse: Warehouse): BackhaulOpportunity? {
+    suspend operator fun invoke(vehicle: Vehicle, destinationWarehouse: Warehouse): BackhaulOpportunity? {
         val returnPackages = findEligibleReturnPackages(vehicle, destinationWarehouse)
         val selectedPackages = selectPackagesWithinCapacity(returnPackages, vehicle.maxCapacityKg)
 
@@ -17,7 +17,7 @@ class FindBackhaulOpportunityUseCase(
         return createBackhaulOpportunity(vehicle, destinationWarehouse, selectedPackages)
     }
 
-    private fun findEligibleReturnPackages(vehicle: Vehicle, destinationWarehouse: Warehouse): List<Package> {
+    private suspend fun findEligibleReturnPackages(vehicle: Vehicle, destinationWarehouse: Warehouse): List<Package> {
         return packageRepository.getAll().filter { pkg ->
             isMatchingRoute(pkg, origin = destinationWarehouse.id, destination = vehicle.currentWarehouse.id)
         }

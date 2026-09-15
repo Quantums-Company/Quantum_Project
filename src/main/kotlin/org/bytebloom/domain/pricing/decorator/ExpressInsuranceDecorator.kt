@@ -16,7 +16,7 @@ class ExpressInsuranceDecorator(
         premium
     }
 
-    override fun getTransitRate(pkg: Package): Double? {
+    override suspend fun getTransitRate(pkg: Package): Double? {
         return super.getTransitRate(pkg)?.plus(premium)
     }
 }

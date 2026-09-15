@@ -8,7 +8,7 @@ class GetWarehouseReportUseCase(
     private val warehouseRepository: WarehouseRepository,
 ) {
 
-    operator fun invoke(
+    suspend operator fun invoke(
         warehouseId: String
     ): WarehouseReport? {
         val warehousesById = warehouseRepository.getAll().associateBy { it.id }

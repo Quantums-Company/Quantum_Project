@@ -15,7 +15,7 @@ class CalculatePricingUseCase(
     private val decoratorFactory: DecoratorFactory,
     private val routeRepository: RouteRepository
 ) {
-    operator fun invoke(options: PricingOptions): Double? {
+    suspend operator fun invoke(options: PricingOptions): Double? {
 
         val strategy = strategyFactory.getStrategy(options.strategy)
 

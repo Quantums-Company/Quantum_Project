@@ -8,7 +8,7 @@ class FindPackagesByPriorityUseCase(
     private val packageRepository: PackageRepository
 ) {
 
-    operator fun invoke(
+    suspend operator fun invoke(
         priority: Priority
     ): List<Package> =
         packageRepository

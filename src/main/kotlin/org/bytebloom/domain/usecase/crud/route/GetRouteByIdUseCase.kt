@@ -6,7 +6,7 @@ import org.bytebloom.domain.repository.RouteRepository
 class GetRouteByIdUseCase(
     private val routeRepository: RouteRepository
 ) {
-    operator fun invoke(id: String): Route? {
+    suspend operator fun invoke(id: String): Route? {
         return routeRepository.getById(id)
     }
 }
