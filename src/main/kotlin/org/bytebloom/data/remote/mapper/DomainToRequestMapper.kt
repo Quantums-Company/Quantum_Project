@@ -9,7 +9,7 @@ import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 
-class DomainToRequestMapper {
+object DomainToRequestMapper {
 
     fun Warehouse.toRequest(): WarehouseRequestDto =
         WarehouseRequestDto(

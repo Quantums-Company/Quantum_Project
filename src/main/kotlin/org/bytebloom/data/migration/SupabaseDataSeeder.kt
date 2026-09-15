@@ -1,31 +1,65 @@
 package org.bytebloom.data.migration
 
-import io.github.jan.supabase.SupabaseClient
-import org.bytebloom.data.remote.dto.WarehouseDto
 import org.bytebloom.domain.model.Warehouse
-import io.github.jan.supabase.postgrest.from
+import org.bytebloom.data.remote.client.SupabaseHttpClient
+import org.bytebloom.data.remote.mapper.DomainToRequestMapper
+import org.bytebloom.domain.model.Route
+import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.model.Package
 
 class SupabaseDataSeeder(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseHttpClient
 ) {
 
     suspend fun seedWarehouses(
         warehouses: List<Warehouse>
     ) {
-        val data = warehouses.map { warehouse ->
-            WarehouseDto(
-                id = warehouse.id,
-                name = warehouse.name,
-                regionalZone = warehouse.regionalZone,
-                latitude = warehouse.latitude.toFloat(),
-                longitude = warehouse.longitude.toFloat()
-            )
-        }
+        val data = DomainToRequestMapper.toWarehouseRequests(warehouses)
 
         if (data.isNotEmpty()) {
-            supabase
-                .from("warehouses")
-                .insert(data)
+            supabase.insert("warehouses", data)
         }
+    }
+
+    suspend fun seedVehicles(
+        vehicles: List<Vehicle>
+    ) {
+        val data = DomainToRequestMapper.toVehicleRequests(vehicles)
+
+        if (data.isNotEmpty()) {
+            supabase.insert("vehicles", data)
+        }
+    }
+
+    suspend fun seedRoutes(
+        routes: List<Route>
+    ) {
+        val data = DomainToRequestMapper.toRouteRequests(routes)
+
+        if (data.isNotEmpty()) {
+            supabase.insert("routes", data)
+        }
+    }
+
+    suspend fun seedPackages(
+        packages: List<Package>
+    ) {
+        val data = DomainToRequestMapper.toPackageRequests(packages)
+
+        if (data.isNotEmpty()) {
+            supabase.insert("packages", data)
+        }
+    }
+
+    suspend fun seedAll(
+        warehouses: List<Warehouse>,
+        vehicles: List<Vehicle>,
+        routes: List<Route>,
+        packages: List<Package>
+    ) {
+        seedWarehouses(warehouses)
+        seedVehicles(vehicles)
+        seedRoutes(routes)
+        seedPackages(packages)
     }
 }
