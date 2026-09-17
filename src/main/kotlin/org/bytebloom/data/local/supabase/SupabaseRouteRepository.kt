@@ -21,7 +21,6 @@ class SupabaseRouteRepository(
         val dtos = client.from(TableName.ROUTES)
             .select()
             .decodeList<RouteResponseDto>()
-        println("DEBUG: DTOs fetched from Supabase = ${dtos.size}")
         return RouteDtoMapper.toDomainList(dtos, warehousesById())
     }
 
