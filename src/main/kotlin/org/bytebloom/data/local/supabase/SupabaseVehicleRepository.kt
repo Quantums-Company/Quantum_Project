@@ -21,7 +21,6 @@ class SupabaseVehicleRepository(
         val dtos = client.from(TableName.VEHICLES)
             .select()
             .decodeList<VehicleResponseDto>()
-        println("DEBUG: DTOs fetched from Supabase = ${dtos.size}")
         return VehicleDtoMapper.toDomainList(dtos, warehousesById())
     }
 

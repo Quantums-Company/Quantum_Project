@@ -21,7 +21,6 @@ class SupabasePackageRepository(
         val dtos = client.from(TableName.PACKAGES)
             .select()
             .decodeList<PackageResponseDto>()
-        println("DEBUG: DTOs fetched from Supabase = ${dtos.size}")
         return PackageDtoMapper.toDomainList(dtos, warehousesById())
     }
 
