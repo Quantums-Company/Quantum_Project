@@ -58,9 +58,7 @@ class GreedyFleetDispatchUseCase {
         if (
             state.uncoveredZones.isEmpty() ||
             state.candidateVehicles.isEmpty()
-        ) {
-            return state
-        }
+        ) { return state }
 
         val bestCandidate = findBestCandidate(
             candidates = state.candidateVehicles,
