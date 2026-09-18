@@ -1,4 +1,4 @@
-package org.bytebloom.data.local.csv.common
+package org.bytebloom.data.local.common
 
 import org.bytebloom.util.Logger
 import java.io.File

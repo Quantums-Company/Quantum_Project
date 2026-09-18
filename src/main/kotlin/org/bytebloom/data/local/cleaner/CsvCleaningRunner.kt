@@ -1,14 +1,15 @@
-package org.bytebloom.data.local.csv.cleaner
+package org.bytebloom.data.local.cleaner
 
-import org.bytebloom.data.local.csv.CsvPackageDataSource
-import org.bytebloom.data.local.csv.CsvRouteDataSource
-import org.bytebloom.data.local.csv.CsvVehicleDataSource
-import org.bytebloom.data.local.csv.CsvWarehouseDataSource
+import kotlinx.coroutines.runBlocking
+import org.bytebloom.data.local.CsvPackageDataSource
+import org.bytebloom.data.local.CsvRouteDataSource
+import org.bytebloom.data.local.CsvVehicleDataSource
+import org.bytebloom.data.local.CsvWarehouseDataSource
 
 object CsvCleaningRunner {
 
     @JvmStatic
-    fun main(args: Array<String>) {
+    fun main(args: Array<String>) = runBlocking {
 
         val cleaner = CsvDataCleaner(
             warehouseDataSource = CsvWarehouseDataSource(),

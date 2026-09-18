@@ -1,12 +1,12 @@
-package org.bytebloom.data.local.csv
+package org.bytebloom.data.local
 
-import org.bytebloom.data.local.csv.common.CsvColumns
-import org.bytebloom.data.local.csv.common.CsvTablesName
-import org.bytebloom.data.local.csv.common.hasExpectedColumns
-import org.bytebloom.data.local.csv.common.hasRequiredValues
-import org.bytebloom.data.local.csv.common.loadCsv
-import org.bytebloom.data.local.csv.common.toValidDouble
-import org.bytebloom.data.local.csv.common.toValidInteger
+import org.bytebloom.data.local.common.CsvColumns
+import org.bytebloom.data.local.common.CsvTablesName
+import org.bytebloom.data.local.common.hasExpectedColumns
+import org.bytebloom.data.local.common.hasRequiredValues
+import org.bytebloom.data.local.common.loadCsv
+import org.bytebloom.data.local.common.toValidDouble
+import org.bytebloom.data.local.common.toValidInteger
 import org.bytebloom.data.raw.RouteRaw
 import org.bytebloom.data.source.RouteDataSource
 
@@ -51,6 +51,22 @@ class CsvRouteDataSource: RouteDataSource {
         }
     }
 
-    override fun loadAll(): List<RouteRaw> =
+    override suspend fun loadAll(): List<RouteRaw> =
         loadCsv(fileName = CsvTablesName.ROUTE, parser = ::parseRoute)
+
+    override suspend fun getById(): List<RouteRaw> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun create(): List<RouteRaw> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun update(): List<RouteRaw> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun delete(): List<RouteRaw> {
+        TODO("Not yet implemented")
+    }
 }

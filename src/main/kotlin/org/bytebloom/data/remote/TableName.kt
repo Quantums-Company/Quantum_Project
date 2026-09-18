@@ -1,4 +1,4 @@
-package org.bytebloom.data.local.supabase
+package org.bytebloom.data.remote
 
 object TableName {
     const val PACKAGES = "Packages"

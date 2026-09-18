@@ -1,11 +1,11 @@
-package org.bytebloom.data.local.csv
+package org.bytebloom.data.local
 
-import org.bytebloom.data.local.csv.common.CsvColumns
-import org.bytebloom.data.local.csv.common.CsvTablesName
-import org.bytebloom.data.local.csv.common.hasExpectedColumns
-import org.bytebloom.data.local.csv.common.hasRequiredValues
-import org.bytebloom.data.local.csv.common.loadCsv
-import org.bytebloom.data.local.csv.common.toValidDouble
+import org.bytebloom.data.local.common.CsvColumns
+import org.bytebloom.data.local.common.CsvTablesName
+import org.bytebloom.data.local.common.hasExpectedColumns
+import org.bytebloom.data.local.common.hasRequiredValues
+import org.bytebloom.data.local.common.loadCsv
+import org.bytebloom.data.local.common.toValidDouble
 import org.bytebloom.data.raw.PackageRaw
 import org.bytebloom.data.source.PackageDataSource
 import org.bytebloom.domain.model.Priority
@@ -54,6 +54,22 @@ class CsvPackageDataSource: PackageDataSource {
             null
         }
     }
-    override fun loadAll(): List<PackageRaw> =
+    override suspend fun loadAll(): List<PackageRaw> =
         loadCsv(fileName = CsvTablesName.PACKAGE, parser = ::parsePackage)
+
+    override suspend fun getById(): List<PackageRaw> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun create(): List<PackageRaw> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun update(): List<PackageRaw> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun delete(): List<PackageRaw> {
+        TODO("Not yet implemented")
+    }
 }
