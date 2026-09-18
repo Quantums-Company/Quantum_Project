@@ -18,6 +18,7 @@ import org.bytebloom.data.local.supabase.SupabaseRouteRepository
 import org.bytebloom.data.local.supabase.SupabaseVehicleRepository
 import org.bytebloom.data.local.supabase.SupabaseWarehouseRepository
 import org.bytebloom.data.remote.client.SupabaseClientProvider
+import org.bytebloom.presentation.DemoRunner
 
 fun main() = runBlocking {
 //    val warehouseRepo: WarehouseRepository =
@@ -50,6 +51,10 @@ fun main() = runBlocking {
     val vehicleRepo = SupabaseVehicleRepository(client, warehouseRepo)
     val routeRepo = SupabaseRouteRepository(client, warehouseRepo)
     val packageRepo = SupabasePackageRepository(client, warehouseRepo)
+
+    val warehouses = warehouseRepo.getAll()
+    val vehicles = vehicleRepo.getAll()
+    val routes = routeRepo.getAll()
 
     println("--- Warehouses ---")
     try {
@@ -84,6 +89,12 @@ fun main() = runBlocking {
     } catch (e: Exception) {
         println("Error fetching packages: ${e.message}")
     }
+
+    demonstrateGreedyDispatcher(
+        warehouses = warehouses,
+        vehicles = vehicles,
+        routes = routes
+    )
 }
 
 
