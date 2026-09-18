@@ -1,9 +1,9 @@
-package org.bytebloom.data.local.csv.cleaner
+package org.bytebloom.data.local.cleaner
 
-import org.bytebloom.data.local.csv.CsvPackageDataSource
-import org.bytebloom.data.local.csv.CsvRouteDataSource
-import org.bytebloom.data.local.csv.CsvVehicleDataSource
-import org.bytebloom.data.local.csv.CsvWarehouseDataSource
+import org.bytebloom.data.local.CsvPackageDataSource
+import org.bytebloom.data.local.CsvRouteDataSource
+import org.bytebloom.data.local.CsvVehicleDataSource
+import org.bytebloom.data.local.CsvWarehouseDataSource
 import org.bytebloom.data.mapper.PackageMapper
 import org.bytebloom.data.mapper.RouteMapper
 import org.bytebloom.data.mapper.VehicleMapper
@@ -32,7 +32,7 @@ class CsvDataCleaner(
         private const val PACKAGES_FILE = "packages.csv"
     }
 
-    fun clean() {
+    suspend fun clean() {
 
         /*
          * 1. Read and validate warehouses.

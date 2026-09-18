@@ -1,4 +1,4 @@
-package org.bytebloom.data.local.csv.cleaner
+package org.bytebloom.data.local.cleaner
 
 import java.io.File
 

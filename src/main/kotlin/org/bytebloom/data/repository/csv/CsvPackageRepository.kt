@@ -1,5 +1,8 @@
-package org.bytebloom.data.repository
+package org.bytebloom.data.repository.csv
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bytebloom.data.mapper.PackageMapper
 import org.bytebloom.data.mapper.WarehouseReferenceMapper
 import org.bytebloom.data.source.PackageDataSource
@@ -14,20 +17,22 @@ class CsvPackageRepository(
 ) : PackageRepository {
     private var cachedPackages = listOf<Package>()
 
-    private fun loadAll(): List<Package> {
+    private suspend fun loadAll(): List<Package> {
         val packageMapper = PackageMapper(WarehouseReferenceMapper(warehousesById))
         val packageRaws = csvPackageDataSource.loadAll()
 
         return packageMapper.toDomain(packageRaws)
     }
 
-    fun refresh() {
+    suspend fun refresh() {
         cachedPackages = loadAll()
     }
 
     init {
         Logger.info("Loading packages in init...")
-        cachedPackages = loadAll()
+        CoroutineScope(Dispatchers.IO).launch {
+            refresh()
+        }
     }
 
     override suspend fun getAll(): List<Package> = cachedPackages

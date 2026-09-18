@@ -1,5 +1,8 @@
-package org.bytebloom.data.repository
+package org.bytebloom.data.repository.csv
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bytebloom.data.mapper.VehicleMapper
 import org.bytebloom.data.mapper.WarehouseReferenceMapper
 import org.bytebloom.data.source.VehicleDataSource
@@ -14,20 +17,22 @@ class CsvVehicleRepository(
 ) : VehicleRepository {
     private var cachedVehicles= listOf<Vehicle>()
 
-    private fun loadAll():List<Vehicle>{
+    private suspend fun loadAll():List<Vehicle>{
         val vehicleMapper = VehicleMapper(WarehouseReferenceMapper(warehousesById))
         val vehicleRaws = csvVehicleDataSource.loadAll()
 
         return vehicleMapper.toDomain(vehicleRaws)
     }
 
-    fun refresh(){
+    suspend fun refresh(){
         cachedVehicles = loadAll()
     }
 
     init {
         Logger.info("Loading vehicles in init...")
-        cachedVehicles = loadAll()
+        CoroutineScope(Dispatchers.IO).launch {
+            refresh()
+        }
     }
     override suspend fun getAll(): List<Vehicle> = cachedVehicles
     override suspend fun getById(id: String): Vehicle? {
