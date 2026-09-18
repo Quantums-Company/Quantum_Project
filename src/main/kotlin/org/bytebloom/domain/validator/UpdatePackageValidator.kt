@@ -1,29 +1,35 @@
 package org.bytebloom.domain.validator
 
-import org.bytebloom.domain.model.Package
-
 class UpdatePackageValidator {
 
-    operator fun invoke(pkg: Package): ValidationResult {
+    operator fun invoke(input: PackageUpdateInput): ValidationResult {
         val violations = mutableListOf<String>()
 
-        if (pkg.id.isBlank()) {
+        if (input.id.isBlank()) {
             violations.add("Package ID cannot be blank")
-        }
-
-        if (!pkg.id.startsWith("PKG-")) {
+        } else if (!input.id.startsWith("PKG-")) {
             violations.add("Package ID must start with PKG-")
         }
 
-        if (pkg.weight <= 0) {
+        val hasAnyUpdate =
+            input.weight != null ||
+                    input.priority != null ||
+                    input.originWarehouse != null ||
+                    input.destinationWarehouse != null
+
+        if (!hasAnyUpdate) {
+            violations.add("At least one field must be provided for update")
+        }
+
+        if (input.weight != null && input.weight <= 0) {
             violations.add("Package weight must be greater than 0")
         }
 
-        if (pkg.originWarehouse.id.isBlank()) {
+        if (input.originWarehouse != null && input.originWarehouse.id.isBlank()) {
             violations.add("Origin warehouse ID cannot be blank")
         }
 
-        if (pkg.destinationWarehouse.id.isBlank()) {
+        if (input.destinationWarehouse != null && input.destinationWarehouse.id.isBlank()) {
             violations.add("Destination warehouse ID cannot be blank")
         }
 
