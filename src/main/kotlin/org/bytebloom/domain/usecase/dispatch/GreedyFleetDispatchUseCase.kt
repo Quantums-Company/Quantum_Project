@@ -11,6 +11,7 @@ data class DispatchResult(
         get() = uncoveredZones.isEmpty()
 }
 
+
 private data class DispatchState(
     val uncoveredZones: Set<String>,
     val coveredZones: Set<String>,
