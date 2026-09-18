@@ -42,7 +42,7 @@ import org.bytebloom.domain.usecase.queries.backhaul.BackhaulOpportunity
 import org.bytebloom.domain.usecase.dispatch.GreedyFleetDispatchUseCase
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.usecase.dispatch.DispatchResult
-import org.bytebloom.domain.usecase.dispatch.zonesCoveredBy
+import org.bytebloom.domain.usecase.dispatch.zonesCovered
 
 class DemoRunner(
     private val warehouseRepository: WarehouseRepository,
@@ -71,8 +71,6 @@ class DemoRunner(
     private val dispatchVehicle = DispatchVehicleUseCase()
     private val reroutePackage = ReroutePackageUseCase()
     private val commandInvoker = CommandInvoker()
-//    private val greedyFleetDispatch = GreedyFleetDispatchUseCase()
-//    private val greedyFleetDispatch = org.bytebloom.domain.usecase.dispatch.GreedyFleetDispatchUseCase()
 
     suspend fun run() {
         printHeader()
@@ -797,9 +795,7 @@ fun demonstrateGreedyDispatcher(
     val result = GreedyFleetDispatchUseCase().invoke(
         targetZones = targetZones,
         availableVehicles = vehicles,
-        coverageOf = { vehicle ->
-            zonesCoveredBy(vehicle, routes)
-        }
+        coverageOf = { vehicle -> zonesCovered(vehicle, routes) }
     )
     println(formatDispatchReport(targetZones, result))
 }
