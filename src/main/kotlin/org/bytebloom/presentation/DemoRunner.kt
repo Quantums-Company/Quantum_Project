@@ -784,6 +784,7 @@ private fun formatDispatchReport(targetZones: Set<String>, result: DispatchResul
         |Coverage: $coverageStatus
     """.trimMargin()
 }
+
 fun demonstrateGreedyDispatcher(
     warehouses: List<Warehouse>,
     vehicles: List<Vehicle>,
