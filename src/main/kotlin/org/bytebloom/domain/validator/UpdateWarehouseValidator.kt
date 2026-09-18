@@ -1,36 +1,38 @@
 package org.bytebloom.domain.validator
 
-import org.bytebloom.domain.model.Warehouse
-
 class UpdateWarehouseValidator {
 
-    operator fun invoke(warehouse: Warehouse): ValidationResult {
+    operator fun invoke(input : WarehouseUpdateInput): ValidationResult {
         val violations = mutableListOf<String>()
 
-        if (warehouse.id.isBlank()) {
+        if (input .id.isBlank()) {
             violations.add("Warehouse ID cannot be blank")
-        }
-
-        if (!warehouse.id.startsWith("WH-")) {
+        } else if (!input.id.startsWith("WH-")) {
             violations.add("Warehouse ID must start with WH-")
         }
 
-        if (warehouse.name.isBlank()) {
+        val hasAnyUpdate =
+            input.name != null ||
+                    input.regionalZone != null ||
+                    input.longitude != null ||
+                    input.latitude != null
+
+        if (!hasAnyUpdate) {
+            violations.add("At least one field must be provided for update")
+        }
+
+        if (input.name != null && input.name.isBlank()) {
             violations.add("Warehouse name cannot be blank")
         }
-
-        if (warehouse.regionalZone.isBlank()) {
+        if (input.regionalZone != null && input.regionalZone.isBlank()) {
             violations.add("Regional zone cannot be blank")
         }
-
-        if (warehouse.latitude !in -90.0..90.0) {
+        if (input.latitude != null && input.latitude !in -90.0..90.0) {
             violations.add("Latitude must be between -90 and 90")
         }
-
-        if (warehouse.longitude !in -180.0..180.0) {
+        if (input.longitude != null && input.longitude !in -180.0..180.0) {
             violations.add("Longitude must be between -180 and 180")
         }
-
         return if (violations.isEmpty()) {
             ValidationResult.Valid()
         } else {
