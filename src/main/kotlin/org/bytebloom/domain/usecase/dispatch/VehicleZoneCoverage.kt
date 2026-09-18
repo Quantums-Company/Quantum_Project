@@ -9,4 +9,5 @@ fun zonesCoveredBy(vehicle: Vehicle, allRoutes: List<Route>): Set<String> {
         .map { route -> route.destinationWarehouse.regionalZone }
 
     return (sequenceOf(vehicle.currentWarehouse.regionalZone) + directRouteZones).toSet()
+
 }
