@@ -11,6 +11,23 @@ import org.bytebloom.data.remote.SdkPackageDataSource
 import org.bytebloom.data.remote.SdkWarehouseDataSource
 import org.bytebloom.data.remote.SdkRouteDataSource
 import org.bytebloom.data.remote.SdkVehicleDataSource
+import org.bytebloom.domain.exception.DatabaseConflictException
+import org.bytebloom.domain.exception.EntityValidationException
+import org.bytebloom.domain.exception.NetworkUnavailableException
+import org.bytebloom.domain.exception.ResourceNotFoundException
+import org.bytebloom.domain.exception.UnknownDataException
+import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.usecase.crud.warehouse.CreateWarehouseUseCase
+import org.bytebloom.domain.validator.CreateWarehouseValidator
+
+fun formatError(e: Throwable): String = when (e) {
+    is EntityValidationException -> "Validation failed: ${e.violations.joinToString("; ")}"
+    is ResourceNotFoundException -> "Not found: ${e.message}"
+    is DatabaseConflictException -> "Conflict: ${e.message}"
+    is NetworkUnavailableException -> "Network issue: ${e.message}"
+    is UnknownDataException -> "Unexpected error: ${e.message}"
+    else -> "Unhandled error: ${e.message}"
+}
 
 fun main() = runBlocking {
 //    val warehouseRepo: WarehouseRepository =
@@ -40,7 +57,7 @@ fun main() = runBlocking {
     val client = SupabaseClientProvider.create()
 
     val warehouseRepo = RemoteWarehouseRepository(SdkWarehouseDataSource(client))
-        val warehousesById =
+    val warehousesById =
         warehouseRepo
             .getAll()
             .associateBy { it.id }
@@ -56,8 +73,8 @@ fun main() = runBlocking {
     println("--- Warehouses ---")
     try {
         warehouseRepo.getAll().forEach { println(it) }
-    } catch (e: Throwable) {
-        println("Error fetching warehouses: ${e.message}")
+    } catch (e: Exception) {
+        println(formatError(e))
     }
 
     println("--- Vehicles ---")
@@ -65,8 +82,8 @@ fun main() = runBlocking {
         vehicleRepo.getAll().forEach {
             println("Vehicle(id=${it.id}, capacity=${it.maxCapacityKg}, warehouse=${it.currentWarehouse.id})")
         }
-    } catch (e: Throwable) {
-        println("Error fetching vehicles: ${e.message}")
+    } catch (e: Exception) {
+        println(formatError(e))
     }
 
     println("--- Routes ---")
@@ -74,8 +91,8 @@ fun main() = runBlocking {
         routeRepo.getAll().forEach {
             println("Route(id=${it.id}, ${it.originWarehouse.id} -> ${it.destinationWarehouse.id}, ${it.distanceKm}km)")
         }
-    } catch (e: Throwable) {
-        println("Error fetching routes: ${e.message}")
+    } catch (e: Exception) {
+        println(formatError(e))
     }
 
     println("--- Packages ---")
@@ -83,8 +100,23 @@ fun main() = runBlocking {
         packageRepo.getAll().forEach {
             println("Package(id=${it.id}, weight=${it.weight}, priority=${it.priority})")
         }
-    } catch (e: Throwable) {
-        println("Error fetching packages: ${e.message}")
+    } catch (e: Exception) {
+        println(formatError(e))
+    }
+
+    println("--- Deliberately invalid create (proves error strategy) ---")
+    try {
+        val createWarehouse = CreateWarehouseUseCase(warehouseRepo, CreateWarehouseValidator())
+        val badWarehouse = Warehouse(
+            id = "",
+            name = "",
+            regionalZone = "",
+            longitude = 999.0,
+            latitude = 999.0
+        )
+        createWarehouse(badWarehouse)
+    } catch (e: Exception) {
+        println(formatError(e))
     }
 
     demonstrateGreedyDispatcher(
@@ -94,5 +126,3 @@ fun main() = runBlocking {
     )
 
 }
-
-

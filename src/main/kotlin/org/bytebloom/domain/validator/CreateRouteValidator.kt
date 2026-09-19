@@ -9,9 +9,7 @@ class CreateRouteValidator {
 
         if (route.id.isBlank()) {
             violations.add("Route ID cannot be blank")
-        }
-
-        if (!route.id.startsWith("RT-")) {
+        } else if (!route.id.startsWith("RT-")) {
             violations.add("Route ID must start with RT-")
         }
 

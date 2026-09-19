@@ -9,9 +9,7 @@ class CreateWarehouseValidator {
 
         if (warehouse.id.isBlank()) {
             violations.add("Warehouse ID cannot be blank")
-        }
-
-        if (!warehouse.id.startsWith("WH-")) {
+        } else if (!warehouse.id.startsWith("WH-")) {
             violations.add("Warehouse ID must start with WH-")
         }
 
