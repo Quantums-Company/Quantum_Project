@@ -6,6 +6,7 @@ import org.bytebloom.data.repository.remote.RemoteRouteRepository
 import org.bytebloom.data.repository.remote.RemoteVehicleRepository
 import org.bytebloom.data.repository.remote.RemoteWarehouseRepository
 import org.bytebloom.data.remote.client.SupabaseClientProvider
+import org.bytebloom.presentation.DemoRunner
 import org.bytebloom.data.remote.SdkPackageDataSource
 import org.bytebloom.data.remote.SdkWarehouseDataSource
 import org.bytebloom.data.remote.SdkRouteDataSource
@@ -48,10 +49,14 @@ fun main() = runBlocking {
     val routeRepo = RemoteRouteRepository(warehousesById, SdkRouteDataSource(client))
     val packageRepo = RemotePackageRepository(warehousesById, SdkPackageDataSource(client))
 
+    val warehouses = warehouseRepo.getAll()
+    val vehicles = vehicleRepo.getAll()
+    val routes = routeRepo.getAll()
+
     println("--- Warehouses ---")
     try {
         warehouseRepo.getAll().forEach { println(it) }
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         println("Error fetching warehouses: ${e.message}")
     }
 
@@ -60,7 +65,7 @@ fun main() = runBlocking {
         vehicleRepo.getAll().forEach {
             println("Vehicle(id=${it.id}, capacity=${it.maxCapacityKg}, warehouse=${it.currentWarehouse.id})")
         }
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         println("Error fetching vehicles: ${e.message}")
     }
 
@@ -69,7 +74,7 @@ fun main() = runBlocking {
         routeRepo.getAll().forEach {
             println("Route(id=${it.id}, ${it.originWarehouse.id} -> ${it.destinationWarehouse.id}, ${it.distanceKm}km)")
         }
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         println("Error fetching routes: ${e.message}")
     }
 
@@ -78,9 +83,16 @@ fun main() = runBlocking {
         packageRepo.getAll().forEach {
             println("Package(id=${it.id}, weight=${it.weight}, priority=${it.priority})")
         }
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         println("Error fetching packages: ${e.message}")
     }
+
+    demonstrateGreedyDispatcher(
+        warehouses = warehouses,
+        vehicles = vehicles,
+        routes = routes
+    )
+
 }
 
 
