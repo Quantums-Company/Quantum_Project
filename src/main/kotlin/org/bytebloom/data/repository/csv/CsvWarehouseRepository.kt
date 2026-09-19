@@ -1,28 +1,38 @@
-package org.bytebloom.data.repository
+package org.bytebloom.data.repository.csv
 
 import org.bytebloom.data.mapper.toDomain
 import org.bytebloom.data.source.WarehouseDataSource
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.util.Logger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-class CsvWarehouseRepository (
+class CsvWarehouseRepository(
     private val csvWarehouseDataSource: WarehouseDataSource
-): WarehouseRepository {
+) : WarehouseRepository {
+
     private var cachedWarehouses = listOf<Warehouse>()
+    private var isLoaded = false
+    private val mutex = Mutex() // Prevents duplicate concurrent loads
 
-    fun refresh(){
-        cachedWarehouses = csvWarehouseDataSource.loadAll().toDomain()
+    suspend fun refresh() {
+        mutex.withLock {
+            Logger.info("Refreshing warehouses...")
+            cachedWarehouses = csvWarehouseDataSource.loadAll().toDomain()
+            isLoaded = true
+        }
     }
 
-    init {
-        Logger.info("Loading vehicles in init...")
-        cachedWarehouses = csvWarehouseDataSource.loadAll().toDomain()
+    override suspend fun getAll(): List<Warehouse> {
+        if (!isLoaded) {
+            refresh()
+        }
+        return cachedWarehouses
     }
 
-    override suspend fun getAll(): List<Warehouse> = cachedWarehouses
     override suspend fun getById(id: String): Warehouse? {
-        TODO("Not yet implemented")
+        return getAll().find { it.id == id }
     }
 
     override suspend fun create(warehouse: Warehouse): Warehouse {

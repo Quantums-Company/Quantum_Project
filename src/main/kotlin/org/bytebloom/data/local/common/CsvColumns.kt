@@ -1,4 +1,4 @@
-package org.bytebloom.data.local.csv.common
+package org.bytebloom.data.local.common
 
 object CsvColumns {
     const val PACKAGE = 5

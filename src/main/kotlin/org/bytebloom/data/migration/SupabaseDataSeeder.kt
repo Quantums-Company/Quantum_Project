@@ -7,8 +7,7 @@ import org.bytebloom.data.remote.mapper.DomainToRequestMapper
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Package
-import org.bytebloom.data.local.supabase.TableName
-
+import org.bytebloom.data.remote.TableName
 class SupabaseDataSeeder(
     private val supabase: SupabaseClient
 ) {
