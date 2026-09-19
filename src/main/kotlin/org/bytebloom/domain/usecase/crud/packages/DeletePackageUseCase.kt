@@ -1,5 +1,6 @@
 package org.bytebloom.domain.usecase.crud.packages
 
+import org.bytebloom.domain.exception.EntityValidationException
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.validator.PackageIdValidator
 import org.bytebloom.domain.validator.ValidationResult
@@ -16,9 +17,7 @@ class DeletePackageUseCase(
             }
 
             is ValidationResult.Invalid -> {
-                throw IllegalArgumentException(
-                    result.violations.joinToString(", ")
-                )
+                throw EntityValidationException(result.violations)
             }
         }
     }
