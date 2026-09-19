@@ -24,6 +24,28 @@ private data class VehicleCoverageGain(
     val newZones: Set<String>
 )
 
+/**
+ * Greedy solver for the set-covering problem: given a set of target zones and a
+ * fleet of vehicles (each covering some subset of zones), repeatedly pick the
+ * vehicle that covers the most *currently uncovered* zones until every zone is
+ * covered or no candidate can help anymore.
+ *
+ * Complexity: O(N^2) vs brute force O(2^N)
+ * -----------------------------------------
+ * The exact set-covering problem is NP-hard: a brute-force solution would need to
+ * examine every possible subset of the N available vehicles (2^N combinations) to
+ * find the minimum-size cover — infeasible once N grows past ~20-30 vehicles.
+ *
+ * This greedy heuristic instead runs at most N selection rounds (one vehicle
+ * picked per round, in the worst case), and each round scans the remaining
+ * candidates (at most N) to find the best one — O(N) work per round, O(N) rounds,
+ * so O(N^2) total. It doesn't guarantee the mathematically minimum-size fleet
+ * (that trade-off is the well-known approximation gap of the greedy set-cover
+ * heuristic, discussed in Grokking Algorithms Ch. 10), but it produces a
+ * provably good cover (within a ln(N) factor of optimal) in polynomial time,
+ * which is what makes it usable at dispatch-time on live data instead of only
+ * offline on small inputs.
+ */
 class GreedyFleetDispatchUseCase {
 
     operator fun invoke(
