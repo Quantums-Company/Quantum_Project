@@ -9,9 +9,7 @@ class CreateVehicleValidator {
 
         if (vehicle.id.isBlank()) {
             violations.add("Vehicle ID cannot be blank")
-        }
-
-        if (!vehicle.id.startsWith("TRK-")) {
+        } else if (!vehicle.id.startsWith("TRK-")) {
             violations.add("Vehicle ID must start with TRK-")
         }
 
