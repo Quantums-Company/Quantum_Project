@@ -9,9 +9,7 @@ class CreatePackageValidator {
 
         if (pkg.id.isBlank()) {
             violations.add("Package ID cannot be blank")
-        }
-
-        if (!pkg.id.startsWith("PKG-")) {
+        } else if (!pkg.id.startsWith("PKG-")) {
             violations.add("Package ID must start with PKG-")
         }
 
