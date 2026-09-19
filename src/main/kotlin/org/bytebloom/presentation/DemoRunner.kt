@@ -39,6 +39,10 @@ import org.bytebloom.domain.usecase.queries.routing.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.queries.routing.VerifyHubLinkUseCase
 import org.bytebloom.domain.usecase.queries.shipment.EstimateShipmentDeliveryUseCase
 import org.bytebloom.domain.usecase.queries.backhaul.BackhaulOpportunity
+import org.bytebloom.domain.usecase.dispatch.GreedyFleetDispatchUseCase
+import org.bytebloom.domain.model.Route
+import org.bytebloom.domain.usecase.dispatch.DispatchResult
+import org.bytebloom.domain.usecase.dispatch.zonesCovered
 
 class DemoRunner(
     private val warehouseRepository: WarehouseRepository,
@@ -763,4 +767,35 @@ class DemoRunner(
     private fun formatKg(value: Double): String = "${"%.2f".format(value)} kg"
 
     private fun formatPercent(value: Double): String = "${"%.2f".format(value * PERCENTAGE_MULTIPLIER)}%"
+}
+
+private fun formatDispatchReport(targetZones: Set<String>, result: DispatchResult): String {
+    val vehicleIds = result.selectedVehicles.joinToString { it.id }.ifEmpty { "none" }
+    val coverageStatus = if (result.isFullyCovered) "COMPLETE" else "INCOMPLETE"
+
+    return """
+        |--- Greedy Fleet Dispatcher ---
+        |Target zones: $targetZones
+        |Selected vehicles: $vehicleIds
+        |Covered zones: ${result.coveredZones}
+        |Uncovered zones: ${result.uncoveredZones}
+        |Coverage: $coverageStatus
+    """.trimMargin()
+}
+
+fun demonstrateGreedyDispatcher(
+    warehouses: List<Warehouse>,
+    vehicles: List<Vehicle>,
+    routes: List<Route>
+) {
+    val targetZones = warehouses
+        .map { it.regionalZone }
+        .toSet()
+
+    val result = GreedyFleetDispatchUseCase().invoke(
+        targetZones = targetZones,
+        availableVehicles = vehicles,
+        coverageOf = { vehicle -> zonesCovered(vehicle, routes) }
+    )
+    println(formatDispatchReport(targetZones, result))
 }
