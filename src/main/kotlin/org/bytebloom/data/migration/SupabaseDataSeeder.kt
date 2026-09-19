@@ -7,7 +7,7 @@ import org.bytebloom.data.remote.mapper.DomainToRequestMapper
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Package
-
+import org.bytebloom.data.remote.TableName
 class SupabaseDataSeeder(
     private val supabase: SupabaseClient
 ) {
@@ -18,7 +18,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toWarehouseRequests(warehouses)
 
         if (data.isNotEmpty()) {
-            supabase.from("warehouses").insert(data)
+            supabase.from(TableName.WAREHOUSES).insert(data)
         }
     }
 
@@ -28,7 +28,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toVehicleRequests(vehicles)
 
         if (data.isNotEmpty()) {
-            supabase.from("vehicles").insert(data)
+            supabase.from(TableName.VEHICLES).insert(data)
         }
     }
 
@@ -38,7 +38,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toRouteRequests(routes)
 
         if (data.isNotEmpty()) {
-            supabase.from("routes").insert(data)
+            supabase.from(TableName.ROUTES).insert(data)
         }
     }
 
@@ -48,7 +48,7 @@ class SupabaseDataSeeder(
         val data = DomainToRequestMapper.toPackageRequests(packages)
 
         if (data.isNotEmpty()) {
-            supabase.from("packages").insert(data)
+            supabase.from(TableName.PACKAGES).insert(data)
         }
     }
 

@@ -1,24 +1,16 @@
 package org.bytebloom.presentation
 
 import kotlinx.coroutines.runBlocking
-import org.bytebloom.data.repository.CsvPackageRepository
-import org.bytebloom.data.repository.CsvRouteRepository
-import org.bytebloom.data.repository.CsvVehicleRepository
-import org.bytebloom.data.repository.CsvWarehouseRepository
-import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.data.local.csv.CsvPackageDataSource
-import org.bytebloom.data.local.csv.CsvRouteDataSource
-import org.bytebloom.data.local.csv.CsvVehicleDataSource
-import org.bytebloom.data.local.csv.CsvWarehouseDataSource
-import org.bytebloom.data.local.supabase.SupabasePackageRepository
-import org.bytebloom.data.local.supabase.SupabaseRouteRepository
-import org.bytebloom.data.local.supabase.SupabaseVehicleRepository
-import org.bytebloom.data.local.supabase.SupabaseWarehouseRepository
+import org.bytebloom.data.repository.remote.RemotePackageRepository
+import org.bytebloom.data.repository.remote.RemoteRouteRepository
+import org.bytebloom.data.repository.remote.RemoteVehicleRepository
+import org.bytebloom.data.repository.remote.RemoteWarehouseRepository
 import org.bytebloom.data.remote.client.SupabaseClientProvider
 import org.bytebloom.presentation.DemoRunner
+import org.bytebloom.data.remote.SdkPackageDataSource
+import org.bytebloom.data.remote.SdkWarehouseDataSource
+import org.bytebloom.data.remote.SdkRouteDataSource
+import org.bytebloom.data.remote.SdkVehicleDataSource
 
 fun main() = runBlocking {
 //    val warehouseRepo: WarehouseRepository =
@@ -47,10 +39,15 @@ fun main() = runBlocking {
 
     val client = SupabaseClientProvider.create()
 
-    val warehouseRepo = SupabaseWarehouseRepository(client)
-    val vehicleRepo = SupabaseVehicleRepository(client, warehouseRepo)
-    val routeRepo = SupabaseRouteRepository(client, warehouseRepo)
-    val packageRepo = SupabasePackageRepository(client, warehouseRepo)
+    val warehouseRepo = RemoteWarehouseRepository(SdkWarehouseDataSource(client))
+        val warehousesById =
+        warehouseRepo
+            .getAll()
+            .associateBy { it.id }
+
+    val vehicleRepo = RemoteVehicleRepository(warehousesById, SdkVehicleDataSource(client))
+    val routeRepo = RemoteRouteRepository(warehousesById, SdkRouteDataSource(client))
+    val packageRepo = RemotePackageRepository(warehousesById, SdkPackageDataSource(client))
 
     val warehouses = warehouseRepo.getAll()
     val vehicles = vehicleRepo.getAll()
