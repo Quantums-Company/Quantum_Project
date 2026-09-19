@@ -1,4 +1,4 @@
-package org.bytebloom.data.remote.dto
+package org.bytebloom.data.remote.dto.warehouseDto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

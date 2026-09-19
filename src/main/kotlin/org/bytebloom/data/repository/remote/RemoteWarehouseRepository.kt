@@ -1,6 +1,6 @@
 package org.bytebloom.data.repository.remote
 
-import org.bytebloom.data.remote.dto.WarehouseRequestDto
+import org.bytebloom.data.remote.dto.warehouseDto.WarehouseRequestDto
 import org.bytebloom.data.remote.mapper.WarehouseDtoMapper
 import org.bytebloom.data.source.remote.WarehouseRemoteDataSource
 import org.bytebloom.domain.model.Warehouse
