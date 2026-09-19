@@ -1,5 +1,7 @@
 package org.bytebloom.domain.usecase.crud.vehicle
 
+import org.bytebloom.domain.exception.EntityValidationException
+import org.bytebloom.domain.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.validator.UpdateVehicleValidator
@@ -14,7 +16,7 @@ class UpdateVehicleUseCase(
         when (val result = validator(input)) {
             is ValidationResult.Valid -> {
                 val existing = vehicleRepository.getById(input.id)
-                    ?: throw IllegalArgumentException("Vehicle '${input.id}' was not found")
+                    ?: throw ResourceNotFoundException("Vehicle '${input.id}' was not found")
 
                 val updated = Vehicle(
                     id = existing.id,
@@ -27,9 +29,7 @@ class UpdateVehicleUseCase(
             }
 
             is ValidationResult.Invalid -> {
-                throw IllegalArgumentException(
-                    result.violations.joinToString(", ")
-                )
+                throw EntityValidationException(result.violations)
             }
         }
     }

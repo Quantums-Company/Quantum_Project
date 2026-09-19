@@ -1,5 +1,7 @@
 package org.bytebloom.domain.usecase.crud.route
 
+import org.bytebloom.domain.exception.EntityValidationException
+import org.bytebloom.domain.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.validator.RouteUpdateInput
@@ -14,7 +16,7 @@ class UpdateRouteUseCase(
         when (val result = validator(input)) {
             is ValidationResult.Valid -> {
                 val existing = routeRepository.getById(input.id)
-                    ?: throw IllegalArgumentException("Route '${input.id}' was not found")
+                    ?: throw ResourceNotFoundException("Route '${input.id}' was not found")
 
                 val updated = Route(
                     id = existing.id,
@@ -28,9 +30,7 @@ class UpdateRouteUseCase(
             }
 
             is ValidationResult.Invalid -> {
-                throw IllegalArgumentException(
-                    result.violations.joinToString(", ")
-                )
+                throw EntityValidationException(result.violations)
             }
         }
     }

@@ -9,6 +9,7 @@ import org.bytebloom.data.local.common.hasRequiredValues
 import org.bytebloom.data.local.common.loadCsv
 import org.bytebloom.data.local.common.toValidDouble
 import org.bytebloom.data.raw.WarehouseRaw
+import org.bytebloom.data.remote.client.SupabaseErrorTranslator
 import org.bytebloom.data.remote.dto.WarehouseRequestDto
 import org.bytebloom.data.remote.dto.warehouseDto.WarehouseResponseDto
 import org.bytebloom.data.source.WarehouseDataSource
@@ -19,25 +20,32 @@ class SdkWarehouseDataSource(
 ): WarehouseRemoteDataSource {
 
     override suspend fun loadAll(): List<WarehouseResponseDto> =
-        client.from(TableName.WAREHOUSES).select().decodeList()
+        SupabaseErrorTranslator.translate("getAll warehouses") {
+            client.from(TableName.WAREHOUSES).select().decodeList()
+        }
 
     override suspend fun loadById(id: String): WarehouseResponseDto? =
-        client.from(TableName.WAREHOUSES)
-            .select { filter { eq("id", id) } }
-            .decodeSingleOrNull()
+        SupabaseErrorTranslator.translate("getById warehouse '$id'") {
+            client.from(TableName.WAREHOUSES)
+                .select { filter { eq("id", id) } }
+                .decodeSingleOrNull()
+        }
 
-    override suspend fun create(request: WarehouseRequestDto): WarehouseResponseDto? {
+    override suspend fun create(request: WarehouseRequestDto): WarehouseResponseDto? =
+        SupabaseErrorTranslator.translate("create warehouse '${request.id}'") {
         client.from(TableName.WAREHOUSES).insert(request)
-        return loadById(request.id)
+        loadById(request.id)
     }
 
-    override suspend fun update(id: String, request: WarehouseRequestDto): WarehouseResponseDto? {
+    override suspend fun update(id: String, request: WarehouseRequestDto): WarehouseResponseDto? =
+        SupabaseErrorTranslator.translate("update warehouse '${id}'") {
         client.from(TableName.WAREHOUSES).update(request) { filter { eq("id", id) } }
-        return loadById(id)
+        loadById(id)
     }
 
-    override suspend fun delete(id: String): Boolean {
+    override suspend fun delete(id: String): Boolean =
+        SupabaseErrorTranslator.translate("delete warehouse '$id'") {
         client.from(TableName.WAREHOUSES).delete { filter { eq("id", id) } }
-        return true
+        true
     }
 }

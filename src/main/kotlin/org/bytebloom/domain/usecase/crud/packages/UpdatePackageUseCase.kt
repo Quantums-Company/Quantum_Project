@@ -1,5 +1,7 @@
 package org.bytebloom.domain.usecase.crud.packages
 
+import org.bytebloom.domain.exception.EntityValidationException
+import org.bytebloom.domain.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.validator.PackageUpdateInput
@@ -14,7 +16,7 @@ class UpdatePackageUseCase(
         when (val result = validator(input)) {
             is ValidationResult.Valid -> {
                 val existing = packageRepository.getById(input.id)
-                    ?: throw IllegalArgumentException("Package '${input.id}' was not found")
+                    ?: throw ResourceNotFoundException("Package '${input.id}' was not found")
 
                 val updated = Package(
                     id = existing.id,
@@ -28,9 +30,7 @@ class UpdatePackageUseCase(
             }
 
             is ValidationResult.Invalid -> {
-                throw IllegalArgumentException(
-                    result.violations.joinToString(", ")
-                )
+                throw EntityValidationException(result.violations)
             }
         }
     }
