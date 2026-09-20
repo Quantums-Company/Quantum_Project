@@ -47,16 +47,6 @@ import org.bytebloom.domain.validator.VehicleUpdateInput
 import org.bytebloom.domain.validator.WarehouseIdValidator
 import org.bytebloom.domain.validator.WarehouseUpdateInput
 
-/**
- * Runs every Sub-Task 2 CRUD use case (all 16) through a real
- * create -> read -> update -> delete cycle against the live Supabase
- * repositories, then one deliberately invalid call.
- *
- * This is the "end-to-end verification" Main.kt is required to perform:
- * it proves the validators (Sub-Task 3) and the domain exception hierarchy
- * (Sub-Task 4, Strategy B) both work against live data, and that invalid
- * input is rejected without crashing the app.
- */
 class CrudUseCaseRunner(
     warehouseRepository: WarehouseRepository,
     vehicleRepository: VehicleRepository,

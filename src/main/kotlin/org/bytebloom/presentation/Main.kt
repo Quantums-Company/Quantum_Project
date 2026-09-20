@@ -16,7 +16,7 @@ import org.bytebloom.domain.exception.ResourceNotFoundException
 import org.bytebloom.domain.exception.UnknownDataException
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.usecase.dispatch.GreedyFleetDispatchUseCase
+import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
 
 fun formatError(e: Throwable): String = when (e) {
     is EntityValidationException -> "Validation failed: ${e.violations.joinToString("; ")}"

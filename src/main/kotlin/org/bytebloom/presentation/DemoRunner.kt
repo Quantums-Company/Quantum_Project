@@ -39,10 +39,9 @@ import org.bytebloom.domain.usecase.queries.routing.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.queries.routing.VerifyHubLinkUseCase
 import org.bytebloom.domain.usecase.queries.shipment.EstimateShipmentDeliveryUseCase
 import org.bytebloom.domain.usecase.queries.backhaul.BackhaulOpportunity
-import org.bytebloom.domain.usecase.dispatch.GreedyFleetDispatchUseCase
+import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
 import org.bytebloom.domain.model.Route
-import org.bytebloom.domain.usecase.dispatch.DispatchResult
-import org.bytebloom.domain.usecase.dispatch.zonesCovered
+import org.bytebloom.domain.usecase.greedy.DispatchResult
 
 class DemoRunner(
     private val warehouseRepository: WarehouseRepository,
@@ -782,7 +781,13 @@ private fun formatDispatchReport(targetZones: Set<String>, result: DispatchResul
         |Coverage: $coverageStatus
     """.trimMargin()
 }
+private fun zonesCovered(vehicle: Vehicle, allRoutes: List<Route>): Set<String> {
+    val directRouteZones = allRoutes
+        .filter { route -> route.originWarehouse.id == vehicle.currentWarehouse.id }
+        .map { route -> route.destinationWarehouse.regionalZone }
 
+    return (sequenceOf(vehicle.currentWarehouse.regionalZone) + directRouteZones).toSet()
+}
 fun demonstrateGreedyDispatcher(
     warehouses: List<Warehouse>,
     vehicles: List<Vehicle>,

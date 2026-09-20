@@ -1,28 +1,6 @@
-package org.bytebloom.domain.usecase.dispatch
+package org.bytebloom.domain.usecase.greedy
 
 import org.bytebloom.domain.model.Vehicle
-
-data class DispatchResult(
-    val selectedVehicles: List<Vehicle>,
-    val coveredZones: Set<String>,
-    val uncoveredZones: Set<String>
-) {
-    val isFullyCovered: Boolean
-        get() = uncoveredZones.isEmpty()
-}
-
-
-private data class DispatchState(
-    val uncoveredZones: Set<String>,
-    val coveredZones: Set<String>,
-    val selectedVehicles: List<Vehicle>,
-    val candidateVehicles: List<Vehicle>
-)
-
-private data class VehicleCoverageGain(
-    val vehicle: Vehicle,
-    val newZones: Set<String>
-)
 
 /**
  * Greedy solver for the set-covering problem: given a set of target zones and a
@@ -72,6 +50,18 @@ class GreedyFleetDispatchUseCase {
             uncoveredZones = finalState.uncoveredZones
         )
     }
+
+    private data class DispatchState(
+        val uncoveredZones: Set<String>,
+        val coveredZones: Set<String>,
+        val selectedVehicles: List<Vehicle>,
+        val candidateVehicles: List<Vehicle>
+    )
+
+    private data class VehicleCoverageGain(
+        val vehicle: Vehicle,
+        val newZones: Set<String>
+    )
 
     private tailrec fun dispatchStep(
         state: DispatchState,
