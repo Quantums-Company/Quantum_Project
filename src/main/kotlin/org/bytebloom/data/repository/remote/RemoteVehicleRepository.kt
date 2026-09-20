@@ -6,6 +6,7 @@ import org.bytebloom.data.source.remote.VehicleRemoteDataSource
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.VehicleRepository
+import java.time.Instant
 
 class RemoteVehicleRepository(
     private val warehousesById: Map<String, Warehouse>,
@@ -33,6 +34,7 @@ class RemoteVehicleRepository(
 
     private fun Vehicle.toRequestDto() = VehicleRequestDto(
         id = id, currentWarehouseId = currentWarehouse.id,
-        maxCapacityKg = maxCapacityKg, costPerKm = costPerKm
+        maxCapacityKg = maxCapacityKg, costPerKm = costPerKm,
+        updatedAt = Instant.now().toString()
     )
 }

@@ -6,6 +6,7 @@ import org.bytebloom.data.source.remote.RouteRemoteDataSource
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.RouteRepository
+import java.time.Instant
 
 class RemoteRouteRepository(
     private val warehousesById: Map<String, Warehouse>,
@@ -34,6 +35,7 @@ class RemoteRouteRepository(
     private fun Route.toRequestDto() = RouteRequestDto(
         id = id, originWarehouseId = originWarehouse.id,
         destinationWarehouseId = destinationWarehouse.id,
-        distanceKm = distanceKm, typicalDelayMin = typicalDelayMin
+        distanceKm = distanceKm, typicalDelayMin = typicalDelayMin,
+        updatedAt = Instant.now().toString()
     )
 }
