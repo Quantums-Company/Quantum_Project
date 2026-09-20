@@ -4,14 +4,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-
 data class VehicleResponseDto(
-    @SerialName("vehicleId")
+    @SerialName("id")
     val id: String = "",
-    @SerialName("currentWarehouseId")
+    @SerialName("current_warehouse_id")
     val currentWarehouseId: String = "",
-    @SerialName("maxCapacityKg")
+    @SerialName("max_capacity_kg")
     val maxCapacityKg: Double = 0.0,
-    @SerialName("costPerKm")
-    val costPerKm: Double = 0.0
+    @SerialName("cost_per_km")
+    val costPerKm: Double = 0.0,
+    @SerialName("created_at")
+    val createdAt: String? = null,
+    @SerialName("updated_at")
+    val updatedAt: String? = null
 )

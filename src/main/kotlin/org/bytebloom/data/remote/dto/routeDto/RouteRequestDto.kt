@@ -4,16 +4,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-
-data class RouteRequestDto (
+data class RouteRequestDto(
     @SerialName("id")
     val id: String = "",
-    @SerialName("originWarehouseId")
+    @SerialName("origin_warehouse_id")
     val originWarehouseId: String = "",
-    @SerialName("destinationWarehouseId")
+    @SerialName("destination_warehouse_id")
     val destinationWarehouseId: String = "",
-    @SerialName("distanceKm")
+    @SerialName("distance_km")
     val distanceKm: Double = 0.0,
-    @SerialName("typicalDelayMin")
-    val typicalDelayMin: Int = 0
+    @SerialName("typical_delay_min")
+    val typicalDelayMin: Int = 0,
+    @SerialName("updated_at")
+    val updatedAt: String = ""
 )

@@ -117,7 +117,7 @@ class CsvDataCleaner(
                 CLEANED_DIRECTORY,
                 WAREHOUSES_FILE
             ),
-            header = "id,name,regionalZone,latitude,longitude",
+            header = "id,name,regional_zone,latitude,longitude",
             rows = rows
         )
     }
@@ -140,7 +140,7 @@ class CsvDataCleaner(
                 CLEANED_DIRECTORY,
                 ROUTES_FILE
             ),
-            header = "routeId,originHubId,destinationHubId,distanceKm,typicalDelayMin",
+            header = "id,origin_warehouse_id,destination_warehouse_id,distance_km,typical_delay_min",
             rows = rows
         )
     }
@@ -162,7 +162,7 @@ class CsvDataCleaner(
                 CLEANED_DIRECTORY,
                 VEHICLES_FILE
             ),
-            header = "vehicleId,currentHubId,maxCapacityKg,costPerKm",
+            header = "id,current_warehouse_id,max_capacity_kg,cost_per_km",
             rows = rows
         )
     }
@@ -185,7 +185,7 @@ class CsvDataCleaner(
                 CLEANED_DIRECTORY,
                 PACKAGES_FILE
             ),
-            header = "id,weight,originHubId,destinationHubId,priority",
+            header = "id,weight,origin_warehouse_id,destination_warehouse_id,priority",
             rows = rows
         )
     }

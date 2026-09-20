@@ -6,6 +6,7 @@ import org.bytebloom.data.source.remote.PackageRemoteDataSource
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository
+import java.time.Instant
 
 class RemotePackageRepository(
     private val warehousesById: Map<String, Warehouse>,
@@ -35,6 +36,7 @@ class RemotePackageRepository(
         id = id, weight = weight,
         originWarehouseId = originWarehouse.id,
         destinationWarehouseId = destinationWarehouse.id,
-        priority = priority.name
+        priority = priority.name,
+        updatedAt = Instant.now().toString()
     )
 }

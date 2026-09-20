@@ -9,10 +9,12 @@ data class WarehouseRequestDto(
     val id: String = "",
     @SerialName("name")
     val name: String = "",
-    @SerialName("regionalZone")
+    @SerialName("regional_zone")
     val regionalZone: String = "",
     @SerialName("longitude")
     val longitude: Double = 0.0,
     @SerialName("latitude")
-    val latitude: Double = 0.0
+    val latitude: Double = 0.0,
+    @SerialName("updated_at")
+    val updatedAt: String = ""
 )
