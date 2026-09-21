@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bytebloom.data.mapper.PackageMapper
 import org.bytebloom.data.mapper.WarehouseReferenceMapper
-import org.bytebloom.data.source.PackageDataSource
+import org.bytebloom.data.source.csv.PackageDataSource
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository

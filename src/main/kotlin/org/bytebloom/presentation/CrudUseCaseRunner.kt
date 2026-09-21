@@ -1,10 +1,10 @@
 package org.bytebloom.presentation
 
-import org.bytebloom.domain.exception.DatabaseConflictException
-import org.bytebloom.domain.exception.EntityValidationException
-import org.bytebloom.domain.exception.NetworkUnavailableException
-import org.bytebloom.domain.exception.ResourceNotFoundException
-import org.bytebloom.domain.exception.UnknownDataException
+import org.bytebloom.domain.model.exception.DatabaseConflictException
+import org.bytebloom.domain.model.exception.EntityValidationException
+import org.bytebloom.domain.model.exception.NetworkUnavailableException
+import org.bytebloom.domain.model.exception.ResourceNotFoundException
+import org.bytebloom.domain.model.exception.UnknownDataException
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Route

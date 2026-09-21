@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bytebloom.data.mapper.VehicleMapper
 import org.bytebloom.data.mapper.WarehouseReferenceMapper
-import org.bytebloom.data.source.VehicleDataSource
+import org.bytebloom.data.source.csv.VehicleDataSource
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.VehicleRepository

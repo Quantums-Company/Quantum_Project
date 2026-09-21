@@ -1,10 +1,10 @@
 package org.bytebloom.data.local.cleaner
 
 import kotlinx.coroutines.runBlocking
-import org.bytebloom.data.local.CsvPackageDataSource
-import org.bytebloom.data.local.CsvRouteDataSource
-import org.bytebloom.data.local.CsvVehicleDataSource
-import org.bytebloom.data.local.CsvWarehouseDataSource
+import org.bytebloom.data.local.csv.CsvPackageDataSource
+import org.bytebloom.data.local.csv.CsvRouteDataSource
+import org.bytebloom.data.local.csv.CsvVehicleDataSource
+import org.bytebloom.data.local.csv.CsvWarehouseDataSource
 import org.bytebloom.data.remote.client.SupabaseClientProvider
 
 object CsvUploadRunner {

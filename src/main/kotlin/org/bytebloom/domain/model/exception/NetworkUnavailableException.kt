@@ -1,4 +1,4 @@
-package org.bytebloom.domain.exception
+package org.bytebloom.domain.model.exception
 
 class NetworkUnavailableException(
     message: String = "Could not reach Supabase — check your internet connection.",

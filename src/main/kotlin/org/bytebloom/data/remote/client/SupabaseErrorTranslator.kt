@@ -4,12 +4,13 @@ import io.github.jan.supabase.exceptions.HttpRequestException
 import io.github.jan.supabase.exceptions.RestException
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
-import org.bytebloom.domain.exception.DatabaseConflictException
-import org.bytebloom.domain.exception.DomainException
-import org.bytebloom.domain.exception.EntityValidationException
-import org.bytebloom.domain.exception.NetworkUnavailableException
-import org.bytebloom.domain.exception.ResourceNotFoundException
-import org.bytebloom.domain.exception.UnknownDataException
+import org.bytebloom.domain.model.exception.DatabaseConflictException
+import org.bytebloom.domain.model.exception.DomainException
+import org.bytebloom.domain.model.exception.EntityValidationException
+import org.bytebloom.domain.model.exception.NetworkUnavailableException
+import org.bytebloom.domain.model.exception.ResourceNotFoundException
+import org.bytebloom.domain.model.exception.UnknownDataException
+import org.bytebloom.domain.validator.FieldViolation
 
 object SupabaseErrorTranslator {
 
@@ -43,7 +44,12 @@ object SupabaseErrorTranslator {
                     cause = e
                 )
                 400, 422 -> throw EntityValidationException(
-                    listOf(e.message ?: "Invalid data during $operation")
+                    listOf(
+                        FieldViolation.CustomError(
+                            fieldName = "request",
+                            customMessage = e.message ?: "Invalid data during $operation"
+                        )
+                    )
                 )
                 else -> throw UnknownDataException(
                     message = "Unexpected Supabase error during $operation: ${e.message}",

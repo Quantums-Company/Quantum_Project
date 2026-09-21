@@ -6,13 +6,14 @@ import org.bytebloom.domain.usecase.queries.planing.CargoRecoveryPlan
 import kotlin.math.abs
 import org.bytebloom.util.Logger
 
-private const val MIN_RING_SIZE = 100
-private const val VEHICLE_SLOT_MULTIPLIER = 2
-
 class ConsistentHashingRing(
     packages: Collection<Package>,
     vehicles: Collection<Vehicle>
 ) {
+    companion object{
+        private const val MIN_RING_SIZE = 100
+        private const val VEHICLE_SLOT_MULTIPLIER = 2
+    }
     private val packagesList = packages.toList()
     private val vehiclesList = vehicles.toList()
 

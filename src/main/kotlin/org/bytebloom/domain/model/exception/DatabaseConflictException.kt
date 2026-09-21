@@ -1,4 +1,4 @@
-package org.bytebloom.domain.exception
+package org.bytebloom.domain.model.exception
 
 class DatabaseConflictException(
     message: String,

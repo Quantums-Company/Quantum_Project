@@ -1,4 +1,4 @@
-package org.bytebloom.data.remote
+package org.bytebloom.data.remote.datasource
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
