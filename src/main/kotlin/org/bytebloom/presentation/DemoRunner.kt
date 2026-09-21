@@ -54,6 +54,9 @@ class DemoRunner(
         private const val TRACKING_ID_COUNT = 1000
         private const val DISPLAYED_PAIRS_LIMIT = 10
         private const val PERCENTAGE_MULTIPLIER = 100.0
+        private const val DEFAULT_CANDIDATE_PACKAGES_COUNT = 2
+        private const val ORIGIN_WAREHOUSE_INDEX = 10
+        private const val DESTINATION_WAREHOUSE_INDEX = 20
     }
 
     private val findStationedVehicles = FindStationedVehiclesByCapacityUseCase()
@@ -109,7 +112,13 @@ class DemoRunner(
         runWarehouseQueries(warehouses)
         runPackageQueries(warehouses)
         runVehicleQueries(warehouses, packages)
-        runRoutingQueries(warehouses, findOptimalPath, findFewestHops, verifyHubLink, findAllPairsShortestPath)
+        runRoutingQueries(
+            warehouses,
+            findOptimalPath,
+            findFewestHops,
+            verifyHubLink,
+            findAllPairsShortestPath
+        )
         runShipmentQueries(packages, estimateShipmentDelivery)
         runBackhaulQuery(vehicles, warehouses)
         runRecoveryQuery(vehicles)
@@ -200,7 +209,7 @@ class DemoRunner(
             return
         }
 
-        val requiredCapacityKg = packages.take(2).sumOf(Package::weight)
+        val requiredCapacityKg = packages.take(DEFAULT_CANDIDATE_PACKAGES_COUNT).sumOf(Package::weight)
 
         printResult(
             "Find Stationed Vehicles By Capacity",
@@ -210,7 +219,7 @@ class DemoRunner(
             ).formatVehicles()
         )
 
-        val candidatePackages = packages.take(2)
+        val candidatePackages = packages.take(DEFAULT_CANDIDATE_PACKAGES_COUNT)
 
         printResult(
             "Find Cheapest Suitable Vehicle",
@@ -232,8 +241,8 @@ class DemoRunner(
     ) {
         printSection("ROUTING")
 
-        val origin = warehouses.getOrNull(10)
-        val destination = warehouses.getOrNull(20)
+        val origin = warehouses.getOrNull(ORIGIN_WAREHOUSE_INDEX)
+        val destination = warehouses.getOrNull(DESTINATION_WAREHOUSE_INDEX)
 
         if (origin == null || destination == null) {
             printResult("Routing", "At least two warehouses are required.")
@@ -724,8 +733,10 @@ class DemoRunner(
         if (this.isEmpty()) {
             "No packages found."
         } else {
-            this.joinToString("\n") {
-                "  ${it.id} | ${formatKg(it.weight)} | ${it.originWarehouse.id} -> ${it.destinationWarehouse.id} | ${it.priority}"
+            this.joinToString("\n") { pkg ->
+                val origin = pkg.originWarehouse.id
+                val destination = pkg.destinationWarehouse.id
+                "  ${pkg.id} | ${formatKg(pkg.weight)} | $origin -> $destination | ${pkg.priority}"
             }
         }
 
@@ -733,8 +744,10 @@ class DemoRunner(
         if (this.isEmpty()) {
             "No suitable vehicles found."
         } else {
-            this.joinToString("\n") {
-                "  ${it.id} | capacity=${formatKg(it.maxCapacityKg)} | cost/km=${"%.2f".format(it.costPerKm)}"
+            this.joinToString("\n") { vehicle ->
+                val capacity = formatKg(vehicle.maxCapacityKg)
+                val cost = "%.2f".format(vehicle.costPerKm)
+                "  ${vehicle.id} | capacity=$capacity | cost/km=$cost"
             }
         }
 
@@ -748,20 +761,22 @@ class DemoRunner(
 
     private fun BackhaulOpportunity.formatBackhaul(): String =
         """
-        Vehicle: $vehicleId
-        Outbound: $outboundWarehouseId
-        Return: $returnWarehouseId
-        Selected Packages: ${packages.size}
-        Total Cargo Weight: ${formatKg(totalCargoWeightKg)}
-        Remaining Capacity: ${formatKg(remainingCapacityKg)}
+    Vehicle: $vehicleId
+    Outbound: $outboundWarehouseId
+    Return: $returnWarehouseId
+    Selected Packages: ${packages.size}
+    Total Cargo Weight: ${formatKg(totalCargoWeightKg)}
+    Remaining Capacity: ${formatKg(remainingCapacityKg)}
 
-        Packages:
-        ${
-            packages.joinToString("\n") {
-                "  ${it.id} | ${formatKg(it.weight)} | ${it.originWarehouse.id} -> ${it.destinationWarehouse.id}"
+    Packages:
+    ${
+            packages.joinToString("\n") { pkg ->
+                val origin = pkg.originWarehouse.id
+                val dest = pkg.destinationWarehouse.id
+                "  ${pkg.id} | ${formatKg(pkg.weight)} | $origin -> $dest"
             }
         }
-        """.trimIndent()
+    """.trimIndent()
 
     private fun formatKg(value: Double): String = "${"%.2f".format(value)} kg"
 
@@ -783,8 +798,8 @@ private fun formatDispatchReport(targetZones: Set<String>, result: DispatchResul
 }
 private fun zonesCovered(vehicle: Vehicle, allRoutes: List<Route>): Set<String> {
     val directRouteZones = allRoutes
-        .filter { route -> route.originWarehouse.id == vehicle.currentWarehouse.id }
-        .map { route -> route.destinationWarehouse.regionalZone }
+        .filter { it.originWarehouse.id == vehicle.currentWarehouse.id }
+        .map { it.destinationWarehouse.regionalZone }
 
     return (sequenceOf(vehicle.currentWarehouse.regionalZone) + directRouteZones).toSet()
 }

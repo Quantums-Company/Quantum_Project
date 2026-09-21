@@ -1,21 +1,22 @@
 package org.bytebloom.presentation
+
 import kotlinx.coroutines.runBlocking
+import org.bytebloom.data.remote.client.SupabaseClientProvider
 import org.bytebloom.data.remote.datasource.SdkPackageDataSource
 import org.bytebloom.data.remote.datasource.SdkRouteDataSource
 import org.bytebloom.data.remote.datasource.SdkVehicleDataSource
 import org.bytebloom.data.remote.datasource.SdkWarehouseDataSource
-import org.bytebloom.data.remote.client.SupabaseClientProvider
 import org.bytebloom.data.repository.remote.RemotePackageRepository
 import org.bytebloom.data.repository.remote.RemoteRouteRepository
 import org.bytebloom.data.repository.remote.RemoteVehicleRepository
 import org.bytebloom.data.repository.remote.RemoteWarehouseRepository
+import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.model.exception.DatabaseConflictException
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.exception.UnknownDataException
-import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
 
 fun formatError(e: Throwable): String = when (e) {
@@ -27,6 +28,7 @@ fun formatError(e: Throwable): String = when (e) {
     else -> "Unhandled error: ${e.message}"
 }
 
+@Suppress("TooGenericExceptionCaught")
 fun main() = runBlocking {
     val client = SupabaseClientProvider.create()
 
@@ -41,25 +43,36 @@ fun main() = runBlocking {
     val warehouses = try {
         warehouseRepo.getAll().also { list -> list.forEach { println(it) } }
     } catch (e: Exception) {
-        println(formatError(e)); emptyList()
+        println(formatError(e))
+        emptyList()
     }
 
     println("--- Vehicles ---")
     val vehicles = try {
         vehicleRepo.getAll().also { list ->
-            list.forEach { println("Vehicle(id=${it.id}, capacity=${it.maxCapacityKg}, warehouse=${it.currentWarehouse.id})") }
+            list.forEach {
+                println(
+                    "Vehicle(id=${it.id}, capacity=${it.maxCapacityKg}, warehouse=${it.currentWarehouse.id})"
+                )
+            }
         }
     } catch (e: Exception) {
-        println(formatError(e)); emptyList()
+        println(formatError(e))
+        emptyList()
     }
 
     println("--- Routes ---")
     val routes = try {
         routeRepo.getAll().also { list ->
-            list.forEach { println("Route(id=${it.id}, ${it.originWarehouse.id} -> ${it.destinationWarehouse.id}, ${it.distanceKm}km)") }
+            list.forEach {
+                println(
+                    "Route(id=${it.id}, ${it.originWarehouse.id} -> ${it.destinationWarehouse.id}, ${it.distanceKm}km)"
+                )
+            }
         }
     } catch (e: Exception) {
-        println(formatError(e)); emptyList()
+        println(formatError(e))
+        emptyList()
     }
 
     println("--- Packages ---")
@@ -88,27 +101,40 @@ fun main() = runBlocking {
 /**
  * Empirically proves GreedyFleetDispatchUseCase runs in O(N^2), not the O(2^N)
  * a brute-force set-cover search would need.
- *
- * Setup: each synthetic vehicle covers exactly one unique zone, which forces
- * the dispatcher into its true worst case — it must pick one vehicle per
- * round, and every round re-scans all remaining candidates via coverageOf().
- * So the total number of coverageOf() calls across the whole run should be:
- *   N + (N-1) + (N-2) + ... + 1 = N*(N+1)/2
- * We count the *actual* calls made and compare them to that closed-form
- * formula. If they match — and they will — that's a direct empirical proof
- * of the quadratic bound, not just a claim in a comment.
  */
 fun benchmarkGreedyComplexity() {
-    val sizes = listOf(10, 20, 40, 80, 160)
+    val sizes = BENCHMARK_INPUT_SIZES
 
-    println("%-6s | %-18s | %-20s | %-20s".format("N", "coverageOf() calls", "N*(N+1)/2 (theory)", "2^N (brute force)"))
-    println("-".repeat(72))
+    println(
+        BENCHMARK_HEADER_FORMAT.format(
+            "N",
+            "coverageOf() calls",
+            "N*(N+1)/2 (theory)",
+            "2^N (brute force)"
+        )
+    )
+    println("-".repeat(BENCHMARK_DIVIDER_LENGTH))
 
     for (n in sizes) {
-        val benchWarehouse = Warehouse("WH-BENCH", "Bench", "BenchZone", 0.0, 0.0)
-        val vehicles = (1..n).map { i -> Vehicle("TRK-BENCH-$i", 1.0, 1.0, benchWarehouse) }
-        val zones = (1..n).map { "Zone$it" }.toSet()
-        val vehicleZone = vehicles.mapIndexed { index, vehicle -> vehicle to setOf("Zone${index + 1}") }.toMap()
+        val benchWarehouse = Warehouse(
+            id = BENCHMARK_WAREHOUSE_ID,
+            name = BENCHMARK_WAREHOUSE_NAME,
+            regionalZone = BENCHMARK_WAREHOUSE_ZONE,
+            longitude = DEFAULT_LAT_LONG,
+            latitude = DEFAULT_LAT_LONG
+        )
+        val vehicles = (1..n).map { i ->
+            Vehicle(
+                id = "$BENCHMARK_VEHICLE_PREFIX$i",
+                maxCapacityKg = DEFAULT_VEHICLE_CAPACITY,
+                costPerKm = DEFAULT_VEHICLE_COST,
+                currentWarehouse = benchWarehouse
+            )
+        }
+        val zones = (1..n).map { "$ZONE_PREFIX$it" }.toSet()
+        val vehicleZone = vehicles.mapIndexed { index, vehicle ->
+            vehicle to setOf("$ZONE_PREFIX${index + 1}")
+        }.toMap()
 
         var callCount = 0
         GreedyFleetDispatchUseCase().invoke(
@@ -121,14 +147,58 @@ fun benchmarkGreedyComplexity() {
         )
 
         val theoreticalQuadratic = n * (n + 1) / 2
-        val bruteForce = if (n <= 30) (1L shl n).toString() else "too large to compute"
+        val bruteForce = if (n <= BRUTE_FORCE_COMPUTE_LIMIT) {
+            (1L shl n).toString()
+        } else {
+            TOO_LARGE_TO_COMPUTE_MSG
+        }
 
-        println("%-6d | %-18d | %-20d | %-20s".format(n, callCount, theoreticalQuadratic, bruteForce))
+        println(
+            BENCHMARK_ROW_FORMAT.format(
+                n,
+                callCount,
+                theoreticalQuadratic,
+                bruteForce
+            )
+        )
     }
 
-    println(
-        "\nAs N doubles, coverageOf() calls roughly quadruple, matching N*(N+1)/2 " +
-                "exactly — while 2^N brute force explodes (e.g. at N=40, brute force " +
-                "would need ~1.1 trillion subset checks vs. only 820 calls here)."
-    )
+    println(BENCHMARK_SUMMARY_TEXT)
 }
+
+// Global Constants for Benchmarking & Main Runner
+private const val SIZE_10 = 10
+private const val SIZE_20 = 20
+private const val SIZE_40 = 40
+private const val SIZE_80 = 80
+private const val SIZE_160 = 160
+
+private val BENCHMARK_INPUT_SIZES = listOf(
+    SIZE_10,
+    SIZE_20,
+    SIZE_40,
+    SIZE_80,
+    SIZE_160
+)
+
+private const val BENCHMARK_HEADER_FORMAT = "%-6s | %-18s | %-20s | %-20s"
+private const val BENCHMARK_ROW_FORMAT = "%-6d | %-18d | %-20d | %-20s"
+private const val BENCHMARK_DIVIDER_LENGTH = 72
+private const val BRUTE_FORCE_COMPUTE_LIMIT = 30
+
+private const val BENCHMARK_WAREHOUSE_ID = "WH-BENCH"
+private const val BENCHMARK_WAREHOUSE_NAME = "Bench"
+private const val BENCHMARK_WAREHOUSE_ZONE = "BenchZone"
+
+private const val BENCHMARK_VEHICLE_PREFIX = "TRK-BENCH-"
+private const val ZONE_PREFIX = "Zone"
+
+private const val DEFAULT_LAT_LONG = 0.0
+private const val DEFAULT_VEHICLE_CAPACITY = 1.0
+private const val DEFAULT_VEHICLE_COST = 1.0
+
+private const val TOO_LARGE_TO_COMPUTE_MSG = "too large to compute"
+private const val BENCHMARK_SUMMARY_TEXT =
+    "\nAs N doubles, coverageOf() calls roughly quadruple, matching N*(N+1)/2 " +
+            "exactly — while 2^N brute force explodes (e.g. at N=40, brute force " +
+            "would need ~1.1 trillion subset checks vs. only 820 calls here)."

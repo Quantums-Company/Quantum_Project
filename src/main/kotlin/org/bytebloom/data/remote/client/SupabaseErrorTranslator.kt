@@ -14,51 +14,52 @@ import org.bytebloom.domain.validator.FieldViolation
 
 object SupabaseErrorTranslator {
 
+    private const val HTTP_BAD_REQUEST = 400
+    private const val HTTP_NOT_FOUND = 404
+    private const val HTTP_CONFLICT = 409
+    private const val HTTP_UNPROCESSABLE_ENTITY = 422
+
+    @Suppress("TooGenericExceptionCaught")
     suspend fun <T> translate(
         operation: String,
         block: suspend () -> T
     ): T {
-        try {
-            return block()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: DomainException) {
-            throw e
-        } catch (e: HttpRequestException) {
-            throw NetworkUnavailableException(
-                message = "Network unavailable during $operation",
-                cause = e
-            )
-        } catch (e: IOException) {
-            throw NetworkUnavailableException(
-                message = "Network unavailable during $operation",
-                cause = e
-            )
-        } catch (e: RestException) {
-            when (e.statusCode) {
-                404 -> throw ResourceNotFoundException(
-                    "Resource not found during $operation"
-                )
-                409 -> throw DatabaseConflictException(
-                    message = "Database conflict during $operation",
-                    cause = e
-                )
-                400, 422 -> throw EntityValidationException(
-                    listOf(
-                        FieldViolation.CustomError(
-                            fieldName = "request",
-                            customMessage = e.message ?: "Invalid data during $operation"
-                        )
-                    )
-                )
-                else -> throw UnknownDataException(
-                    message = "Unexpected Supabase error during $operation: ${e.message}",
-                    cause = e
-                )
-            }
+        return try {
+            block()
         } catch (e: Exception) {
-            throw UnknownDataException(
-                message = "Unexpected error during $operation: ${e.message}",
+            throw mapThrowable(e, operation)
+        }
+    }
+
+    private fun mapThrowable(e: Exception, operation: String): Throwable = when (e) {
+        is CancellationException -> e
+        is DomainException -> e
+        is HttpRequestException, is IOException -> {
+            NetworkUnavailableException("Network unavailable during $operation", e)
+        }
+        is RestException -> mapRestException(e, operation)
+        else -> UnknownDataException("Unexpected error during $operation: ${e.message}", e)
+    }
+
+    private fun mapRestException(e: RestException, operation: String): DomainException {
+        return when (e.statusCode) {
+            HTTP_NOT_FOUND -> ResourceNotFoundException(
+                message = "Resource not found during $operation",
+            )
+            HTTP_CONFLICT -> DatabaseConflictException(
+                message = "Database conflict during $operation",
+                cause = e
+            )
+            HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE_ENTITY -> EntityValidationException(
+                violations = listOf(
+                    FieldViolation.CustomError(
+                        fieldName = "request",
+                        customMessage = e.message ?: "Invalid data during $operation"
+                    )
+                ),
+            )
+            else -> UnknownDataException(
+                message = "Unexpected Supabase error during $operation: ${e.message}",
                 cause = e
             )
         }

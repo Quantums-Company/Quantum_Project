@@ -5,34 +5,39 @@ import org.bytebloom.domain.model.Warehouse
 class CreateWarehouseValidator {
 
     operator fun invoke(warehouse: Warehouse): ValidationResult {
-        val violations = mutableListOf<FieldViolation>()
+        val violations = buildList {
+            when {
+                warehouse.id.isBlank() -> add(FieldViolation.BlankField("id"))
+                !warehouse.id.startsWith(PREFIX_WAREHOUSE_ID) -> add(
+                    FieldViolation.InvalidPrefix("id", PREFIX_WAREHOUSE_ID)
+                )
+            }
 
-        if (warehouse.id.isBlank()) {
-            violations.add(FieldViolation.BlankField("id"))
-        } else if (!warehouse.id.startsWith("WH-")) {
-            violations.add(FieldViolation.InvalidPrefix("id", "WH-"))
+            if (warehouse.name.isBlank()) {
+                add(FieldViolation.BlankField("name"))
+            }
+
+            if (warehouse.regionalZone.isBlank()) {
+                add(FieldViolation.BlankField("regionalZone"))
+            }
+
+            if (warehouse.latitude !in MIN_LATITUDE..MAX_LATITUDE) {
+                add(FieldViolation.OutOfRange("latitude", MIN_LATITUDE, MAX_LATITUDE))
+            }
+
+            if (warehouse.longitude !in MIN_LONGITUDE..MAX_LONGITUDE) {
+                add(FieldViolation.OutOfRange("longitude", MIN_LONGITUDE, MAX_LONGITUDE))
+            }
         }
 
-        if (warehouse.name.isBlank()) {
-            violations.add(FieldViolation.BlankField("name"))
-        }
+        return if (violations.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(violations)
+    }
 
-        if (warehouse.regionalZone.isBlank()) {
-            violations.add(FieldViolation.BlankField("regionalZone"))
-        }
-
-        if (warehouse.latitude !in -90.0..90.0) {
-            violations.add(FieldViolation.OutOfRange("latitude", -90.0, 90.0))
-        }
-
-        if (warehouse.longitude !in -180.0..180.0) {
-            violations.add(FieldViolation.OutOfRange("longitude", -180.0, 180.0))
-        }
-
-        return if (violations.isEmpty()) {
-            ValidationResult.Valid
-        } else {
-            ValidationResult.Invalid(violations)
-        }
+    companion object {
+        private const val PREFIX_WAREHOUSE_ID = "WH-"
+        private const val MIN_LATITUDE = -90.0
+        private const val MAX_LATITUDE = 90.0
+        private const val MIN_LONGITUDE = -180.0
+        private const val MAX_LONGITUDE = 180.0
     }
 }
