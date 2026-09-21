@@ -5,27 +5,21 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
 
-object PackageDtoMapper {
+class PackageDtoMapper(
+    warehousesById: Map<String, Warehouse>
+) : EntityMapper<PackageResponseDto, Package>(
+    toDomain = { dto ->
+        val origin = warehousesById[dto.originWarehouseId]
+        val destination = warehousesById[dto.destinationWarehouseId]
 
-    fun toDomain(
-        dto: PackageResponseDto,
-        warehousesById: Map<String, Warehouse>
-    ): Package? {
-        val origin = warehousesById[dto.originWarehouseId] ?: return null
-        val destination = warehousesById[dto.destinationWarehouseId] ?: return null
-
-        return Package(
-            id = dto.id,
-            weight = dto.weight,
-            priority = Priority.from(dto.priority),
-            originWarehouse = origin,
-            destinationWarehouse = destination
-        )
+        if (origin != null && destination != null) {
+            Package(
+                id = dto.id,
+                weight = dto.weight,
+                priority = Priority.from(dto.priority),
+                originWarehouse = origin,
+                destinationWarehouse = destination
+            )
+        } else null
     }
-
-    fun toDomainList(
-        dtos: List<PackageResponseDto>,
-        warehousesById: Map<String, Warehouse>
-    ): List<Package> =
-        dtos.mapNotNull { toDomain(it, warehousesById) }
-}
+)

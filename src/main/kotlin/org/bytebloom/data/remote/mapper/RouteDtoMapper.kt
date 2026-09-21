@@ -4,27 +4,21 @@ import org.bytebloom.data.remote.dto.routeDto.RouteResponseDto
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Warehouse
 
-object RouteDtoMapper {
+class RouteDtoMapper(
+    warehousesById: Map<String, Warehouse>
+) : EntityMapper<RouteResponseDto, Route>(
+    toDomain = { dto ->
+        val origin = warehousesById[dto.originWarehouseId]
+        val destination = warehousesById[dto.destinationWarehouseId]
 
-    fun toDomain(
-        dto: RouteResponseDto,
-        warehousesById: Map<String, Warehouse>
-    ): Route? {
-        val origin = warehousesById[dto.originWarehouseId] ?: return null
-        val destination = warehousesById[dto.destinationWarehouseId] ?: return null
-
-        return Route(
-            id = dto.id,
-            distanceKm = dto.distanceKm,
-            typicalDelayMin = dto.typicalDelayMin,
-            originWarehouse = origin,
-            destinationWarehouse = destination
-        )
+        if (origin != null && destination != null) {
+            Route(
+                id = dto.id,
+                distanceKm = dto.distanceKm,
+                typicalDelayMin = dto.typicalDelayMin,
+                originWarehouse = origin,
+                destinationWarehouse = destination
+            )
+        } else null
     }
-
-    fun toDomainList(
-        dtos: List<RouteResponseDto>,
-        warehousesById: Map<String, Warehouse>
-    ): List<Route> =
-        dtos.mapNotNull { toDomain(it, warehousesById) }
-}
+)

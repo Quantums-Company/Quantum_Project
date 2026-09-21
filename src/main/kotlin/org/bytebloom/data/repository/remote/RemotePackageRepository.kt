@@ -13,20 +13,21 @@ class RemotePackageRepository(
     private val remoteDataSource: PackageRemoteDataSource
 ) : PackageRepository {
 
+    val packageDtoMapper = PackageDtoMapper(warehousesById)
     override suspend fun getAll(): List<Package> =
-        PackageDtoMapper.toDomainList(remoteDataSource.loadAll(), warehousesById)
+        packageDtoMapper.mapList(remoteDataSource.loadAll())
 
     override suspend fun getById(id: String): Package? =
-        remoteDataSource.loadById(id)?.let { PackageDtoMapper.toDomain(it, warehousesById) }
+        remoteDataSource.loadById(id)?.let { packageDtoMapper.map(it) }
 
     override suspend fun create(pkg: Package): Package {
         val dto = remoteDataSource.create(pkg.toRequestDto())
-        return dto?.let { PackageDtoMapper.toDomain(it, warehousesById) } ?: pkg
+        return dto?.let { packageDtoMapper.map(it) } ?: pkg
     }
 
     override suspend fun update(pkg: Package): Package {
         val dto = remoteDataSource.update(pkg.id, pkg.toRequestDto())
-        return dto?.let { PackageDtoMapper.toDomain(it, warehousesById) } ?: pkg
+        return dto?.let { packageDtoMapper.map(it) } ?: pkg
     }
 
     override suspend fun delete(id: String): Boolean =
