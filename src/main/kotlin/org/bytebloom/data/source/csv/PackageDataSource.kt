@@ -1,4 +1,4 @@
-package org.bytebloom.data.source
+package org.bytebloom.data.source.csv
 
 import org.bytebloom.data.raw.PackageRaw
 

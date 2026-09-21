@@ -3,44 +3,57 @@ package org.bytebloom.domain.validator
 class UpdateRouteValidator {
 
     operator fun invoke(input: RouteUpdateInput): ValidationResult {
-        val violations = mutableListOf<String>()
-
-        if (input.id.isBlank()) {
-            violations.add("Route ID cannot be blank")
-        } else if (!input.id.startsWith("RT-")) {
-            violations.add("Route ID must start with RT-")
-        }
-
-        val hasAnyUpdate =
-            input.distanceKm != null ||
-                    input.typicalDelayMin != null ||
-                    input.originWarehouse != null ||
-                    input.destinationWarehouse != null
-
-        if (!hasAnyUpdate) {
-            violations.add("At least one field must be provided for update")
-        }
-
-        if (input.distanceKm != null && input.distanceKm <= 0) {
-            violations.add("Distance must be greater than 0")
-        }
-
-        if (input.typicalDelayMin != null && input.typicalDelayMin < 0) {
-            violations.add("Typical delay cannot be negative")
-        }
-
-        if (input.originWarehouse != null && input.originWarehouse.id.isBlank()) {
-            violations.add("Origin warehouse ID cannot be blank")
-        }
-
-        if (input.destinationWarehouse != null && input.destinationWarehouse.id.isBlank()) {
-            violations.add("Destination warehouse ID cannot be blank")
+        val violations = buildList {
+            validateId(input.id)
+            validateHasUpdates(input)
+            validateDistance(input.distanceKm)
+            validateDelay(input.typicalDelayMin)
+            validateWarehouse(input.originWarehouse?.id, "originWarehouse.id")
+            validateWarehouse(input.destinationWarehouse?.id, "destinationWarehouse.id")
         }
 
         return if (violations.isEmpty()) {
-            ValidationResult.Valid()
+            ValidationResult.Valid
         } else {
             ValidationResult.Invalid(violations)
+        }
+    }
+
+    private fun MutableList<FieldViolation>.validateId(id: String) {
+        when {
+            id.isBlank() -> add(FieldViolation.BlankField("id"))
+            !id.startsWith("RT-") -> add(FieldViolation.InvalidPrefix("id", "RT-"))
+        }
+    }
+
+    private fun MutableList<FieldViolation>.validateHasUpdates(input: RouteUpdateInput) {
+        val hasAnyUpdate = listOfNotNull(
+            input.distanceKm,
+            input.typicalDelayMin,
+            input.originWarehouse,
+            input.destinationWarehouse
+        ).isNotEmpty()
+
+        if (!hasAnyUpdate) {
+            add(FieldViolation.NoFieldsProvided("Route"))
+        }
+    }
+
+    private fun MutableList<FieldViolation>.validateDistance(distanceKm: Double?) {
+        if (distanceKm != null && distanceKm <= 0) {
+            add(FieldViolation.NotPositive("distanceKm"))
+        }
+    }
+
+    private fun MutableList<FieldViolation>.validateDelay(typicalDelayMin: Int?) {
+        if (typicalDelayMin != null && typicalDelayMin < 0) {
+            add(FieldViolation.OutOfRange("typicalDelayMin", 0.0, Double.MAX_VALUE))
+        }
+    }
+
+    private fun MutableList<FieldViolation>.validateWarehouse(warehouseId: String?, fieldName: String) {
+        if (warehouseId != null && warehouseId.isBlank()) {
+            add(FieldViolation.BlankField(fieldName))
         }
     }
 }

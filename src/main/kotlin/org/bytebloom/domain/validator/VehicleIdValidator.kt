@@ -3,16 +3,16 @@ package org.bytebloom.domain.validator
 class VehicleIdValidator {
 
     operator fun invoke(id: String): ValidationResult {
-        val violations = mutableListOf<String>()
+        val violations = mutableListOf<FieldViolation>()
 
         if (id.isBlank()) {
-            violations.add("Vehicle ID cannot be blank")
+            violations.add(FieldViolation.BlankField("id"))
         } else if (!id.startsWith("TRK-")) {
-            violations.add("Vehicle ID must start with TRK-")
+            violations.add(FieldViolation.InvalidPrefix("id", "TRK-"))
         }
 
         return if (violations.isEmpty()) {
-            ValidationResult.Valid()
+            ValidationResult.Valid
         } else {
             ValidationResult.Invalid(violations)
         }

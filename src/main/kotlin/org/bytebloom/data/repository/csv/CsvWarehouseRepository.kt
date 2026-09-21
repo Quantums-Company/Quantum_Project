@@ -1,7 +1,7 @@
 package org.bytebloom.data.repository.csv
 
 import org.bytebloom.data.mapper.toDomain
-import org.bytebloom.data.source.WarehouseDataSource
+import org.bytebloom.data.source.csv.WarehouseDataSource
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.util.Logger

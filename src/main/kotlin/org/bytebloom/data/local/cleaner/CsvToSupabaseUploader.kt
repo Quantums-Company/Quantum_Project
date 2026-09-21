@@ -2,16 +2,16 @@ package org.bytebloom.data.local.cleaner
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
-import org.bytebloom.data.local.CsvPackageDataSource
-import org.bytebloom.data.local.CsvRouteDataSource
-import org.bytebloom.data.local.CsvVehicleDataSource
-import org.bytebloom.data.local.CsvWarehouseDataSource
+import org.bytebloom.data.local.csv.CsvPackageDataSource
+import org.bytebloom.data.local.csv.CsvRouteDataSource
+import org.bytebloom.data.local.csv.CsvVehicleDataSource
+import org.bytebloom.data.local.csv.CsvWarehouseDataSource
 import org.bytebloom.data.mapper.PackageMapper
 import org.bytebloom.data.mapper.RouteMapper
 import org.bytebloom.data.mapper.VehicleMapper
 import org.bytebloom.data.mapper.WarehouseReferenceMapper
 import org.bytebloom.data.mapper.toDomain
-import org.bytebloom.data.remote.TableName
+import org.bytebloom.data.remote.datasource.TableName
 import org.bytebloom.data.remote.dto.packageDto.PackageRequestDto
 import org.bytebloom.data.remote.dto.routeDto.RouteRequestDto
 import org.bytebloom.data.remote.dto.vehicleDto.VehicleRequestDto

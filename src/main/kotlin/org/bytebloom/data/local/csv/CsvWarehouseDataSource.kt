@@ -1,13 +1,13 @@
-package org.bytebloom.data.local
+package org.bytebloom.data.local.csv
 
 import org.bytebloom.data.local.common.CsvColumns
+import org.bytebloom.data.local.common.CsvFileReader
 import org.bytebloom.data.local.common.CsvTablesName
 import org.bytebloom.data.local.common.hasExpectedColumns
 import org.bytebloom.data.local.common.hasRequiredValues
-import org.bytebloom.data.local.common.loadCsv
 import org.bytebloom.data.local.common.toValidDouble
 import org.bytebloom.data.raw.WarehouseRaw
-import org.bytebloom.data.source.WarehouseDataSource
+import org.bytebloom.data.source.csv.WarehouseDataSource
 
 class CsvWarehouseDataSource: WarehouseDataSource {
     companion object {
@@ -17,6 +17,8 @@ class CsvWarehouseDataSource: WarehouseDataSource {
         private const val LATITUDE_INDEX = 3
         private const val LONGITUDE_INDEX = 4
     }
+
+    val csvFileReader = CsvFileReader()
 
     fun parseWarehouse(line: String, lineNumber: Int): WarehouseRaw? {
         val columns = line.split(",").map(String::trim)
@@ -51,7 +53,7 @@ class CsvWarehouseDataSource: WarehouseDataSource {
     }
 
     override suspend fun loadAll(): List<WarehouseRaw> =
-        loadCsv(fileName = CsvTablesName.WAREHOUSE, parser = ::parseWarehouse)
+        csvFileReader.loadCsv(fileName = CsvTablesName.WAREHOUSE, parser = ::parseWarehouse)
 
     override suspend fun getById(): List<WarehouseRaw> {
         TODO("Not yet implemented")

@@ -1,14 +1,14 @@
-package org.bytebloom.data.local
+package org.bytebloom.data.local.csv
 
 import org.bytebloom.data.local.common.CsvColumns
+import org.bytebloom.data.local.common.CsvFileReader
 import org.bytebloom.data.local.common.CsvTablesName
 import org.bytebloom.data.local.common.hasExpectedColumns
 import org.bytebloom.data.local.common.hasRequiredValues
-import org.bytebloom.data.local.common.loadCsv
 import org.bytebloom.data.local.common.toValidDouble
 import org.bytebloom.data.local.common.toValidInteger
 import org.bytebloom.data.raw.RouteRaw
-import org.bytebloom.data.source.RouteDataSource
+import org.bytebloom.data.source.csv.RouteDataSource
 
 class CsvRouteDataSource: RouteDataSource {
     companion object {
@@ -18,6 +18,8 @@ class CsvRouteDataSource: RouteDataSource {
         private const val DISTANCE_INDEX = 3
         private const val DELAY_INDEX = 4
     }
+
+    val csvFileReader = CsvFileReader()
 
     fun parseRoute(line: String, lineNumber: Int): RouteRaw? {
         val columns = line.split(",").map(String::trim)
@@ -52,7 +54,7 @@ class CsvRouteDataSource: RouteDataSource {
     }
 
     override suspend fun loadAll(): List<RouteRaw> =
-        loadCsv(fileName = CsvTablesName.ROUTE, parser = ::parseRoute)
+        csvFileReader.loadCsv(fileName = CsvTablesName.ROUTE, parser = ::parseRoute)
 
     override suspend fun getById(): List<RouteRaw> {
         TODO("Not yet implemented")

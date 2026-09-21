@@ -1,6 +1,6 @@
 package org.bytebloom.domain.usecase.crud.route
 
-import org.bytebloom.domain.exception.EntityValidationException
+import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.validator.RouteIdValidator
 import org.bytebloom.domain.validator.ValidationResult

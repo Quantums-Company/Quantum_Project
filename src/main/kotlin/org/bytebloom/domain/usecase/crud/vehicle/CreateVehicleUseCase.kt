@@ -1,6 +1,6 @@
 package org.bytebloom.domain.usecase.crud.vehicle
 
-import org.bytebloom.domain.exception.EntityValidationException
+import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.validator.CreateVehicleValidator
