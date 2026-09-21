@@ -3,16 +3,16 @@ package org.bytebloom.domain.validator
 class WarehouseIdValidator {
 
     operator fun invoke(id: String): ValidationResult {
-        val violations = mutableListOf<String>()
+        val violations = mutableListOf<FieldViolation>()
 
         if (id.isBlank()) {
-            violations.add("Warehouse ID cannot be blank")
+            violations.add(FieldViolation.BlankField("id"))
         } else if (!id.startsWith("WH-")) {
-            violations.add("Warehouse ID must start with WH-")
+            violations.add(FieldViolation.InvalidPrefix("id", "WH-"))
         }
 
         return if (violations.isEmpty()) {
-            ValidationResult.Valid()
+            ValidationResult.Valid
         } else {
             ValidationResult.Invalid(violations)
         }
