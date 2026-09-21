@@ -3,12 +3,12 @@ package org.bytebloom.domain.validator
 class UpdateRouteValidator {
 
     operator fun invoke(input: RouteUpdateInput): ValidationResult {
-        val violations = mutableListOf<String>()
+        val violations = mutableListOf<FieldViolation>()
 
         if (input.id.isBlank()) {
-            violations.add("Route ID cannot be blank")
+            violations.add(FieldViolation.BlankField("id"))
         } else if (!input.id.startsWith("RT-")) {
-            violations.add("Route ID must start with RT-")
+            violations.add(FieldViolation.InvalidPrefix("id", "RT-"))
         }
 
         val hasAnyUpdate =
@@ -18,27 +18,27 @@ class UpdateRouteValidator {
                     input.destinationWarehouse != null
 
         if (!hasAnyUpdate) {
-            violations.add("At least one field must be provided for update")
+            violations.add(FieldViolation.NoFieldsProvided("Route"))
         }
 
         if (input.distanceKm != null && input.distanceKm <= 0) {
-            violations.add("Distance must be greater than 0")
+            violations.add(FieldViolation.NotPositive("distanceKm"))
         }
 
         if (input.typicalDelayMin != null && input.typicalDelayMin < 0) {
-            violations.add("Typical delay cannot be negative")
+            violations.add(FieldViolation.OutOfRange("typicalDelayMin", 0.0, Double.MAX_VALUE))
         }
 
         if (input.originWarehouse != null && input.originWarehouse.id.isBlank()) {
-            violations.add("Origin warehouse ID cannot be blank")
+            violations.add(FieldViolation.BlankField("originWarehouse.id"))
         }
 
         if (input.destinationWarehouse != null && input.destinationWarehouse.id.isBlank()) {
-            violations.add("Destination warehouse ID cannot be blank")
+            violations.add(FieldViolation.BlankField("destinationWarehouse.id"))
         }
 
         return if (violations.isEmpty()) {
-            ValidationResult.Valid()
+            ValidationResult.Valid
         } else {
             ValidationResult.Invalid(violations)
         }

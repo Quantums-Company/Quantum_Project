@@ -5,28 +5,28 @@ import org.bytebloom.domain.model.Vehicle
 class CreateVehicleValidator {
 
     operator fun invoke(vehicle: Vehicle): ValidationResult {
-        val violations = mutableListOf<String>()
+        val violations = mutableListOf<FieldViolation>()
 
         if (vehicle.id.isBlank()) {
-            violations.add("Vehicle ID cannot be blank")
+            violations.add(FieldViolation.BlankField("id"))
         } else if (!vehicle.id.startsWith("TRK-")) {
-            violations.add("Vehicle ID must start with TRK-")
+            violations.add(FieldViolation.InvalidPrefix("id", "TRK-"))
         }
 
         if (vehicle.maxCapacityKg <= 0) {
-            violations.add("Maximum capacity must be greater than 0")
+            violations.add(FieldViolation.NotPositive("maxCapacityKg"))
         }
 
         if (vehicle.costPerKm <= 0) {
-            violations.add("Cost per kilometer must be greater than 0")
+            violations.add(FieldViolation.NotPositive("costPerKm"))
         }
 
         if (vehicle.currentWarehouse.id.isBlank()) {
-            violations.add("Current warehouse ID cannot be blank")
+            violations.add(FieldViolation.BlankField("currentWarehouse.id"))
         }
 
         return if (violations.isEmpty()) {
-            ValidationResult.Valid()
+            ValidationResult.Valid
         } else {
             ValidationResult.Invalid(violations)
         }
