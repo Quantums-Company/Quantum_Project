@@ -6,6 +6,7 @@ import org.bytebloom.data.source.remote.PackageRemoteDataSource
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository
+import org.bytebloom.util.retryWithBackoff
 import java.time.Instant
 
 class RemotePackageRepository(
@@ -13,24 +14,29 @@ class RemotePackageRepository(
     private val remoteDataSource: PackageRemoteDataSource
 ) : PackageRepository {
 
-    override suspend fun getAll(): List<Package> =
-        PackageDtoMapper.toDomainList(remoteDataSource.loadAll(), warehousesById)
+    override suspend fun getAll(): List<Package> {
+        val dtos = retryWithBackoff { remoteDataSource.loadAll() }.getOrThrow()
+        return PackageDtoMapper.toDomainList(dtos, warehousesById)
+    }
 
-    override suspend fun getById(id: String): Package? =
-        remoteDataSource.loadById(id)?.let { PackageDtoMapper.toDomain(it, warehousesById) }
+    override suspend fun getById(id: String): Package? {
+        val dto = retryWithBackoff { remoteDataSource.loadById(id) }.getOrThrow()
+        return dto?.let { PackageDtoMapper.toDomain(it, warehousesById) }
+    }
 
     override suspend fun create(pkg: Package): Package {
-        val dto = remoteDataSource.create(pkg.toRequestDto())
+        val dto = retryWithBackoff { remoteDataSource.create(pkg.toRequestDto()) }.getOrThrow()
         return dto?.let { PackageDtoMapper.toDomain(it, warehousesById) } ?: pkg
     }
 
     override suspend fun update(pkg: Package): Package {
-        val dto = remoteDataSource.update(pkg.id, pkg.toRequestDto())
+        val dto = retryWithBackoff { remoteDataSource.update(pkg.id, pkg.toRequestDto()) }.getOrThrow()
         return dto?.let { PackageDtoMapper.toDomain(it, warehousesById) } ?: pkg
     }
 
-    override suspend fun delete(id: String): Boolean =
-        remoteDataSource.delete(id)
+    override suspend fun delete(id: String): Boolean {
+        return retryWithBackoff { remoteDataSource.delete(id) }.getOrThrow()
+    }
 
     private fun Package.toRequestDto() = PackageRequestDto(
         id = id, weight = weight,
