@@ -1,13 +1,13 @@
-package org.bytebloom.data.local
+package org.bytebloom.data.local.csv
 
 import org.bytebloom.data.local.common.CsvColumns
+import org.bytebloom.data.local.common.CsvFileReader
 import org.bytebloom.data.local.common.CsvTablesName
 import org.bytebloom.data.local.common.hasExpectedColumns
 import org.bytebloom.data.local.common.hasRequiredValues
-import org.bytebloom.data.local.common.loadCsv
 import org.bytebloom.data.local.common.toValidDouble
 import org.bytebloom.data.raw.VehicleRaw
-import org.bytebloom.data.source.VehicleDataSource
+import org.bytebloom.data.source.csv.VehicleDataSource
 
 class CsvVehicleDataSource: VehicleDataSource {
     companion object {
@@ -16,6 +16,8 @@ class CsvVehicleDataSource: VehicleDataSource {
         private const val CAPACITY_INDEX = 2
         private const val COST_INDEX = 3
     }
+
+    val csvFileReader = CsvFileReader()
 
     fun parseVehicle(line: String, lineNumber: Int): VehicleRaw? {
         val columns = line.split(",").map(String::trim)
@@ -48,7 +50,7 @@ class CsvVehicleDataSource: VehicleDataSource {
     }
 
     override suspend fun loadAll(): List<VehicleRaw> =
-        loadCsv(fileName = CsvTablesName.FLEET, parser = ::parseVehicle)
+        csvFileReader.loadCsv(fileName = CsvTablesName.FLEET, parser = ::parseVehicle)
 
     override suspend fun getById(): List<VehicleRaw> {
         TODO("Not yet implemented")

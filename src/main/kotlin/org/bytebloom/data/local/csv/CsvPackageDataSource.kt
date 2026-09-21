@@ -1,13 +1,13 @@
-package org.bytebloom.data.local
+package org.bytebloom.data.local.csv
 
 import org.bytebloom.data.local.common.CsvColumns
 import org.bytebloom.data.local.common.CsvTablesName
 import org.bytebloom.data.local.common.hasExpectedColumns
 import org.bytebloom.data.local.common.hasRequiredValues
-import org.bytebloom.data.local.common.loadCsv
+import org.bytebloom.data.local.common.CsvFileReader
 import org.bytebloom.data.local.common.toValidDouble
 import org.bytebloom.data.raw.PackageRaw
-import org.bytebloom.data.source.PackageDataSource
+import org.bytebloom.data.source.csv.PackageDataSource
 import org.bytebloom.domain.model.Priority
 
 class CsvPackageDataSource: PackageDataSource {
@@ -18,6 +18,8 @@ class CsvPackageDataSource: PackageDataSource {
         private const val DESTINATION_INDEX = 3
         private const val PRIORITY_INDEX = 4
     }
+
+    val csvFileReader = CsvFileReader()
 
     private fun parsePackage(line: String, lineNumber: Int): PackageRaw? {
         val columns = line.split(",").map(String::trim)
@@ -55,7 +57,7 @@ class CsvPackageDataSource: PackageDataSource {
         }
     }
     override suspend fun loadAll(): List<PackageRaw> =
-        loadCsv(fileName = CsvTablesName.PACKAGE, parser = ::parsePackage)
+        csvFileReader.loadCsv(fileName = CsvTablesName.PACKAGE, parser = ::parsePackage)
 
     override suspend fun getById(): List<PackageRaw> {
         TODO("Not yet implemented")
