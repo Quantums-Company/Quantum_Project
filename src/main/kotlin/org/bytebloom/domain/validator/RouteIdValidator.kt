@@ -3,16 +3,16 @@ package org.bytebloom.domain.validator
 class RouteIdValidator {
 
     operator fun invoke(id: String): ValidationResult {
-        val violations = mutableListOf<String>()
+        val violations = mutableListOf<FieldViolation>()
 
         if (id.isBlank()) {
-            violations.add("Route ID cannot be blank")
+            violations.add(FieldViolation.BlankField("id"))
         } else if (!id.startsWith("RT-")) {
-            violations.add("Route ID must start with RT-")
+            violations.add(FieldViolation.InvalidPrefix("id", "RT-"))
         }
 
         return if (violations.isEmpty()) {
-            ValidationResult.Valid()
+            ValidationResult.Valid
         } else {
             ValidationResult.Invalid(violations)
         }
