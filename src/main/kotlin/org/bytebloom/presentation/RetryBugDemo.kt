@@ -1,4 +1,4 @@
-package org.bytebloom.scratch
+package org.bytebloom.presentation
 
 import kotlinx.coroutines.runBlocking
 import org.bytebloom.data.remote.client.SupabaseErrorTranslator
