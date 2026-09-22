@@ -13,42 +13,42 @@ class SdkWarehouseDataSource(
 ) : WarehouseRemoteDataSource {
 
     override suspend fun loadAll(): List<WarehouseResponseDto> =
-        SupabaseErrorTranslator.translate("getAll warehouses") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("getAll warehouses") {
                 client.from(TableName.WAREHOUSES).select().decodeList<WarehouseResponseDto>()
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun loadById(id: String): WarehouseResponseDto? =
-        SupabaseErrorTranslator.translate("getById warehouse '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("getById warehouse '$id'") {
                 client.from(TableName.WAREHOUSES)
                     .select { filter { eq("id", id) } }
                     .decodeSingleOrNull<WarehouseResponseDto>()
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun create(request: WarehouseRequestDto): WarehouseResponseDto? =
-        SupabaseErrorTranslator.translate("create warehouse '${request.id}'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("create warehouse '${request.id}'") {
                 client.from(TableName.WAREHOUSES).insert(request)
                 loadById(request.id)
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun update(id: String, request: WarehouseRequestDto): WarehouseResponseDto? =
-        SupabaseErrorTranslator.translate("update warehouse '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("update warehouse '$id'") {
                 client.from(TableName.WAREHOUSES).update(request) { filter { eq("id", id) } }
                 loadById(id)
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun delete(id: String): Boolean =
-        SupabaseErrorTranslator.translate("delete warehouse '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("delete warehouse '$id'") {
                 client.from(TableName.WAREHOUSES).delete { filter { eq("id", id) } }
                 true
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 }
