@@ -33,33 +33,3 @@ class CreatePackageUseCase(
         }
     }
 }
-/*
-
-    suspend operator fun invoke(
-        weight: Double,
-        priority: Priority,
-        originWarehouse: Warehouse,
-        destinationWarehouse: Warehouse
-    ): Package {
-
-        val pkg = Package(
-            id = idGenerator.next(EntityType.PACKAGE.idPrefix),
-            weight = weight,
-            priority = priority,
-            originWarehouse = originWarehouse,
-            destinationWarehouse = destinationWarehouse
-        )
-
-        return when (val result = validator(pkg)) {
-
-            is ValidationResult.Valid -> {
-                packageRepository.create(pkg)
-            }
-
-            is ValidationResult.Invalid -> {
-                throw EntityValidationException(result.violations)
-            }
-        }
-    }
-}
- */
