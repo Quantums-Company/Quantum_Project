@@ -2,6 +2,7 @@ package org.bytebloom.data.remote.client
 
 import io.github.jan.supabase.exceptions.HttpRequestException
 import io.github.jan.supabase.exceptions.RestException
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import org.bytebloom.domain.model.exception.DatabaseConflictException
@@ -11,6 +12,7 @@ import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.exception.UnknownDataException
 import org.bytebloom.domain.validator.FieldViolation
+
 
 object SupabaseErrorTranslator {
 
@@ -34,7 +36,7 @@ object SupabaseErrorTranslator {
     private fun mapThrowable(e: Exception, operation: String): Throwable = when (e) {
         is CancellationException -> e
         is DomainException -> e
-        is HttpRequestException, is IOException -> {
+        is HttpRequestTimeoutException, is HttpRequestException, is IOException -> {
             NetworkUnavailableException("Network unavailable during $operation", e)
         }
         is RestException -> mapRestException(e, operation)

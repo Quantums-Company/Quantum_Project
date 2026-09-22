@@ -2,37 +2,39 @@ package org.bytebloom.util
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import org.bytebloom.domain.model.exception.DomainException
-import org.bytebloom.domain.model.exception.EntityValidationException
 import kotlin.time.Duration.Companion.milliseconds
+import org.bytebloom.domain.model.exception.DomainException
+import org.bytebloom.domain.model.exception.NetworkUnavailableException
 
 suspend fun <T> retryWithBackoff(
     maxRetries: Int = 3,
     initialDelayMs: Long = 1000,
     factor: Double = 2.0,
-    shouldRetry: (DomainException) -> Boolean = { defaultRetryPredicate(it) },
+    shouldRetry: (Exception) -> Boolean = { defaultRetryPredicate(it) },
     block: suspend () -> T
 ): Result<T> {
     var currentDelay = initialDelayMs
-    var attempt = 0
+    var retryCount  = 0
 
     while (true) {
         try {
-            attempt++
+            retryCount ++
             val result = block()
-            if (attempt > 1) {
-                Logger.info("Attempt $attempt succeeded successfully.")
+            if (retryCount  > 1) {
+                Logger.info("Attempt $retryCount  succeeded successfully.")
             }
             return Result.success(result)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: DomainException) {
             val isRetryable = shouldRetry(e)
 
-            if (!isRetryable || attempt >= maxRetries) {
-                Logger.warning("Operation failed permanently on attempt $attempt. Reason: ${e.message}")
+            if (!isRetryable || retryCount  > maxRetries) {
+                Logger.warning("Operation failed permanently on attempt $retryCount . Reason: ${e.message}")
                 return Result.failure(e)
             }
 
-            Logger.warning("Attempt $attempt failed: ${e.message}. Retrying in ${currentDelay}ms...")
+            Logger.warning("Attempt $retryCount  failed: ${e.message}. Retrying in ${currentDelay}ms...")
 
             delay(currentDelay.milliseconds)
             currentDelay = (currentDelay * factor).toLong()
@@ -45,12 +47,5 @@ suspend fun <T> retryWithBackoff(
  * to keep the handler clean and extensible.
  */
 private fun defaultRetryPredicate(e: Exception): Boolean {
-    if (e is EntityValidationException) return false
-
-    val errorMessage = e.message.orEmpty()
-    val isAuthOrValidationError = errorMessage.contains("401") ||
-            errorMessage.contains("422") ||
-            errorMessage.contains("Unauthorized")
-
-    return !isAuthOrValidationError
+    return e is NetworkUnavailableException
 }
