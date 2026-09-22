@@ -1,25 +1,18 @@
 package org.bytebloom.domain.usecase.crud.packages
 
-import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Package
+import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.validator.PackageIdValidator
-import org.bytebloom.domain.validator.ValidationResult
+import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.id.PackageIdValidator
 
 class GetPackageByIdUseCase(
     private val packageRepository: PackageRepository,
     private val validator: PackageIdValidator
 ) {
-    suspend operator fun invoke(id: String): Package? {
-
+    suspend operator fun invoke(id: String): Package? =
         when (val result = validator(id)) {
-            is ValidationResult.Valid -> {
-                return packageRepository.getById(id)
-            }
-
-            is ValidationResult.Invalid -> {
-                throw EntityValidationException(result.violations)
-            }
+            is ValidationResult.Valid -> packageRepository.getById(id)
+            is ValidationResult.Invalid -> throw EntityValidationException(result.violations)
         }
-    }
 }

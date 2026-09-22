@@ -4,9 +4,9 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.validator.UpdateWarehouseValidator
-import org.bytebloom.domain.validator.ValidationResult
-import org.bytebloom.domain.validator.WarehouseUpdateInput
+import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
+import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validation.input.WarehouseUpdateInput
 
 class UpdateWarehouseUseCase(
     private val warehouseRepository: WarehouseRepository,

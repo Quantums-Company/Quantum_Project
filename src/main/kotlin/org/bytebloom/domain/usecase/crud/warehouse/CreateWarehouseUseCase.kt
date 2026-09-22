@@ -3,8 +3,8 @@ package org.bytebloom.domain.usecase.crud.warehouse
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.validator.CreateWarehouseValidator
-import org.bytebloom.domain.validator.ValidationResult
+import org.bytebloom.domain.validator.create.CreateWarehouseValidator
+import org.bytebloom.domain.validation.ValidationResult
 
 class CreateWarehouseUseCase(
     private val warehouseRepository: WarehouseRepository,

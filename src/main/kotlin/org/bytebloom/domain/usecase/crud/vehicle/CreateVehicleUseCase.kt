@@ -3,8 +3,8 @@ package org.bytebloom.domain.usecase.crud.vehicle
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.domain.validator.CreateVehicleValidator
-import org.bytebloom.domain.validator.ValidationResult
+import org.bytebloom.domain.validator.create.CreateVehicleValidator
+import org.bytebloom.domain.validation.ValidationResult
 
 class CreateVehicleUseCase(
     private val vehicleRepository: VehicleRepository,

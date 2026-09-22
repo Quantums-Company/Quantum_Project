@@ -2,8 +2,8 @@ package org.bytebloom.domain.usecase.crud.packages
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.validator.CreatePackageValidator
-import org.bytebloom.domain.validator.ValidationResult
+import org.bytebloom.domain.validator.create.CreatePackageValidator
+import org.bytebloom.domain.validation.ValidationResult
 import org.bytebloom.domain.model.exception.EntityValidationException
 
 class CreatePackageUseCase(

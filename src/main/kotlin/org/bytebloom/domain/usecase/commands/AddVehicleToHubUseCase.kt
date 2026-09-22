@@ -10,7 +10,7 @@ class AddVehicleToHubUseCase {
         vehicle: Vehicle
     ){
         warehouse.addVehicle(vehicle)
-        vehicle.currentWarehouse = warehouse
+        vehicle.reassignedTo(warehouse)
     }
 
 }
