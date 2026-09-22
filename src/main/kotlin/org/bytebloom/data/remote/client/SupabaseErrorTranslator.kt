@@ -53,4 +53,4 @@ object SupabaseErrorTranslator {
             )
             else -> UnknownDataException("Unexpected Supabase error during $operation: ${e.message}", e)
         }
-}
+    }
