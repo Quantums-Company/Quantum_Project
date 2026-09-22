@@ -13,42 +13,42 @@ class SdkPackageDataSource(
 ) : PackageRemoteDataSource {
 
     override suspend fun loadAll(): List<PackageResponseDto> =
-        SupabaseErrorTranslator.translate("getAll packages") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("getAll packages") {
                 client.from(TableName.PACKAGES).select().decodeList<PackageResponseDto>()
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun loadById(id: String): PackageResponseDto? =
-        SupabaseErrorTranslator.translate("getById package '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("getById package '$id'") {
                 client.from(TableName.PACKAGES)
                     .select { filter { eq("id", id) } }
                     .decodeSingleOrNull<PackageResponseDto>()
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun create(request: PackageRequestDto): PackageResponseDto? =
-        SupabaseErrorTranslator.translate("create package '${request.id}'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("create package '${request.id}'") {
                 client.from(TableName.PACKAGES).insert(request)
                 loadById(request.id)
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun update(id: String, request: PackageRequestDto): PackageResponseDto? =
-        SupabaseErrorTranslator.translate("update package '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("update package '$id'") {
                 client.from(TableName.PACKAGES).update(request) { filter { eq("id", id) } }
                 loadById(id)
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun delete(id: String): Boolean =
-        SupabaseErrorTranslator.translate("delete package '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("delete package '$id'") {
                 client.from(TableName.PACKAGES).delete { filter { eq("id", id) } }
                 true
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 }

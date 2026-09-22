@@ -13,42 +13,42 @@ class SdkRouteDataSource(
 ) : RouteRemoteDataSource {
 
     override suspend fun loadAll(): List<RouteResponseDto> =
-        SupabaseErrorTranslator.translate("getAll routes") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("getAll routes") {
                 client.from(TableName.ROUTES).select().decodeList<RouteResponseDto>()
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun loadById(id: String): RouteResponseDto? =
-        SupabaseErrorTranslator.translate("getById route '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("getById route '$id'") {
                 client.from(TableName.ROUTES)
                     .select { filter { eq("id", id) } }
                     .decodeSingleOrNull<RouteResponseDto>()
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun create(request: RouteRequestDto): RouteResponseDto? =
-        SupabaseErrorTranslator.translate("create route '${request.id}'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("create route '${request.id}'") {
                 client.from(TableName.ROUTES).insert(request)
                 loadById(request.id)
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun update(id: String, request: RouteRequestDto): RouteResponseDto? =
-        SupabaseErrorTranslator.translate("update route '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("update route '$id'") {
                 client.from(TableName.ROUTES).update(request) { filter { eq("id", id) } }
                 loadById(id)
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 
     override suspend fun delete(id: String): Boolean =
-        SupabaseErrorTranslator.translate("delete route '$id'") {
-            retryWithBackoff {
+        retryWithBackoff {
+            SupabaseErrorTranslator.translate("delete route '$id'") {
                 client.from(TableName.ROUTES).delete { filter { eq("id", id) } }
                 true
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
 }
