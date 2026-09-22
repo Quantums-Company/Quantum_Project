@@ -186,11 +186,11 @@ private const val BENCHMARK_ROW_FORMAT = "%-6d | %-18d | %-20d | %-20s"
 private const val BENCHMARK_DIVIDER_LENGTH = 72
 private const val BRUTE_FORCE_COMPUTE_LIMIT = 30
 
-private const val BENCHMARK_WAREHOUSE_ID = "WH-BENCH"
+private const val BENCHMARK_WAREHOUSE_ID = "WH-1548877456558878"
 private const val BENCHMARK_WAREHOUSE_NAME = "Bench"
 private const val BENCHMARK_WAREHOUSE_ZONE = "BenchZone"
 
-private const val BENCHMARK_VEHICLE_PREFIX = "TRK-BENCH-"
+private const val BENCHMARK_VEHICLE_PREFIX = "TRK-54554846656465"
 private const val ZONE_PREFIX = "Zone"
 
 private const val DEFAULT_LAT_LONG = 0.0
