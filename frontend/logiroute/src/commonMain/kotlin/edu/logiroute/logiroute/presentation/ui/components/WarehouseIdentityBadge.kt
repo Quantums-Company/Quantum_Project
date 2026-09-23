@@ -15,8 +15,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import edu.logiroute.logiroute.domain.model.RegionZone
 import edu.logiroute.logiroute.domain.model.Warehouse
 import edu.logiroute.logiroute.presentation.ui.extension.zoneBadgeColor
+import edu.logiroute.logiroute.presentation.ui.theme.CharcoalBlue
 import edu.logiroute.logiroute.presentation.ui.theme.InkBlack
 import edu.logiroute.logiroute.presentation.ui.theme.TextPrimary
 import edu.logiroute.logiroute.presentation.ui.theme.TextSecondary
@@ -33,6 +35,7 @@ fun WarehouseIdentityBadge(
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .clickable { onClick() }
+            .background(CharcoalBlue)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -63,12 +66,15 @@ fun WarehouseIdentityBadge(
 
         Spacer(modifier = Modifier.width(16.dp))
 
+        val zoneBadgeColor = RegionZone.from(warehouse.regionalZone).zoneBadgeColor
+
         Box(
             modifier = Modifier
                 .width(80.dp)
+                .height(30.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(warehouse.regionalZone.zoneBadgeColor)
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .background(zoneBadgeColor)
+                .padding(horizontal = 2.dp, vertical = 4.dp)
         ) {
             Text(
                 text = warehouse.displayNormalizedZone(),
@@ -76,7 +82,7 @@ fun WarehouseIdentityBadge(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -84,4 +90,4 @@ fun WarehouseIdentityBadge(
 
 private fun Warehouse.displayMonospaceId(): String = "NODE: $id"
 
-private fun Warehouse.displayNormalizedZone(): String = regionalZone.name
+private fun Warehouse.displayNormalizedZone(): String = regionalZone.uppercase()

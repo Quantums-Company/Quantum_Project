@@ -3,12 +3,7 @@ package edu.logiroute.logiroute.presentation.ui.extension
 import androidx.compose.ui.graphics.Color
 import edu.logiroute.logiroute.domain.model.Priority
 import edu.logiroute.logiroute.domain.model.RegionZone
-import edu.logiroute.logiroute.presentation.ui.theme.CharcoalBlue
-import edu.logiroute.logiroute.presentation.ui.theme.CyberSprout
-import edu.logiroute.logiroute.presentation.ui.theme.ErrorRed
-import edu.logiroute.logiroute.presentation.ui.theme.InkBlack
-import edu.logiroute.logiroute.presentation.ui.theme.LightGreen
-import edu.logiroute.logiroute.presentation.ui.theme.TextSecondary
+import edu.logiroute.logiroute.presentation.ui.theme.*
 
 val Priority.brandColors: Pair<Color, Color>
     get() = when (this) {

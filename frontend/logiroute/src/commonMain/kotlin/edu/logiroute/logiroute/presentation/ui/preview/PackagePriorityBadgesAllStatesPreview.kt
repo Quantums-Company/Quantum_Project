@@ -16,10 +16,10 @@ import edu.logiroute.logiroute.presentation.ui.components.PackagePriorityBadge
 @Composable
 @Preview
 fun PackagePriorityBadgesAllStatesPreview(modifier: Modifier = Modifier) {
-    val urgentCargo = Package("PKG-URG-001", 12.5, Priority.from("urgent"), "WH-1", "WH-2")
-    val standardCargo = Package("PKG-STD-092", 5.2, Priority.from("standard"), "WH-1", "WH-2")
-    val lowCargo = Package("PKG-LOW-741", 150.0, Priority.from("lOw"), "WH-1", "WH-2")
-    val longIdCargo = Package("PKG-CRITICAL-LONG-ID-GENERATED-BY-SYSTEM-AX992", 88.0, Priority.URGENT, "WH-1", "WH-2")
+    val urgentCargo = Package("PKG-URG-001", 12.5, "urgent", "WH-1", "WH-2")
+    val standardCargo = Package("PKG-STD-092", 5.2, "standard     ", "WH-1", "WH-2")
+    val lowCargo = Package("PKG-LOW-741", 150.0, "lOw", "WH-1", "WH-2")
+    val longIdCargo = Package("PKG-CRITICAL-LONG-ID-GENERATED-BY-SYSTEM-AX992", 88.0, "URGENT", "WH-1", "WH-2")
 
     Column(
         modifier = modifier

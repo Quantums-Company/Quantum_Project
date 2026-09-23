@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.domain.model.Package
+import edu.logiroute.logiroute.domain.model.Priority
 import edu.logiroute.logiroute.presentation.ui.theme.TextSecondary
 import edu.logiroute.logiroute.presentation.ui.extension.brandColors
 
@@ -26,7 +27,8 @@ fun PackagePriorityBadge(
     cargo: Package,
     modifier: Modifier = Modifier
 ) {
-    val (backgroundColor, textColor) = cargo.priority.brandColors
+    val priorityEnum = Priority.from(cargo.priority)
+    val (backgroundColor, textColor) = priorityEnum.brandColors
 
     Row(
         modifier = modifier
@@ -58,6 +60,6 @@ fun PackagePriorityBadge(
     }
 }
 
-private fun Package.displayTitle(): String = "[$id] ${priority.name}"
+private fun Package.displayTitle(): String = "[$id] ${priority.uppercase()}"
 
 private fun Package.displayWeight(): String = "$weight kg"

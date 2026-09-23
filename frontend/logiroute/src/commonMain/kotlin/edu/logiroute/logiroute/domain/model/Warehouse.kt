@@ -3,7 +3,7 @@ package edu.logiroute.logiroute.domain.model
 data class Warehouse(
     val id: String,
     val name: String,
-    val regionalZone: RegionZone,
+    val regionalZone: String,
     val longitude: Double,
     val latitude: Double,
     val cargoQueue: List<Package> = emptyList(),
@@ -12,6 +12,8 @@ data class Warehouse(
 ){
 
     fun findHighestPriorityCargo(): Package? {
-        return cargoQueue.minByOrNull { it.priority.ordinal }
+        return cargoQueue.minByOrNull { pkg ->
+            Priority.from(pkg.priority).ordinal
+        }
     }
 }

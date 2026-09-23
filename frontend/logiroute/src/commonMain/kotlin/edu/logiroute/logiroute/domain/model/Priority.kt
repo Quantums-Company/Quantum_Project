@@ -14,7 +14,7 @@ enum class Priority {
             }
 
             return when (val normalized = value.trim().uppercase()) {
-                "URGENT" -> URGENT
+                "URGENT","CRITICAL" -> URGENT
                 "STANDARD" -> STANDARD
                 "LOW" -> LOW
                 else -> throw InvalidPriorityException(normalized)

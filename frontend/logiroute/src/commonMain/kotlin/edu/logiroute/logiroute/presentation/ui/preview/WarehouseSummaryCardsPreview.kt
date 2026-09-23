@@ -18,14 +18,14 @@ import edu.logiroute.logiroute.presentation.ui.components.WarehouseSummaryCard
 @Composable
 @Preview
 fun WarehouseSummaryCardsPreview(modifier: Modifier = Modifier) {
-    val standardCargo = Package("PKG-STD-101", 15.0, Priority.from("standard"), "WH-001", "WH-002")
-    val urgentCargo = Package("PKG-URG-202", 45.5, Priority.from("URGENT"), "WH-001", "WH-002")
-    val lowCargo = Package("PKG-LOW-303", 120.0, Priority.from("low"), "WH-001", "WH-002")
+    val standardCargo = Package("PKG-STD-101", 15.0, "standard", "WH-001", "WH-002")
+    val urgentCargo = Package("PKG-URG-202", 45.5, "URGENT       ", "WH-001", "WH-002")
+    val lowCargo = Package("PKG-LOW-303", 120.0, "low", "WH-001", "WH-002")
 
     val activeWarehouse = Warehouse(
         id = "WH-001",
         name = "Central Cargo Terminal - Main Logistics Hub Expansion",
-        regionalZone = RegionZone.from("central"),
+        regionalZone = "central",
         longitude = 35.11,
         latitude = 32.04,
         cargoQueue = listOf(standardCargo, urgentCargo, lowCargo),
@@ -36,7 +36,7 @@ fun WarehouseSummaryCardsPreview(modifier: Modifier = Modifier) {
     val emptyWarehouse = Warehouse(
         id = "WH-002",
         name = "Northern Network Node",
-        regionalZone = RegionZone.from("north"),
+        regionalZone = "north",
         longitude = 34.22,
         latitude = 31.45,
         cargoQueue = emptyList(),
