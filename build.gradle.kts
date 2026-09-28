@@ -25,12 +25,19 @@ dependencies {
     implementation(libs.supabase.postgrest)
     implementation(libs.ktor.client.cio)
     implementation(libs.kotlinx.serialization.json)
+    implementation("io.insert-koin:koin-core:4.2.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("com.google.truth:truth:1.4.5")
+    testImplementation("io.mockk:mockk-jvm:1.14.11")
+    testImplementation("io.insert-koin:koin-test:4.2.2")
+    testImplementation("com.lemonappdev:konsist:0.17.3")
 }
 
 kotlin {
     jvmToolchain(21)
 }
 
-tasks.test {
+tasks.named<Test>("test") {
     useJUnitPlatform()
 }
