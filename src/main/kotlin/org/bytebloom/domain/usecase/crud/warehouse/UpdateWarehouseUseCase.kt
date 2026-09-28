@@ -5,8 +5,8 @@ import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
-import org.bytebloom.domain.validation.ValidationResult
-import org.bytebloom.domain.validation.input.WarehouseUpdateInput
+import org.bytebloom.domain.validator.ValidatorResult
+import org.bytebloom.domain.validator.input.WarehouseUpdateInput
 
 class UpdateWarehouseUseCase(
     private val warehouseRepository: WarehouseRepository,
@@ -14,7 +14,7 @@ class UpdateWarehouseUseCase(
 ) {
     suspend operator fun invoke(input: WarehouseUpdateInput): Warehouse {
         when (val result = validator(input)) {
-            is ValidationResult.Valid -> {
+            is ValidatorResult.Valid -> {
                 val existing = warehouseRepository.getById(input.id)
                     ?: throw ResourceNotFoundException("Warehouse '${input.id}' was not found")
 
@@ -29,7 +29,7 @@ class UpdateWarehouseUseCase(
                 return warehouseRepository.update(updated)
             }
 
-            is ValidationResult.Invalid -> {
+            is ValidatorResult.Invalid -> {
                 throw EntityValidationException(result.violations)
             }
         }

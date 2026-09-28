@@ -2,10 +2,9 @@ package org.bytebloom.domain.model
 
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.sorting.quickSortCargoByWeight
-import org.bytebloom.domain.validation.EntityType
-import org.bytebloom.domain.validation.IdRules
-import org.bytebloom.domain.validation.ValidationField
-import org.bytebloom.domain.validation.ValidationRules
+import org.bytebloom.domain.validator.id.EntityIdValidator
+import org.bytebloom.domain.validator.ValidatorField
+import org.bytebloom.domain.validator.FieldValidator
 
 class Warehouse(
     val id: String,
@@ -15,11 +14,11 @@ class Warehouse(
     val latitude: Double
 ) {
     init {
-        val rules = ValidationRules()
+        val rules = FieldValidator()
         val violations = listOfNotNull(
-            IdRules.validate(id, EntityType.WAREHOUSE),
-            rules.requiredText(name, ValidationField.Name()),
-            rules.requiredText(regionalZone, ValidationField.RegionalZone()),
+            EntityIdValidator().validate(id, EntityType.WAREHOUSE),
+            rules.requiredText(name, ValidatorField.Name()),
+            rules.requiredText(regionalZone, ValidatorField.RegionalZone()),
             rules.latitude(latitude),
             rules.longitude(longitude)
         )

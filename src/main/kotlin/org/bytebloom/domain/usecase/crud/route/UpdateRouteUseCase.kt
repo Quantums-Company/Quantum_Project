@@ -4,9 +4,9 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.validation.input.RouteUpdateInput
+import org.bytebloom.domain.validator.input.RouteUpdateInput
 import org.bytebloom.domain.validator.update.UpdateRouteValidator
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 
 class UpdateRouteUseCase(
     private val routeRepository: RouteRepository,
@@ -14,7 +14,7 @@ class UpdateRouteUseCase(
 ) {
     suspend operator fun invoke(input: RouteUpdateInput): Route {
         when (val result = validator(input)) {
-            is ValidationResult.Valid -> {
+            is ValidatorResult.Valid -> {
                 val existing = routeRepository.getById(input.id)
                     ?: throw ResourceNotFoundException("Route '${input.id}' was not found")
 
@@ -29,7 +29,7 @@ class UpdateRouteUseCase(
                 return routeRepository.update(updated)
             }
 
-            is ValidationResult.Invalid -> {
+            is ValidatorResult.Invalid -> {
                 throw EntityValidationException(result.violations)
             }
         }

@@ -3,7 +3,7 @@ package org.bytebloom.domain.usecase.crud.packages
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 import org.bytebloom.domain.validator.id.PackageIdValidator
 
 class GetPackageByIdUseCase(
@@ -12,7 +12,7 @@ class GetPackageByIdUseCase(
 ) {
     suspend operator fun invoke(id: String): Package? =
         when (val result = validator(id)) {
-            is ValidationResult.Valid -> packageRepository.getById(id)
-            is ValidationResult.Invalid -> throw EntityValidationException(result.violations)
+            is ValidatorResult.Valid -> packageRepository.getById(id)
+            is ValidatorResult.Invalid -> throw EntityValidationException(result.violations)
         }
 }

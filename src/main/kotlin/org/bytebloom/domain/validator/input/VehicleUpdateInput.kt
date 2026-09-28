@@ -1,4 +1,4 @@
-package org.bytebloom.domain.validation.input
+package org.bytebloom.domain.validator.input
 
 import org.bytebloom.domain.model.Warehouse
 

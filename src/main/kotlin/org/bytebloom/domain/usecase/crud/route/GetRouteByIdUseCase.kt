@@ -3,7 +3,7 @@ package org.bytebloom.domain.usecase.crud.route
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 import org.bytebloom.domain.validator.id.RouteIdValidator
 
 class GetRouteByIdUseCase(
@@ -12,7 +12,7 @@ class GetRouteByIdUseCase(
 ) {
     suspend operator fun invoke(id: String): Route? =
         when (val result = validator(id)) {
-            is ValidationResult.Valid ->  routeRepository.getById(id)
-            is ValidationResult.Invalid -> throw EntityValidationException(result.violations)
+            is ValidatorResult.Valid ->  routeRepository.getById(id)
+            is ValidatorResult.Invalid -> throw EntityValidationException(result.violations)
         }
 }
