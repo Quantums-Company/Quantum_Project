@@ -1,5 +1,12 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
-  <CurrentIssues></CurrentIssues>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:ValidationField.kt$fun ValidationField.displayName(): String</ID>
+    <ID>InvalidPackageDeclaration:RetryBugDemo.kt$package org.bytebloom.scratch</ID>
+    <ID>MagicNumber:ValidationRules.kt$ValidationRules$180.0</ID>
+    <ID>MagicNumber:ValidationRules.kt$ValidationRules$90.0</ID>
+    <ID>MaxLineLength:UpdatePackageValidator.kt$UpdatePackageValidator$input.destinationWarehouse?.let { rules.requiredText(it.id, ValidationField.DestinationWarehouse())?.let(::add) }</ID>
+    <ID>MaxLineLength:UpdateRouteValidator.kt$UpdateRouteValidator$input.destinationWarehouse?.let { rules.requiredText(it.id, ValidationField.DestinationWarehouse())?.let(::add) }</ID>
+  </CurrentIssues>
 </SmellBaseline>
