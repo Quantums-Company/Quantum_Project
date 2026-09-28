@@ -14,9 +14,9 @@ class CreateVehicleValidator {
     operator fun invoke(vehicle: Vehicle): ValidatorResult {
         val violations = listOfNotNull(
             EntityIdValidator().validate(vehicle.id, EntityType.VEHICLE),
-            rules.positive(vehicle.maxCapacityKg, ValidatorField.MaxCapacityKg()),
-            rules.positive(vehicle.costPerKm, ValidatorField.CostPerKm()),
-            rules.requiredText(vehicle.currentWarehouse.id, ValidatorField.CurrentWarehouse())
+            rules.positive(vehicle.maxCapacityKg, ValidatorField.MAX_CAPACITY_KG),
+            rules.positive(vehicle.costPerKm, ValidatorField.COST_PER_KM),
+            rules.requiredText(vehicle.currentWarehouse.id, ValidatorField.CURRENT_WAREHOUSE)
         )
         return violations.toValidatorResult()
     }

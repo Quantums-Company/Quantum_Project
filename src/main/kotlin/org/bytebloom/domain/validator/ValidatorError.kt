@@ -34,7 +34,7 @@ sealed class ValidatorError(
     ) : ValidatorError(field)
 
     class NoFieldsProvided(
-        field: ValidatorField.Entity
+        field: ValidatorField
     ) : ValidatorError(field)
 
     class SameWarehouse(
@@ -48,14 +48,14 @@ sealed class ValidatorError(
 }
 
 fun ValidatorError.describe(): String = when (this) {
-    is ValidatorError.Blank -> "${field.displayName()} cannot be blank"
+    is ValidatorError.Blank -> "${field.displayName} cannot be blank"
     is ValidatorError.InvalidIdFormat ->
-        "${field.displayName()} must match ${entityType.idPrefix}<number or UUID>"
-    is ValidatorError.NotPositive -> "${field.displayName()} must be greater than 0"
-    is ValidatorError.NegativeValue -> "${field.displayName()} cannot be negative"
-    is ValidatorError.OutOfRange -> "${field.displayName()} must be between $minimum and $maximum"
-    is ValidatorError.NonFiniteNumber -> "${field.displayName()} must be a finite number"
+        "${field.displayName} must match ${entityType.idPrefix}<number or UUID>"
+    is ValidatorError.NotPositive -> "${field.displayName} must be greater than 0"
+    is ValidatorError.NegativeValue -> "${field.displayName} cannot be negative"
+    is ValidatorError.OutOfRange -> "${field.displayName} must be between $minimum and $maximum"
+    is ValidatorError.NonFiniteNumber -> "${field.displayName} must be a finite number"
     is ValidatorError.NoFieldsProvided -> "At least one field must be provided to update"
-    is ValidatorError.SameWarehouse -> "${field.displayName()} must differ from the other warehouse"
+    is ValidatorError.SameWarehouse -> "${field.displayName} must differ from the other warehouse"
     is ValidatorError.Custom -> message
 }

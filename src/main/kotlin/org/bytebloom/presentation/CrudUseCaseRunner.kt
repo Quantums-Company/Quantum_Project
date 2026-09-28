@@ -1,6 +1,7 @@
 package org.bytebloom.presentation
 
 import kotlinx.coroutines.CancellationException
+import org.bytebloom.data.local.common.UuidIdGenerator
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Route
@@ -36,19 +37,18 @@ import org.bytebloom.domain.validator.create.CreatePackageValidator
 import org.bytebloom.domain.validator.create.CreateRouteValidator
 import org.bytebloom.domain.validator.create.CreateVehicleValidator
 import org.bytebloom.domain.validator.create.CreateWarehouseValidator
-import org.bytebloom.domain.validator.input.PackageUpdateInput
-import org.bytebloom.domain.validator.input.RouteUpdateInput
-import org.bytebloom.domain.validator.update.UpdatePackageValidator
-import org.bytebloom.domain.validator.update.UpdateRouteValidator
-import org.bytebloom.domain.validator.update.UpdateVehicleValidator
-import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
-import org.bytebloom.domain.validator.input.VehicleUpdateInput
-import org.bytebloom.domain.validator.input.WarehouseUpdateInput
 import org.bytebloom.domain.validator.id.PackageIdValidator
 import org.bytebloom.domain.validator.id.RouteIdValidator
 import org.bytebloom.domain.validator.id.VehicleIdValidator
 import org.bytebloom.domain.validator.id.WarehouseIdValidator
-import org.bytebloom.data.local.common.UuidIdGenerator
+import org.bytebloom.domain.validator.input.PackageUpdateInput
+import org.bytebloom.domain.validator.input.RouteUpdateInput
+import org.bytebloom.domain.validator.input.VehicleUpdateInput
+import org.bytebloom.domain.validator.input.WarehouseUpdateInput
+import org.bytebloom.domain.validator.update.UpdatePackageValidator
+import org.bytebloom.domain.validator.update.UpdateRouteValidator
+import org.bytebloom.domain.validator.update.UpdateVehicleValidator
+import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
 
 class CrudUseCaseRunner(
     warehouseRepository: WarehouseRepository,
@@ -83,18 +83,18 @@ class CrudUseCaseRunner(
 
         val origin = safely("create origin warehouse") {
             createWarehouse(
-                    name = ORIGIN_WAREHOUSE_NAME,
-                    regionalZone = ORIGIN_WAREHOUSE_ZONE,
-                    longitude = ORIGIN_WAREHOUSE_LONGITUDE,
-                    latitude = ORIGIN_WAREHOUSE_LATITUDE
-                )
+                name = ORIGIN_WAREHOUSE_NAME,
+                regionalZone = ORIGIN_WAREHOUSE_ZONE,
+                longitude = ORIGIN_WAREHOUSE_LONGITUDE,
+                latitude = ORIGIN_WAREHOUSE_LATITUDE
+            )
         }
         val destination = safely("create destination warehouse") {
             createWarehouse(
-                    name = DEST_WAREHOUSE_NAME,
-                    regionalZone = DEST_WAREHOUSE_ZONE,
-                    longitude = DEST_WAREHOUSE_LONGITUDE,
-                    latitude = DEST_WAREHOUSE_LATITUDE
+                name = DEST_WAREHOUSE_NAME,
+                regionalZone = DEST_WAREHOUSE_ZONE,
+                longitude = DEST_WAREHOUSE_LONGITUDE,
+                latitude = DEST_WAREHOUSE_LATITUDE
             )
         }
 
@@ -138,9 +138,9 @@ class CrudUseCaseRunner(
         warehouse: Warehouse
     ): Vehicle? = safely("vehicle CRUD cycle") {
         val created = createVehicle(
-                maxCapacityKg = INITIAL_VEHICLE_CAPACITY_KG,
-                costPerKm = INITIAL_VEHICLE_COST_PER_KM,
-                currentWarehouse = warehouse
+            maxCapacityKg = INITIAL_VEHICLE_CAPACITY_KG,
+            costPerKm = INITIAL_VEHICLE_COST_PER_KM,
+            currentWarehouse = warehouse
         )
         println("Vehicle created: ${created.id}")
         println("Vehicle fetched: ${getVehicleById(created.id)?.id}")
@@ -159,10 +159,10 @@ class CrudUseCaseRunner(
         destination: Warehouse
     ): Route? = safely("route CRUD cycle") {
         val created = createRoute(
-                distanceKm = INITIAL_ROUTE_DISTANCE_KM,
-                typicalDelayMin = INITIAL_ROUTE_DELAY_MIN,
-                originWarehouse = origin,
-                destinationWarehouse = destination
+            distanceKm = INITIAL_ROUTE_DISTANCE_KM,
+            typicalDelayMin = INITIAL_ROUTE_DELAY_MIN,
+            originWarehouse = origin,
+            destinationWarehouse = destination
         )
         println("Route created: ${created.id}")
         println("Route fetched: ${getRouteById(created.id)?.id}")
@@ -181,11 +181,11 @@ class CrudUseCaseRunner(
         destination: Warehouse
     ): Package? = safely("package CRUD cycle") {
         val created = createPackage(
-                weight = INITIAL_PACKAGE_WEIGHT_KG,
-                priority = Priority.STANDARD,
-                originWarehouse = origin,
-                destinationWarehouse = destination
-            )
+            weight = INITIAL_PACKAGE_WEIGHT_KG,
+            priority = Priority.STANDARD,
+            originWarehouse = origin,
+            destinationWarehouse = destination
+        )
         println("Package created: ${created.id}")
         println("Package fetched: ${getPackageById(created.id)?.id}")
         val updated = updatePackage(
@@ -201,10 +201,10 @@ class CrudUseCaseRunner(
     private suspend fun runDeliberatelyInvalidCreate() {
         try {
             createWarehouse(
-                    name = "",
-                    regionalZone = "",
-                    longitude = INVALID_LAT_LONG,
-                    latitude = INVALID_LAT_LONG
+                name = "",
+                regionalZone = "",
+                longitude = INVALID_LAT_LONG,
+                latitude = INVALID_LAT_LONG
             )
             println("Unexpected: invalid warehouse was accepted!")
         } catch (e: DomainException) {
@@ -236,13 +236,11 @@ class CrudUseCaseRunner(
 
     private companion object {
         // Warehouse Constants
-        private const val ORIGIN_WAREHOUSE_ID = "WH-9001"
         private const val ORIGIN_WAREHOUSE_NAME = "Demo Origin"
         private const val ORIGIN_WAREHOUSE_ZONE = "ZoneA"
         private const val ORIGIN_WAREHOUSE_LONGITUDE = 35.0
         private const val ORIGIN_WAREHOUSE_LATITUDE = 32.0
 
-        private const val DEST_WAREHOUSE_ID = "WH-9002"
         private const val DEST_WAREHOUSE_NAME = "Demo Destination"
         private const val DEST_WAREHOUSE_ZONE = "ZoneB"
         private const val DEST_WAREHOUSE_LONGITUDE = 36.0
@@ -251,19 +249,16 @@ class CrudUseCaseRunner(
         private const val UPDATED_WAREHOUSE_NAME = "Updated Demo Warehouse"
 
         // Vehicle Constants
-        private const val VEHICLE_ID = "TRK-9001"
         private const val INITIAL_VEHICLE_CAPACITY_KG = 500.0
         private const val INITIAL_VEHICLE_COST_PER_KM = 2.5
         private const val UPDATED_VEHICLE_COST_PER_KM = 3.0
 
         // Route Constants
-        private const val ROUTE_ID = "RT-9001"
         private const val INITIAL_ROUTE_DISTANCE_KM = 120.0
         private const val INITIAL_ROUTE_DELAY_MIN = 15
         private const val UPDATED_ROUTE_DISTANCE_KM = 130.0
 
         // Package Constants
-        private const val PACKAGE_ID = "PKG-9001"
         private const val INITIAL_PACKAGE_WEIGHT_KG = 12.5
 
         // Validation Test Constants

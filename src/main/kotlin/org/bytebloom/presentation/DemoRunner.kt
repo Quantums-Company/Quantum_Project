@@ -38,10 +38,10 @@ import org.bytebloom.domain.usecase.queries.routing.FindFewestHopsRouteUseCase
 import org.bytebloom.domain.usecase.queries.routing.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.queries.routing.VerifyHubLinkUseCase
 import org.bytebloom.domain.usecase.queries.shipment.EstimateShipmentDeliveryUseCase
-import org.bytebloom.domain.usecase.queries.backhaul.BackhaulOpportunity
+import org.bytebloom.domain.model.result.BackhaulOpportunity
 import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
 import org.bytebloom.domain.model.Route
-import org.bytebloom.domain.usecase.greedy.DispatchResult
+import org.bytebloom.domain.model.result.DispatchResult
 
 class DemoRunner(
     private val warehouseRepository: WarehouseRepository,

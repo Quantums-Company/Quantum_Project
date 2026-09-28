@@ -16,7 +16,12 @@ class CreatePackageUseCase(
     private val validator: CreatePackageValidator,
     private val idGenerator: IdGenerator
 ) {
-    suspend operator fun invoke( weight: Double, priority: Priority, originWarehouse: Warehouse, destinationWarehouse: Warehouse): Package {
+    suspend operator fun invoke(
+        weight: Double,
+        priority: Priority,
+        originWarehouse: Warehouse,
+        destinationWarehouse: Warehouse
+    ): Package {
 
         val pkg = Package(
             id = idGenerator.next(EntityType.PACKAGE.idPrefix),

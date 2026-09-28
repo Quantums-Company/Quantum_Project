@@ -13,7 +13,7 @@ class EntityIdValidator {
 
     fun validate(id: String, entityType: EntityType): ValidatorError? {
         if (id.isBlank()) {
-            return ValidatorError.Blank(ValidatorField.Id())
+            return ValidatorError.Blank(ValidatorField.ID)
         }
 
         val pattern = Regex(
@@ -23,7 +23,7 @@ class EntityIdValidator {
         return if (pattern.matches(id)) {
             null
         } else {
-            ValidatorError.InvalidIdFormat(field = ValidatorField.Id(), entityType = entityType)
+            ValidatorError.InvalidIdFormat(field = ValidatorField.ID, entityType = entityType)
         }
     }
 

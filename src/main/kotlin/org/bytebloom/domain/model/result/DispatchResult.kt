@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase.greedy
+package org.bytebloom.domain.model.result
 
 import org.bytebloom.domain.model.Vehicle
 
