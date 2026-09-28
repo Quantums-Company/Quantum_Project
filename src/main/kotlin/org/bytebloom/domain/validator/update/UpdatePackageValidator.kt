@@ -17,12 +17,18 @@ class UpdatePackageValidator {
             EntityIdValidator().validate(input.id, EntityType.PACKAGE)?.let(::add)
 
             if (!input.hasUpdates()) {
-                add(ValidatorError.NoFieldsProvided(ValidatorField.Entity()))
+                add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
             }
 
-            input.weight?.let { rules.positive(it, ValidatorField.Weight())?.let(::add) }
-            input.originWarehouse?.let { rules.requiredText(it.id, ValidatorField.OriginWarehouse())?.let(::add) }
-            input.destinationWarehouse?.let { rules.requiredText(it.id, ValidatorField.DestinationWarehouse())?.let(::add) }
+            input.weight?.let {
+                rules.positive(it, ValidatorField.WEIGHT)?.let(::add)
+            }
+            input.originWarehouse?.let {
+                rules.requiredText(it.id, ValidatorField.ORIGIN_WAREHOUSE)?.let(::add)
+            }
+            input.destinationWarehouse?.let {
+                rules.requiredText(it.id, ValidatorField.DESTINATION_WAREHOUSE)?.let(::add)
+            }
         }
         return violations.toValidatorResult()
     }

@@ -14,10 +14,10 @@ class CreateRouteValidator {
     operator fun invoke(route: Route): ValidatorResult {
         val violations = listOfNotNull(
             EntityIdValidator().validate(route.id, EntityType.ROUTE),
-            rules.positive(route.distanceKm, ValidatorField.DistanceKm()),
-            rules.nonNegative(route.typicalDelayMin, ValidatorField.TypicalDelayMin()),
-            rules.requiredText(route.originWarehouse.id, ValidatorField.OriginWarehouse()),
-            rules.requiredText(route.destinationWarehouse.id, ValidatorField.DestinationWarehouse())
+            rules.positive(route.distanceKm, ValidatorField.DISTANCE_KM),
+            rules.nonNegative(route.typicalDelayMin, ValidatorField.TYPICAL_DELAY_MIN),
+            rules.requiredText(route.originWarehouse.id, ValidatorField.ORIGIN_WAREHOUSE),
+            rules.requiredText(route.destinationWarehouse.id, ValidatorField.DESTINATION_WAREHOUSE)
         )
         return violations.toValidatorResult()
     }

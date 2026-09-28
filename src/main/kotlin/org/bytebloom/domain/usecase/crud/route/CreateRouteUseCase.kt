@@ -15,7 +15,12 @@ class CreateRouteUseCase(
     private val validator: CreateRouteValidator,
     private val idGenerator: IdGenerator
 ) {
-    suspend operator fun invoke(distanceKm: Double, typicalDelayMin: Int, originWarehouse: Warehouse, destinationWarehouse: Warehouse): Route {
+    suspend operator fun invoke(
+        distanceKm: Double,
+        typicalDelayMin: Int,
+        originWarehouse: Warehouse,
+        destinationWarehouse: Warehouse
+    ): Route {
 
         val route = Route(
             id = idGenerator.next(EntityType.ROUTE.idPrefix),

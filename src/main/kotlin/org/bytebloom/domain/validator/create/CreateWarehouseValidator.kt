@@ -14,8 +14,8 @@ class CreateWarehouseValidator {
     operator fun invoke(warehouse: Warehouse): ValidatorResult {
         val violations = listOfNotNull(
             EntityIdValidator().validate(warehouse.id, EntityType.WAREHOUSE),
-            rules.requiredText(warehouse.name, ValidatorField.Name()),
-            rules.requiredText(warehouse.regionalZone, ValidatorField.RegionalZone()),
+            rules.requiredText(warehouse.name, ValidatorField.NAME),
+            rules.requiredText(warehouse.regionalZone, ValidatorField.REGIONAL_ZONE),
             rules.latitude(warehouse.latitude),
             rules.longitude(warehouse.longitude)
         )

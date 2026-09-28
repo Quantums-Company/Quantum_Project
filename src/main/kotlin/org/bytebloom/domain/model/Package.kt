@@ -17,9 +17,9 @@ class Package(
         val rules = FieldValidator()
         val violations = buildList {
             EntityIdValidator().validate(id, EntityType.PACKAGE)?.let(::add)
-            rules.positive(weight, ValidatorField.Weight())?.let(::add)
+            rules.positive(weight, ValidatorField.WEIGHT)?.let(::add)
             if (originWarehouse.id == destinationWarehouse.id) {
-                add(ValidatorError.SameWarehouse(ValidatorField.OriginWarehouse()))
+                add(ValidatorError.SameWarehouse(ValidatorField.ORIGIN_WAREHOUSE))
             }
         }
         if (violations.isNotEmpty()) throw EntityValidationException(violations)

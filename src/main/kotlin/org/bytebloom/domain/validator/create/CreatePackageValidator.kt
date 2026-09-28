@@ -14,9 +14,9 @@ class CreatePackageValidator {
     operator fun invoke(pkg: Package): ValidatorResult {
         val violations = listOfNotNull(
             EntityIdValidator().validate(pkg.id, EntityType.PACKAGE),
-            rules.positive(pkg.weight, ValidatorField.Weight()),
-            rules.requiredText(pkg.originWarehouse.id, ValidatorField.OriginWarehouse()),
-            rules.requiredText(pkg.destinationWarehouse.id, ValidatorField.DestinationWarehouse())
+            rules.positive(pkg.weight, ValidatorField.WEIGHT),
+            rules.requiredText(pkg.originWarehouse.id, ValidatorField.ORIGIN_WAREHOUSE),
+            rules.requiredText(pkg.destinationWarehouse.id, ValidatorField.DESTINATION_WAREHOUSE)
         )
         return violations.toValidatorResult()
     }

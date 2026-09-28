@@ -46,7 +46,7 @@ object SupabaseErrorTranslator {
             HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE_ENTITY -> EntityValidationException(
                 violations = listOf(
                     ValidatorError.Custom(
-                        field = ValidatorField.Entity(),
+                        field = ValidatorField.ENTITY,
                         message = e.message ?: "Invalid data during $operation"
                     )
                 )

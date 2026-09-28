@@ -17,11 +17,11 @@ class UpdateWarehouseValidator {
             EntityIdValidator().validate(input.id, EntityType.WAREHOUSE)?.let(::add)
 
             if (!input.hasUpdates()) {
-                add(ValidatorError.NoFieldsProvided(ValidatorField.Entity()))
+                add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
             }
 
-            input.name?.let { rules.requiredText(it, ValidatorField.Name())?.let(::add) }
-            input.regionalZone?.let { rules.requiredText(it, ValidatorField.RegionalZone())?.let(::add) }
+            input.name?.let { rules.requiredText(it, ValidatorField.NAME)?.let(::add) }
+            input.regionalZone?.let { rules.requiredText(it, ValidatorField.REGIONAL_ZONE)?.let(::add) }
             input.latitude?.let { rules.latitude(it)?.let(::add) }
             input.longitude?.let { rules.longitude(it)?.let(::add) }
         }

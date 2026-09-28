@@ -17,8 +17,8 @@ class Warehouse(
         val rules = FieldValidator()
         val violations = listOfNotNull(
             EntityIdValidator().validate(id, EntityType.WAREHOUSE),
-            rules.requiredText(name, ValidatorField.Name()),
-            rules.requiredText(regionalZone, ValidatorField.RegionalZone()),
+            rules.requiredText(name, ValidatorField.NAME),
+            rules.requiredText(regionalZone, ValidatorField.REGIONAL_ZONE),
             rules.latitude(latitude),
             rules.longitude(longitude)
         )

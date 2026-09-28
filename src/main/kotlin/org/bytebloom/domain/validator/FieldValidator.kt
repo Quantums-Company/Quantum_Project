@@ -1,6 +1,12 @@
 package org.bytebloom.domain.validator
 
 class FieldValidator {
+    companion object {
+        private const val MIN_LATITUDE = -90.0
+        private const val MAX_LATITUDE = 90.0
+        private const val MIN_LONGITUDE = -180.0
+        private const val MAX_LONGITUDE = 180.0
+    }
 
     fun requiredText(
         value: String,
@@ -46,15 +52,15 @@ class FieldValidator {
 
         if (!value.isFinite()) {
             return ValidatorError.NonFiniteNumber(
-                ValidatorField.Latitude()
+                ValidatorField.LATITUDE
             )
         }
 
-        return if (value !in -90.0..90.0) {
+        return if (value !in MIN_LATITUDE..MAX_LATITUDE) {
             ValidatorError.OutOfRange(
-                field = ValidatorField.Latitude(),
-                minimum = -90.0,
-                maximum = 90.0
+                field = ValidatorField.LATITUDE,
+                minimum = MIN_LATITUDE,
+                maximum = MAX_LATITUDE
             )
         } else {
             null
@@ -67,15 +73,15 @@ class FieldValidator {
 
         if (!value.isFinite()) {
             return ValidatorError.NonFiniteNumber(
-                ValidatorField.Longitude()
+                ValidatorField.LONGITUDE
             )
         }
 
-        return if (value !in -180.0..180.0) {
+        return if (value !in MIN_LONGITUDE..MAX_LONGITUDE) {
             ValidatorError.OutOfRange(
-                field = ValidatorField.Longitude(),
-                minimum = -180.0,
-                maximum = 180.0
+                field = ValidatorField.LONGITUDE,
+                minimum = MIN_LONGITUDE,
+                maximum = MAX_LONGITUDE
             )
         } else {
             null

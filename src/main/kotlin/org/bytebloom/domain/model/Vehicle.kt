@@ -15,8 +15,8 @@ class Vehicle(
         val rules = FieldValidator()
         val violations = listOfNotNull(
             EntityIdValidator().validate(id, EntityType.VEHICLE),
-            rules.positive(maxCapacityKg, ValidatorField.MaxCapacityKg()),
-            rules.positive(costPerKm, ValidatorField.CostPerKm())
+            rules.positive(maxCapacityKg, ValidatorField.MAX_CAPACITY_KG),
+            rules.positive(costPerKm, ValidatorField.COST_PER_KM)
         )
         if (violations.isNotEmpty()) throw EntityValidationException(violations)
     }
