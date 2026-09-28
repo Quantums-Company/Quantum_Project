@@ -48,6 +48,7 @@ import org.bytebloom.domain.validator.id.PackageIdValidator
 import org.bytebloom.domain.validator.id.RouteIdValidator
 import org.bytebloom.domain.validator.id.VehicleIdValidator
 import org.bytebloom.domain.validator.id.WarehouseIdValidator
+import org.bytebloom.data.local.common.UuidIdGenerator
 
 class CrudUseCaseRunner(
     warehouseRepository: WarehouseRepository,
@@ -55,22 +56,24 @@ class CrudUseCaseRunner(
     routeRepository: RouteRepository,
     packageRepository: PackageRepository
 ) {
-    private val createWarehouse = CreateWarehouseUseCase(warehouseRepository, CreateWarehouseValidator())
+    private val idGenerator = UuidIdGenerator()
+
+    private val createWarehouse = CreateWarehouseUseCase(warehouseRepository, CreateWarehouseValidator(), idGenerator)
     private val getWarehouseById = GetWarehouseByIdUseCase(warehouseRepository, WarehouseIdValidator())
     private val updateWarehouse = UpdateWarehouseUseCase(warehouseRepository, UpdateWarehouseValidator())
     private val deleteWarehouse = DeleteWarehouseUseCase(warehouseRepository, WarehouseIdValidator())
 
-    private val createVehicle = CreateVehicleUseCase(vehicleRepository, CreateVehicleValidator())
+    private val createVehicle = CreateVehicleUseCase(vehicleRepository, CreateVehicleValidator(), idGenerator)
     private val getVehicleById = GetVehicleByIdUseCase(vehicleRepository, VehicleIdValidator())
     private val updateVehicle = UpdateVehicleUseCase(vehicleRepository, UpdateVehicleValidator())
     private val deleteVehicle = DeleteVehicleUseCase(vehicleRepository, VehicleIdValidator())
 
-    private val createRoute = CreateRouteUseCase(routeRepository, CreateRouteValidator())
+    private val createRoute = CreateRouteUseCase(routeRepository, CreateRouteValidator(), idGenerator)
     private val getRouteById = GetRouteByIdUseCase(routeRepository, RouteIdValidator())
     private val updateRoute = UpdateRouteUseCase(routeRepository, UpdateRouteValidator())
     private val deleteRoute = DeleteRouteUseCase(routeRepository, RouteIdValidator())
 
-    private val createPackage = CreatePackageUseCase(packageRepository, CreatePackageValidator())
+    private val createPackage = CreatePackageUseCase(packageRepository, CreatePackageValidator(), idGenerator)
     private val getPackageById = GetPackageByIdUseCase(packageRepository, PackageIdValidator())
     private val updatePackage = UpdatePackageUseCase(packageRepository, UpdatePackageValidator())
     private val deletePackage = DeletePackageUseCase(packageRepository, PackageIdValidator())
@@ -80,24 +83,18 @@ class CrudUseCaseRunner(
 
         val origin = safely("create origin warehouse") {
             createWarehouse(
-                Warehouse(
-                    id = ORIGIN_WAREHOUSE_ID,
                     name = ORIGIN_WAREHOUSE_NAME,
                     regionalZone = ORIGIN_WAREHOUSE_ZONE,
                     longitude = ORIGIN_WAREHOUSE_LONGITUDE,
                     latitude = ORIGIN_WAREHOUSE_LATITUDE
                 )
-            )
         }
         val destination = safely("create destination warehouse") {
             createWarehouse(
-                Warehouse(
-                    id = DEST_WAREHOUSE_ID,
                     name = DEST_WAREHOUSE_NAME,
                     regionalZone = DEST_WAREHOUSE_ZONE,
                     longitude = DEST_WAREHOUSE_LONGITUDE,
                     latitude = DEST_WAREHOUSE_LATITUDE
-                )
             )
         }
 
@@ -141,12 +138,9 @@ class CrudUseCaseRunner(
         warehouse: Warehouse
     ): Vehicle? = safely("vehicle CRUD cycle") {
         val created = createVehicle(
-            Vehicle(
-                id = VEHICLE_ID,
                 maxCapacityKg = INITIAL_VEHICLE_CAPACITY_KG,
                 costPerKm = INITIAL_VEHICLE_COST_PER_KM,
                 currentWarehouse = warehouse
-            )
         )
         println("Vehicle created: ${created.id}")
         println("Vehicle fetched: ${getVehicleById(created.id)?.id}")
@@ -165,13 +159,10 @@ class CrudUseCaseRunner(
         destination: Warehouse
     ): Route? = safely("route CRUD cycle") {
         val created = createRoute(
-            Route(
-                id = ROUTE_ID,
                 distanceKm = INITIAL_ROUTE_DISTANCE_KM,
                 typicalDelayMin = INITIAL_ROUTE_DELAY_MIN,
                 originWarehouse = origin,
                 destinationWarehouse = destination
-            )
         )
         println("Route created: ${created.id}")
         println("Route fetched: ${getRouteById(created.id)?.id}")
@@ -190,14 +181,11 @@ class CrudUseCaseRunner(
         destination: Warehouse
     ): Package? = safely("package CRUD cycle") {
         val created = createPackage(
-            Package(
-                id = PACKAGE_ID,
                 weight = INITIAL_PACKAGE_WEIGHT_KG,
                 priority = Priority.STANDARD,
                 originWarehouse = origin,
                 destinationWarehouse = destination
             )
-        )
         println("Package created: ${created.id}")
         println("Package fetched: ${getPackageById(created.id)?.id}")
         val updated = updatePackage(
@@ -213,13 +201,10 @@ class CrudUseCaseRunner(
     private suspend fun runDeliberatelyInvalidCreate() {
         try {
             createWarehouse(
-                Warehouse(
-                    id = "",
                     name = "",
                     regionalZone = "",
                     longitude = INVALID_LAT_LONG,
                     latitude = INVALID_LAT_LONG
-                )
             )
             println("Unexpected: invalid warehouse was accepted!")
         } catch (e: DomainException) {
