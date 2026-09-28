@@ -1,6 +1,7 @@
 package org.bytebloom.domain.usecase.greedy
 
 import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.model.result.DispatchResult
 
 /**
  * Greedy solver for the set-covering problem: given a set of target zones and a

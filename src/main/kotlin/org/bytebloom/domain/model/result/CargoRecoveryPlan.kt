@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase.queries.planing
+package org.bytebloom.domain.model.result
 
 data class CargoRecoveryPlan(
     val failedVehicleId: String,

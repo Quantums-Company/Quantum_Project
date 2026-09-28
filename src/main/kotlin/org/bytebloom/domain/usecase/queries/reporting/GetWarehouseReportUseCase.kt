@@ -3,6 +3,7 @@ package org.bytebloom.domain.usecase.queries.reporting
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.model.result.WarehouseReport
 
 class GetWarehouseReportUseCase(
     private val warehouseRepository: WarehouseRepository,

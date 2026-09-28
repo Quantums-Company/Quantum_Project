@@ -2,8 +2,7 @@ package org.bytebloom.domain.vehicleReshuffling
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.usecase.queries.planing.CargoRecoveryPlan
-import kotlin.math.abs
+import org.bytebloom.domain.model.result.CargoRecoveryPlan
 import org.bytebloom.util.Logger
 
 class ConsistentHashingRing(

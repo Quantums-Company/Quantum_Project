@@ -3,6 +3,7 @@ package org.bytebloom.domain.usecase.queries.backhaul
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.model.result.BackhaulOpportunity
 import org.bytebloom.domain.repository.PackageRepository
 
 class FindBackhaulOpportunityUseCase(

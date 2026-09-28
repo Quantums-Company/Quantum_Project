@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase.queries.backhaul
+package org.bytebloom.domain.model.result
 
 import org.bytebloom.domain.model.Package
 
