@@ -4,9 +4,9 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.validation.input.PackageUpdateInput
+import org.bytebloom.domain.validator.input.PackageUpdateInput
 import org.bytebloom.domain.validator.update.UpdatePackageValidator
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 
 class UpdatePackageUseCase(
     private val packageRepository: PackageRepository,
@@ -14,7 +14,7 @@ class UpdatePackageUseCase(
 ) {
     suspend operator fun invoke(input: PackageUpdateInput): Package {
         when (val result = validator(input)) {
-            is ValidationResult.Valid -> {
+            is ValidatorResult.Valid -> {
                 val existing = packageRepository.getById(input.id)
                     ?: throw ResourceNotFoundException("Package '${input.id}' was not found")
 
@@ -29,7 +29,7 @@ class UpdatePackageUseCase(
                 return packageRepository.update(updated)
             }
 
-            is ValidationResult.Invalid -> {
+            is ValidatorResult.Invalid -> {
                 throw EntityValidationException(result.violations)
             }
         }

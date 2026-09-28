@@ -3,12 +3,12 @@ package org.bytebloom.domain.usecase.crud.packages
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.validator.create.CreatePackageValidator
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.validation.EntityType
+import org.bytebloom.domain.model.EntityType
 
 
 class CreatePackageUseCase(
@@ -27,9 +27,9 @@ class CreatePackageUseCase(
         )
 
         return when (val result = validator(pkg)) {
-            is ValidationResult.Valid -> { packageRepository.create(pkg) }
+            is ValidatorResult.Valid -> { packageRepository.create(pkg) }
 
-            is ValidationResult.Invalid -> { throw EntityValidationException(result.violations) }
+            is ValidatorResult.Invalid -> { throw EntityValidationException(result.violations) }
         }
     }
 }

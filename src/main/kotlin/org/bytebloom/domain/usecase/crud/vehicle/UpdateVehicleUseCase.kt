@@ -5,8 +5,8 @@ import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.validator.update.UpdateVehicleValidator
-import org.bytebloom.domain.validation.ValidationResult
-import org.bytebloom.domain.validation.input.VehicleUpdateInput
+import org.bytebloom.domain.validator.ValidatorResult
+import org.bytebloom.domain.validator.input.VehicleUpdateInput
 
 class UpdateVehicleUseCase(
     private val vehicleRepository: VehicleRepository,
@@ -14,7 +14,7 @@ class UpdateVehicleUseCase(
 ) {
     suspend operator fun invoke(input: VehicleUpdateInput): Vehicle {
         when (val result = validator(input)) {
-            is ValidationResult.Valid -> {
+            is ValidatorResult.Valid -> {
                 val existing = vehicleRepository.getById(input.id)
                     ?: throw ResourceNotFoundException("Vehicle '${input.id}' was not found")
 
@@ -28,7 +28,7 @@ class UpdateVehicleUseCase(
                 return vehicleRepository.update(updated)
             }
 
-            is ValidationResult.Invalid -> {
+            is ValidatorResult.Invalid -> {
                 throw EntityValidationException(result.violations)
             }
         }

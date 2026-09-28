@@ -2,7 +2,7 @@ package org.bytebloom.domain.usecase.crud.route
 
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 import org.bytebloom.domain.validator.id.RouteIdValidator
 
 class DeleteRouteUseCase(
@@ -11,7 +11,7 @@ class DeleteRouteUseCase(
 ) {
     suspend operator fun invoke(id: String): Boolean =
         when (val result = validator(id)) {
-            is ValidationResult.Valid -> routeRepository.delete(id)
-            is ValidationResult.Invalid -> throw EntityValidationException(result.violations)
+            is ValidatorResult.Valid -> routeRepository.delete(id)
+            is ValidatorResult.Invalid -> throw EntityValidationException(result.violations)
         }
 }

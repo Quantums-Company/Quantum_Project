@@ -4,9 +4,9 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.validator.create.CreateWarehouseValidator
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.validation.EntityType
+import org.bytebloom.domain.model.EntityType
 
 class CreateWarehouseUseCase(
     private val warehouseRepository: WarehouseRepository,
@@ -25,9 +25,9 @@ class CreateWarehouseUseCase(
 
         return when (val result = validator(warehouse)) {
 
-            is ValidationResult.Valid -> { warehouseRepository.create(warehouse) }
+            is ValidatorResult.Valid -> { warehouseRepository.create(warehouse) }
 
-            is ValidationResult.Invalid -> { throw EntityValidationException(result.violations) }
+            is ValidatorResult.Invalid -> { throw EntityValidationException(result.violations) }
         }
     }
 }

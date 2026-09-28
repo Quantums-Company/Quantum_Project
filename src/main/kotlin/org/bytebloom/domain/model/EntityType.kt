@@ -1,4 +1,4 @@
-package org.bytebloom.domain.validation
+package org.bytebloom.domain.model
 
 enum class EntityType(
     val idPrefix: String

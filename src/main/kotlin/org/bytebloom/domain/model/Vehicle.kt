@@ -1,10 +1,9 @@
 package org.bytebloom.domain.model
 
 import org.bytebloom.domain.model.exception.EntityValidationException
-import org.bytebloom.domain.validation.EntityType
-import org.bytebloom.domain.validation.IdRules
-import org.bytebloom.domain.validation.ValidationField
-import org.bytebloom.domain.validation.ValidationRules
+import org.bytebloom.domain.validator.id.EntityIdValidator
+import org.bytebloom.domain.validator.ValidatorField
+import org.bytebloom.domain.validator.FieldValidator
 
 class Vehicle(
     val id: String,
@@ -13,11 +12,11 @@ class Vehicle(
     val currentWarehouse: Warehouse   // كانت var — لازم val، شرح تحت
 ) {
     init {
-        val rules = ValidationRules()
+        val rules = FieldValidator()
         val violations = listOfNotNull(
-            IdRules.validate(id, EntityType.VEHICLE),
-            rules.positive(maxCapacityKg, ValidationField.MaxCapacityKg()),
-            rules.positive(costPerKm, ValidationField.CostPerKm())
+            EntityIdValidator().validate(id, EntityType.VEHICLE),
+            rules.positive(maxCapacityKg, ValidatorField.MaxCapacityKg()),
+            rules.positive(costPerKm, ValidatorField.CostPerKm())
         )
         if (violations.isNotEmpty()) throw EntityValidationException(violations)
     }

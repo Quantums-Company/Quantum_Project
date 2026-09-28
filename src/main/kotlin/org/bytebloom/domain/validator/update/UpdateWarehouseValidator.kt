@@ -1,30 +1,30 @@
 package org.bytebloom.domain.validator.update
 
-import org.bytebloom.domain.validation.EntityType
-import org.bytebloom.domain.validation.IdRules
-import org.bytebloom.domain.validation.ValidationError
-import org.bytebloom.domain.validation.ValidationField
-import org.bytebloom.domain.validation.ValidationResult
-import org.bytebloom.domain.validation.ValidationRules
-import org.bytebloom.domain.validation.input.WarehouseUpdateInput
-import org.bytebloom.domain.validation.toValidationResult
+import org.bytebloom.domain.model.EntityType
+import org.bytebloom.domain.validator.id.EntityIdValidator
+import org.bytebloom.domain.validator.ValidatorError
+import org.bytebloom.domain.validator.ValidatorField
+import org.bytebloom.domain.validator.ValidatorResult
+import org.bytebloom.domain.validator.FieldValidator
+import org.bytebloom.domain.validator.input.WarehouseUpdateInput
+import org.bytebloom.domain.validator.toValidatorResult
 
 class UpdateWarehouseValidator {
-    private val rules = ValidationRules()
+    private val rules = FieldValidator()
 
-    operator fun invoke(input: WarehouseUpdateInput): ValidationResult {
+    operator fun invoke(input: WarehouseUpdateInput): ValidatorResult {
         val violations = buildList {
-            IdRules.validate(input.id, EntityType.WAREHOUSE)?.let(::add)
+            EntityIdValidator().validate(input.id, EntityType.WAREHOUSE)?.let(::add)
 
             if (!input.hasUpdates()) {
-                add(ValidationError.NoFieldsProvided(ValidationField.Entity()))
+                add(ValidatorError.NoFieldsProvided(ValidatorField.Entity()))
             }
 
-            input.name?.let { rules.requiredText(it, ValidationField.Name())?.let(::add) }
-            input.regionalZone?.let { rules.requiredText(it, ValidationField.RegionalZone())?.let(::add) }
+            input.name?.let { rules.requiredText(it, ValidatorField.Name())?.let(::add) }
+            input.regionalZone?.let { rules.requiredText(it, ValidatorField.RegionalZone())?.let(::add) }
             input.latitude?.let { rules.latitude(it)?.let(::add) }
             input.longitude?.let { rules.longitude(it)?.let(::add) }
         }
-        return violations.toValidationResult()
+        return violations.toValidatorResult()
     }
 }

@@ -4,10 +4,10 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.validator.create.CreateVehicleValidator
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.validator.ValidatorResult
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.validation.EntityType
+import org.bytebloom.domain.model.EntityType
 
 
 class CreateVehicleUseCase(
@@ -24,9 +24,9 @@ class CreateVehicleUseCase(
             currentWarehouse = currentWarehouse )
 
         return when (val result = validator(vehicle)) {
-            is ValidationResult.Valid -> { vehicleRepository.create(vehicle) }
+            is ValidatorResult.Valid -> { vehicleRepository.create(vehicle) }
 
-            is ValidationResult.Invalid -> { throw EntityValidationException(result.violations) }
+            is ValidatorResult.Invalid -> { throw EntityValidationException(result.violations) }
         }
     }
 }

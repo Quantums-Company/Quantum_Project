@@ -1,9 +1,9 @@
 package org.bytebloom.domain.validator.id
 
-import org.bytebloom.domain.validation.EntityType
-import org.bytebloom.domain.validation.ValidationResult
+import org.bytebloom.domain.model.EntityType
+import org.bytebloom.domain.validator.ValidatorResult
 
 class VehicleIdValidator {
     private val entityIdValidator = EntityIdValidator()
-    operator fun invoke(id: String): ValidationResult = entityIdValidator(id, EntityType.VEHICLE)
+    operator fun invoke(id: String): ValidatorResult = entityIdValidator(id, EntityType.VEHICLE)
 }
