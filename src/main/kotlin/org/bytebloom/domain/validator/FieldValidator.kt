@@ -1,13 +1,13 @@
-package org.bytebloom.domain.validation
+package org.bytebloom.domain.validator
 
-class ValidationRules {
+class FieldValidator {
 
     fun requiredText(
         value: String,
-        field: ValidationField
-    ): ValidationError? {
+        field: ValidatorField
+    ): ValidatorError? {
         return if (value.isBlank()) {
-            ValidationError.Blank(field)
+            ValidatorError.Blank(field)
         } else {
             null
         }
@@ -15,15 +15,15 @@ class ValidationRules {
 
     fun positive(
         value: Double,
-        field: ValidationField
-    ): ValidationError? {
+        field: ValidatorField
+    ): ValidatorError? {
 
         if (!value.isFinite()) {
-            return ValidationError.NonFiniteNumber(field)
+            return ValidatorError.NonFiniteNumber(field)
         }
 
         return if (value <= 0.0) {
-            ValidationError.NotPositive(field)
+            ValidatorError.NotPositive(field)
         } else {
             null
         }
@@ -31,10 +31,10 @@ class ValidationRules {
 
     fun nonNegative(
         value: Int,
-        field: ValidationField
-    ): ValidationError? {
+        field: ValidatorField
+    ): ValidatorError? {
         return if (value < 0) {
-            ValidationError.NegativeValue(field)
+            ValidatorError.NegativeValue(field)
         } else {
             null
         }
@@ -42,17 +42,17 @@ class ValidationRules {
 
     fun latitude(
         value: Double
-    ): ValidationError? {
+    ): ValidatorError? {
 
         if (!value.isFinite()) {
-            return ValidationError.NonFiniteNumber(
-                ValidationField.Latitude()
+            return ValidatorError.NonFiniteNumber(
+                ValidatorField.Latitude()
             )
         }
 
         return if (value !in -90.0..90.0) {
-            ValidationError.OutOfRange(
-                field = ValidationField.Latitude(),
+            ValidatorError.OutOfRange(
+                field = ValidatorField.Latitude(),
                 minimum = -90.0,
                 maximum = 90.0
             )
@@ -63,17 +63,17 @@ class ValidationRules {
 
     fun longitude(
         value: Double
-    ): ValidationError? {
+    ): ValidatorError? {
 
         if (!value.isFinite()) {
-            return ValidationError.NonFiniteNumber(
-                ValidationField.Longitude()
+            return ValidatorError.NonFiniteNumber(
+                ValidatorField.Longitude()
             )
         }
 
         return if (value !in -180.0..180.0) {
-            ValidationError.OutOfRange(
-                field = ValidationField.Longitude(),
+            ValidatorError.OutOfRange(
+                field = ValidatorField.Longitude(),
                 minimum = -180.0,
                 maximum = 180.0
             )

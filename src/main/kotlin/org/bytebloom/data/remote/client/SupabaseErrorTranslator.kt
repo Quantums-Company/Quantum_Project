@@ -10,8 +10,8 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.exception.UnknownDataException
-import org.bytebloom.domain.validation.ValidationError
-import org.bytebloom.domain.validation.ValidationField
+import org.bytebloom.domain.validator.ValidatorError
+import org.bytebloom.domain.validator.ValidatorField
 
 object SupabaseErrorTranslator {
 
@@ -45,8 +45,8 @@ object SupabaseErrorTranslator {
             HTTP_CONFLICT -> DatabaseConflictException("Database conflict during $operation", e)
             HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE_ENTITY -> EntityValidationException(
                 violations = listOf(
-                    ValidationError.Custom(
-                        field = ValidationField.Entity(),
+                    ValidatorError.Custom(
+                        field = ValidatorField.Entity(),
                         message = e.message ?: "Invalid data during $operation"
                     )
                 )

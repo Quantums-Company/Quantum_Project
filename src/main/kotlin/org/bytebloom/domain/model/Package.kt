@@ -1,11 +1,10 @@
 package org.bytebloom.domain.model
 
 import org.bytebloom.domain.model.exception.EntityValidationException
-import org.bytebloom.domain.validation.EntityType
-import org.bytebloom.domain.validation.IdRules
-import org.bytebloom.domain.validation.ValidationError
-import org.bytebloom.domain.validation.ValidationField
-import org.bytebloom.domain.validation.ValidationRules
+import org.bytebloom.domain.validator.id.EntityIdValidator
+import org.bytebloom.domain.validator.ValidatorError
+import org.bytebloom.domain.validator.ValidatorField
+import org.bytebloom.domain.validator.FieldValidator
 
 class Package(
     val id: String,
@@ -15,12 +14,12 @@ class Package(
     val destinationWarehouse: Warehouse
 ) {
     init {
-        val rules = ValidationRules()
+        val rules = FieldValidator()
         val violations = buildList {
-            IdRules.validate(id, EntityType.PACKAGE)?.let(::add)
-            rules.positive(weight, ValidationField.Weight())?.let(::add)
+            EntityIdValidator().validate(id, EntityType.PACKAGE)?.let(::add)
+            rules.positive(weight, ValidatorField.Weight())?.let(::add)
             if (originWarehouse.id == destinationWarehouse.id) {
-                add(ValidationError.SameWarehouse(ValidationField.OriginWarehouse()))
+                add(ValidatorError.SameWarehouse(ValidatorField.OriginWarehouse()))
             }
         }
         if (violations.isNotEmpty()) throw EntityValidationException(violations)
