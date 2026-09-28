@@ -32,22 +32,22 @@ import org.bytebloom.domain.usecase.crud.warehouse.CreateWarehouseUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.DeleteWarehouseUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.GetWarehouseByIdUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.UpdateWarehouseUseCase
-import org.bytebloom.domain.validator.CreatePackageValidator
-import org.bytebloom.domain.validator.CreateRouteValidator
-import org.bytebloom.domain.validator.CreateVehicleValidator
-import org.bytebloom.domain.validator.CreateWarehouseValidator
-import org.bytebloom.domain.validator.PackageIdValidator
-import org.bytebloom.domain.validator.PackageUpdateInput
-import org.bytebloom.domain.validator.RouteIdValidator
-import org.bytebloom.domain.validator.RouteUpdateInput
-import org.bytebloom.domain.validator.UpdatePackageValidator
-import org.bytebloom.domain.validator.UpdateRouteValidator
-import org.bytebloom.domain.validator.UpdateVehicleValidator
-import org.bytebloom.domain.validator.UpdateWarehouseValidator
-import org.bytebloom.domain.validator.VehicleIdValidator
-import org.bytebloom.domain.validator.VehicleUpdateInput
-import org.bytebloom.domain.validator.WarehouseIdValidator
-import org.bytebloom.domain.validator.WarehouseUpdateInput
+import org.bytebloom.domain.validator.create.CreatePackageValidator
+import org.bytebloom.domain.validator.create.CreateRouteValidator
+import org.bytebloom.domain.validator.create.CreateVehicleValidator
+import org.bytebloom.domain.validator.create.CreateWarehouseValidator
+import org.bytebloom.domain.validation.input.PackageUpdateInput
+import org.bytebloom.domain.validation.input.RouteUpdateInput
+import org.bytebloom.domain.validator.update.UpdatePackageValidator
+import org.bytebloom.domain.validator.update.UpdateRouteValidator
+import org.bytebloom.domain.validator.update.UpdateVehicleValidator
+import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
+import org.bytebloom.domain.validation.input.VehicleUpdateInput
+import org.bytebloom.domain.validation.input.WarehouseUpdateInput
+import org.bytebloom.domain.validator.id.PackageIdValidator
+import org.bytebloom.domain.validator.id.RouteIdValidator
+import org.bytebloom.domain.validator.id.VehicleIdValidator
+import org.bytebloom.domain.validator.id.WarehouseIdValidator
 
 class CrudUseCaseRunner(
     warehouseRepository: WarehouseRepository,
@@ -251,13 +251,13 @@ class CrudUseCaseRunner(
 
     private companion object {
         // Warehouse Constants
-        private const val ORIGIN_WAREHOUSE_ID = "WH-DEMO-1"
+        private const val ORIGIN_WAREHOUSE_ID = "WH-9001"
         private const val ORIGIN_WAREHOUSE_NAME = "Demo Origin"
         private const val ORIGIN_WAREHOUSE_ZONE = "ZoneA"
         private const val ORIGIN_WAREHOUSE_LONGITUDE = 35.0
         private const val ORIGIN_WAREHOUSE_LATITUDE = 32.0
 
-        private const val DEST_WAREHOUSE_ID = "WH-DEMO-2"
+        private const val DEST_WAREHOUSE_ID = "WH-9002"
         private const val DEST_WAREHOUSE_NAME = "Demo Destination"
         private const val DEST_WAREHOUSE_ZONE = "ZoneB"
         private const val DEST_WAREHOUSE_LONGITUDE = 36.0
@@ -266,19 +266,19 @@ class CrudUseCaseRunner(
         private const val UPDATED_WAREHOUSE_NAME = "Updated Demo Warehouse"
 
         // Vehicle Constants
-        private const val VEHICLE_ID = "TRK-DEMO-1"
+        private const val VEHICLE_ID = "TRK-9001"
         private const val INITIAL_VEHICLE_CAPACITY_KG = 500.0
         private const val INITIAL_VEHICLE_COST_PER_KM = 2.5
         private const val UPDATED_VEHICLE_COST_PER_KM = 3.0
 
         // Route Constants
-        private const val ROUTE_ID = "RT-DEMO-1"
+        private const val ROUTE_ID = "RT-9001"
         private const val INITIAL_ROUTE_DISTANCE_KM = 120.0
         private const val INITIAL_ROUTE_DELAY_MIN = 15
         private const val UPDATED_ROUTE_DISTANCE_KM = 130.0
 
         // Package Constants
-        private const val PACKAGE_ID = "PKG-DEMO-1"
+        private const val PACKAGE_ID = "PKG-9001"
         private const val INITIAL_PACKAGE_WEIGHT_KG = 12.5
 
         // Validation Test Constants

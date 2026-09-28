@@ -4,9 +4,9 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.validator.RouteUpdateInput
-import org.bytebloom.domain.validator.UpdateRouteValidator
-import org.bytebloom.domain.validator.ValidationResult
+import org.bytebloom.domain.validation.input.RouteUpdateInput
+import org.bytebloom.domain.validator.update.UpdateRouteValidator
+import org.bytebloom.domain.validation.ValidationResult
 
 class UpdateRouteUseCase(
     private val routeRepository: RouteRepository,
