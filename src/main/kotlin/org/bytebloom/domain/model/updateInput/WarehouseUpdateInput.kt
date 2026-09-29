@@ -1,4 +1,4 @@
-package org.bytebloom.domain.validator.input
+package org.bytebloom.domain.model.updateInput
 
 data class WarehouseUpdateInput(
     val id: String,

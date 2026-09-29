@@ -5,8 +5,8 @@ import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.validator.update.UpdateVehicleValidator
-import org.bytebloom.domain.validator.ValidatorResult
-import org.bytebloom.domain.validator.input.VehicleUpdateInput
+import org.bytebloom.domain.model.validation.ValidatorResult
+import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
 
 class UpdateVehicleUseCase(
     private val vehicleRepository: VehicleRepository,

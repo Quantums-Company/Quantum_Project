@@ -33,11 +33,10 @@ fun main() = runBlocking {
     val client = SupabaseClientProvider.create()
 
     val warehouseRepo = RemoteWarehouseRepository(SdkWarehouseDataSource(client))
-    val warehousesById = warehouseRepo.getAll().associateBy { it.id }
 
-    val vehicleRepo = RemoteVehicleRepository(warehousesById, SdkVehicleDataSource(client))
-    val routeRepo = RemoteRouteRepository(warehousesById, SdkRouteDataSource(client))
-    val packageRepo = RemotePackageRepository(warehousesById, SdkPackageDataSource(client))
+    val vehicleRepo = RemoteVehicleRepository(warehouseRepo, SdkVehicleDataSource(client))
+    val routeRepo = RemoteRouteRepository(warehouseRepo, SdkRouteDataSource(client))
+    val packageRepo = RemotePackageRepository(warehouseRepo, SdkPackageDataSource(client))
 
     println("--- Warehouses ---")
     val warehouses = try {

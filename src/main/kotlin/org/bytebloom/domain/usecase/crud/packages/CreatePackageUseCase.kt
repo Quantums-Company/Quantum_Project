@@ -3,7 +3,7 @@ package org.bytebloom.domain.usecase.crud.packages
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.validator.create.CreatePackageValidator
-import org.bytebloom.domain.validator.ValidatorResult
+import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
@@ -24,7 +24,7 @@ class CreatePackageUseCase(
     ): Package {
 
         val pkg = Package(
-            id = idGenerator.next(EntityType.PACKAGE.idPrefix),
+            id = idGenerator.next(EntityType.PACKAGE),
             weight = weight,
             priority = priority,
             originWarehouse = originWarehouse,
