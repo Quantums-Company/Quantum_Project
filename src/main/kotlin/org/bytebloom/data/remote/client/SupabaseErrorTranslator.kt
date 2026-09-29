@@ -10,8 +10,8 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.exception.UnknownDataException
-import org.bytebloom.domain.validator.ValidatorError
-import org.bytebloom.domain.validator.ValidatorField
+import org.bytebloom.domain.model.validation.ValidatorError
+import org.bytebloom.domain.model.validation.ValidatorField
 
 object SupabaseErrorTranslator {
 

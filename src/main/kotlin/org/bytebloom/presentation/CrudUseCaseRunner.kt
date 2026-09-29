@@ -41,10 +41,10 @@ import org.bytebloom.domain.validator.id.PackageIdValidator
 import org.bytebloom.domain.validator.id.RouteIdValidator
 import org.bytebloom.domain.validator.id.VehicleIdValidator
 import org.bytebloom.domain.validator.id.WarehouseIdValidator
-import org.bytebloom.domain.validator.input.PackageUpdateInput
-import org.bytebloom.domain.validator.input.RouteUpdateInput
-import org.bytebloom.domain.validator.input.VehicleUpdateInput
-import org.bytebloom.domain.validator.input.WarehouseUpdateInput
+import org.bytebloom.domain.model.updateInput.PackageUpdateInput
+import org.bytebloom.domain.model.updateInput.RouteUpdateInput
+import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
+import org.bytebloom.domain.model.updateInput.WarehouseUpdateInput
 import org.bytebloom.domain.validator.update.UpdatePackageValidator
 import org.bytebloom.domain.validator.update.UpdateRouteValidator
 import org.bytebloom.domain.validator.update.UpdateVehicleValidator
