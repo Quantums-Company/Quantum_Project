@@ -19,11 +19,7 @@ class UpdatePackageValidator {
             if (!input.hasUpdates()) {
                 add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
             }
-            if (
-                input.originWarehouse != null &&
-                input.destinationWarehouse != null &&
-                input.originWarehouse.id == input.destinationWarehouse.id
-            ) {
+            if (hasSameWarehouse(input)) {
                 add(ValidatorError.SameWarehouse(ValidatorField.ORIGIN_WAREHOUSE))
             }
 
@@ -39,4 +35,8 @@ class UpdatePackageValidator {
         }
         return violations.toValidatorResult()
     }
+    private fun hasSameWarehouse(input: PackageUpdateInput): Boolean =
+        input.originWarehouse != null &&
+                input.destinationWarehouse != null &&
+                input.originWarehouse.id == input.destinationWarehouse.id
 }
