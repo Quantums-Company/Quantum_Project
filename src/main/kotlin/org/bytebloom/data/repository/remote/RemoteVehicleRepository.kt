@@ -16,7 +16,7 @@ class RemoteVehicleRepository(
     private suspend fun mapper() = VehicleDtoMapper(warehouseRepository.getAll().associateBy { it.id })
 
     override suspend fun getAll(): List<Vehicle> =
-        mapper() .mapList(remoteDataSource.loadAll())
+        mapper() .mapList(remoteDataSource.loadAll()).succeeded
 
     override suspend fun getById(id: String): Vehicle? =
         remoteDataSource.loadById(id)?.let { mapper() .map(it) }

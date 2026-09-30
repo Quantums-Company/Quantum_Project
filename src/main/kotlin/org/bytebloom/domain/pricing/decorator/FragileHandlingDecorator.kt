@@ -1,22 +1,21 @@
 package org.bytebloom.domain.pricing.decorator
 
 import org.bytebloom.domain.model.Package
+import org.bytebloom.domain.model.exception.EntityValidationException
+import org.bytebloom.domain.model.validation.ValidatorError
+import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.pricing.core.PackageComponent
-import org.bytebloom.util.Logger
 
 class FragileHandlingDecorator(
     component: PackageComponent,
-    fee: Double
+    private val fee: Double
 ) : PackageDecorator(component) {
 
-    private val fee: Double = if (fee < 0.0) {
-        Logger.warning("Fragile handling fee cannot be negative. Using 0.0 instead.")
-        0.0
-    } else {
-        fee
+    init {
+        if (fee < 0.0) {
+            throw EntityValidationException(listOf(ValidatorError.NegativeValue(ValidatorField.FEE)))
+        }
     }
 
-    override suspend fun getTransitRate(pkg: Package): Double? {
-        return super.getTransitRate(pkg)?.plus(fee)
-    }
+    override suspend fun getTransitRate(pkg: Package): Double? = super.getTransitRate(pkg)?.plus(fee)
 }

@@ -4,7 +4,6 @@ import org.bytebloom.data.mapper.toDomain
 import org.bytebloom.data.source.csv.WarehouseDataSource
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.util.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -18,7 +17,6 @@ class CsvWarehouseRepository(
 
     suspend fun refresh() {
         mutex.withLock {
-            Logger.info("Refreshing warehouses...")
             cachedWarehouses = csvWarehouseDataSource.loadAll().toDomain()
             isLoaded = true
         }

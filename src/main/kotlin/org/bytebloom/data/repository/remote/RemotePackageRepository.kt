@@ -16,7 +16,7 @@ class RemotePackageRepository(
     private suspend fun mapper() = PackageDtoMapper(warehouseRepository.getAll().associateBy { it.id })
 
     override suspend fun getAll(): List<Package> =
-        mapper().mapList(remoteDataSource.loadAll())
+        mapper().mapList(remoteDataSource.loadAll()).succeeded
 
     override suspend fun getById(id: String): Package? =
         remoteDataSource.loadById(id)?.let { mapper().map(it) }

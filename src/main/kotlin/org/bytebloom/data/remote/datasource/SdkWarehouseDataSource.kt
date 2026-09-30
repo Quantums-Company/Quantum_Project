@@ -6,7 +6,7 @@ import org.bytebloom.data.remote.client.SupabaseErrorTranslator
 import org.bytebloom.data.remote.dto.warehouseDto.WarehouseRequestDto
 import org.bytebloom.data.remote.dto.warehouseDto.WarehouseResponseDto
 import org.bytebloom.data.source.remote.WarehouseRemoteDataSource
-import org.bytebloom.util.retryWithBackoff
+import org.bytebloom.data.remote.util.retryWithBackoff
 
 class SdkWarehouseDataSource(
     private val client: SupabaseClient

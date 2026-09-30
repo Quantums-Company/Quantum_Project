@@ -2,8 +2,9 @@ package org.bytebloom.domain.vehicleReshuffling
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.model.exception.ResourceNotFoundException
+import org.bytebloom.domain.model.exception.UnknownDataException
 import org.bytebloom.domain.model.result.CargoRecoveryPlan
-import org.bytebloom.util.Logger
 
 class ConsistentHashingRing(
     packages: Collection<Package>,
@@ -76,63 +77,36 @@ class ConsistentHashingRing(
         return true
     }
 
-    fun createRecoveryPlan(
-        failedVehicle: Vehicle
-    ): CargoRecoveryPlan? {
+    fun createRecoveryPlan(failedVehicle: Vehicle): CargoRecoveryPlan {
+        val failedSlot = findSlotForVehicle(failedVehicle.id)
+            ?: throw ResourceNotFoundException(
+                "Failed vehicle '${failedVehicle.id}' does not exist in the hashing ring."
+            )
 
-        val failedSlot =
-            findSlotForVehicle(failedVehicle.id)
-                ?: run {
-                    Logger.warning(
-                        "Failed vehicle '${failedVehicle.id}' " +
-                                "does not exist in the hashing ring."
-                    )
-                    return null
-                }
-
-        val affectedPackages =
-            getAssignedPackages(failedVehicle)
-
-        val healthyVehicles =
-            _vehicleRing.values.filterNot {
-                it.id.equals(
-                    failedVehicle.id,
-                    ignoreCase = true
-                )
-            }
+        val affectedPackages = getAssignedPackages(failedVehicle)
+        val healthyVehicles = _vehicleRing.values.filterNot {
+            it.id.equals(failedVehicle.id, ignoreCase = true)
+        }
 
         if (healthyVehicles.isEmpty()) {
-            Logger.warning(
-                "No healthy vehicle is available to recover " +
-                        "cargo from vehicle '${failedVehicle.id}'."
+            throw UnknownDataException(
+                "No healthy vehicle is available to recover cargo from vehicle '${failedVehicle.id}'."
             )
-            return null
         }
 
         removeVehicle(failedSlot)
 
-        val assignments =
-            affectedPackages.mapNotNull { pkg ->
-                findVehicleForPackage(pkg.id)?.let { vehicle ->
-                    pkg.id to vehicle.id
-                }
-            }.toMap()
+        val assignments = affectedPackages.mapNotNull { pkg ->
+            findVehicleForPackage(pkg.id)?.let { vehicle -> pkg.id to vehicle.id }
+        }.toMap()
 
-        return CargoRecoveryPlan(
-            failedVehicleId = failedVehicle.id,
-            rescueVehicleByPackageId = assignments
-        )
+        return CargoRecoveryPlan(failedVehicleId = failedVehicle.id, rescueVehicleByPackageId = assignments)
     }
 
     private fun generateVehicleSlots(): List<Int> {
 
-        if (vehiclesList.isEmpty()) {
-            Logger.warning(
-                "At least one vehicle is required. " +
-                        "No vehicle slots generated."
-            )
+        if (vehiclesList.isEmpty())
             return emptyList()
-        }
 
         val step = circleSize / vehiclesList.size
 
@@ -160,12 +134,8 @@ class ConsistentHashingRing(
         packageSlot: Int
     ): Vehicle? {
 
-        if (_vehicleRing.isEmpty()) {
-            Logger.warning(
-                "Vehicle ring cannot be empty."
-            )
+        if (_vehicleRing.isEmpty())
             return null
-        }
 
         return _vehicleRing[packageSlot]
             ?: findNextClockwiseVehicle(packageSlot)
@@ -219,25 +189,11 @@ class ConsistentHashingRing(
         orphanedPackages.forEach { pkg ->
 
             val packageSlot =
-                _packageSlots[pkg]
-
-            if (packageSlot == null) {
-                Logger.warning(
-                    "No hash slot found for package '${pkg.id}'."
-                )
-                return@forEach
-            }
+                _packageSlots[pkg] ?: return@forEach
 
             val nextVehicle =
-                resolveVehicleClockwise(packageSlot)
+                resolveVehicleClockwise(packageSlot) ?: return@forEach
 
-            if (nextVehicle == null) {
-                Logger.warning(
-                    "No vehicle available to reroute " +
-                            "package '${pkg.id}'."
-                )
-                return@forEach
-            }
 
             _assignments
                 .getOrPut(nextVehicle) {
