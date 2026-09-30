@@ -19,6 +19,13 @@ class UpdatePackageValidator {
             if (!input.hasUpdates()) {
                 add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
             }
+            if (
+                input.originWarehouse != null &&
+                input.destinationWarehouse != null &&
+                input.originWarehouse.id == input.destinationWarehouse.id
+            ) {
+                add(ValidatorError.SameWarehouse(ValidatorField.ORIGIN_WAREHOUSE))
+            }
 
             input.weight?.let {
                 rules.positive(it, ValidatorField.WEIGHT)?.let(::add)
