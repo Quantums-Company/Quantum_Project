@@ -79,13 +79,19 @@ class ConsistentHashingRing(
 
     fun createRecoveryPlan(failedVehicle: Vehicle): CargoRecoveryPlan {
         val failedSlot = findSlotForVehicle(failedVehicle.id)
-            ?: throw ResourceNotFoundException("Failed vehicle '${failedVehicle.id}' does not exist in the hashing ring.")
+            ?: throw ResourceNotFoundException(
+                "Failed vehicle '${failedVehicle.id}' does not exist in the hashing ring."
+            )
 
         val affectedPackages = getAssignedPackages(failedVehicle)
-        val healthyVehicles = _vehicleRing.values.filterNot { it.id.equals(failedVehicle.id, ignoreCase = true) }
+        val healthyVehicles = _vehicleRing.values.filterNot {
+            it.id.equals(failedVehicle.id, ignoreCase = true)
+        }
 
         if (healthyVehicles.isEmpty()) {
-            throw UnknownDataException("No healthy vehicle is available to recover cargo from vehicle '${failedVehicle.id}'.")
+            throw UnknownDataException(
+                "No healthy vehicle is available to recover cargo from vehicle '${failedVehicle.id}'."
+            )
         }
 
         removeVehicle(failedSlot)

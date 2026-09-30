@@ -10,6 +10,7 @@ class CsvFileReader {
         const val DEFAULT_CSV_DIRECTORY = "src/resources"
     }
 
+    @Suppress("SwallowedException")
     fun <T> loadCsv(
         csvDirectory: String = DEFAULT_CSV_DIRECTORY,
         fileName: String,
