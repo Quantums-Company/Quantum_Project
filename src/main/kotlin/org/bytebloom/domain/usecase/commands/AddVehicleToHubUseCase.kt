@@ -4,13 +4,9 @@ import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 
 class AddVehicleToHubUseCase {
-
-    operator fun invoke(
-        warehouse: Warehouse,
-        vehicle: Vehicle
-    ){
-        warehouse.addVehicle(vehicle)
-        vehicle.reassignedTo(warehouse)
+    operator fun invoke(warehouse: Warehouse, vehicle: Vehicle): Vehicle {
+        val stationedVehicle = vehicle.reassignedTo(warehouse)
+        warehouse.addVehicle(stationedVehicle)
+        return stationedVehicle
     }
-
 }
