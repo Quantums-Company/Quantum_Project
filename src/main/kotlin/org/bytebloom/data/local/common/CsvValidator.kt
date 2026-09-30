@@ -1,69 +1,26 @@
+// data/local/common/CsvRowRules.kt
 package org.bytebloom.data.local.common
 
-import org.bytebloom.util.Logger
+import org.bytebloom.data.exception.CsvParsingException
 
-fun hasExpectedColumns(
-    columns: List<String>,
-    expected: Int,
-    lineNumber: Int
-): Boolean {
+fun requireExpectedColumnCount(columns: List<String>, expected: Int, lineNumber: Int) {
     if (columns.size != expected) {
-        Logger.warning(
-            "Skipping line $lineNumber. " +
-                    "Expected $expected columns but found ${columns.size}."
-        )
-        return false
+        throw CsvParsingException("Line $lineNumber: expected $expected columns but found ${columns.size}.")
     }
-
-    return true
 }
 
-fun hasRequiredValues(
-    lineNumber: Int,
-    message: String,
-    vararg values: String
-): Boolean {
+fun requireNonBlankValues(lineNumber: Int, message: String, vararg values: String) {
     if (values.any(String::isBlank)) {
-        Logger.warning(
-            "Skipping line $lineNumber. " +
-                    message
-        )
-        return false
-    }
-
-    return true
-}
-
-fun String?.toValidDouble(
-    field: String,
-    line: Int
-): Double? {
-    if (this.isNullOrBlank() || this.equals("null", ignoreCase = true)) {
-        return null
-    }
-
-    return this.toDoubleOrNull() ?: run {
-        Logger.warning(
-            "Skipping line $line. " +
-                    "Invalid $field '$this'."
-        )
-        null
+        throw CsvParsingException("Line $lineNumber: $message")
     }
 }
 
-fun String?.toValidInteger(
-    field: String,
-    line: Int
-): Int? {
-    if (this.isNullOrBlank() || this.equals("null", ignoreCase = true)) {
-        return null
-    }
+fun String?.toDoubleOrThrow(field: String, line: Int): Double? {
+    if (this.isNullOrBlank() || this.equals("null", ignoreCase = true)) return null
+    return this.toDoubleOrNull() ?: throw CsvParsingException("Line $line: invalid $field '$this'.")
+}
 
-    return this.toIntOrNull() ?: run {
-        Logger.warning(
-            "Skipping line $line. " +
-                    "Invalid $field '$this'."
-        )
-        null
-    }
+fun String?.toIntOrThrow(field: String, line: Int): Int? {
+    if (this.isNullOrBlank() || this.equals("null", ignoreCase = true)) return null
+    return this.toIntOrNull() ?: throw CsvParsingException("Line $line: invalid $field '$this'.")
 }

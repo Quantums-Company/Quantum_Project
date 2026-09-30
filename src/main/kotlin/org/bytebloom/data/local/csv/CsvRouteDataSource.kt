@@ -1,16 +1,20 @@
 package org.bytebloom.data.local.csv
 
+import org.bytebloom.data.exception.CsvParsingException
 import org.bytebloom.data.local.common.CsvColumns
 import org.bytebloom.data.local.common.CsvFileReader
 import org.bytebloom.data.local.common.CsvTablesName
-import org.bytebloom.data.local.common.hasExpectedColumns
-import org.bytebloom.data.local.common.hasRequiredValues
-import org.bytebloom.data.local.common.toValidDouble
-import org.bytebloom.data.local.common.toValidInteger
+import org.bytebloom.data.local.common.requireExpectedColumnCount
+import org.bytebloom.data.local.common.requireNonBlankValues
+import org.bytebloom.data.local.common.toDoubleOrThrow
+import org.bytebloom.data.local.common.toIntOrThrow
 import org.bytebloom.data.raw.RouteRaw
 import org.bytebloom.data.source.csv.RouteDataSource
 
-class CsvRouteDataSource: RouteDataSource {
+class CsvRouteDataSource(
+    private val csvFileReader: CsvFileReader = CsvFileReader()
+) : RouteDataSource {
+
     companion object {
         private const val ID_INDEX = 0
         private const val ORIGIN_INDEX = 1
@@ -19,56 +23,50 @@ class CsvRouteDataSource: RouteDataSource {
         private const val DELAY_INDEX = 4
     }
 
-    val csvFileReader = CsvFileReader()
+    override suspend fun loadAll(): List<RouteRaw> =
+        csvFileReader.loadCsv(fileName = CsvTablesName.ROUTE, parser = ::parseRoute).rows
 
-    fun parseRoute(line: String, lineNumber: Int): RouteRaw? {
+    private fun parseRoute(line: String, lineNumber: Int): RouteRaw {
         val columns = line.split(",").map(String::trim)
 
-        return columns.takeIf { hasExpectedColumns(it, CsvColumns.ROUTE, lineNumber) }
-            ?.let { extractRouteFromColumns(it, lineNumber) }
+        requireExpectedColumnCount(columns, CsvColumns.ROUTE, lineNumber)
+
+        val routeId = columns[ID_INDEX].uppercase()
+        val originHubId = columns[ORIGIN_INDEX].uppercase()
+        val destinationHubId = columns[DESTINATION_INDEX].uppercase()
+        val distanceStr = columns[DISTANCE_INDEX]
+        val delayStr = columns[DELAY_INDEX]
+
+        requireNonBlankValues(
+            lineNumber,
+            "Missing required route identifiers or numerical fields.",
+            routeId, originHubId, destinationHubId, distanceStr, delayStr
+        )
+
+        val distanceKm = distanceStr.toDoubleOrThrow("distance", lineNumber)
+            ?: throw CsvParsingException("Line $lineNumber: distance field is required and cannot be empty.")
+
+        val typicalDelayMin = delayStr.toIntOrThrow("typical delay", lineNumber)
+            ?: throw CsvParsingException("Line $lineNumber: typical delay field is required and cannot be empty.")
+
+        return RouteRaw(
+            id = routeId,
+            originWarehouseId = originHubId,
+            destinationWarehouseId = destinationHubId,
+            distanceKm = distanceKm,
+            typicalDelayMin = typicalDelayMin
+        )
     }
 
-    private fun extractRouteFromColumns(
-        columns: List<String>,
-        lineNumber: Int
-    ): RouteRaw? {
-        val routeId = columns[ID_INDEX].trim().uppercase()
-        val originHubId = columns[ORIGIN_INDEX].trim().uppercase()
-        val destinationHubId = columns[DESTINATION_INDEX].trim().uppercase()
-        val distanceKm = columns[DISTANCE_INDEX].toValidDouble("distance", lineNumber)
-        val typicalDelayMin = columns[DELAY_INDEX].toValidInteger("typical delay", lineNumber)
+    override suspend fun getById(): List<RouteRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 
-        return if (hasRequiredValues(lineNumber, "Missing required route data.", routeId, originHubId, destinationHubId)
-            && distanceKm != null && typicalDelayMin != null
-        ) {
-            RouteRaw(
-                id = routeId,
-                originWarehouseId = originHubId,
-                destinationWarehouseId = destinationHubId,
-                distanceKm = distanceKm,
-                typicalDelayMin = typicalDelayMin
-            )
-        } else {
-            null
-        }
-    }
+    override suspend fun create(): List<RouteRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 
-    override suspend fun loadAll(): List<RouteRaw> =
-        csvFileReader.loadCsv(fileName = CsvTablesName.ROUTE, parser = ::parseRoute)
+    override suspend fun update(): List<RouteRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 
-    override suspend fun getById(): List<RouteRaw> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun create(): List<RouteRaw> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun update(): List<RouteRaw> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun delete(): List<RouteRaw> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun delete(): List<RouteRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 }

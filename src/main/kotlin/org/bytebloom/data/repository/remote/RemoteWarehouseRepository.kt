@@ -16,7 +16,7 @@ class RemoteWarehouseRepository(
     val warehouseDtoMapper = WarehouseDtoMapper()
 
     override suspend fun getAll(): List<Warehouse> =
-        warehouseDtoMapper.mapList(remoteDataSource.loadAll())
+        warehouseDtoMapper.mapList(remoteDataSource.loadAll()).succeeded
 
     override suspend fun getById(id: String): Warehouse? =
         remoteDataSource.loadById(id)?.let { warehouseDtoMapper.map(it) }

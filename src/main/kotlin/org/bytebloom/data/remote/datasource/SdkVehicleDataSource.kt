@@ -6,7 +6,7 @@ import org.bytebloom.data.remote.client.SupabaseErrorTranslator
 import org.bytebloom.data.remote.dto.vehicleDto.VehicleRequestDto
 import org.bytebloom.data.remote.dto.vehicleDto.VehicleResponseDto
 import org.bytebloom.data.source.remote.VehicleRemoteDataSource
-import org.bytebloom.util.retryWithBackoff
+import org.bytebloom.data.remote.util.retryWithBackoff
 
 class SdkVehicleDataSource(
     private val client: SupabaseClient

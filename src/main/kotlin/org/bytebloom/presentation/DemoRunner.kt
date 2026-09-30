@@ -82,10 +82,10 @@ class DemoRunner(
         val vehicles = vehicleRepository.getAll()
         val routes = routeRepository.getAll()
 
-        val warehouseGraph = WarehouseGraphBuilder(
-            warehouses = warehouses,
-            routes = routes
-        ).build()
+        val (warehouseGraph, skippedRoutes) = WarehouseGraphBuilder(warehouses, routes).build()
+        if (skippedRoutes.isNotEmpty()) {
+            println("Skipped ${skippedRoutes.size} route(s) with unknown warehouses: $skippedRoutes")
+        }
 
         val dijkstraRouter: RouteFinder = DijkstraRouter(warehouseGraph)
         val bfsRouter: RouteFinder = BidirectionalBreadthFirstRouter(warehouseGraph)

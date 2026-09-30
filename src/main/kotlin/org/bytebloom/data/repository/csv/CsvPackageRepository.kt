@@ -9,7 +9,6 @@ import org.bytebloom.data.source.csv.PackageDataSource
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.util.Logger
 
 class CsvPackageRepository(
     private val warehousesById: Map<String, Warehouse>,
@@ -29,7 +28,6 @@ class CsvPackageRepository(
     }
 
     init {
-        Logger.info("Loading packages in init...")
         CoroutineScope(Dispatchers.IO).launch {
             refresh()
         }

@@ -2,10 +2,8 @@ package org.bytebloom.domain.routing.bfs
 
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.WarehouseGraph
-import org.bytebloom.util.Logger
 
-class BfsBenchmark(
-    private val graph: WarehouseGraph) {
+class BfsBenchmark(private val graph: WarehouseGraph) {
 
     companion object {
         private const val NANOS_PER_MILLISECOND = 1_000_000.0
@@ -19,11 +17,10 @@ class BfsBenchmark(
         val elapsedNanos: Long
     )
 
-    fun runAndCompare(startWarehouse: Warehouse, endWarehouse: Warehouse) {
+    fun runAndCompare(startWarehouse: Warehouse, endWarehouse: Warehouse): String {
         val unidirectionalResult = runStandardBfs(startWarehouse, endWarehouse)
         val bidirectionalResult = runBidirectionalBfs(startWarehouse, endWarehouse)
-
-        report(startWarehouse, endWarehouse, unidirectionalResult, bidirectionalResult)
+        return buildReport(startWarehouse, endWarehouse, unidirectionalResult, bidirectionalResult)
     }
 
     private fun runStandardBfs(start: Warehouse, end: Warehouse): RunResult {
@@ -44,72 +41,47 @@ class BfsBenchmark(
         return result to (System.nanoTime() - startTime)
     }
 
-    private fun report(
+    private fun buildReport(
         start: Warehouse,
         end: Warehouse,
         unidirectional: RunResult,
         bidirectional: RunResult
-    ) {
-        Logger.info("")
-        Logger.info("==================== BFS Benchmark ====================")
-        Logger.info("Route: ${start.id} -> ${end.id}")
-        Logger.info("---------------------------------------------------------")
-        Logger.info(String.format("%-20s %12s %14s %12s", "Algorithm", "Evaluated", "Path Length", "Time (ms)"))
-        Logger.info("---------------------------------------------------------")
-
-        logRow(unidirectional)
-        logRow(bidirectional)
-
-        Logger.info("---------------------------------------------------------")
-        logEfficiency(unidirectional, bidirectional)
-        logCorrectnessCheck(unidirectional, bidirectional)
-        Logger.info("===========================================================")
-        Logger.info("")
+    ): String = buildString {
+        appendLine()
+        appendLine("==================== BFS Benchmark ====================")
+        appendLine("Route: ${start.id} -> ${end.id}")
+        appendLine("---------------------------------------------------------")
+        appendLine(String.format("%-20s %12s %14s %12s", "Algorithm", "Evaluated", "Path Length", "Time (ms)"))
+        appendLine("---------------------------------------------------------")
+        appendLine(rowFor(unidirectional))
+        appendLine(rowFor(bidirectional))
+        appendLine("---------------------------------------------------------")
+        appendLine(efficiencyLine(unidirectional, bidirectional))
+        appendLine(correctnessLine(unidirectional, bidirectional))
+        appendLine("===========================================================")
     }
 
-    private fun logRow(result: RunResult) {
+    private fun rowFor(result: RunResult): String {
         val pathLength = result.path?.size ?: 0
         val elapsedMs = result.elapsedNanos / NANOS_PER_MILLISECOND
-
-        Logger.info(
-            String.format(
-                "%-20s %12d %14d %12.3f",
-                result.label,
-                result.evaluatedWarehouses,
-                pathLength,
-                elapsedMs
-            )
-        )
+        return String.format("%-20s %12d %14d %12.3f", result.label, result.evaluatedWarehouses, pathLength, elapsedMs)
     }
 
-    private fun logEfficiency(unidirectional: RunResult, bidirectional: RunResult) {
-        if (unidirectional.evaluatedWarehouses == 0) {
-            return
-        }
-
-        val reduction =
-            PERCENTAGE_MULTIPLIER *
-                    (1.0 - bidirectional.evaluatedWarehouses.toDouble() / unidirectional.evaluatedWarehouses)
-
-        Logger.info(
-            "Bidirectional BFS evaluated %.1f%% fewer warehouses than Unidirectional BFS."
-                .format(reduction)
-        )
+    private fun efficiencyLine(unidirectional: RunResult, bidirectional: RunResult): String {
+        if (unidirectional.evaluatedWarehouses == 0) return ""
+        val reduction = PERCENTAGE_MULTIPLIER *
+                (1.0 - bidirectional.evaluatedWarehouses.toDouble() / unidirectional.evaluatedWarehouses)
+        return "Bidirectional BFS evaluated %.1f%% fewer warehouses than Unidirectional BFS.".format(reduction)
     }
 
-    private fun logCorrectnessCheck(unidirectional: RunResult, bidirectional: RunResult) {
+    private fun correctnessLine(unidirectional: RunResult, bidirectional: RunResult): String {
         val unidirectionalLength = unidirectional.path?.size ?: 0
         val bidirectionalLength = bidirectional.path?.size ?: 0
-
-        if (unidirectionalLength != bidirectionalLength) {
-            Logger.warning(
-                "Path length mismatch detected: Unidirectional BFS returned $unidirectionalLength " +
-                        "warehouse(s), bidirectional BFS returned $bidirectionalLength. " +
-                        "Both algorithms must agree on shortest path length - investigate."
-            )
+        return if (unidirectionalLength != bidirectionalLength) {
+            "Path length mismatch detected: Unidirectional BFS returned $unidirectionalLength warehouse(s), " +
+                    "bidirectional BFS returned $bidirectionalLength. Both algorithms must agree — investigate."
         } else {
-            Logger.info("Correctness check passed: both algorithms agree on a path length of $unidirectionalLength.")
+            "Correctness check passed: both algorithms agree on a path length of $unidirectionalLength."
         }
     }
-
 }

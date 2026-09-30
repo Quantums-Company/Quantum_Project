@@ -24,9 +24,7 @@ class VehicleMapper(
 
     private fun map(raw: VehicleRaw): Vehicle? {
         val currentWarehouse = warehouseMapper.map(
-            raw.currentWarehouseId,
-            "Vehicle",
-            raw.id
+            raw.currentWarehouseId
         ) ?: return null
 
         return raw.toDomain(currentWarehouse)

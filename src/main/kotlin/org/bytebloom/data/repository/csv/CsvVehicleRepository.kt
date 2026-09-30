@@ -9,7 +9,6 @@ import org.bytebloom.data.source.csv.VehicleDataSource
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.util.Logger
 
 class CsvVehicleRepository(
     private val warehousesById: Map<String, Warehouse>,
@@ -29,7 +28,6 @@ class CsvVehicleRepository(
     }
 
     init {
-        Logger.info("Loading vehicles in init...")
         CoroutineScope(Dispatchers.IO).launch {
             refresh()
         }

@@ -1,22 +1,22 @@
 package org.bytebloom.domain.pricing.decorator
 
 import org.bytebloom.domain.model.Package
+import org.bytebloom.domain.model.exception.EntityValidationException
+import org.bytebloom.domain.model.validation.ValidatorError
+import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.pricing.core.PackageComponent
-import org.bytebloom.util.Logger
 
 class ColdChainDecorator(
     component: PackageComponent,
-    multiplier: Double
+    private val multiplier: Double
 ) : PackageDecorator(component) {
 
-    private val multiplier: Double = if (multiplier <= 0.0){
-        Logger.warning("Cold chain multiplier must be greater than 0. Using 1.0 instead.")
-        1.0
-    } else {
-        multiplier
+    init {
+        if (multiplier <= 0.0) {
+            throw EntityValidationException(listOf(ValidatorError.NegativeValue(ValidatorField.MULTIPLIER)))
+        }
     }
 
-    override suspend fun getTransitRate(pkg: Package): Double? {
-        return super.getTransitRate(pkg)?.times(multiplier)
-    }
+    override suspend fun getTransitRate(pkg: Package): Double? = super.getTransitRate(pkg)?.times(multiplier)
+
 }

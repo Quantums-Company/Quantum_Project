@@ -27,15 +27,11 @@ class PackageMapper(
     private fun map(raw: PackageRaw): Package? {
 
         val origin = warehouseMapper.map(
-            raw.originWarehouseId,
-            "Package",
-            raw.id
+            raw.originWarehouseId
         ) ?: return null
 
         val destination = warehouseMapper.map(
-            raw.destinationWarehouseId,
-            "Package",
-            raw.id
+            raw.destinationWarehouseId
         ) ?: return null
 
         return raw.toDomain(origin, destination)
