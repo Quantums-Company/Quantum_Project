@@ -33,4 +33,19 @@ class UpdatePackageValidatorTest {
             invalid.violations.single()
         )
     }
+    @Test
+    fun `rejects an update with no fields`() {
+        // Given
+        val validator = UpdatePackageValidator()
+        val input = PackageUpdateInput(id = "PKG-001")
+
+        // When
+        val result = validator(input)
+
+        // Then
+        val invalid = assertIs<ValidatorResult.Invalid>(result)
+        assertIs<ValidatorError.NoFieldsProvided>(
+            invalid.violations.single()
+        )
+    }
 }
