@@ -2,7 +2,7 @@ package org.bytebloom.domain.usecase.crud.route
 
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.validator.ValidatorResult
+import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.validator.id.RouteIdValidator
 
 class DeleteRouteUseCase(

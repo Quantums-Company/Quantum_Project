@@ -1,36 +1,34 @@
 package org.bytebloom.data.repository.remote
 
 import org.bytebloom.data.remote.dto.routeDto.RouteRequestDto
-import org.bytebloom.data.remote.dto.routeDto.RouteResponseDto
-import org.bytebloom.data.remote.mapper.EntityMapper
 import org.bytebloom.data.remote.mapper.RouteDtoMapper
 import org.bytebloom.data.source.remote.RouteRemoteDataSource
 import org.bytebloom.domain.model.Route
-import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.RouteRepository
+import org.bytebloom.domain.repository.WarehouseRepository
 import java.time.Instant
 
 class RemoteRouteRepository(
-    private val warehousesById: Map<String, Warehouse>,
+    private val warehouseRepository: WarehouseRepository,
     private val remoteDataSource: RouteRemoteDataSource
 ) : RouteRepository {
 
-    val routeDtoMapper = RouteDtoMapper(warehousesById)
+    private suspend fun mapper() = RouteDtoMapper(warehouseRepository.getAll().associateBy { it.id })
 
     override suspend fun getAll(): List<Route> =
-        routeDtoMapper.mapList(remoteDataSource.loadAll())
+        mapper().mapList(remoteDataSource.loadAll())
 
     override suspend fun getById(id: String): Route? =
-        remoteDataSource.loadById(id)?.let {routeDtoMapper.map(it) }
+        remoteDataSource.loadById(id)?.let {mapper().map(it) }
 
     override suspend fun create(route: Route): Route {
         val dto = remoteDataSource.create(route.toRequestDto())
-        return dto?.let { routeDtoMapper.map(it) } ?: route
+        return dto?.let { mapper().map(it) } ?: route
     }
 
     override suspend fun update(route: Route): Route {
         val dto = remoteDataSource.update(route.id, route.toRequestDto())
-        return dto?.let { routeDtoMapper.map(it) } ?: route
+        return dto?.let { mapper().map(it) } ?: route
     }
 
     override suspend fun delete(id: String): Boolean =

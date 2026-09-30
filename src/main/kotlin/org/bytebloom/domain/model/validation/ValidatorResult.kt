@@ -1,4 +1,4 @@
-package org.bytebloom.domain.validator
+package org.bytebloom.domain.model.validation
 
 sealed class ValidatorResult {
     object Valid : ValidatorResult()

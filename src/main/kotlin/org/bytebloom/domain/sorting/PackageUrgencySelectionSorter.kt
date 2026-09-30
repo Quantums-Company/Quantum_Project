@@ -1,7 +1,7 @@
 package org.bytebloom.domain.sorting
 
 import org.bytebloom.domain.model.Priority
-import org.bytebloom.data.raw.PackageRaw
+import org.bytebloom.domain.model.Package
 
 class PackageUrgencySelectionSorter {
     companion object {
@@ -10,7 +10,7 @@ class PackageUrgencySelectionSorter {
         private const val PRIORITY_LOW_VALUE = 1
     }
 
-    fun sortByUrgency(packages: MutableList<PackageRaw>) {
+    fun sortByUrgency(packages: MutableList<Package>) {
         for (i in 0 until packages.size - 1) {
             var bestPackageIndex = i
 
@@ -33,15 +33,15 @@ class PackageUrgencySelectionSorter {
         Priority.LOW -> PRIORITY_LOW_VALUE
     }
 
-    private fun hasHigherPriority(first: PackageRaw, second: PackageRaw): Boolean {
+    private fun hasHigherPriority(first: Package, second: Package): Boolean {
         return getPriorityValue(first.priority) > getPriorityValue(second.priority)
     }
 
-    private fun hasGreaterWeight(first: PackageRaw, second: PackageRaw): Boolean {
+    private fun hasGreaterWeight(first: Package, second: Package): Boolean {
         return first.weight > second.weight
     }
 
-    private fun isMoreUrgentThan(first: PackageRaw, second: PackageRaw): Boolean {
+    private fun isMoreUrgentThan(first: Package, second: Package): Boolean {
         if (first.priority != second.priority) {
             return hasHigherPriority(first, second)
         }

@@ -1,5 +1,8 @@
 package org.bytebloom.domain.validator
 
+import org.bytebloom.domain.model.validation.ValidatorError
+import org.bytebloom.domain.model.validation.ValidatorField
+
 class FieldValidator {
     companion object {
         private const val MIN_LATITUDE = -90.0

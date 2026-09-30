@@ -1,5 +1,7 @@
 package org.bytebloom.domain.service
 
+import org.bytebloom.domain.model.EntityType
+
 interface IdGenerator {
-    fun next(prefix: String): String
+    fun next(entityType: EntityType): String
 }

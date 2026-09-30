@@ -2,7 +2,7 @@ package org.bytebloom.domain.model
 
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.validator.id.EntityIdValidator
-import org.bytebloom.domain.validator.ValidatorField
+import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.validator.FieldValidator
 
 class Vehicle(
