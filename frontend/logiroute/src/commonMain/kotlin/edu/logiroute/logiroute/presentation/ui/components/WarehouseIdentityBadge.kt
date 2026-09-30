@@ -9,16 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import edu.logiroute.logiroute.presentation.ui.theme.ErrorRed
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.logiroute.logiroute.domain.model.RegionZone
-import edu.logiroute.logiroute.domain.model.Warehouse
-import edu.logiroute.logiroute.presentation.ui.extension.zoneBadgeColor
+import edu.logiroute.logiroute.presentation.ui.sampledata.WarehouseSamples
+import org.bytebloom.domain.model.Warehouse
 import edu.logiroute.logiroute.presentation.ui.theme.CharcoalBlue
+import edu.logiroute.logiroute.presentation.ui.theme.CyberSprout
 import edu.logiroute.logiroute.presentation.ui.theme.InkBlack
 import edu.logiroute.logiroute.presentation.ui.theme.TextPrimary
 import edu.logiroute.logiroute.presentation.ui.theme.TextSecondary
@@ -30,6 +32,17 @@ fun WarehouseIdentityBadge(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    val region = warehouse.regionalZone
+    val zoneBadgeColor = when (region) {
+        "NORTH",
+        "EAST",
+        "CENTRAL",
+        "SOUTH",
+        "WEST"
+            -> CyberSprout
+
+        else -> ErrorRed
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -43,51 +56,78 @@ fun WarehouseIdentityBadge(
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Text(
-                text = warehouse.name,
-                color = TextPrimary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            DisplayWarehouseName(warehouse)
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = warehouse.displayMonospaceId(),
-                color = TextSecondary,
-                fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            DisplayWarehouseId(warehouse)
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        val zoneBadgeColor = RegionZone.from(warehouse.regionalZone).zoneBadgeColor
-
-        Box(
-            modifier = Modifier
-                .width(80.dp)
-                .height(30.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(zoneBadgeColor)
-                .padding(horizontal = 2.dp, vertical = 4.dp)
-        ) {
-            Text(
-                text = warehouse.displayNormalizedZone(),
-                color = InkBlack,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        DisplayRegionBox(zoneBadgeColor, warehouse)
     }
 }
 
-private fun Warehouse.displayMonospaceId(): String = "NODE: $id"
+@Composable
+private fun DisplayRegionBox(
+    zoneBadgeColor: Color,
+    warehouse: Warehouse
+) {
+    Box(
+        modifier = Modifier
+            .width(80.dp)
+            .height(30.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(zoneBadgeColor)
+            .padding(horizontal = 2.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = warehouse.regionalZone,
+            color = InkBlack,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
 
-private fun Warehouse.displayNormalizedZone(): String = regionalZone.uppercase()
+@Composable
+private fun DisplayWarehouseId(warehouse: Warehouse) {
+    Text(
+        text = "NODE: ${warehouse.id}",
+        color = TextSecondary,
+        fontSize = 11.sp,
+        fontFamily = FontFamily.Monospace,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+private fun DisplayWarehouseName(warehouse: Warehouse) {
+    Text(
+        text = warehouse.name,
+        color = TextPrimary,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+@Preview
+fun WarehouseIdentityBadgePreview() {
+    Column (
+        modifier = Modifier.fillMaxSize()
+            .padding( 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ){
+        WarehouseIdentityBadge(warehouse = WarehouseSamples.centralWarehouse)
+        WarehouseIdentityBadge(warehouse = WarehouseSamples.northWarehouse)
+        WarehouseIdentityBadge(warehouse = WarehouseSamples.eastWarehouse)
+        WarehouseIdentityBadge(warehouse = WarehouseSamples.westWarehouse)
+    }
+}

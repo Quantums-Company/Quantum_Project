@@ -6,7 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,15 +18,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.logiroute.logiroute.domain.model.Warehouse
+import edu.logiroute.logiroute.presentation.ui.sampledata.WarehouseSamples
+import org.bytebloom.domain.model.Warehouse
 import edu.logiroute.logiroute.presentation.ui.theme.Border
 import edu.logiroute.logiroute.presentation.ui.theme.CharcoalBlue
 import edu.logiroute.logiroute.presentation.ui.theme.JetBlack
 import edu.logiroute.logiroute.presentation.ui.theme.TextDisabled
 import edu.logiroute.logiroute.presentation.ui.theme.TextPrimary
 import edu.logiroute.logiroute.presentation.ui.theme.TextSecondary
+import org.bytebloom.domain.model.Package
 
 @Composable
 fun WarehouseSummaryCard(
@@ -44,8 +49,7 @@ fun WarehouseSummaryCard(
     ) {
         WarehouseIdentityBadge(
             warehouse = warehouse,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onClick
+            modifier = Modifier.fillMaxWidth()
         )
 
         Row(
@@ -53,53 +57,79 @@ fun WarehouseSummaryCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(text = "Queued Cargo", color = TextSecondary, fontSize = 11.sp)
-                Text(
-                    text = warehouse.displayCargoSize(),
-                    color = TextPrimary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(text = "Stationed Fleet", color = TextSecondary, fontSize = 11.sp)
-                Text(
-                    text = warehouse.displayFleetSize(),
-                    color = TextPrimary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            DisplayQueuePackage(warehouse)
+            DisplayStationedFleet(warehouse)
         }
 
-        val highestUrgentCargo = warehouse.findHighestPriorityCargo()
+        val cargo = warehouse.cargoQueue.firstOrNull()
 
-        if (highestUrgentCargo != null) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = "Highest Urgent Dispatch", color = TextSecondary, fontSize = 11.sp)
-                PackagePriorityBadge(cargo = highestUrgentCargo, modifier = Modifier.fillMaxWidth())
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(CharcoalBlue)
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No Pending Cargo",
-                    color = TextDisabled,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+        DisplayPriorityPackage(cargo)
+    }
+}
+
+@Composable
+private fun ColumnScope.DisplayPriorityPackage(cargo: Package?) {
+
+    cargo?.let { cargo ->
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(text = "cargo", color = TextSecondary, fontSize = 11.sp)
+            PackagePriorityBadge(cargo = cargo, modifier = Modifier.fillMaxWidth())
+        }
+    } ?: run {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(6.dp))
+                .background(CharcoalBlue)
+                .padding(vertical = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No Pending Cargo",
+                color = TextDisabled,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
 
-private fun Warehouse.displayCargoSize(): String = "${cargoQueue.size} Packages"
+@Composable
+private fun DisplayStationedFleet(warehouse: Warehouse) {
+    Column(horizontalAlignment = Alignment.End) {
+        Text(text = "Stationed Fleet", color = TextSecondary, fontSize = 11.sp)
+        Text(
+            text = "${warehouse.stationedVehicles.size}",
+            color = TextPrimary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
 
-private fun Warehouse.displayFleetSize(): String = "${stationedVehicles.size} Vehicles"
+@Composable
+private fun DisplayQueuePackage(warehouse: Warehouse) {
+    Column {
+        Text(text = "Queued Cargo", color = TextSecondary, fontSize = 11.sp)
+        Text(
+            text = "${warehouse.cargoQueue.size}",
+            color = TextPrimary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+@Preview
+private fun WarehouseSummaryCardPreview() {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        WarehouseSummaryCard(WarehouseSamples.northWarehouse)
+        WarehouseSummaryCard(WarehouseSamples.southWarehouse)
+        WarehouseSummaryCard(WarehouseSamples.centralWarehouse)
+    }
+}
