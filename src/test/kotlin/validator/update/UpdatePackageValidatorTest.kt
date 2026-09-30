@@ -22,7 +22,7 @@ class UpdatePackageValidatorTest {
     @Test
     fun `rejects identical origin and destination warehouses`() {
         // Given
-        val warehouse = warehouse("WH-001")
+        val warehouse = warehouse()
         val input = PackageUpdateInput(
             id = "PKG-001",
             originWarehouse = warehouse,
@@ -154,9 +154,9 @@ class UpdatePackageValidatorTest {
         assertSame(ValidatorResult.Valid, result)
     }
 
-    private fun warehouse(id: String): Warehouse =
+    private fun warehouse(): Warehouse =
         Warehouse(
-            id = id,
+            id = "WH-001",
             name = "Test Warehouse",
             regionalZone = "CENTRAL",
             longitude = 35.0,
