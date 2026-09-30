@@ -7,6 +7,7 @@ import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.routing.common.RouteFinder
 import org.bytebloom.domain.usecase.queries.routing.VerifyHubLinkUseCase
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class VerifyHubLinkUseCaseTest {
@@ -42,5 +43,31 @@ class VerifyHubLinkUseCaseTest {
         // Then
         assertTrue(result)
         verify(exactly = 1) { routeFinder.findShortestPath(origin, destination) }
+    }
+
+    @Test
+    fun `when no route exists between warehouses should return false`() {
+        // Given
+        every { routeFinder.findShortestPath(origin, destination) } returns null
+
+        // When
+        val result = useCase(origin, destination)
+
+        // Then
+        assertFalse(result)
+        verify(exactly = 1) { routeFinder.findShortestPath(origin, destination) }
+    }
+
+    @Test
+    fun `when origin and destination are same warehouse should return false`() {
+        // Given
+        every { routeFinder.findShortestPath(origin, origin) } returns listOf(origin)
+
+        // When
+        val result = useCase(origin, origin)
+
+        // Then
+        assertFalse(result)
+        verify(exactly = 1) { routeFinder.findShortestPath(origin, origin) }
     }
 }
