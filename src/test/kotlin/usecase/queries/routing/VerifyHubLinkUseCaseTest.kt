@@ -31,13 +31,11 @@ class VerifyHubLinkUseCaseTest {
             latitude = 31.5500
         )
 
-        // Intentionally return null to force a RED (failing assertion) state
-        every { routeFinder.findShortestPath(origin, destination) } returns null
-
+        every { routeFinder.findShortestPath(origin, destination) } returns listOf(origin, destination)
         // When
         val result = useCase(origin, destination)
 
         // Then
-        assertTrue(result) // ❌ FAILS HERE: Expected true, but got false
+        assertTrue(result)
     }
 }
