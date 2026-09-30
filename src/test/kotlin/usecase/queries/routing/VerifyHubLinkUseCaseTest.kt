@@ -60,14 +60,13 @@ class VerifyHubLinkUseCaseTest {
 
     @Test
     fun `when origin and destination are same warehouse should return false`() {
-        // Given
-        every { routeFinder.findShortestPath(origin, origin) } returns listOf(origin)
+        // Given (no mocking needed since routeFinder shouldn't be executed)
 
         // When
         val result = useCase(origin, origin)
 
         // Then
         assertFalse(result)
-        verify(exactly = 1) { routeFinder.findShortestPath(origin, origin) }
+        verify(exactly = 0) { routeFinder.findShortestPath(any(), any()) }
     }
 }
