@@ -1,15 +1,19 @@
 package org.bytebloom.data.local.csv
 
+import org.bytebloom.data.exception.CsvParsingException
 import org.bytebloom.data.local.common.CsvColumns
 import org.bytebloom.data.local.common.CsvFileReader
 import org.bytebloom.data.local.common.CsvTablesName
-import org.bytebloom.data.local.common.hasExpectedColumns
-import org.bytebloom.data.local.common.hasRequiredValues
-import org.bytebloom.data.local.common.toValidDouble
+import org.bytebloom.data.local.common.requireExpectedColumnCount
+import org.bytebloom.data.local.common.requireNonBlankValues
+import org.bytebloom.data.local.common.toDoubleOrThrow
 import org.bytebloom.data.raw.VehicleRaw
 import org.bytebloom.data.source.csv.VehicleDataSource
 
-class CsvVehicleDataSource: VehicleDataSource {
+class CsvVehicleDataSource(
+    private val csvFileReader: CsvFileReader = CsvFileReader()
+) : VehicleDataSource {
+
     companion object {
         private const val ID_INDEX = 0
         private const val HUB_INDEX = 1
@@ -17,54 +21,48 @@ class CsvVehicleDataSource: VehicleDataSource {
         private const val COST_INDEX = 3
     }
 
-    val csvFileReader = CsvFileReader()
+    override suspend fun loadAll(): List<VehicleRaw> =
+        csvFileReader.loadCsv(fileName = CsvTablesName.FLEET, parser = ::parseVehicle).rows
 
-    fun parseVehicle(line: String, lineNumber: Int): VehicleRaw? {
+    private fun parseVehicle(line: String, lineNumber: Int): VehicleRaw {
         val columns = line.split(",").map(String::trim)
 
-        return columns.takeIf { hasExpectedColumns(it, CsvColumns.VEHICLE, lineNumber) }
-            ?.let { extractVehicleFromColumns(it, lineNumber) }
+        requireExpectedColumnCount(columns, CsvColumns.VEHICLE, lineNumber)
+
+        val vehicleId = columns[ID_INDEX].uppercase()
+        val currentHubId = columns[HUB_INDEX].uppercase()
+        val capacityStr = columns[CAPACITY_INDEX]
+        val costStr = columns[COST_INDEX]
+
+        requireNonBlankValues(
+            lineNumber,
+            "Missing required vehicle identifiers or capacity/cost values.",
+            vehicleId, currentHubId, capacityStr, costStr
+        )
+
+        val maxCapacityKg = capacityStr.toDoubleOrThrow("maximum capacity", lineNumber)
+            ?: throw CsvParsingException("Line $lineNumber: maximum capacity field is required and cannot be empty.")
+
+        val costPerKm = costStr.toDoubleOrThrow("cost per kilometer", lineNumber)
+            ?: throw CsvParsingException("Line $lineNumber: cost per kilometer field is required and cannot be empty.")
+
+        return VehicleRaw(
+            id = vehicleId,
+            currentWarehouseId = currentHubId,
+            maxCapacityKg = maxCapacityKg,
+            costPerKm = costPerKm
+        )
     }
 
-    private fun extractVehicleFromColumns(
-        columns: List<String>,
-        lineNumber: Int
-    ): VehicleRaw? {
-        val vehicleId = columns[ID_INDEX].trim().uppercase()
-        val currentHubId = columns[HUB_INDEX].trim().uppercase()
-        val maxCapacityKg = columns[CAPACITY_INDEX].toValidDouble("maximum capacity", lineNumber)
-        val costPerKm = columns[COST_INDEX].toValidDouble("cost per kilometer", lineNumber)
+    override suspend fun getById(): List<VehicleRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 
-        return if (hasRequiredValues(lineNumber, "Missing required vehicle data.", vehicleId, currentHubId)
-            && maxCapacityKg != null && costPerKm != null
-        ) {
-            VehicleRaw(
-                id = vehicleId,
-                currentWarehouseId = currentHubId,
-                maxCapacityKg = maxCapacityKg,
-                costPerKm = costPerKm
-            )
-        } else {
-            null
-        }
-    }
+    override suspend fun create(): List<VehicleRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 
-    override suspend fun loadAll(): List<VehicleRaw> =
-        csvFileReader.loadCsv(fileName = CsvTablesName.FLEET, parser = ::parseVehicle)
+    override suspend fun update(): List<VehicleRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 
-    override suspend fun getById(): List<VehicleRaw> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun create(): List<VehicleRaw> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun update(): List<VehicleRaw> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun delete(): List<VehicleRaw> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun delete(): List<VehicleRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 }

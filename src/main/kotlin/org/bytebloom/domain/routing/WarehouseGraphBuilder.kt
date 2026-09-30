@@ -2,46 +2,36 @@ package org.bytebloom.domain.routing
 
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.util.Logger
 
 class WarehouseGraphBuilder(
     private val warehouses: List<Warehouse>,
     private val routes: List<Route>
 ) {
-
-    fun build(): WarehouseGraph {
+    fun build(): GraphBuildResult {
         val graph = WarehouseGraph()
-
         addWarehouses(graph)
-        addValidRoutes(graph)
-
-        return graph
+        val skipped = addValidRoutes(graph)
+        return GraphBuildResult(graph, skipped)
     }
 
     private fun addWarehouses(graph: WarehouseGraph) {
-        warehouses.forEach { warehouse ->
-            graph.addWarehouse(warehouse)
-        }
+        warehouses.forEach { graph.addWarehouse(it) }
     }
 
-    private fun addValidRoutes(graph: WarehouseGraph) {
+    private fun addValidRoutes(graph: WarehouseGraph): List<String> {
         val warehouseMap = warehouses.associateBy { it.id }
+        val skipped = mutableListOf<String>()
 
         routes.forEach { route ->
             val originWarehouse = warehouseMap[route.originWarehouse.id]
             val destinationWarehouse = warehouseMap[route.destinationWarehouse.id]
 
             if (originWarehouse != null && destinationWarehouse != null) {
-                graph.addRoute(
-                    originWarehouse = originWarehouse,
-                    destinationWarehouse = destinationWarehouse,
-                    distanceKm = route.distanceKm
-                )
+                graph.addRoute(originWarehouse, destinationWarehouse, route.distanceKm)
             } else {
-                Logger.warning(
-                    "Skipping route '${route.id}' because it references an unknown warehouse."
-                )
+                skipped.add(route.id)
             }
         }
+        return skipped
     }
 }

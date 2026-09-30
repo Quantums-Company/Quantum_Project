@@ -6,7 +6,6 @@ import org.bytebloom.data.source.csv.RouteDataSource
 import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.util.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +28,6 @@ class CsvRouteRepository(
     }
 
     init {
-        Logger.info("Loading routes in init...")
         CoroutineScope(Dispatchers.IO).launch {
             refresh()
         }

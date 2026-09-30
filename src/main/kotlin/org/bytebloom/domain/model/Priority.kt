@@ -1,25 +1,21 @@
 package org.bytebloom.domain.model
 
-import org.bytebloom.util.Logger
+import org.bytebloom.domain.model.exception.EntityValidationException
+import org.bytebloom.domain.model.validation.ValidatorError
+import org.bytebloom.domain.model.validation.ValidatorField
 
 enum class Priority {
-    URGENT,
-    STANDARD,
-    LOW;
+    URGENT, STANDARD, LOW;
 
     companion object {
-
         fun from(value: String): Priority =
-            when(value.trim().uppercase()) {
+            when (value.trim().uppercase()) {
                 "URGENT" -> URGENT
                 "STANDARD" -> STANDARD
                 "LOW" -> LOW
-                else -> {
-                    Logger.warning("Unknown priority '$value'. Using LOW.")
-                    LOW
-                }
-
+                else -> throw EntityValidationException(
+                    listOf(ValidatorError.Custom(ValidatorField.PRIORITY, "Unknown priority '$value'"))
+                )
             }
-        }
-
+    }
 }
