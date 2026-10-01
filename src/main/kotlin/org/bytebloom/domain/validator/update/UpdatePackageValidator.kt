@@ -16,6 +16,10 @@ class UpdatePackageValidator {
         val violations = buildList {
             EntityIdValidator().validate(input.id, EntityType.PACKAGE)?.let(::add)
 
+            if (hasSameWarehouse(input)) {
+                add(ValidatorError.SameWarehouse(ValidatorField.ORIGIN_WAREHOUSE))
+            }
+
             if (!input.hasUpdates()) {
                 add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
             }
@@ -32,4 +36,8 @@ class UpdatePackageValidator {
         }
         return violations.toValidatorResult()
     }
+    private fun hasSameWarehouse(input: PackageUpdateInput): Boolean =
+        input.originWarehouse != null &&
+                input.destinationWarehouse != null &&
+                input.originWarehouse.id == input.destinationWarehouse.id
 }

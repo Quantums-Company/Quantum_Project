@@ -14,15 +14,15 @@ class FindCargoRecoveryPlanUseCase {
         val vehicles = warehouse.stationedVehicles
         val packages = warehouse.cargoQueue
 
-        val availableVehicles = vehicles.filterNot {
+        val healthyVehicles = vehicles.filterNot {
             it.id.equals(failedVehicle.id, ignoreCase = true)
         }
 
-        if (packages.isEmpty() || availableVehicles.isEmpty()) return null
+        if (packages.isEmpty() || healthyVehicles.isEmpty()) return null
 
         val ring = ConsistentHashingRing(
             packages = packages,
-            vehicles = availableVehicles
+            vehicles = vehicles
         )
 
         return ring.createRecoveryPlan(failedVehicle)
