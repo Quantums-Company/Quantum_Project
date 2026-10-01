@@ -28,6 +28,24 @@ class GetPackageByIdUseCaseTest {
     private val packageRepository = mockk<PackageRepository>()
     private val validator = mockk<PackageIdValidator>()
 
+    private fun packageItem(): Package =
+        Package(
+            id = "PKG-001",
+            weight = 10.0,
+            priority = Priority.STANDARD,
+            originWarehouse = warehouse("WH-001"),
+            destinationWarehouse = warehouse("WH-002")
+        )
+
+    private fun warehouse(id: String): Warehouse =
+        Warehouse(
+            id = id,
+            name = "Test Warehouse",
+            regionalZone = "CENTRAL",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
     private val useCase = GetPackageByIdUseCase(
         packageRepository = packageRepository,
         validator = validator
@@ -113,22 +131,4 @@ class GetPackageByIdUseCaseTest {
             packageRepository.getById(invalidId)
         }
     }
-
-    private fun packageItem(): Package =
-        Package(
-            id = "PKG-001",
-            weight = 10.0,
-            priority = Priority.STANDARD,
-            originWarehouse = warehouse("WH-001"),
-            destinationWarehouse = warehouse("WH-002")
-        )
-
-    private fun warehouse(id: String): Warehouse =
-        Warehouse(
-            id = id,
-            name = "Test Warehouse",
-            regionalZone = "CENTRAL",
-            longitude = 35.0,
-            latitude = 32.0
-        )
 }

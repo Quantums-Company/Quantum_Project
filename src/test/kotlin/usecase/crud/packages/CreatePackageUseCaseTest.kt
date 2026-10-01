@@ -29,6 +29,15 @@ class CreatePackageUseCaseTest {
     private val validator = mockk<CreatePackageValidator>()
     private val idGenerator = mockk<IdGenerator>()
 
+    private fun warehouse(id: String): Warehouse =
+        Warehouse(
+            id = id,
+            name = "Test Warehouse",
+            regionalZone = "CENTRAL",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
     private val useCase = CreatePackageUseCase(
         packageRepository = packageRepository,
         validator = validator,
@@ -116,13 +125,4 @@ class CreatePackageUseCaseTest {
             packageRepository.create(any())
         }
     }
-
-    private fun warehouse(id: String): Warehouse =
-        Warehouse(
-            id = id,
-            name = "Test Warehouse",
-            regionalZone = "CENTRAL",
-            longitude = 35.0,
-            latitude = 32.0
-        )
 }

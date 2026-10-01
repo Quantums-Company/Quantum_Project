@@ -17,6 +17,15 @@ import kotlin.test.assertSame
 
 class UpdatePackageValidatorTest {
 
+    private fun warehouse(): Warehouse =
+        Warehouse(
+            id = "WH-001",
+            name = "Test Warehouse",
+            regionalZone = "CENTRAL",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
     private val validator = UpdatePackageValidator()
 
     @Test
@@ -153,13 +162,4 @@ class UpdatePackageValidatorTest {
         // Then
         assertSame(ValidatorResult.Valid, result)
     }
-
-    private fun warehouse(): Warehouse =
-        Warehouse(
-            id = "WH-001",
-            name = "Test Warehouse",
-            regionalZone = "CENTRAL",
-            longitude = 35.0,
-            latitude = 32.0
-        )
 }

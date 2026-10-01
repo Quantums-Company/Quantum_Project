@@ -27,6 +27,24 @@ class UpdatePackageUseCaseTest {
     private val packageRepository = mockk<PackageRepository>()
     private val validator = mockk<UpdatePackageValidator>()
 
+    private fun packageItem(weight: Double): Package =
+        Package(
+            id = "PKG-001",
+            weight = weight,
+            priority = Priority.STANDARD,
+            originWarehouse = warehouse("WH-001"),
+            destinationWarehouse = warehouse("WH-002")
+        )
+
+    private fun warehouse(id: String): Warehouse =
+        Warehouse(
+            id = id,
+            name = "Test Warehouse",
+            regionalZone = "CENTRAL",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
     private val useCase = UpdatePackageUseCase(
         packageRepository = packageRepository,
         validator = validator
@@ -136,22 +154,4 @@ class UpdatePackageUseCaseTest {
             packageRepository.update(any())
         }
     }
-
-    private fun packageItem(weight: Double): Package =
-        Package(
-            id = "PKG-001",
-            weight = weight,
-            priority = Priority.STANDARD,
-            originWarehouse = warehouse("WH-001"),
-            destinationWarehouse = warehouse("WH-002")
-        )
-
-    private fun warehouse(id: String): Warehouse =
-        Warehouse(
-            id = id,
-            name = "Test Warehouse",
-            regionalZone = "CENTRAL",
-            longitude = 35.0,
-            latitude = 32.0
-        )
 }

@@ -15,6 +15,35 @@ import kotlin.test.assertSame
 
 class CreatePackageValidatorTest {
 
+    private fun warehouse(id: String): Warehouse =
+        Warehouse(
+            id = id,
+            name = "Test Warehouse",
+            regionalZone = "CENTRAL",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
+    private fun packageMock(
+        id: String = "PKG-001",
+        weight: Double = 10.0,
+        originId: String = "WH-001",
+        destinationId: String = "WH-002"
+    ): Package {
+        val packageItem = mockk<Package>()
+        val origin = mockk<Warehouse>()
+        val destination = mockk<Warehouse>()
+
+        every { packageItem.id } returns id
+        every { packageItem.weight } returns weight
+        every { packageItem.originWarehouse } returns origin
+        every { packageItem.destinationWarehouse } returns destination
+        every { origin.id } returns originId
+        every { destination.id } returns destinationId
+
+        return packageItem
+    }
+
     private val validator = CreatePackageValidator()
 
     @Test
@@ -99,34 +128,5 @@ class CreatePackageValidatorTest {
             invalid.violations.single()
         )
         assertEquals(ValidatorField.DESTINATION_WAREHOUSE, error.field)
-    }
-
-    private fun warehouse(id: String): Warehouse =
-        Warehouse(
-            id = id,
-            name = "Test Warehouse",
-            regionalZone = "CENTRAL",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
-    private fun packageMock(
-        id: String = "PKG-001",
-        weight: Double = 10.0,
-        originId: String = "WH-001",
-        destinationId: String = "WH-002"
-    ): Package {
-        val packageItem = mockk<Package>()
-        val origin = mockk<Warehouse>()
-        val destination = mockk<Warehouse>()
-
-        every { packageItem.id } returns id
-        every { packageItem.weight } returns weight
-        every { packageItem.originWarehouse } returns origin
-        every { packageItem.destinationWarehouse } returns destination
-        every { origin.id } returns originId
-        every { destination.id } returns destinationId
-
-        return packageItem
     }
 }
