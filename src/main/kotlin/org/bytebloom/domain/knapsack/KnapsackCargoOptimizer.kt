@@ -7,20 +7,33 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 
 class KnapsackCargoOptimizer {
+
     operator fun invoke(items: List<CargoItem>, capacityKg: Int): KnapsackResult {
+        validateInputs(items, capacityKg)
+
+        val grid = buildValueGrid(items, capacityKg)
+        val selected = backtrackSelectedItems(items, grid, capacityKg)
+
+        return KnapsackResult(
+            selectedItems = selected,
+            totalWeightKg = selected.sumOf { it.weightKg },
+            totalPriorityValue = grid[items.size][capacityKg]
+        )
+    }
+
+    private fun validateInputs(items: List<CargoItem>, capacityKg: Int) {
         if (capacityKg < 0) {
             throw EntityValidationException(listOf(ValidatorError.NegativeValue(ValidatorField.MAX_CAPACITY_KG)))
         }
-        items.forEach { item ->
-            if (item.weightKg < 0) {
-                throw EntityValidationException(listOf(ValidatorError.NegativeValue(ValidatorField.WEIGHT)))
-            }
+        if (items.any { it.weightKg < 0 }) {
+            throw EntityValidationException(listOf(ValidatorError.NegativeValue(ValidatorField.WEIGHT)))
         }
+    }
 
-        val itemCount = items.size
-        val grid = Array(itemCount + 1) { IntArray(capacityKg + 1) }
+    private fun buildValueGrid(items: List<CargoItem>, capacityKg: Int): Array<IntArray> {
+        val grid = Array(items.size + 1) { IntArray(capacityKg + 1) }
 
-        for (i in 1..itemCount) {
+        for (i in 1..items.size) {
             val item = items[i - 1]
             for (w in 0..capacityKg) {
                 grid[i][w] = if (item.weightKg <= w) {
@@ -30,22 +43,20 @@ class KnapsackCargoOptimizer {
                 }
             }
         }
+        return grid
+    }
 
+    private fun backtrackSelectedItems(items: List<CargoItem>, grid: Array<IntArray>, capacityKg: Int): List<CargoItem> {
         val selected = mutableListOf<CargoItem>()
         var remainingCapacity = capacityKg
-        for (i in itemCount downTo 1) {
+
+        for (i in items.size downTo 1) {
             if (grid[i][remainingCapacity] != grid[i - 1][remainingCapacity]) {
                 val item = items[i - 1]
                 selected.add(item)
                 remainingCapacity -= item.weightKg
             }
         }
-        selected.reverse()
-
-        return KnapsackResult(
-            selectedItems = selected,
-            totalWeightKg = selected.sumOf { it.weightKg },
-            totalPriorityValue = grid[itemCount][capacityKg]
-        )
+        return selected.reversed()
     }
 }
