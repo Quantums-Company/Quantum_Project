@@ -45,4 +45,34 @@ class FindStationedVehiclesByCapacityUseCaseTest {
         // Then
         assertEquals(listOf(suitableVehicle), result)
     }
+
+
+    @Test
+    fun `should include vehicle when capacity exactly matches requirement`() {
+        // Given
+        val warehouse = Warehouse(
+            id = "WH-001",
+            name = "Main Warehouse",
+            regionalZone = "North",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
+        val vehicle = Vehicle(
+            id = "TRK-001",
+            maxCapacityKg = 100.0,
+            costPerKm = 5.0,
+            currentWarehouse = warehouse
+        )
+
+        warehouse.addVehicle(vehicle)
+
+        val useCase = FindStationedVehiclesByCapacityUseCase()
+
+        // When
+        val result = useCase(warehouse, 100.0)
+
+        // Then
+        assertEquals(listOf(vehicle), result)
+    }
 }
