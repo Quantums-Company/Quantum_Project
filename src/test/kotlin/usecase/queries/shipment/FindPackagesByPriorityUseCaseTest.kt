@@ -65,4 +65,47 @@ class FindPackagesByPriorityUseCaseTest {
             result
         )
     }
+
+
+    @Test
+    fun `should not return packages with different priority`() = runTest {
+        // Given
+        val packageRepository = mockk<PackageRepository>()
+
+        val originWarehouse = Warehouse(
+            id = "WH-001",
+            name = "Origin",
+            regionalZone = "North",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
+        val destinationWarehouse = Warehouse(
+            id = "WH-002",
+            name = "Destination",
+            regionalZone = "South",
+            longitude = 35.1,
+            latitude = 32.1
+        )
+
+        val standardPackage = Package(
+            id = "PKG-000003",
+            weight = 100.0,
+            priority = Priority.STANDARD,
+            originWarehouse = originWarehouse,
+            destinationWarehouse = destinationWarehouse
+        )
+
+        coEvery {
+            packageRepository.getAll()
+        } returns listOf(standardPackage)
+
+        val useCase = FindPackagesByPriorityUseCase(packageRepository)
+
+        // When
+        val result = useCase(Priority.URGENT)
+
+        // Then
+        assertEquals(emptyList<Package>(), result)
+    }
 }
