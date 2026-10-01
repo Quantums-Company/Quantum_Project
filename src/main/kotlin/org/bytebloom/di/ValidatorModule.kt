@@ -17,19 +17,16 @@ import org.koin.dsl.module
 
 val validatorModule = module {
 
-    // Create validators
     factory { CreateWarehouseValidator() }
     factory { CreatePackageValidator() }
     factory { CreateRouteValidator() }
     factory { CreateVehicleValidator() }
 
-    // Update validators
     factory { UpdateWarehouseValidator() }
     factory { UpdatePackageValidator() }
     factory { UpdateRouteValidator() }
     factory { UpdateVehicleValidator() }
 
-    // ID validators
     factory { EntityIdValidator() }
     factory { WarehouseIdValidator() }
     factory { PackageIdValidator() }
