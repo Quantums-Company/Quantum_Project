@@ -22,7 +22,6 @@ class CreatePackageValidatorTest {
         // Given
         val origin = warehouse("WH-001")
         val destination = warehouse("WH-002")
-
         val packageItem = Package(
             id = "PKG-001",
             weight = 10.0,
@@ -40,10 +39,13 @@ class CreatePackageValidatorTest {
 
     @Test
     fun `rejects an invalid package id`() {
+        // Given
         val packageItem = packageMock(id = "WH-001")
 
+        // When
         val result = validator(packageItem)
 
+        // Then
         val invalid = assertIs<ValidatorResult.Invalid>(result)
         val error = assertIs<ValidatorError.InvalidIdFormat>(
             invalid.violations.single()
@@ -53,11 +55,13 @@ class CreatePackageValidatorTest {
 
     @Test
     fun `rejects a non positive package weight`() {
+        // Given
         val packageItem = packageMock(weight = 0.0)
 
-
+        // When
         val result = validator(packageItem)
 
+        // Then
         val invalid = assertIs<ValidatorResult.Invalid>(result)
         val error = assertIs<ValidatorError.NotPositive>(
             invalid.violations.single()
@@ -67,10 +71,13 @@ class CreatePackageValidatorTest {
 
     @Test
     fun `rejects a blank origin warehouse id`() {
+        // Given
         val packageItem = packageMock(originId = "")
 
+        // When
         val result = validator(packageItem)
 
+        // Then
         val invalid = assertIs<ValidatorResult.Invalid>(result)
         val error = assertIs<ValidatorError.Blank>(
             invalid.violations.single()
@@ -80,10 +87,13 @@ class CreatePackageValidatorTest {
 
     @Test
     fun `rejects a blank destination warehouse id`() {
+        // Given
         val packageItem = packageMock(destinationId = "")
 
+        // When
         val result = validator(packageItem)
 
+        // Then
         val invalid = assertIs<ValidatorResult.Invalid>(result)
         val error = assertIs<ValidatorError.Blank>(
             invalid.violations.single()
