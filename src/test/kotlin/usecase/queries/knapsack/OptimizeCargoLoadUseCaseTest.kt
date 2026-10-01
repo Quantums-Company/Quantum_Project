@@ -1,3 +1,5 @@
+package usecase.queries.knapsack
+
 import io.mockk.every
 import io.mockk.mockk
 import org.bytebloom.domain.knapsack.KnapsackCargoOptimizer
