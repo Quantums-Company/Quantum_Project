@@ -4,7 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.EntityType
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.validation.ValidatorError
@@ -30,7 +30,7 @@ class DeletePackageUseCaseTest {
     )
 
     @Test
-    fun `deletes package successfully`() {
+    fun `deletes package successfully`() = runTest {
         // Given
         val id = "PKG-001"
 
@@ -38,9 +38,7 @@ class DeletePackageUseCaseTest {
         coEvery { packageRepository.delete(id) } returns true
 
         // When
-        val result = runBlocking {
-            useCase(id)
-        }
+        val result = useCase(id)
 
         // Then
         assertTrue(result)
@@ -51,7 +49,7 @@ class DeletePackageUseCaseTest {
     }
 
     @Test
-    fun `returns false when package cannot be deleted`() {
+    fun `returns false when package cannot be deleted`() = runTest {
         // Given
         val id = "PKG-404"
 
@@ -59,9 +57,7 @@ class DeletePackageUseCaseTest {
         coEvery { packageRepository.delete(id) } returns false
 
         // When
-        val result = runBlocking {
-            useCase(id)
-        }
+        val result = useCase(id)
 
         // Then
         assertFalse(result)
@@ -72,7 +68,7 @@ class DeletePackageUseCaseTest {
     }
 
     @Test
-    fun `throws validation exception when package id is invalid`() {
+    fun `throws validation exception when package id is invalid`() = runTest {
         // Given
         val invalidId = "WH-001"
 
@@ -89,9 +85,7 @@ class DeletePackageUseCaseTest {
 
         // When
         val exception = assertFailsWith<EntityValidationException> {
-            runBlocking {
-                useCase(invalidId)
-            }
+            useCase(invalidId)
         }
 
         // Then

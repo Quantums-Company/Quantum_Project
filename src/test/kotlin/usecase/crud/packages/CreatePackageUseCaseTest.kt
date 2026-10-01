@@ -5,7 +5,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.EntityType
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
@@ -45,7 +45,7 @@ class CreatePackageUseCaseTest {
     )
 
     @Test
-    fun `creates a package and stores it in the repository`() {
+    fun `creates a package and stores it in the repository`() = runTest {
         // Given
         val origin = warehouse("WH-001")
         val destination = warehouse("WH-002")
@@ -62,14 +62,12 @@ class CreatePackageUseCaseTest {
         coEvery { packageRepository.create(any()) } returns storedPackage
 
         // When
-        val result = runBlocking {
-            useCase(
-                weight = 10.0,
-                priority = Priority.STANDARD,
-                originWarehouse = origin,
-                destinationWarehouse = destination
-            )
-        }
+        val result = useCase(
+            weight = 10.0,
+            priority = Priority.STANDARD,
+            originWarehouse = origin,
+            destinationWarehouse = destination
+        )
 
         // Then
         assertSame(storedPackage, result)
@@ -92,7 +90,7 @@ class CreatePackageUseCaseTest {
     }
 
     @Test
-    fun `throws validation exception when validator rejects the package`() {
+    fun `throws validation exception when validator rejects the package`() = runTest {
         // Given
         val origin = warehouse("WH-001")
         val destination = warehouse("WH-002")
@@ -106,15 +104,14 @@ class CreatePackageUseCaseTest {
 
         // When
         val exception = assertFailsWith<EntityValidationException> {
-            runBlocking {
-                useCase(
-                    weight = 10.0,
-                    priority = Priority.STANDARD,
-                    originWarehouse = origin,
-                    destinationWarehouse = destination
-                )
-            }
+            useCase(
+                weight = 10.0,
+                priority = Priority.STANDARD,
+                originWarehouse = origin,
+                destinationWarehouse = destination
+            )
         }
+
         // Then
         assertEquals(
             ValidatorField.WEIGHT,

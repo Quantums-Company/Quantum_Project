@@ -76,5 +76,6 @@ class PackageIdValidatorTest {
         val result = validator(id)
 
         // Then
-        assertIs<ValidatorResult.Invalid>(result)    }
+        assertIs<ValidatorResult.Invalid>(result)
+    }
 }

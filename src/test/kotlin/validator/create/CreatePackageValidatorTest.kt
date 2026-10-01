@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertSame
+import org.bytebloom.domain.model.Priority
 
 class CreatePackageValidatorTest {
 
@@ -54,8 +55,7 @@ class CreatePackageValidatorTest {
         val packageItem = Package(
             id = "PKG-001",
             weight = 10.0,
-            priority = org.bytebloom.domain.model.Priority.STANDARD,
-            originWarehouse = origin,
+            priority = Priority.STANDARD,            originWarehouse = origin,
             destinationWarehouse = destination
         )
 

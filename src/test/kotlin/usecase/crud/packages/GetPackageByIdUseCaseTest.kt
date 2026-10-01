@@ -5,7 +5,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.EntityType
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
@@ -52,7 +52,7 @@ class GetPackageByIdUseCaseTest {
     )
 
     @Test
-    fun `returns package when id is valid and package exists`() {
+    fun `returns package when id is valid and package exists`() = runTest {
         // Given
         val id = "PKG-001"
         val expectedPackage = packageItem()
@@ -61,9 +61,7 @@ class GetPackageByIdUseCaseTest {
         coEvery { packageRepository.getById(id) } returns expectedPackage
 
         // When
-        val result = runBlocking {
-            useCase(id)
-        }
+        val result = useCase(id)
 
         // Then
         assertSame(expectedPackage, result)
@@ -78,7 +76,7 @@ class GetPackageByIdUseCaseTest {
     }
 
     @Test
-    fun `returns null when package does not exist`() {
+    fun `returns null when package does not exist`() = runTest {
         // Given
         val id = "PKG-999"
 
@@ -86,9 +84,7 @@ class GetPackageByIdUseCaseTest {
         coEvery { packageRepository.getById(id) } returns null
 
         // When
-        val result = runBlocking {
-            useCase(id)
-        }
+        val result = useCase(id)
 
         // Then
         assertNull(result)
@@ -99,7 +95,7 @@ class GetPackageByIdUseCaseTest {
     }
 
     @Test
-    fun `throws validation exception when package id is invalid`() {
+    fun `throws validation exception when package id is invalid`() = runTest {
         // Given
         val invalidId = "WH-001"
 
@@ -116,9 +112,7 @@ class GetPackageByIdUseCaseTest {
 
         // When
         val exception = assertFailsWith<EntityValidationException> {
-            runBlocking {
-                useCase(invalidId)
-            }
+            useCase(invalidId)
         }
 
         // Then
