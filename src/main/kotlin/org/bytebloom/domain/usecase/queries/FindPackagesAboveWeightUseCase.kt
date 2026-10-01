@@ -11,6 +11,6 @@ class FindPackagesAboveWeightUseCase(
 
         return packageRepository
             .getAll()
-            .filter { it.weight > minimumWeightKg }
+            .filter { it.weight >= minimumWeightKg }
     }
 }
