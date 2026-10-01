@@ -52,6 +52,7 @@ class FindAllPairsShortestPathUseCaseTest {
     @Test
     fun `distance from a warehouse to itself is always zero, without asking RouteFinder`() {
         // Given — no stubs needed for A->A, B->B, C->C
+        every { routeFinder.findShortestPath(any(), any()) } returns null
 
         // When
         val result = useCase()
