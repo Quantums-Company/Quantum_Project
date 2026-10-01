@@ -12,12 +12,11 @@ import org.bytebloom.domain.model.Route
 import io.mockk.coEvery
 import org.bytebloom.domain.usecase.queries.shipment.EstimateShipmentDeliveryUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
-import kotlinx.coroutines.runBlocking
-
+import kotlinx.coroutines.test.runTest
 class EstimateShipmentDeliveryUseCaseTest {
 
     @Test
-    fun `should execute successfully`() = runBlocking {
+    fun `should execute successfully`() = runTest {
         // Given
         val packageRepository = mockk<PackageRepository>()
         val routeRepository = mockk<RouteRepository>()

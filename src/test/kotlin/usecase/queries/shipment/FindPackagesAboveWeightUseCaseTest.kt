@@ -2,7 +2,7 @@ package usecase.queries.shipment
 
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 class FindPackagesAboveWeightUseCaseTest {
 
     @Test
-    fun `should return packages above minimum weight`() = runBlocking {
+    fun `should return packages above minimum weight`() = runTest {
         // Given
         val packageRepository = mockk<PackageRepository>()
 
