@@ -16,11 +16,12 @@ class UpdatePackageValidator {
         val violations = buildList {
             EntityIdValidator().validate(input.id, EntityType.PACKAGE)?.let(::add)
 
-            if (!input.hasUpdates()) {
-                add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
-            }
             if (hasSameWarehouse(input)) {
                 add(ValidatorError.SameWarehouse(ValidatorField.ORIGIN_WAREHOUSE))
+            }
+
+            if (!input.hasUpdates()) {
+                add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
             }
 
             input.weight?.let {
