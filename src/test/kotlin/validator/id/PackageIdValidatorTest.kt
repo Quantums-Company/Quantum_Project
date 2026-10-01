@@ -16,29 +16,37 @@ class PackageIdValidatorTest {
 
     @Test
     fun `accepts a valid sequential package id`() {
+        // Given
         val id = "PKG-001"
 
+        // When
         val result = validator(id)
 
+        // Then
         assertSame(ValidatorResult.Valid, result)
     }
 
     @Test
     fun `accepts a valid UUID package id`() {
+        // Given
         val id = "PKG-550e8400-e29b-41d4-a716-446655440000"
 
+        // When
         val result = validator(id)
 
-        //
+        // Then
         assertSame(ValidatorResult.Valid, result)
     }
 
     @Test
     fun `rejects a blank package id`() {
+        // Given
         val id = ""
 
+        // When
         val result = validator(id)
 
+        // Then
         val invalid = assertIs<ValidatorResult.Invalid>(result)
         val error = assertIs<ValidatorError.Blank>(invalid.violations.single())
         assertEquals(ValidatorField.ID, error.field)
@@ -46,10 +54,13 @@ class PackageIdValidatorTest {
 
     @Test
     fun `rejects an id with the wrong format`() {
+        // Given
         val id = "WH-001"
 
+        // When
         val result = validator(id)
 
+        // Then
         val invalid = assertIs<ValidatorResult.Invalid>(result)
         val error = assertIs<ValidatorError.InvalidIdFormat>(invalid.violations.single())
         assertEquals(ValidatorField.ID, error.field)
@@ -58,9 +69,12 @@ class PackageIdValidatorTest {
 
     @Test
     fun `rejects a sequential id with fewer than three digits`() {
+        // Given
         val id = "PKG-12"
 
+        // When
         val result = validator(id)
 
+        // Then
         assertIs<ValidatorResult.Invalid>(result)    }
 }
