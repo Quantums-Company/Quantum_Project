@@ -2,6 +2,7 @@ package edu.logiroute.logiroute.presentation.ui.style
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,15 +23,23 @@ fun Card(
     shape: Shape = RoundedCornerShape(12.dp),
     backgroundColor: Color = CharcoalBlue,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(12.dp),
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ){
+    val baseModifier = modifier
+        .fillMaxWidth()
+        .clip(shape)
+        .background(backgroundColor)
+        .border(1.dp, Border, shape)
+
+    val finalModifier = baseModifier.then(
+        onClick?.let { action ->
+            Modifier.clickable { action.invoke() }
+        } ?: Modifier
+    )
+
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(backgroundColor)
-            .border(1.dp, Border, shape)
-            .padding(16.dp),
+        modifier = finalModifier.padding(16.dp),
         verticalArrangement = verticalArrangement,
     ){
         content()
