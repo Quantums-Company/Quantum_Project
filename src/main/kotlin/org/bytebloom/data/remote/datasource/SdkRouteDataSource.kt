@@ -6,7 +6,7 @@ import org.bytebloom.data.remote.client.SupabaseErrorTranslator
 import org.bytebloom.data.remote.dto.routeDto.RouteRequestDto
 import org.bytebloom.data.remote.dto.routeDto.RouteResponseDto
 import org.bytebloom.data.source.remote.RouteRemoteDataSource
-import org.bytebloom.util.retryWithBackoff
+import org.bytebloom.data.remote.util.retryWithBackoff
 
 class SdkRouteDataSource(
     private val client: SupabaseClient

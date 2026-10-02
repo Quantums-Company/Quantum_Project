@@ -1,4 +1,4 @@
-package org.bytebloom.util
+package org.bytebloom.data.remote.util
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -14,28 +14,19 @@ suspend fun <T> retryWithBackoff(
     block: suspend () -> T
 ): Result<T> {
     var currentDelay = initialDelayMs
-    var retryCount  = 0
+    var retryCount = 0
 
     while (true) {
         try {
-            retryCount ++
-            val result = block()
-            if (retryCount  > 1) {
-                Logger.info("Attempt $retryCount  succeeded successfully.")
-            }
-            return Result.success(result)
+            retryCount++
+            return Result.success(block())
         } catch (e: CancellationException) {
             throw e
         } catch (e: DomainException) {
             val isRetryable = shouldRetry(e)
-
-            if (!isRetryable || retryCount  > maxRetries) {
-                Logger.warning("Operation failed permanently on attempt $retryCount . Reason: ${e.message}")
+            if (!isRetryable || retryCount > maxRetries) {
                 return Result.failure(e)
             }
-
-            Logger.warning("Attempt $retryCount  failed: ${e.message}. Retrying in ${currentDelay}ms...")
-
             delay(currentDelay.milliseconds)
             currentDelay = (currentDelay * factor).toLong()
         }

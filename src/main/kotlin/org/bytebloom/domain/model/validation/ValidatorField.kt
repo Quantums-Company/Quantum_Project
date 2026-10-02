@@ -15,5 +15,8 @@ enum class ValidatorField(val displayName: String) {
     ORIGIN_WAREHOUSE("Origin warehouse"),
     DESTINATION_WAREHOUSE("Destination warehouse"),
     CURRENT_WAREHOUSE("Current warehouse"),
-    ENTITY("Entity")
+    ENTITY("Entity"),
+    FEE("Fee"),
+    MULTIPLIER("multiplier"),
+    PREMIUM("premium"),
 }

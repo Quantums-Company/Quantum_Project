@@ -1,16 +1,20 @@
 package org.bytebloom.data.local.csv
 
+import org.bytebloom.data.exception.CsvParsingException
 import org.bytebloom.data.local.common.CsvColumns
-import org.bytebloom.data.local.common.CsvTablesName
-import org.bytebloom.data.local.common.hasExpectedColumns
-import org.bytebloom.data.local.common.hasRequiredValues
 import org.bytebloom.data.local.common.CsvFileReader
-import org.bytebloom.data.local.common.toValidDouble
+import org.bytebloom.data.local.common.CsvTablesName
+import org.bytebloom.data.local.common.requireExpectedColumnCount
+import org.bytebloom.data.local.common.requireNonBlankValues
+import org.bytebloom.data.local.common.toDoubleOrThrow
 import org.bytebloom.data.raw.PackageRaw
 import org.bytebloom.data.source.csv.PackageDataSource
 import org.bytebloom.domain.model.Priority
 
-class CsvPackageDataSource: PackageDataSource {
+class CsvPackageDataSource(
+    private val csvFileReader: CsvFileReader = CsvFileReader()
+) : PackageDataSource {
+
     companion object {
         private const val ID_INDEX = 0
         private const val WEIGHT_INDEX = 1
@@ -19,59 +23,56 @@ class CsvPackageDataSource: PackageDataSource {
         private const val PRIORITY_INDEX = 4
     }
 
-    val csvFileReader = CsvFileReader()
+    override suspend fun loadAll(): List<PackageRaw> =
+        csvFileReader.loadCsv(fileName = CsvTablesName.PACKAGE, parser = ::parsePackage).rows
 
-    private fun parsePackage(line: String, lineNumber: Int): PackageRaw? {
+    private fun parsePackage(line: String, lineNumber: Int): PackageRaw {
         val columns = line.split(",").map(String::trim)
 
-        return columns.takeIf { hasExpectedColumns(it, CsvColumns.PACKAGE, lineNumber) }
-            ?.let { extractPackageFromColumns(it, lineNumber) }
-    }
+        requireExpectedColumnCount(columns, CsvColumns.PACKAGE, lineNumber)
 
-    private fun extractPackageFromColumns(
-        columns: List<String>,
-        lineNumber: Int
-    ): PackageRaw? {
-        val id = columns[ID_INDEX].trim().uppercase()
+        val id = columns[ID_INDEX].uppercase()
         val weightValue = columns[WEIGHT_INDEX]
-        val originHubId = columns[ORIGIN_INDEX].trim().uppercase()
-        val destinationHubId = columns[DESTINATION_INDEX].trim().uppercase()
+        val originHubId = columns[ORIGIN_INDEX].uppercase()
+        val destinationHubId = columns[DESTINATION_INDEX].uppercase()
         val priorityValue = columns[PRIORITY_INDEX]
 
-        val weight = weightValue.toValidDouble("weight", lineNumber)
-
-        val hasValues = hasRequiredValues(
-            lineNumber, "Missing required data.", id, destinationHubId, originHubId
+        requireNonBlankValues(
+            lineNumber,
+            "Missing required package identifier or warehouse IDs.",
+            id, originHubId, destinationHubId, weightValue, priorityValue
         )
 
-        return if (hasValues && weight != null) {
-            PackageRaw(
-                id = id,
-                weight = weight,
-                originWarehouseId = originHubId,
-                destinationWarehouseId = destinationHubId,
-                priority = Priority.from(priorityValue)
-            )
-        } else {
-            null
-        }
-    }
-    override suspend fun loadAll(): List<PackageRaw> =
-        csvFileReader.loadCsv(fileName = CsvTablesName.PACKAGE, parser = ::parsePackage)
+        val weight = weightValue.toDoubleOrThrow("weight", lineNumber)
+            ?: throw CsvParsingException("Line $lineNumber: weight field is required and cannot be empty.")
 
-    override suspend fun getById(): List<PackageRaw> {
-        TODO("Not yet implemented")
+        val priority = parsePriority(priorityValue, lineNumber)
+
+        return PackageRaw(
+            id = id,
+            weight = weight,
+            originWarehouseId = originHubId,
+            destinationWarehouseId = destinationHubId,
+            priority = priority
+        )
     }
 
-    override suspend fun create(): List<PackageRaw> {
-        TODO("Not yet implemented")
+    private fun parsePriority(value: String, line: Int): Priority = try {
+        Priority.valueOf(value.uppercase())
+    } catch (_: Exception) {
+        throw CsvParsingException("Line $line: invalid priority value '$value'.")
     }
 
-    override suspend fun update(): List<PackageRaw> {
-        TODO("Not yet implemented")
-    }
+    // Read-only CSV sources throw UnsupportedOperationException for write operations
+    override suspend fun getById(): List<PackageRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 
-    override suspend fun delete(): List<PackageRaw> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun create(): List<PackageRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
+
+    override suspend fun update(): List<PackageRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
+
+    override suspend fun delete(): List<PackageRaw> =
+        throw UnsupportedOperationException("CSV Data Source is read-only.")
 }

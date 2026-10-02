@@ -27,15 +27,11 @@ class RouteMapper(
     private fun map(raw: RouteRaw): Route? {
 
         val origin = warehouseMapper.map(
-            raw.originWarehouseId,
-            "Route",
-            raw.id
+            raw.originWarehouseId
         ) ?: return null
 
         val destination = warehouseMapper.map(
-            raw.destinationWarehouseId,
-            "Route",
-            raw.id
+            raw.destinationWarehouseId
         ) ?: return null
 
         return raw.toDomain(origin, destination)

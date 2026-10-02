@@ -4,7 +4,6 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.usecase.commands.DispatchVehicleUseCase
-import org.bytebloom.util.Logger
 
 class DispatchVehicleCommand(
     private val dispatchVehicleUseCase: DispatchVehicleUseCase,
@@ -13,25 +12,11 @@ class DispatchVehicleCommand(
     private val warehouse: Warehouse
 ) : Command {
 
-    override fun execute(): Boolean {
-        if(!dispatchVehicleUseCase(packages, vehicle, warehouse)) {
-            return false
-        }
-        return true
-    }
+    override fun execute(): Boolean = dispatchVehicleUseCase(packages, vehicle, warehouse)
 
-    override fun undo():Boolean {
-        packages.forEach { packageItem ->
-            warehouse.addPackage(packageItem)
-        }
-
+    override fun undo(): Boolean {
+        packages.forEach { warehouse.addPackage(it) }
         warehouse.addVehicle(vehicle)
-
-        Logger.info(
-            "Dispatch undone: vehicle '${vehicle.id}' and " +
-                    "${packages.size} package(s) restored to " +
-                    "warehouse '${warehouse.id}'."
-        )
         return true
     }
 }

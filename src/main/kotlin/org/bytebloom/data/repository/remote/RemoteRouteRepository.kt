@@ -16,7 +16,7 @@ class RemoteRouteRepository(
     private suspend fun mapper() = RouteDtoMapper(warehouseRepository.getAll().associateBy { it.id })
 
     override suspend fun getAll(): List<Route> =
-        mapper().mapList(remoteDataSource.loadAll())
+        mapper().mapList(remoteDataSource.loadAll()).succeeded
 
     override suspend fun getById(id: String): Route? =
         remoteDataSource.loadById(id)?.let {mapper().map(it) }

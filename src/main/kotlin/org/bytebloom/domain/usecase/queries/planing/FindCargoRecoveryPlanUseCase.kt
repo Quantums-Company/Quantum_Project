@@ -18,9 +18,7 @@ class FindCargoRecoveryPlanUseCase {
             it.id.equals(failedVehicle.id, ignoreCase = true)
         }
 
-        if (packages.isEmpty() || availableVehicles.isEmpty()) {
-            return null
-        }
+        if (packages.isEmpty() || availableVehicles.isEmpty()) return null
 
         val ring = ConsistentHashingRing(
             packages = packages,
