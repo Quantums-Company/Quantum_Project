@@ -16,7 +16,7 @@ import kotlinx.coroutines.test.runTest
 class EstimateShipmentDeliveryUseCaseTest {
 
     @Test
-    fun `should execute successfully`() = runTest {
+    fun `should return total delivery delay for existing package`() = runTest {
         // Given
         val packageRepository = mockk<PackageRepository>()
         val routeRepository = mockk<RouteRepository>()
@@ -78,5 +78,28 @@ class EstimateShipmentDeliveryUseCaseTest {
         // Then
 
         assertEquals(30.0, result)
+    }
+
+
+    @Test
+    fun `should return null when package does not exist`() = runTest {
+        // Given
+        val packageRepository = mockk<PackageRepository>()
+        val routeRepository = mockk<RouteRepository>()
+        val findOptimalPath = mockk<FindOptimalPathUseCase>()
+
+        coEvery { packageRepository.getAll() } returns emptyList()
+
+        val useCase = EstimateShipmentDeliveryUseCase(
+            packageRepository,
+            routeRepository,
+            findOptimalPath
+        )
+
+        // When
+        val result = useCase("PKG-999999")
+
+        // Then
+        assertEquals(null, result)
     }
 }
