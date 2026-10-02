@@ -8,7 +8,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.presentation.ui.sampledata.VehicleSamples
-import edu.logiroute.logiroute.presentation.ui.sampledata.WarehouseSamples
 import edu.logiroute.logiroute.presentation.ui.theme.TextPrimary
 
 @Composable
