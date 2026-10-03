@@ -1,7 +1,6 @@
 package org.bytebloom.presentation
 
 import kotlinx.coroutines.CancellationException
-import org.bytebloom.data.local.common.UuidIdGenerator
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Route
@@ -13,10 +12,10 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.exception.UnknownDataException
-import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.domain.repository.WarehouseRepository
+import org.bytebloom.domain.model.updateInput.PackageUpdateInput
+import org.bytebloom.domain.model.updateInput.RouteUpdateInput
+import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
+import org.bytebloom.domain.model.updateInput.WarehouseUpdateInput
 import org.bytebloom.domain.usecase.crud.packages.CreatePackageUseCase
 import org.bytebloom.domain.usecase.crud.packages.DeletePackageUseCase
 import org.bytebloom.domain.usecase.crud.packages.GetPackageByIdUseCase
@@ -33,50 +32,28 @@ import org.bytebloom.domain.usecase.crud.warehouse.CreateWarehouseUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.DeleteWarehouseUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.GetWarehouseByIdUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.UpdateWarehouseUseCase
-import org.bytebloom.domain.validator.create.CreatePackageValidator
-import org.bytebloom.domain.validator.create.CreateRouteValidator
-import org.bytebloom.domain.validator.create.CreateVehicleValidator
-import org.bytebloom.domain.validator.create.CreateWarehouseValidator
-import org.bytebloom.domain.validator.id.PackageIdValidator
-import org.bytebloom.domain.validator.id.RouteIdValidator
-import org.bytebloom.domain.validator.id.VehicleIdValidator
-import org.bytebloom.domain.validator.id.WarehouseIdValidator
-import org.bytebloom.domain.model.updateInput.PackageUpdateInput
-import org.bytebloom.domain.model.updateInput.RouteUpdateInput
-import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
-import org.bytebloom.domain.model.updateInput.WarehouseUpdateInput
-import org.bytebloom.domain.validator.update.UpdatePackageValidator
-import org.bytebloom.domain.validator.update.UpdateRouteValidator
-import org.bytebloom.domain.validator.update.UpdateVehicleValidator
-import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
 
 class CrudUseCaseRunner(
-    warehouseRepository: WarehouseRepository,
-    vehicleRepository: VehicleRepository,
-    routeRepository: RouteRepository,
-    packageRepository: PackageRepository
+    private val createWarehouse: CreateWarehouseUseCase,
+    private val getWarehouseById: GetWarehouseByIdUseCase,
+    private val updateWarehouse: UpdateWarehouseUseCase,
+    private val deleteWarehouse: DeleteWarehouseUseCase,
+
+    private val createVehicle: CreateVehicleUseCase,
+    private val getVehicleById: GetVehicleByIdUseCase,
+    private val updateVehicle: UpdateVehicleUseCase,
+    private val deleteVehicle: DeleteVehicleUseCase,
+
+    private val createRoute: CreateRouteUseCase,
+    private val getRouteById: GetRouteByIdUseCase,
+    private val updateRoute: UpdateRouteUseCase,
+    private val deleteRoute: DeleteRouteUseCase,
+
+    private val createPackage: CreatePackageUseCase,
+    private val getPackageById: GetPackageByIdUseCase,
+    private val updatePackage: UpdatePackageUseCase,
+    private val deletePackage: DeletePackageUseCase
 ) {
-    private val idGenerator = UuidIdGenerator()
-
-    private val createWarehouse = CreateWarehouseUseCase(warehouseRepository, CreateWarehouseValidator(), idGenerator)
-    private val getWarehouseById = GetWarehouseByIdUseCase(warehouseRepository, WarehouseIdValidator())
-    private val updateWarehouse = UpdateWarehouseUseCase(warehouseRepository, UpdateWarehouseValidator())
-    private val deleteWarehouse = DeleteWarehouseUseCase(warehouseRepository, WarehouseIdValidator())
-
-    private val createVehicle = CreateVehicleUseCase(vehicleRepository, CreateVehicleValidator(), idGenerator)
-    private val getVehicleById = GetVehicleByIdUseCase(vehicleRepository, VehicleIdValidator())
-    private val updateVehicle = UpdateVehicleUseCase(vehicleRepository, UpdateVehicleValidator())
-    private val deleteVehicle = DeleteVehicleUseCase(vehicleRepository, VehicleIdValidator())
-
-    private val createRoute = CreateRouteUseCase(routeRepository, CreateRouteValidator(), idGenerator)
-    private val getRouteById = GetRouteByIdUseCase(routeRepository, RouteIdValidator())
-    private val updateRoute = UpdateRouteUseCase(routeRepository, UpdateRouteValidator())
-    private val deleteRoute = DeleteRouteUseCase(routeRepository, RouteIdValidator())
-
-    private val createPackage = CreatePackageUseCase(packageRepository, CreatePackageValidator(), idGenerator)
-    private val getPackageById = GetPackageByIdUseCase(packageRepository, PackageIdValidator())
-    private val updatePackage = UpdatePackageUseCase(packageRepository, UpdatePackageValidator())
-    private val deletePackage = DeletePackageUseCase(packageRepository, PackageIdValidator())
 
     suspend fun runAll() {
         println("=== CRUD Use Case Verification ===\n")
@@ -89,6 +66,7 @@ class CrudUseCaseRunner(
                 latitude = ORIGIN_WAREHOUSE_LATITUDE
             )
         }
+
         val destination = safely("create destination warehouse") {
             createWarehouse(
                 name = DEST_WAREHOUSE_NAME,
@@ -105,11 +83,31 @@ class CrudUseCaseRunner(
             val pkg = runPackageCycle(origin, destination)
 
             // Cleanup in FK-safe order: dependents first, warehouses last
-            pkg?.let { safely("delete package") { deletePackage(it.id) } }
-            route?.let { safely("delete route") { deleteRoute(it.id) } }
-            vehicle?.let { safely("delete vehicle") { deleteVehicle(it.id) } }
-            safely("delete origin warehouse") { deleteWarehouse(origin.id) }
-            safely("delete destination warehouse") { deleteWarehouse(destination.id) }
+            pkg?.let {
+                safely("delete package") {
+                    deletePackage(it.id)
+                }
+            }
+
+            route?.let {
+                safely("delete route") {
+                    deleteRoute(it.id)
+                }
+            }
+
+            vehicle?.let {
+                safely("delete vehicle") {
+                    deleteVehicle(it.id)
+                }
+            }
+
+            safely("delete origin warehouse") {
+                deleteWarehouse(origin.id)
+            }
+
+            safely("delete destination warehouse") {
+                deleteWarehouse(destination.id)
+            }
         }
 
         println("\n--- Deliberately invalid input (proves error strategy) ---")
@@ -120,6 +118,7 @@ class CrudUseCaseRunner(
         safely("get warehouse by id") {
             println("Warehouse fetched: ${getWarehouseById(warehouse.id)}")
         }
+
         safely("update warehouse") {
             println(
                 "Warehouse updated: ${
@@ -142,14 +141,17 @@ class CrudUseCaseRunner(
             costPerKm = INITIAL_VEHICLE_COST_PER_KM,
             currentWarehouse = warehouse
         )
+
         println("Vehicle created: ${created.id}")
         println("Vehicle fetched: ${getVehicleById(created.id)?.id}")
+
         val updated = updateVehicle(
             VehicleUpdateInput(
                 id = created.id,
                 costPerKm = UPDATED_VEHICLE_COST_PER_KM
             )
         )
+
         println("Vehicle updated: costPerKm=${updated.costPerKm}")
         updated
     }
@@ -164,14 +166,17 @@ class CrudUseCaseRunner(
             originWarehouse = origin,
             destinationWarehouse = destination
         )
+
         println("Route created: ${created.id}")
         println("Route fetched: ${getRouteById(created.id)?.id}")
+
         val updated = updateRoute(
             RouteUpdateInput(
                 id = created.id,
                 distanceKm = UPDATED_ROUTE_DISTANCE_KM
             )
         )
+
         println("Route updated: distanceKm=${updated.distanceKm}")
         updated
     }
@@ -186,14 +191,17 @@ class CrudUseCaseRunner(
             originWarehouse = origin,
             destinationWarehouse = destination
         )
+
         println("Package created: ${created.id}")
         println("Package fetched: ${getPackageById(created.id)?.id}")
+
         val updated = updatePackage(
             PackageUpdateInput(
                 id = created.id,
                 priority = Priority.URGENT
             )
         )
+
         println("Package updated: priority=${updated.priority}")
         updated
     }
@@ -206,6 +214,7 @@ class CrudUseCaseRunner(
                 longitude = INVALID_LAT_LONG,
                 latitude = INVALID_LAT_LONG
             )
+
             println("Unexpected: invalid warehouse was accepted!")
         } catch (e: DomainException) {
             println("Correctly rejected -> ${formatError(e)}")
@@ -226,12 +235,23 @@ class CrudUseCaseRunner(
     }
 
     private fun formatError(e: Throwable): String = when (e) {
-        is EntityValidationException -> "Validation failed: ${e.violations.joinToString("; ")}"
-        is ResourceNotFoundException -> "Not found: ${e.message}"
-        is DatabaseConflictException -> "Conflict: ${e.message}"
-        is NetworkUnavailableException -> "Network issue: ${e.message}"
-        is UnknownDataException -> "Unexpected data error: ${e.message}"
-        else -> "Unhandled error: ${e.message}"
+        is EntityValidationException ->
+            "Validation failed: ${e.violations.joinToString("; ")}"
+
+        is ResourceNotFoundException ->
+            "Not found: ${e.message}"
+
+        is DatabaseConflictException ->
+            "Conflict: ${e.message}"
+
+        is NetworkUnavailableException ->
+            "Network issue: ${e.message}"
+
+        is UnknownDataException ->
+            "Unexpected data error: ${e.message}"
+
+        else ->
+            "Unhandled error: ${e.message}"
     }
 
     private companion object {
