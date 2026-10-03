@@ -2,9 +2,12 @@ package validator.create
 
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
+import io.mockk.every
+import io.mockk.mockk
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.validator.create.CreateVehicleValidator
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class CreateVehicleValidatorTest {
@@ -34,6 +37,29 @@ class CreateVehicleValidatorTest {
 
         // Then
         assertEquals(ValidatorResult.Valid, result)
+    }
+
+
+    @Test
+    fun `should return invalid when max capacity is not positive`() {
+        // Given
+        val vehicle = mockk<Vehicle>()
+
+        val warehouse = mockk<Warehouse>()
+
+        every { vehicle.id } returns "TRK-001"
+        every { vehicle.maxCapacityKg } returns -100.0
+        every { vehicle.costPerKm } returns 5.0
+        every { vehicle.currentWarehouse } returns warehouse
+        every { warehouse.id } returns "WH-001"
+
+        val validator = CreateVehicleValidator()
+
+        // When
+        val result = validator(vehicle)
+
+        // Then
+        assertTrue(result is ValidatorResult.Invalid)
     }
 
 }
