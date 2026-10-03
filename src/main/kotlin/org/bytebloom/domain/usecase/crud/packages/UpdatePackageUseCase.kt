@@ -4,7 +4,7 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.model.updateInput.PackageUpdateInput
+import org.bytebloom.domain.model.input.update.PackageUpdateInput
 import org.bytebloom.domain.validator.update.UpdatePackageValidator
 import org.bytebloom.domain.model.validation.ValidatorResult
 

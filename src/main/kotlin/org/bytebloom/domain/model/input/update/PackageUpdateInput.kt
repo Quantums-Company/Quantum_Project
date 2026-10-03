@@ -1,17 +1,18 @@
-package org.bytebloom.domain.model.updateInput
+package org.bytebloom.domain.model.input.update
 
+import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
 
-data class RouteUpdateInput(
+data class PackageUpdateInput(
     val id: String,
-    val distanceKm: Double? = null,
-    val typicalDelayMin: Int? = null,
+    val weight: Double? = null,
+    val priority: Priority? = null,
     val originWarehouse: Warehouse? = null,
     val destinationWarehouse: Warehouse? = null
 ) {
     fun hasUpdates(): Boolean {
-        return distanceKm != null ||
-                typicalDelayMin != null ||
+        return weight != null ||
+                priority != null ||
                 originWarehouse != null ||
                 destinationWarehouse != null
     }

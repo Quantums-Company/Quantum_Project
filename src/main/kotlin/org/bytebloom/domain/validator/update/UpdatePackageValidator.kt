@@ -6,7 +6,7 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.validator.FieldValidator
-import org.bytebloom.domain.model.updateInput.PackageUpdateInput
+import org.bytebloom.domain.model.input.update.PackageUpdateInput
 import org.bytebloom.domain.model.validation.toValidatorResult
 
 class UpdatePackageValidator {
