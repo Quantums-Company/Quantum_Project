@@ -4,7 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
@@ -51,7 +51,7 @@ class UpdatePackageUseCaseTest {
     )
 
     @Test
-    fun `updates an existing package successfully`() {
+    fun `updates an existing package successfully`() = runTest {
         // Given
         val input = PackageUpdateInput(
             id = "PKG-001",
@@ -66,9 +66,7 @@ class UpdatePackageUseCaseTest {
         coEvery { packageRepository.update(any()) } returns storedPackage
 
         // When
-        val result = runBlocking {
-            useCase(input)
-        }
+        val result = useCase(input)
 
         // Then
         assertSame(storedPackage, result)
@@ -90,7 +88,7 @@ class UpdatePackageUseCaseTest {
     }
 
     @Test
-    fun `throws not found exception when package does not exist`() {
+    fun `throws not found exception when package does not exist`() = runTest {
         // Given
         val input = PackageUpdateInput(
             id = "PKG-404",
@@ -102,9 +100,7 @@ class UpdatePackageUseCaseTest {
 
         // When
         val exception = assertFailsWith<ResourceNotFoundException> {
-            runBlocking {
-                useCase(input)
-            }
+            useCase(input)
         }
 
         // Then
@@ -119,7 +115,7 @@ class UpdatePackageUseCaseTest {
     }
 
     @Test
-    fun `throws validation exception when update input is invalid`() {
+    fun `throws validation exception when update input is invalid`() = runTest {
         // Given
         val input = PackageUpdateInput(
             id = "PKG-001"
@@ -135,9 +131,7 @@ class UpdatePackageUseCaseTest {
 
         // When
         val exception = assertFailsWith<EntityValidationException> {
-            runBlocking {
-                useCase(input)
-            }
+            useCase(input)
         }
 
         // Then
