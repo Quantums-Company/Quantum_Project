@@ -1,15 +1,39 @@
 package validator.create
 
+import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.model.validation.ValidatorResult
+import org.bytebloom.domain.validator.create.CreateVehicleValidator
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class CreateVehicleValidatorTest {
 
     @Test
-    fun `should execute successfully`() {
+    fun `should return valid when vehicle data is correct`() {
         // Given
+        val warehouse = Warehouse(
+            id = "WH-001",
+            name = "Main Warehouse",
+            regionalZone = "North",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
+        val vehicle = Vehicle(
+            id = "TRK-001",
+            maxCapacityKg = 200.0,
+            costPerKm = 5.0,
+            currentWarehouse = warehouse
+        )
+
+        val validator = CreateVehicleValidator()
 
         // When
+        val result = validator(vehicle)
 
         // Then
+        assertEquals(ValidatorResult.Valid, result)
     }
+
 }
