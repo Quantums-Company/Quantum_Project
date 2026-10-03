@@ -1,4 +1,4 @@
-package org.bytebloom.domain.model.updateInput
+package org.bytebloom.domain.model.input.update
 
 import org.bytebloom.domain.model.Warehouse
 
