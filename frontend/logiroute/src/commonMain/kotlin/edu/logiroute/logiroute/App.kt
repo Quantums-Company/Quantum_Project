@@ -1,7 +1,6 @@
 package edu.logiroute.logiroute
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,9 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.painterResource
-import quantum_project.frontend.logiroute.generated.resources.Res
-import quantum_project.frontend.logiroute.generated.resources.compose_multiplatform
+import edu.logiroute.logiroute.presentation.ui.components.route.RouteDetailCardPreview
+import edu.logiroute.logiroute.presentation.ui.theme.InkBlack
 
 
 @Composable
@@ -26,7 +24,7 @@ fun App() {
         var showContent by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(color = InkBlack )
                 .safeContentPadding()
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -35,13 +33,11 @@ fun App() {
                 Text("Click me!")
             }
             AnimatedVisibility(showContent) {
-                val greeting = remember { "Hello \"DDDDDDDDDDDDDD " }
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+                    RouteDetailCardPreview()
                 }
             }
         }
