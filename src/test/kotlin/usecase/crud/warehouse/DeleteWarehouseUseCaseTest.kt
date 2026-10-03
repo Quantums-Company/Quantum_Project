@@ -29,7 +29,7 @@ class DeleteWarehouseUseCaseFailingTest {
     fun `returns true when warehouse is deleted`(): Unit = runBlocking {
         // Given
         every { validator("WH-001") } returns ValidatorResult.Valid
-        coEvery { repository.delete("WH-001") } returns true
+        coEvery { repository.delete("WH-001") } returns false
 
         // When
         val result = useCase("WH-001")
@@ -43,7 +43,7 @@ class DeleteWarehouseUseCaseFailingTest {
     fun `returns false when repository did not delete anything`(): Unit = runBlocking {
         // Given
         every { validator("WH-999") } returns ValidatorResult.Valid
-        coEvery { repository.delete("WH-999") } returns false
+        coEvery { repository.delete("WH-999") } returns true
 
         // When
         val result = useCase("WH-999")
