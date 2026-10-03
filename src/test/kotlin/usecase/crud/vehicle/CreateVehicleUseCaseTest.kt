@@ -10,8 +10,12 @@ import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.service.IdGenerator
+import org.bytebloom.domain.model.validation.ValidatorError
+import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.usecase.crud.vehicle.CreateVehicleUseCase
 import org.bytebloom.domain.validator.create.CreateVehicleValidator
+import org.bytebloom.domain.model.exception.EntityValidationException
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -61,4 +65,47 @@ class CreateVehicleUseCaseTest {
         // Then
         assertEquals(createdVehicle, result)
     }
+
+
+    @Test
+    fun `should throw exception when vehicle validation fails`() = runTest {
+        // Given
+        val vehicleRepository = mockk<VehicleRepository>()
+        val validator = mockk<CreateVehicleValidator>()
+        val idGenerator = mockk<IdGenerator>()
+
+        val warehouse = Warehouse(
+            id = "WH-001",
+            name = "Main Warehouse",
+            regionalZone = "North",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
+        every { idGenerator.next(EntityType.VEHICLE) } returns "TRK-001"
+
+        val violation = ValidatorError.NotPositive(
+            ValidatorField.MAX_CAPACITY_KG
+        )
+
+        every { validator(any()) } returns
+                ValidatorResult.Invalid(listOf(violation))
+
+        val useCase = CreateVehicleUseCase(
+            vehicleRepository,
+            validator,
+            idGenerator
+        )
+
+        // When & Then
+        assertThrows<EntityValidationException> {
+            useCase(
+                maxCapacityKg = 200.0,
+                costPerKm = 5.0,
+                currentWarehouse = warehouse
+            )
+        }
+
+    }
+
 }
