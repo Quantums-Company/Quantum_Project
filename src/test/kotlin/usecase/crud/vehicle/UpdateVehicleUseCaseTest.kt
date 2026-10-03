@@ -6,12 +6,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.usecase.crud.vehicle.UpdateVehicleUseCase
 import org.bytebloom.domain.validator.update.UpdateVehicleValidator
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class UpdateVehicleUseCaseTest {
@@ -65,5 +67,47 @@ class UpdateVehicleUseCaseTest {
 
         // Then
         assertEquals(updatedVehicle, result)
+    }
+
+
+    @Test
+    fun `should throw exception when vehicle does not exist`() = runTest {
+        // Given
+        val vehicleRepository = mockk<VehicleRepository>()
+        val validator = mockk<UpdateVehicleValidator>()
+
+        val warehouse = Warehouse(
+            id = "WH-001",
+            name = "Main Warehouse",
+            regionalZone = "North",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
+        val input = VehicleUpdateInput(
+            id = "TRK-999",
+            maxCapacityKg = 300.0,
+            costPerKm = 4.0,
+            currentWarehouse = warehouse
+        )
+
+        every { validator(input) } returns ValidatorResult.Valid
+        coEvery { vehicleRepository.getById("TRK-999") } returns null
+
+        val useCase = UpdateVehicleUseCase(
+            vehicleRepository,
+            validator
+        )
+
+        // When & Then
+        var exception: ResourceNotFoundException? = null
+
+        try {
+            useCase(input)
+        } catch (e: ResourceNotFoundException) {
+            exception = e
+        }
+
+        assertNotNull(exception)
     }
 }
