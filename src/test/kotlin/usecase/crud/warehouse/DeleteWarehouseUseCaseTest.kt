@@ -1,6 +1,3 @@
-package unit.usecase.warehouse
-
-
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -19,7 +16,7 @@ import org.bytebloom.domain.validator.id.WarehouseIdValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class DeleteWarehouseUseCaseFailingTest {
+class DeleteWarehouseUseCaseTest {
 
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<WarehouseIdValidator>()
