@@ -13,7 +13,7 @@ class ColdChainDecorator(
 
     init {
         if (multiplier <= 0.0) {
-            throw EntityValidationException(listOf(ValidatorError.NegativeValue(ValidatorField.MULTIPLIER)))
+            throw EntityValidationException(listOf(ValidatorError.NotPositive(ValidatorField.MULTIPLIER)))
         }
     }
 

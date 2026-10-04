@@ -11,18 +11,17 @@ class DefaultDecoratorFactory : DecoratorFactory {
     private val decorators = mutableMapOf<DecoratorType, (PackageComponent, Double) -> PackageComponent>()
 
     init {
-        registerDecorator(DecoratorType.COLD_CHAIN) { component, value ->
-            ColdChainDecorator(component, value)  // value = multiplier
+        registerDecorator(DecoratorType.COLD_CHAIN) { component, multiplier ->
+            ColdChainDecorator(component, multiplier)
         }
 
-        registerDecorator(DecoratorType.EXPRESS_INSURANCE) { component, value ->
-            ExpressInsuranceDecorator(component, value)  // value = premium
+        registerDecorator(DecoratorType.EXPRESS_INSURANCE) { component, premium ->
+            ExpressInsuranceDecorator(component, premium)
         }
 
-        registerDecorator(DecoratorType.FRAGILE_HANDLING) { component, value ->
-            FragileHandlingDecorator(component, value)  // value = fee
+        registerDecorator(DecoratorType.FRAGILE_HANDLING) { component, fee ->
+            FragileHandlingDecorator(component, fee)
         }
-        //any decorator can add here only
     }
 
     override fun createDecorator(
@@ -30,7 +29,7 @@ class DefaultDecoratorFactory : DecoratorFactory {
         decoratorFee: DecoratorFee
     ): PackageComponent? {
         val creator = decorators[decoratorFee.type]
-        return creator?.invoke(component, decoratorFee.value)  // نمرر القيمة مباشرة
+        return creator?.invoke(component, decoratorFee.value)
     }
 
     override fun registerDecorator(
