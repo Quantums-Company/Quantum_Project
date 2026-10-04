@@ -5,7 +5,7 @@ import io.mockk.mockk
 import org.bytebloom.domain.model.EntityType
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.updateInput.PackageUpdateInput
+import org.bytebloom.domain.model.input.update.PackageUpdateInput
 import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.model.validation.ValidatorResult
