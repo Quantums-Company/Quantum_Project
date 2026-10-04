@@ -12,10 +12,10 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.exception.UnknownDataException
-import org.bytebloom.domain.model.updateInput.PackageUpdateInput
-import org.bytebloom.domain.model.updateInput.RouteUpdateInput
-import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
-import org.bytebloom.domain.model.updateInput.WarehouseUpdateInput
+import org.bytebloom.domain.model.input.update.PackageUpdateInput
+import org.bytebloom.domain.model.input.update.RouteUpdateInput
+import org.bytebloom.domain.model.input.update.VehicleUpdateInput
+import org.bytebloom.domain.model.input.update.WarehouseUpdateInput
 import org.bytebloom.domain.usecase.crud.packages.CreatePackageUseCase
 import org.bytebloom.domain.usecase.crud.packages.DeletePackageUseCase
 import org.bytebloom.domain.usecase.crud.packages.GetPackageByIdUseCase
