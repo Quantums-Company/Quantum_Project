@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.updateInput.RouteUpdateInput
+import org.bytebloom.domain.model.input.update.RouteUpdateInput
 import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.model.validation.ValidatorResult

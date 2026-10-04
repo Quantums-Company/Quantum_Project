@@ -14,11 +14,13 @@ class CleanArchitectureTest {
     private val presentationLayer by lazy { Layer("presentation", "org.bytebloom.presentation..") }
     private val domainLayer by lazy { Layer("domain", "org.bytebloom.domain..") }
     private val dataLayer by lazy { Layer("data", "org.bytebloom.data..") }
+    private val diLayer by lazy { Layer("di", "org.bytebloom.di..") }
 
     @Test
     fun `clean architecture layers have correct dependencies`() {
         scope.assertArchitecture {
-            presentationLayer.dependsOn(domainLayer)
+            presentationLayer.dependsOn(domainLayer, diLayer)
+            diLayer.dependsOn(domainLayer, dataLayer)
             dataLayer.dependsOn(domainLayer)
             domainLayer.dependsOnNothing()
         }
