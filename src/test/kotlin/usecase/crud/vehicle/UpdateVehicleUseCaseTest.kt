@@ -9,7 +9,7 @@ import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
+import org.bytebloom.domain.model.input.update.VehicleUpdateInput
 import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.repository.VehicleRepository
