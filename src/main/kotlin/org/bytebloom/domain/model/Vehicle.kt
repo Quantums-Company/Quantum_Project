@@ -9,7 +9,7 @@ class Vehicle(
     val id: String,
     val maxCapacityKg: Double,
     val costPerKm: Double,
-    val currentWarehouse: Warehouse   // كانت var — لازم val، شرح تحت
+    val currentWarehouse: Warehouse
 ) {
     init {
         val rules = FieldValidator()
