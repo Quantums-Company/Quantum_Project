@@ -806,16 +806,18 @@ private fun zonesCovered(vehicle: Vehicle, allRoutes: List<Route>): Set<String> 
 fun demonstrateGreedyDispatcher(
     warehouses: List<Warehouse>,
     vehicles: List<Vehicle>,
-    routes: List<Route>
+    routes: List<Route>,
+    greedyDispatcher: GreedyFleetDispatchUseCase
 ) {
     val targetZones = warehouses
         .map { it.regionalZone }
         .toSet()
 
-    val result = GreedyFleetDispatchUseCase().invoke(
+    val result = greedyDispatcher(
         targetZones = targetZones,
         availableVehicles = vehicles,
         coverageOf = { vehicle -> zonesCovered(vehicle, routes) }
     )
+
     println(formatDispatchReport(targetZones, result))
 }

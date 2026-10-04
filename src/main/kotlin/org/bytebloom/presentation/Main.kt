@@ -1,15 +1,10 @@
 package org.bytebloom.presentation
 
 import kotlinx.coroutines.runBlocking
-import org.bytebloom.data.remote.client.SupabaseClientProvider
-import org.bytebloom.data.remote.datasource.SdkPackageDataSource
-import org.bytebloom.data.remote.datasource.SdkRouteDataSource
-import org.bytebloom.data.remote.datasource.SdkVehicleDataSource
-import org.bytebloom.data.remote.datasource.SdkWarehouseDataSource
-import org.bytebloom.data.repository.remote.RemotePackageRepository
-import org.bytebloom.data.repository.remote.RemoteRouteRepository
-import org.bytebloom.data.repository.remote.RemoteVehicleRepository
-import org.bytebloom.data.repository.remote.RemoteWarehouseRepository
+import org.bytebloom.di.networkModule
+import org.bytebloom.di.repositoryModule
+import org.bytebloom.di.useCaseModule
+import org.bytebloom.di.validatorModule
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.model.exception.DatabaseConflictException
@@ -17,7 +12,12 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.domain.model.exception.UnknownDataException
+import org.bytebloom.domain.repository.PackageRepository
+import org.bytebloom.domain.repository.RouteRepository
+import org.bytebloom.domain.repository.VehicleRepository
+import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
+import org.koin.core.context.startKoin
 
 fun formatError(e: Throwable): String = when (e) {
     is EntityValidationException -> "Validation failed: ${e.violations.joinToString("; ")}"
@@ -30,14 +30,14 @@ fun formatError(e: Throwable): String = when (e) {
 
 @Suppress("TooGenericExceptionCaught")
 fun main() = runBlocking {
-    val client = SupabaseClientProvider.create()
+    val koin = startKoin {
+        modules(networkModule, repositoryModule, validatorModule, useCaseModule, presentationModule)
+    }.koin
 
-    val warehouseRepo = RemoteWarehouseRepository(SdkWarehouseDataSource(client))
-
-    val vehicleRepo = RemoteVehicleRepository(warehouseRepo, SdkVehicleDataSource(client))
-    val routeRepo = RemoteRouteRepository(warehouseRepo, SdkRouteDataSource(client))
-    val packageRepo = RemotePackageRepository(warehouseRepo, SdkPackageDataSource(client))
-
+    val warehouseRepo: WarehouseRepository = koin.get()
+    val vehicleRepo: VehicleRepository = koin.get()
+    val routeRepo: RouteRepository = koin.get()
+    val packageRepo: PackageRepository = koin.get()
     println("--- Warehouses ---")
     val warehouses = try {
         warehouseRepo.getAll().also { list -> list.forEach { println(it) } }
@@ -84,24 +84,27 @@ fun main() = runBlocking {
     }
 
     println("\n=== CRUD Use Case Verification (Sub-Task 2 + 3 + 4) ===")
-    CrudUseCaseRunner(warehouseRepo, vehicleRepo, routeRepo, packageRepo).runAll()
-
+    koin.get<CrudUseCaseRunner>().runAll()
     println("\n=== Greedy Fleet Dispatcher (Sub-Task 5) ===")
     demonstrateGreedyDispatcher(
         warehouses = warehouses,
         vehicles = vehicles,
-        routes = routes
+        routes = routes,
+        greedyDispatcher = koin.get()
     )
-
     println("\n=== Greedy Dispatcher Complexity Check: O(N^2) ===")
-    benchmarkGreedyComplexity()
+    benchmarkGreedyComplexity(
+        greedyDispatcher = koin.get()
+    )
 }
 
 /**
  * Empirically proves GreedyFleetDispatchUseCase runs in O(N^2), not the O(2^N)
  * a brute-force set-cover search would need.
  */
-fun benchmarkGreedyComplexity() {
+fun benchmarkGreedyComplexity(
+    greedyDispatcher: GreedyFleetDispatchUseCase
+) {
     val sizes = BENCHMARK_INPUT_SIZES
 
     println(
@@ -136,7 +139,7 @@ fun benchmarkGreedyComplexity() {
         }.toMap()
 
         var callCount = 0
-        GreedyFleetDispatchUseCase().invoke(
+        greedyDispatcher(
             targetZones = zones,
             availableVehicles = vehicles,
             coverageOf = { vehicle ->

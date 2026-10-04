@@ -1,3 +1,5 @@
+package usecase.shipment
+
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
