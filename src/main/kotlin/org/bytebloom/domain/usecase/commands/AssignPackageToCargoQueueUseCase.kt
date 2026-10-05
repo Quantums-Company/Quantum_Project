@@ -5,7 +5,10 @@ import org.bytebloom.domain.model.Warehouse
 
 class AssignPackageToCargoQueueUseCase {
 
-    operator fun invoke(warehouse: Warehouse, pkg: Package): Boolean =
-        warehouse.addPackage(pkg)
+    operator fun invoke(warehouse: Warehouse, pkg: Package): Boolean {
+        if (pkg.originWarehouse.id != warehouse.id) return false
+        if (warehouse.containsPackage(pkg)) return false
+        return warehouse.addPackage(pkg)
+    }
 
 }
