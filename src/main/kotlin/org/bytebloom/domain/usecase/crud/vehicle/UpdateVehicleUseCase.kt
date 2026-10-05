@@ -6,7 +6,7 @@ import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.validator.update.UpdateVehicleValidator
 import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
+import org.bytebloom.domain.model.input.update.VehicleUpdateInput
 
 class UpdateVehicleUseCase(
     private val vehicleRepository: VehicleRepository,

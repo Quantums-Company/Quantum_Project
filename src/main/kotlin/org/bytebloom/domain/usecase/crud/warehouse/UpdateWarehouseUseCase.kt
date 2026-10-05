@@ -6,7 +6,7 @@ import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
 import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.model.updateInput.WarehouseUpdateInput
+import org.bytebloom.domain.model.input.update.WarehouseUpdateInput
 
 class UpdateWarehouseUseCase(
     private val warehouseRepository: WarehouseRepository,

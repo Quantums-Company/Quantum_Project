@@ -35,6 +35,7 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.koin.test)
     testImplementation(libs.konsist)
 }
@@ -45,4 +46,11 @@ kotlin {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+tasks.withType<Test> {
+    jvmArgs(
+        "-XX:+EnableDynamicAgentLoading",
+        "-Xshare:off"
+    )
 }

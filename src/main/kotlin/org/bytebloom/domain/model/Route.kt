@@ -17,7 +17,7 @@ class Route(
         val rules = FieldValidator()
         val violations = buildList {
             EntityIdValidator().validate(id, EntityType.ROUTE)?.let(::add)
-            rules.positive(distanceKm, ValidatorField.DESTINATION_WAREHOUSE)?.let(::add)
+            rules.positive(distanceKm, ValidatorField.DISTANCE_KM)?.let(::add)
             rules.nonNegative(typicalDelayMin, ValidatorField.TYPICAL_DELAY_MIN)?.let(::add)
             if (originWarehouse.id == destinationWarehouse.id) {
                 add(ValidatorError.SameWarehouse(ValidatorField.ORIGIN_WAREHOUSE))
