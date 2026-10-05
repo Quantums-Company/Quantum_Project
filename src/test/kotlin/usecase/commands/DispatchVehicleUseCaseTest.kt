@@ -146,6 +146,18 @@ class DispatchVehicleUseCaseTest {
         assertThat(isDispatched).isFalse()
     }
 
+    @Test
+    fun `a vehicle can always carry zero weight`() {
+        // Given
+        val vehicle = createVehicle(maxCapacityKg = 100.0)
+
+        // When
+        val canCarry = vehicle.canCarryWeight(0.0)
+
+        // Then
+        assertThat(canCarry).isTrue()
+    }
+
     private fun queuePackages(weights: List<Double>, firstId: Int = 1): List<Package> =
         weights.mapIndexed { index, weight ->
             createPackage(id = "PKG-%03d".format(firstId + index), weight = weight)
