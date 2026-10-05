@@ -1,4 +1,4 @@
-package usecase.queries.shipment
+package usecase.queries
 
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -7,14 +7,14 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.usecase.queries.FindPackagesByDestinationUseCase
+import org.bytebloom.domain.usecase.queries.FindPackagesByPriorityUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class FindPackagesByDestinationUseCaseTest {
+class FindPackagesByPriorityUseCaseTest {
 
     @Test
-    fun `should return packages by destination warehouse`() = runTest {
+    fun `should return packages by priority sorted by id`() = runTest {
         // Given
         val packageRepository = mockk<PackageRepository>()
 
@@ -34,8 +34,62 @@ class FindPackagesByDestinationUseCaseTest {
             latitude = 32.1
         )
 
-        val testPackage = Package(
+        val firstPackage = Package(
+            id = "PKG-000002",
+            weight = 100.0,
+            priority = Priority.URGENT,
+            originWarehouse = originWarehouse,
+            destinationWarehouse = destinationWarehouse
+        )
+
+        val secondPackage = Package(
             id = "PKG-000001",
+            weight = 150.0,
+            priority = Priority.URGENT,
+            originWarehouse = originWarehouse,
+            destinationWarehouse = destinationWarehouse
+        )
+
+        coEvery {
+            packageRepository.getAll()
+        } returns listOf(firstPackage, secondPackage)
+
+        val useCase = FindPackagesByPriorityUseCase(packageRepository)
+
+        // When
+        val result = useCase(Priority.URGENT)
+
+        // Then
+        assertEquals(
+            listOf(secondPackage, firstPackage),
+            result
+        )
+    }
+
+
+    @Test
+    fun `should not return packages with different priority`() = runTest {
+        // Given
+        val packageRepository = mockk<PackageRepository>()
+
+        val originWarehouse = Warehouse(
+            id = "WH-001",
+            name = "Origin",
+            regionalZone = "North",
+            longitude = 35.0,
+            latitude = 32.0
+        )
+
+        val destinationWarehouse = Warehouse(
+            id = "WH-002",
+            name = "Destination",
+            regionalZone = "South",
+            longitude = 35.1,
+            latitude = 32.1
+        )
+
+        val standardPackage = Package(
+            id = "PKG-000003",
             weight = 100.0,
             priority = Priority.STANDARD,
             originWarehouse = originWarehouse,
@@ -44,65 +98,12 @@ class FindPackagesByDestinationUseCaseTest {
 
         coEvery {
             packageRepository.getAll()
-        } returns listOf(testPackage)
+        } returns listOf(standardPackage)
 
-        val useCase = FindPackagesByDestinationUseCase(packageRepository)
-
-
-        // When
-        val result = useCase(destinationWarehouse)
-
-        // Then
-        assertEquals(listOf(testPackage), result)
-    }
-
-
-    @Test
-    fun `should not return packages with different destination`() = runTest {
-
-        // Given
-        val packageRepository = mockk<PackageRepository>()
-
-        val originWarehouse = Warehouse(
-            id = "WH-001",
-            name = "Origin",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
-        val destinationWarehouse = Warehouse(
-            id = "WH-002",
-            name = "Destination",
-            regionalZone = "South",
-            longitude = 35.1,
-            latitude = 32.1
-        )
-
-        val otherWarehouse = Warehouse(
-            id = "WH-003",
-            name = "Other",
-            regionalZone = "East",
-            longitude = 35.2,
-            latitude = 32.2
-        )
-
-        val testPackage = Package(
-            id = "PKG-000002",
-            weight = 100.0,
-            priority = Priority.STANDARD,
-            originWarehouse = originWarehouse,
-            destinationWarehouse = otherWarehouse
-        )
-
-        coEvery {
-            packageRepository.getAll()
-        } returns listOf(testPackage)
-
-        val useCase = FindPackagesByDestinationUseCase(packageRepository)
+        val useCase = FindPackagesByPriorityUseCase(packageRepository)
 
         // When
-        val result = useCase(destinationWarehouse)
+        val result = useCase(Priority.URGENT)
 
         // Then
         assertEquals(emptyList<Package>(), result)

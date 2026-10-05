@@ -1,4 +1,4 @@
-package usecase.queries.shipment
+package usecase.queries
 
 import io.mockk.coEvery
 import io.mockk.mockk
