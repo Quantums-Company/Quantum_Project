@@ -1,4 +1,4 @@
-package usecase.shipment
+package usecase.queries.shipment
 
 import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
