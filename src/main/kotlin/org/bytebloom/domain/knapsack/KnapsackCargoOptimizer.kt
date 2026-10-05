@@ -46,7 +46,11 @@ class KnapsackCargoOptimizer {
         return grid
     }
 
-    private fun backtrackSelectedItems(items: List<CargoItem>, grid: Array<IntArray>, capacityKg: Int): List<CargoItem> {
+    private fun backtrackSelectedItems(
+        items: List<CargoItem>,
+        grid: Array<IntArray>,
+        capacityKg: Int
+    ): List<CargoItem> {
         val selected = mutableListOf<CargoItem>()
         var remainingCapacity = capacityKg
 

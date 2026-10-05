@@ -91,7 +91,7 @@ class FindAllPairsShortestPathUseCaseTest {
 
         // Then
         assertEquals(5.0, result.getValue(warehouseA).getValue(warehouseB))
-        assertEquals(8.0, result.getValue(warehouseA).getValue(warehouseC))   // 5.0 + 3.0, summed from the real graph, not RouteFinder
+        assertEquals(8.0, result.getValue(warehouseA).getValue(warehouseC))
         assertEquals(3.0, result.getValue(warehouseB).getValue(warehouseC))
     }
 
@@ -125,7 +125,7 @@ class FindAllPairsShortestPathUseCaseTest {
     }
 
     @Test
-    fun `when a hop in the returned path has no matching edge weight in the graph, that segment is treated as infinite`() {
+    fun `should treat hop as infinite when edge weight is missing`() {
         // Given — RouteFinder claims a direct A->C hop, but no such edge was ever added to the graph
         every {
             routeFinder.findShortestPath(warehouseA, warehouseC)

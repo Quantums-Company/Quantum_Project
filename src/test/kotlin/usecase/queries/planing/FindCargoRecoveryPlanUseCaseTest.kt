@@ -80,7 +80,7 @@ class FindCargoRecoveryPlanUseCaseTest {
     }
 
     @Test
-    fun `when recovery is possible, reroutes every affected package to a healthy vehicle, never back to the failed one`() {
+    fun `should reroute affected packages to healthy vehicles avoiding the failed one`() {
         // Given
         val warehouse = warehouseWith()
         val destination = warehouseWith("WH-002")

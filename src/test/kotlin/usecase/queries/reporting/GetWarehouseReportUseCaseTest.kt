@@ -18,16 +18,33 @@ class GetWarehouseReportUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
     private val useCase = GetWarehouseReportUseCase(repository)
 
-    private fun createWarehouse(id: String) = Warehouse(id = id, name = "Warehouse $id", regionalZone = "Central",
-        longitude = 35.0, latitude = 31.0)
+    private fun createWarehouse(id: String) = Warehouse(
+        id = id,
+        name = "Warehouse $id",
+        regionalZone = "Central",
+        longitude = 35.0,
+        latitude = 31.0
+    )
 
     @Test
     fun `should execute successfully`() = runTest {
         // Given
         val origin = createWarehouse("WH-001")
         val destination = createWarehouse("WH-002")
-        origin.addPackage(Package("PKG-001", 10.5, Priority.URGENT, origin, destination))
-        origin.addPackage(Package("PKG-002", 4.5, Priority.LOW, origin, destination))
+        origin.addPackage(Package(
+            "PKG-001",
+            10.5,
+            Priority.URGENT,
+            origin,
+            destination
+        ))
+        origin.addPackage(Package(
+            "PKG-002",
+            4.5,
+            Priority.LOW,
+            origin,
+            destination
+        ))
         origin.addVehicle(Vehicle("TRK-001", 500.0, 2.0, origin))
         origin.addVehicle(Vehicle("TRK-002", 250.0, 3.0, origin))
         coEvery { repository.getAll() } returns listOf(origin, destination)
@@ -36,8 +53,12 @@ class GetWarehouseReportUseCaseTest {
         val report = useCase("WH-001")
 
         // Then
-        assertThat(report).isEqualTo(WarehouseReport(warehouseId = "WH-001", packageCount = 2, totalPackageWeight = 15.0,
-            totalVehicleCapacity = 750.0))
+        assertThat(report).isEqualTo(WarehouseReport(
+            warehouseId = "WH-001",
+            packageCount = 2,
+            totalPackageWeight = 15.0,
+            totalVehicleCapacity = 750.0
+        ))
     }
 
     @Test
@@ -49,7 +70,12 @@ class GetWarehouseReportUseCaseTest {
         val report = useCase("WH-001")
 
         // Then
-        assertThat(report).isEqualTo(WarehouseReport("WH-001", 0, 0.0, 0.0))
+        assertThat(report).isEqualTo(WarehouseReport(
+            "WH-001",
+            0,
+            0.0,
+            0.0
+        ))
     }
 
     @Test
@@ -81,7 +107,13 @@ class GetWarehouseReportUseCaseTest {
         // Given
         val first = createWarehouse("WH-001")
         val second = createWarehouse("WH-002")
-        first.addPackage(Package("PKG-001", 10.0, Priority.STANDARD, first, second))
+        first.addPackage(Package(
+            "PKG-001",
+            10.0,
+            Priority.STANDARD,
+            first,
+            second
+        ))
         second.addVehicle(Vehicle("TRK-001", 900.0, 2.0, second))
         coEvery { repository.getAll() } returns listOf(first, second)
 
@@ -89,7 +121,12 @@ class GetWarehouseReportUseCaseTest {
         val report = useCase("WH-002")
 
         // Then
-        assertThat(report).isEqualTo(WarehouseReport("WH-002", 0, 0.0, 900.0))
+        assertThat(report).isEqualTo(WarehouseReport(
+            "WH-002",
+            0,
+            0.0,
+            900.0
+        ))
         coVerify(exactly = 1) { repository.getAll() }
     }
 }
