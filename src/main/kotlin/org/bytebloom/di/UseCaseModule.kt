@@ -64,22 +64,22 @@ val useCaseModule = module {
     factory { BST<String>() }
     factory { AVLTree<String>() }
 
-    factory { CreateWarehouseUseCase(get(), get(), get()) }
+    factory { CreateWarehouseUseCase(get(), get()) }
     factory { GetWarehouseByIdUseCase(get(), get()) }
     factory { UpdateWarehouseUseCase(get(), get()) }
     factory { DeleteWarehouseUseCase(get(), get()) }
 
-    factory { CreatePackageUseCase(get(), get(), get()) }
+    factory { CreatePackageUseCase(get(), get()) }
     factory { GetPackageByIdUseCase(get(), get()) }
     factory { UpdatePackageUseCase(get(), get()) }
     factory { DeletePackageUseCase(get(), get()) }
 
-    factory { CreateRouteUseCase(get(), get(), get()) }
+    factory { CreateRouteUseCase(get(), get()) }
     factory { GetRouteByIdUseCase(get(), get()) }
     factory { UpdateRouteUseCase(get(), get()) }
     factory { DeleteRouteUseCase(get(), get()) }
 
-    factory { CreateVehicleUseCase(get(), get(), get()) }
+    factory { CreateVehicleUseCase(get(), get()) }
     factory { GetVehicleByIdUseCase(get(), get()) }
     factory { UpdateVehicleUseCase(get(), get()) }
     factory { DeleteVehicleUseCase(get(), get()) }
