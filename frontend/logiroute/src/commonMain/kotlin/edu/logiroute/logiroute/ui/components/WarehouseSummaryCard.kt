@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.logiroute.logiroute.ui.components.DisplayPriorityPackage
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
 import org.bytebloom.domain.model.Warehouse
 import edu.logiroute.logiroute.ui.theme.Border
