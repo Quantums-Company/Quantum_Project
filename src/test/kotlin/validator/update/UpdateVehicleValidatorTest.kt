@@ -1,7 +1,7 @@
 package validator.update
 
 import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.model.updateInput.VehicleUpdateInput
+import org.bytebloom.domain.model.input.update.VehicleUpdateInput
 import org.bytebloom.domain.validator.update.UpdateVehicleValidator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
