@@ -24,7 +24,13 @@ class GetWarehouseByIdUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<WarehouseIdValidator>()
     private val useCase = GetWarehouseByIdUseCase(repository, validator)
-    private val warehouse = Warehouse("WH-001", "Main Hub", "Central", 35.2, 31.9)
+    private val warehouse = Warehouse(
+        "WH-001",
+        "Main Hub",
+        "Central",
+        35.2,
+        31.9
+    )
 
     @Test
     fun `returns warehouse when id is valid and warehouse exists`() = runTest {
@@ -53,7 +59,7 @@ class GetWarehouseByIdUseCaseTest {
     }
 
     @Test
-    suspend fun `throws EntityValidationException and skips repository when id is invalid`() {
+    fun `throws EntityValidationException and skips repository when id is invalid`() = runTest {
         // Given
         val error = ValidatorError.InvalidIdFormat(ValidatorField.ID, EntityType.WAREHOUSE)
         every { validator("bad-id") } returns ValidatorResult.Invalid(listOf(error))
@@ -67,7 +73,7 @@ class GetWarehouseByIdUseCaseTest {
     }
 
     @Test
-    suspend fun `propagates repository exception when fetching fails`() {
+    fun `propagates repository exception when fetching fails`() = runTest {
         // Given
         every { validator("WH-001") } returns ValidatorResult.Valid
         coEvery { repository.getById("WH-001") } throws NetworkUnavailableException()

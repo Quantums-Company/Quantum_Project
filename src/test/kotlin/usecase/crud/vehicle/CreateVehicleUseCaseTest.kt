@@ -7,13 +7,9 @@ import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.EntityType
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.model.validation.ValidatorError
-import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.usecase.crud.vehicle.CreateVehicleUseCase
-import org.bytebloom.domain.validator.create.CreateVehicleValidator
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,91 +17,67 @@ import org.junit.jupiter.api.Test
 
 class CreateVehicleUseCaseTest {
 
+    private val vehicleRepository = mockk<VehicleRepository>()
+    private val idGenerator = mockk<IdGenerator>()
+
+    private val defaultWarehouse = Warehouse(
+        id = "WH-001",
+        name = "Main Warehouse",
+        regionalZone = "North",
+        longitude = 35.0,
+        latitude = 32.0
+    )
+
+    private val useCase = CreateVehicleUseCase(
+        vehicleRepository = vehicleRepository,
+        idGenerator = idGenerator
+    )
+
     @Test
-    fun `should create vehicle successfully`() = runTest {
-        // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<CreateVehicleValidator>()
-        val idGenerator = mockk<IdGenerator>()
-
-        val warehouse = Warehouse(
-            id = "WH-001",
-            name = "Main Warehouse",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
+    fun `should create vehicle successfully when data is valid`() = runTest {
         every { idGenerator.next(EntityType.VEHICLE) } returns "TRK-001"
-
-        every { validator(any()) } returns ValidatorResult.Valid
 
         val createdVehicle = Vehicle(
             id = "TRK-001",
-            maxCapacityKg = 200.0,
-            costPerKm = 5.0,
-            currentWarehouse = warehouse
+            maxCapacityKg = 500.0,
+            costPerKm = 3.5,
+            currentWarehouse = defaultWarehouse
         )
 
         coEvery { vehicleRepository.create(any()) } returns createdVehicle
 
-        val useCase = CreateVehicleUseCase(
-            vehicleRepository,
-            validator,
-            idGenerator
-        )
-
-        // When
         val result = useCase(
-            maxCapacityKg = 200.0,
-            costPerKm = 5.0,
-            currentWarehouse = warehouse
+            maxCapacityKg = 500.0,
+            costPerKm = 3.5,
+            currentWarehouse = defaultWarehouse
         )
 
-        // Then
         assertEquals(createdVehicle, result)
     }
 
-
     @Test
-    fun `should throw exception when vehicle validation fails`() = runTest {
-        // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<CreateVehicleValidator>()
-        val idGenerator = mockk<IdGenerator>()
-
-        val warehouse = Warehouse(
-            id = "WH-001",
-            name = "Main Warehouse",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
+    fun `should throw validation exception when user enters zero or negative capacity`() = runTest {
         every { idGenerator.next(EntityType.VEHICLE) } returns "TRK-001"
 
-        val violation = ValidatorError.NotPositive(
-            ValidatorField.MAX_CAPACITY_KG
-        )
-
-        every { validator(any()) } returns
-                ValidatorResult.Invalid(listOf(violation))
-
-        val useCase = CreateVehicleUseCase(
-            vehicleRepository,
-            validator,
-            idGenerator
-        )
-
-        // When & Then
         assertThrows<EntityValidationException> {
             useCase(
-                maxCapacityKg = 200.0,
-                costPerKm = 5.0,
-                currentWarehouse = warehouse
+                maxCapacityKg = 0.0,
+                costPerKm = 4.0,
+                currentWarehouse = defaultWarehouse
             )
         }
-
     }
 
+    @Test
+    fun `should throw validation exception when user enters negative cost per km`() = runTest {
+        every { idGenerator.next(EntityType.VEHICLE) } returns "TRK-001"
+
+        assertThrows<EntityValidationException> {
+            useCase(
+                maxCapacityKg = 300.0,
+                costPerKm = -1.2,
+                currentWarehouse = defaultWarehouse
+            )
+        }
+    }
 }

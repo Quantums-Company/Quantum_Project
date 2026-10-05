@@ -12,13 +12,9 @@ import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
-import org.bytebloom.domain.model.validation.ValidatorError
-import org.bytebloom.domain.model.validation.ValidatorField
-import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.service.IdGenerator
 import org.bytebloom.domain.usecase.crud.route.CreateRouteUseCase
-import org.bytebloom.domain.validator.create.CreateRouteValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
@@ -35,18 +31,14 @@ class CreateRouteUseCaseTest {
         idGenerator = mockk()
         every { idGenerator.next(EntityType.ROUTE) } returns GENERATED_ROUTE_ID
         coEvery { routeRepository.create(any()) } answers { firstArg() }
-        createRoute = CreateRouteUseCase(routeRepository, CreateRouteValidator(), idGenerator)
+        createRoute = CreateRouteUseCase(routeRepository, idGenerator)
     }
 
     @Test
     fun `should return created route with generated id when input is valid`() = runTest {
-        // Given
-        val distanceKm = 120.0
+        val distanceKm = 150.5
+        val createdRoute = createRouteWith(distanceKm = distanceKm, typicalDelayMin = 20)
 
-        // When
-        val createdRoute = createRouteWith(distanceKm = distanceKm)
-
-        // Then
         assertThat(createdRoute.id).isEqualTo(GENERATED_ROUTE_ID)
         assertThat(createdRoute.distanceKm).isEqualTo(distanceKm)
         assertThat(createdRoute.originWarehouse).isEqualTo(ORIGIN)
@@ -55,90 +47,44 @@ class CreateRouteUseCaseTest {
 
     @Test
     fun `should save route through repository exactly once when input is valid`() = runTest {
-        // Given
-        val distanceKm = 120.0
+        createRouteWith(distanceKm = 100.0)
 
-        // When
-        createRouteWith(distanceKm = distanceKm)
-
-        // Then
         coVerify(exactly = 1) {
-            routeRepository.create(match { it.id == GENERATED_ROUTE_ID && it.distanceKm == distanceKm })
+            routeRepository.create(match { it.id == GENERATED_ROUTE_ID && it.distanceKm == 100.0 })
         }
     }
 
     @Test
     fun `should request a new route id from id generator`() = runTest {
-        // Given
-        val distanceKm = 120.0
-
-        // When
-        createRouteWith(distanceKm = distanceKm)
-
-        // Then
+        createRouteWith()
         verify(exactly = 1) { idGenerator.next(EntityType.ROUTE) }
     }
 
     @Test
-    fun `should throw validation exception and skip saving when distance is not positive`() = runTest {
-        // Given
-        val invalidDistance = 0.0
-
-        // When & Then
-        assertFailsWith<EntityValidationException> { createRouteWith(distanceKm = invalidDistance) }
+    fun `should throw validation exception when user enters zero or negative distance`() = runTest {
+        assertFailsWith<EntityValidationException> { createRouteWith(distanceKm = 0.0) }
+        assertFailsWith<EntityValidationException> { createRouteWith(distanceKm = -45.0) }
         coVerify(exactly = 0) { routeRepository.create(any()) }
     }
 
     @Test
-    fun `should throw validation exception and skip saving when typical delay is negative`() = runTest {
-        // Given
-        val invalidDelay = -1
-
-        // When & Then
-        assertFailsWith<EntityValidationException> { createRouteWith(typicalDelayMin = invalidDelay) }
+    fun `should throw validation exception when user enters negative typical delay`() = runTest {
+        assertFailsWith<EntityValidationException> { createRouteWith(typicalDelayMin = -15) }
         coVerify(exactly = 0) { routeRepository.create(any()) }
     }
 
     @Test
-    fun `should throw same warehouse violation when origin equals destination`() = runTest {
-        // Given
-        val sameWarehouse = ORIGIN
-
-        // When
-        val exception = assertFailsWith<EntityValidationException> {
-            createRouteWith(destination = sameWarehouse)
+    fun `should throw validation exception when origin and destination are the same warehouse`() = runTest {
+        assertFailsWith<EntityValidationException> {
+            createRouteWith(origin = ORIGIN, destination = ORIGIN)
         }
-
-        // Then
-        assertThat(exception.violations.single()).isInstanceOf(ValidatorError.SameWarehouse::class.java)
-        coVerify(exactly = 0) { routeRepository.create(any()) }
-    }
-
-    @Test
-    fun `should throw validation exception and skip saving when validator rejects route`() = runTest {
-        // Given
-        val rejectingValidator = mockk<CreateRouteValidator>()
-        every { rejectingValidator(any()) } returns ValidatorResult.Invalid(
-            listOf(ValidatorError.Custom(ValidatorField.ENTITY, "Rejected by validator"))
-        )
-        val createRouteWithRejection = CreateRouteUseCase(routeRepository, rejectingValidator, idGenerator)
-
-        // When
-        val exception = assertFailsWith<EntityValidationException> {
-            createRouteWithRejection(120.0, 15, ORIGIN, DESTINATION)
-        }
-
-        // Then
-        assertThat(exception.violations).hasSize(1)
         coVerify(exactly = 0) { routeRepository.create(any()) }
     }
 
     @Test
     fun `should propagate network exception when repository is unreachable`() = runTest {
-        // Given
         coEvery { routeRepository.create(any()) } throws NetworkUnavailableException()
 
-        // When & Then
         assertFailsWith<NetworkUnavailableException> { createRouteWith() }
     }
 

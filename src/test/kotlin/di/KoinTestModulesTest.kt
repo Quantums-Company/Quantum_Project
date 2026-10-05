@@ -12,8 +12,6 @@ import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.service.IdGenerator
 import org.bytebloom.domain.usecase.crud.packages.GetPackageByIdUseCase
-import org.bytebloom.presentation.CrudUseCaseRunner
-import org.bytebloom.presentation.presentationModule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,7 +43,6 @@ class KoinTestModulesTest : KoinTest {
             modules(
                 validatorModule,
                 useCaseModule,
-                presentationModule,
                 fakeRepositoryModule
             )
         }
@@ -72,17 +69,5 @@ class KoinTestModulesTest : KoinTest {
         coVerify(exactly = 1) {
             packageRepository.getById("PKG-001")
         }
-    }
-
-    @Test
-    fun `resolves crud runner with mocked repositories`() {
-        // Given
-        val koin = getKoin()
-
-        // When
-        val runner = koin.get<CrudUseCaseRunner>()
-
-        // Then
-        assertNotNull(runner)
     }
 }

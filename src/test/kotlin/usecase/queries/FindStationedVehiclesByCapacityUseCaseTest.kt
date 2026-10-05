@@ -1,4 +1,4 @@
-package usecase.queries.shipment
+package usecase.queries
 
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
