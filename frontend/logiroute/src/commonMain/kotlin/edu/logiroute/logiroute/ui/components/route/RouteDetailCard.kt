@@ -13,21 +13,21 @@ import org.bytebloom.domain.model.Route
 fun RouteDetailCard(
     route: Route,
     modifier: Modifier = Modifier,
-    onClick: (Route) -> Unit ={}
+    onClick: (Route) -> Unit = {}
 ) = Card(
     modifier = modifier,
-    onClick = {onClick.invoke(route) },
+    onClick = { onClick.invoke(route) },
 ) {
-    RouteHeaderRow(route = route)
+    RouteHeader(route = route)
     RouteMetrics(route = route)
 }
 
-@Preview
+@Preview(name = "Route Transit - Edge Cases")
 @Composable
 fun RouteDetailCardPreview() = Column(
     modifier = Modifier.padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp)
 ) {
-    RouteDetailCard(route = RouteSamples.sampleRoute)
-    RouteDetailCard(route = RouteSamples.sampleRoute)
+    RouteDetailCard(route = RouteSamples.longCrossCountryRoute)
+    RouteDetailCard(route = RouteSamples.shortLocalRoute)
 }

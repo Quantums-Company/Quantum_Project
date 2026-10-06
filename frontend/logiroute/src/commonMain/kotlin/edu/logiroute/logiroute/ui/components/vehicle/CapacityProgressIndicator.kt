@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.theme.JetBlack
@@ -24,16 +25,23 @@ fun CapacityProgressIndicator(
     modifier = modifier
         .height(12.dp)
         .drawBehind {
-            drawRoundRect(color = JetBlack, cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()))
-            ratio.takeIf { it > 0f }?.let { activeRatio ->
-                drawRoundRect(
-                    color = fillColor,
-                    size = Size(width = size.width * activeRatio, height = size.height),
-                    cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
-                )
-            }
+            drawProgressBarTrack(ratio, fillColor)
         }
 )
+
+private fun DrawScope.drawProgressBarTrack(
+    ratio: Float,
+    fillColor: Color
+) {
+    drawRoundRect(color = JetBlack, cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()))
+    ratio.takeIf { it > 0f }?.let { activeRatio ->
+        drawRoundRect(
+            color = fillColor,
+            size = Size(width = size.width * activeRatio, height = size.height),
+            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
+        )
+    }
+}
 
 @Preview
 @Composable

@@ -5,7 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,10 +23,11 @@ fun Card(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(12.dp),
     backgroundColor: Color = CharcoalBlue,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(12.dp),
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
-){
+) {
     val baseModifier = modifier
         .fillMaxWidth()
         .clip(shape)
@@ -38,9 +41,9 @@ fun Card(
     )
 
     Column(
-        modifier = finalModifier,
+        modifier = finalModifier.padding(contentPadding),
         verticalArrangement = verticalArrangement,
-    ){
+    ) {
         content()
     }
 }
