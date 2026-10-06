@@ -19,4 +19,6 @@ enum class ValidatorField(val displayName: String) {
     FEE("Fee"),
     MULTIPLIER("multiplier"),
     PREMIUM("premium"),
+    VOLUME_M3("volumeM3"),
+    MAX_VOLUME_M3("Maximum volume")
 }
