@@ -17,116 +17,148 @@ class EntityIdValidatorTest {
     }
 
     @Test
-    fun `validate returns null for a sequential id`() {
-        // Given
+    fun `validate returns null for three digits sequential id`() {
         val threeDigitsId = "WH-001"
+
+        val threeDigitsResult = validator.validate(threeDigitsId, EntityType.WAREHOUSE)
+
+        assertThat(threeDigitsResult).isNull()
+    }
+
+    @Test
+    fun `validate returns null for five digits sequential id`() {
         val fiveDigitsId = "WH-12345"
 
-        // When
-        val threeDigitsResult = validator.validate(threeDigitsId, EntityType.WAREHOUSE)
         val fiveDigitsResult = validator.validate(fiveDigitsId, EntityType.WAREHOUSE)
 
-        // Then
-        assertThat(threeDigitsResult).isNull()
         assertThat(fiveDigitsResult).isNull()
     }
 
     @Test
     fun `validate returns null for a UUID id`() {
-        // Given
         val id = "WH-123e4567-e89b-12d3-a456-426614174000"
 
-        // When
         val result = validator.validate(id, EntityType.WAREHOUSE)
 
-        // Then
         assertThat(result).isNull()
     }
 
     @Test
-    fun `validate returns Blank error when id is blank`() {
-        // Given
+    fun `validate returns Blank error type when id is blank`() {
         val id = "   "
 
-        // When
         val result = validator.validate(id, EntityType.WAREHOUSE)
 
-        // Then
         assertThat(result).isInstanceOf(ValidatorError.Blank::class.java)
+    }
+
+    @Test
+    fun `validate returns sets ID field in Blank error when id is blank`() {
+        val id = "   "
+
+        val result = validator.validate(id, EntityType.WAREHOUSE)
+
         assertThat(result?.field).isEqualTo(ValidatorField.ID)
     }
 
     @Test
-    fun `validate returns InvalidIdFormat error when prefix belongs to another entity`() {
-        // Given
+    fun `validate returns InvalidIdFormat error type when prefix belongs to another entity`() {
         val id = "PKG-001"
 
-        // When
         val result = validator.validate(id, EntityType.WAREHOUSE)
 
-        // Then
         assertThat(result).isInstanceOf(ValidatorError.InvalidIdFormat::class.java)
-        val error = result as ValidatorError.InvalidIdFormat
-        assertThat(error.entityType).isEqualTo(EntityType.WAREHOUSE)
-        assertThat(error.field).isEqualTo(ValidatorField.ID)
+    }
+
+    @Test
+    fun `validate sets expected entityType in error when prefix belongs to another entity`() {
+        val id = "PKG-001"
+
+        val result = validator.validate(id, EntityType.WAREHOUSE) as ValidatorError.InvalidIdFormat
+
+        assertThat(result.entityType).isEqualTo(EntityType.WAREHOUSE)
+    }
+
+    @Test
+    fun `validate sets ID field in error when prefix belongs to another entity`() {
+        val id = "PKG-001"
+
+        val result = validator.validate(id, EntityType.WAREHOUSE) as ValidatorError.InvalidIdFormat
+
+        assertThat(result.field).isEqualTo(ValidatorField.ID)
     }
 
     @Test
     fun `validate returns InvalidIdFormat error for malformed ids`() {
-        // Given
         val malformedIds = listOf("WH-", "WH-01", "WH-abc", "001", "WH-001x", "WH-123e4567-e89b-12d3-a456")
 
-        // When
         val results = malformedIds.map { id -> validator.validate(id, EntityType.WAREHOUSE) }
 
-        // Then
         results.forEach { result -> assertThat(result).isInstanceOf(ValidatorError.InvalidIdFormat::class.java) }
     }
 
     @Test
-    fun `validate accepts the prefix of each entity type`() {
-        // Given
+    fun `validate accepts the prefix of warehouse Id`() {
         val warehouseId = "WH-001"
+
+        val warehouseResult = validator.validate(warehouseId, EntityType.WAREHOUSE)
+
+        assertThat(warehouseResult).isNull()
+    }
+
+    @Test
+    fun `validate accepts the prefix of package Id`() {
         val packageId = "PKG-001"
+
+        val packageResult = validator.validate(packageId, EntityType.PACKAGE)
+
+        assertThat(packageResult).isNull()
+    }
+
+    @Test
+    fun `validate accepts the prefix of route Id`() {
         val routeId = "RT-001"
+
+        val routeResult = validator.validate(routeId, EntityType.ROUTE)
+
+        assertThat(routeResult).isNull()
+    }
+
+    @Test
+    fun `validate accepts the prefix of vehicle Id`() {
         val vehicleId = "TRK-001"
 
-        // When
-        val warehouseResult = validator.validate(warehouseId, EntityType.WAREHOUSE)
-        val packageResult = validator.validate(packageId, EntityType.PACKAGE)
-        val routeResult = validator.validate(routeId, EntityType.ROUTE)
         val vehicleResult = validator.validate(vehicleId, EntityType.VEHICLE)
 
-        // Then
-        assertThat(warehouseResult).isNull()
-        assertThat(packageResult).isNull()
-        assertThat(routeResult).isNull()
         assertThat(vehicleResult).isNull()
     }
 
     @Test
     fun `invoke returns Valid for a correct id`() {
-        // Given
         val id = "WH-001"
 
-        // When
         val result = validator(id, EntityType.WAREHOUSE)
 
-        // Then
         assertThat(result).isEqualTo(ValidatorResult.Valid)
     }
 
     @Test
-    fun `invoke returns Invalid with one violation for an incorrect id`() {
-        // Given
+    fun `invoke returns single violation for an incorrect id`() {
         val id = "bad-id"
 
-        // When
         val result = validator(id, EntityType.WAREHOUSE)
 
-        // Then
         val violations = violationsOf(result)
         assertThat(violations).hasSize(1)
+    }
+
+    @Test
+    fun `invoke returns InvalidIdFormat violation type for an incorrect id`() {
+        val id = "bad-id"
+
+        val result = validator(id, EntityType.WAREHOUSE)
+
+        val violations = violationsOf(result)
         assertThat(violations.first()).isInstanceOf(ValidatorError.InvalidIdFormat::class.java)
     }
 }
