@@ -27,4 +27,8 @@ class Package(
 
     fun redirectedTo(newDestination: Warehouse): Package =
         Package(id, weight, priority, originWarehouse, newDestination)
+
+    override fun equals(other: Any?): Boolean = other is Package && id == other.id
+
+    override fun hashCode(): Int = id.hashCode()
 }

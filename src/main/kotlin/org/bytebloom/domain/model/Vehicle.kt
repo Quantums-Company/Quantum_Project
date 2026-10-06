@@ -25,4 +25,8 @@ class Vehicle(
 
     fun reassignedTo(newWarehouse: Warehouse): Vehicle =
         Vehicle(id, maxCapacityKg, costPerKm, newWarehouse)
+
+    override fun equals(other: Any?): Boolean = other is Vehicle && id == other.id
+
+    override fun hashCode(): Int = id.hashCode()
 }
