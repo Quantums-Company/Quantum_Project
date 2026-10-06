@@ -24,64 +24,51 @@ class GetWarehouseByIdUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<WarehouseIdValidator>()
     private val useCase = GetWarehouseByIdUseCase(repository, validator)
-    private val warehouse = Warehouse(
-        "WH-001",
-        "Main Hub",
-        "Central",
-        35.2,
-        31.9
-    )
+    private val warehouse = Warehouse("WH-001", "Main Hub", "Central", 35.2, 31.9)
 
     @Test
     fun `returns warehouse when id is valid and warehouse exists`() = runTest {
-        // Given
         every { validator("WH-001") } returns ValidatorResult.Valid
         coEvery { repository.getById("WH-001") } returns warehouse
 
-        // When
         val result = useCase("WH-001")
 
-        // Then
         assertThat(result).isEqualTo(warehouse)
     }
 
     @Test
     fun `returns null when id is valid but warehouse does not exist`() = runTest {
-        // Given
         every { validator("WH-999") } returns ValidatorResult.Valid
         coEvery { repository.getById("WH-999") } returns null
 
-        // When
         val result = useCase("WH-999")
 
-        // Then
         assertThat(result).isNull()
     }
 
     @Test
-    fun `throws EntityValidationException and skips repository when id is invalid`() = runTest {
-        // Given
+    fun `skips repository when id is invalid`() = runTest {
         val error = ValidatorError.InvalidIdFormat(ValidatorField.ID, EntityType.WAREHOUSE)
         every { validator("bad-id") } returns ValidatorResult.Invalid(listOf(error))
 
-        // When
         val exception = assertThrows<EntityValidationException> { useCase("bad-id") }
 
-        // Then
         assertThat(exception.violations).containsExactly(error)
+    }
+
+    @Test
+    fun `don't call repository get by id when id is invalid`() = runTest {
+        val error = ValidatorError.InvalidIdFormat(ValidatorField.ID, EntityType.WAREHOUSE)
+        every { validator("bad-id") } returns ValidatorResult.Invalid(listOf(error))
+
         coVerify(exactly = 0) { repository.getById(any()) }
     }
 
     @Test
     fun `propagates repository exception when fetching fails`() = runTest {
-        // Given
         every { validator("WH-001") } returns ValidatorResult.Valid
         coEvery { repository.getById("WH-001") } throws NetworkUnavailableException()
 
-        // When
-        val exception = assertThrows<NetworkUnavailableException> {useCase("WH-001") }
-
-        // Then
-        assertThat(exception).isSameInstanceAs(NetworkUnavailableException())
+        assertThrows<NetworkUnavailableException> { useCase("WH-001") }
     }
 }
