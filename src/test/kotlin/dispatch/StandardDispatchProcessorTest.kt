@@ -179,6 +179,37 @@ class StandardDispatchProcessorTest {
         verify(exactly = 0) { shipmentStateUpdater.markAsDispatched(any()) }
     }
 
+    // add to StandardDispatchProcessorTest
+    @Test
+    fun `should dispatch successfully even if the same package appears twice in the order`() {
+        // Given
+        val pkg = queuePackage(id = "PKG-001", weight = 300.0)
+        val order = createOrder(pkg, pkg)
+
+        // When
+        val outcome = standardProcessor.dispatch(order)
+
+        // Then
+        assertThat(outcome).isEqualTo(DispatchOutcome.Dispatched(order))
+        assertThat(warehouse.cargoQueue).isEmpty()
+    }
+
+    @Test
+    fun `should reject with package not in queue when only one of several packages was never queued`() {
+        // Given
+        val queuedPackage = queuePackage(id = "PKG-001", weight = 100.0)
+        val neverQueuedPackage = createPackage(id = "PKG-099", weight = 100.0)
+        val order = createOrder(queuedPackage, neverQueuedPackage)
+
+        // When
+        val outcome = standardProcessor.dispatch(order)
+
+        // Then
+        assertThat(outcome).isEqualTo(
+            DispatchOutcome.Rejected(order, DispatchRejectionReason.PACKAGE_NOT_IN_QUEUE)
+        )
+    }
+
     private fun queuePackage(id: String, weight: Double, priority: Priority = Priority.STANDARD): Package =
         createPackage(id, weight, priority).also { warehouse.addPackage(it) }
 
