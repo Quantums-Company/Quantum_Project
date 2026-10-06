@@ -30,19 +30,14 @@ class FindBackhaulOpportunityUseCase(
         return startsAtDestination && endsAtCurrentLocation
     }
 
-    private fun selectPackagesWithinCapacity(packages: List<Package>, capacityKg: Double): List<Package> {
-        val selectedPackages = mutableListOf<Package>()
-        var accumulatedWeight = 0.0
-
-        for (pkg in packages) {
-            if (accumulatedWeight + pkg.weight > capacityKg) continue
-
-            selectedPackages.add(pkg)
-            accumulatedWeight += pkg.weight
-        }
-
-        return selectedPackages
-    }
+    private fun selectPackagesWithinCapacity(packages: List<Package>, capacityKg: Double): List<Package> =
+        packages.fold(emptyList<Package>() to 0.0) { (selectedPackages, loadedWeight), pkg ->
+            if (loadedWeight + pkg.weight > capacityKg) {
+                selectedPackages to loadedWeight
+            } else {
+                (selectedPackages + pkg) to (loadedWeight + pkg.weight)
+            }
+        }.first
 
     private fun createBackhaulOpportunity(
         vehicle: Vehicle,

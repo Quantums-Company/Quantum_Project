@@ -9,7 +9,7 @@ class Vehicle(
     val id: String,
     val maxCapacityKg: Double,
     val costPerKm: Double,
-    val currentWarehouse: Warehouse   // كانت var — لازم val، شرح تحت
+    val currentWarehouse: Warehouse
 ) {
     init {
         val rules = FieldValidator()
@@ -21,7 +21,7 @@ class Vehicle(
         if (violations.isNotEmpty()) throw EntityValidationException(violations)
     }
 
-    fun canCarryWeight(weight: Double): Boolean = weight.isFinite() && weight > 0.0 && weight <= maxCapacityKg
+    fun canCarryWeight(weight: Double): Boolean = weight.isFinite() && weight >= 0.0 && weight <= maxCapacityKg
 
     fun reassignedTo(newWarehouse: Warehouse): Vehicle =
         Vehicle(id, maxCapacityKg, costPerKm, newWarehouse)

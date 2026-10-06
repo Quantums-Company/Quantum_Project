@@ -13,8 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import edu.logiroute.logiroute.presentation.ui.components.route.RouteDetailCardPreview
-import edu.logiroute.logiroute.presentation.ui.theme.InkBlack
+import edu.logiroute.logiroute.ui.components.Warehouse.WarehouseSummaryCardPreview
 
 
 @Composable
@@ -24,7 +23,7 @@ fun App() {
         var showContent by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
-                .background(color = InkBlack )
+                .background(color = _root_ide_package_.edu.logiroute.logiroute.ui.theme.InkBlack)
                 .safeContentPadding()
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,7 +36,7 @@ fun App() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    RouteDetailCardPreview()
+                    WarehouseSummaryCardPreview()
                 }
             }
         }

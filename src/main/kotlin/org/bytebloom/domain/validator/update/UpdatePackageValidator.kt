@@ -6,7 +6,7 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.validator.FieldValidator
-import org.bytebloom.domain.model.updateInput.PackageUpdateInput
+import org.bytebloom.domain.model.input.update.PackageUpdateInput
 import org.bytebloom.domain.model.validation.toValidatorResult
 
 class UpdatePackageValidator {
@@ -15,6 +15,10 @@ class UpdatePackageValidator {
     operator fun invoke(input: PackageUpdateInput): ValidatorResult {
         val violations = buildList {
             EntityIdValidator().validate(input.id, EntityType.PACKAGE)?.let(::add)
+
+            if (hasSameWarehouse(input)) {
+                add(ValidatorError.SameWarehouse(ValidatorField.ORIGIN_WAREHOUSE))
+            }
 
             if (!input.hasUpdates()) {
                 add(ValidatorError.NoFieldsProvided(ValidatorField.ENTITY))
@@ -32,4 +36,8 @@ class UpdatePackageValidator {
         }
         return violations.toValidatorResult()
     }
+    private fun hasSameWarehouse(input: PackageUpdateInput): Boolean =
+        input.originWarehouse != null &&
+                input.destinationWarehouse != null &&
+                input.originWarehouse.id == input.destinationWarehouse.id
 }
