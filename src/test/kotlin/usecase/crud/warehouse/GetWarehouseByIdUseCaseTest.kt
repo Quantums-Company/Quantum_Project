@@ -75,13 +75,14 @@ class GetWarehouseByIdUseCaseTest {
     @Test
     fun `propagates repository exception when fetching fails`() = runTest {
         // Given
+        val networkFailure = NetworkUnavailableException()
         every { validator("WH-001") } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } throws NetworkUnavailableException()
+        coEvery { repository.getById("WH-001") } throws networkFailure
 
         // When
-        val exception = assertThrows<NetworkUnavailableException> {useCase("WH-001") }
+        val exception = assertThrows<NetworkUnavailableException> { useCase("WH-001") }
 
         // Then
-        assertThat(exception).isSameInstanceAs(NetworkUnavailableException())
+        assertThat(exception).isSameInstanceAs(networkFailure)
     }
 }
