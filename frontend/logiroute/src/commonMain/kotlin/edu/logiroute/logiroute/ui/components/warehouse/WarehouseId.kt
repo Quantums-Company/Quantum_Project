@@ -1,22 +1,22 @@
-package edu.logiroute.logiroute.ui.components.Warehouse
+package edu.logiroute.logiroute.ui.components.warehouse
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
-import edu.logiroute.logiroute.ui.theme.TextPrimary
+import edu.logiroute.logiroute.ui.theme.TextSecondary
 import org.bytebloom.domain.model.Warehouse
 
 @Composable
-fun WarehouseName(warehouse: Warehouse) {
+fun WarehouseId(warehouse: Warehouse) {
     Text(
-        text = warehouse.name,
-        color = TextPrimary,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Bold,
+        text = "NODE: ${warehouse.id}",
+        color = TextSecondary,
+        fontSize = 11.sp,
+        fontFamily = FontFamily.Monospace,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
@@ -24,6 +24,6 @@ fun WarehouseName(warehouse: Warehouse) {
 
 @Preview
 @Composable
-fun WarehouseNamePreview() {
-    WarehouseName(WarehouseSamples.centralWarehouse)
+fun WarehouseIdPreview() {
+    WarehouseId(WarehouseSamples.centralWarehouse)
 }

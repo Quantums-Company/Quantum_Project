@@ -1,4 +1,4 @@
-package edu.logiroute.logiroute.ui.components.Warehouse
+package edu.logiroute.logiroute.ui.components.warehouse
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

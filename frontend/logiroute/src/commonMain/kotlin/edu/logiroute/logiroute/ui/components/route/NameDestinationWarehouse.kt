@@ -2,6 +2,7 @@ package edu.logiroute.logiroute.ui.components.route
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -11,9 +12,10 @@ import edu.logiroute.logiroute.ui.theme.TextPrimary
 import org.bytebloom.domain.model.Route
 
 @Composable
-fun NameDestinationWarehouse(route: Route) {
+fun NameDestinationWarehouse(route: Route, modifier: Modifier = Modifier) {
     Text(
         text = route.destinationWarehouse.name,
+        modifier = modifier,
         color = TextPrimary,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
