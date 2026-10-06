@@ -19,7 +19,6 @@ fun RouteDetailCard(
     onClick = {onClick.invoke(route) },
 ) {
     RouteHeaderRow(route = route)
-    Spacer(modifier = Modifier.height(8.dp))
     RouteMetrics(route = route)
 }
 
@@ -29,5 +28,6 @@ fun RouteDetailCardPreview() = Column(
     modifier = Modifier.padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp)
 ) {
+    RouteDetailCard(route = RouteSamples.sampleRoute)
     RouteDetailCard(route = RouteSamples.sampleRoute)
 }

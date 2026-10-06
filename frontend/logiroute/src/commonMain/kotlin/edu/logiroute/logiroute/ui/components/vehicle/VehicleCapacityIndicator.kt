@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import edu.logiroute.logiroute.ui.style.RowCard
 import edu.logiroute.logiroute.ui.theme.*
 
 @Composable
@@ -18,13 +19,7 @@ fun VehicleCapacityIndicator(
     val ratio = calculateLoadRatio(currentLoadKg, maxCapacityKg)
     val percentageInt = (ratio * 100).toInt()
     val fillColor = getCapacityColor(ratio)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+    RowCard{
         CapacityProgressIndicator(
             ratio = ratio,
             fillColor = fillColor,

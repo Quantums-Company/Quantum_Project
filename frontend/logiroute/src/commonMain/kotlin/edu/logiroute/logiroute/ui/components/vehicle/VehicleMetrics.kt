@@ -3,7 +3,7 @@ package edu.logiroute.logiroute.ui.components.vehicle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import edu.logiroute.logiroute.ui.style.CardRow
+import edu.logiroute.logiroute.ui.style.RowCard
 import edu.logiroute.logiroute.ui.style.formatCostPerKm
 import edu.logiroute.logiroute.ui.style.formatMaxCapacity
 
@@ -17,7 +17,7 @@ fun VehicleMetrics(
 
     val maxCapacityString = formatMaxCapacity(maxCapacityKg)
 
-    CardRow(modifier = modifier) {
+    RowCard(modifier = modifier) {
         CostRate(costPerKmString)
         MaxCapacity(maxCapacityString)
     }

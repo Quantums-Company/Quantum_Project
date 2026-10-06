@@ -8,7 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.VehicleSamples
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
-import edu.logiroute.logiroute.ui.style.CardRow
+import edu.logiroute.logiroute.ui.style.RowCard
 
 @Composable
 fun VehicleHeader(
@@ -16,7 +16,7 @@ fun VehicleHeader(
     warehouseName: String,
     modifier: Modifier = Modifier
 ) {
-    CardRow {
+    RowCard {
         VehicleId(vehicleId)
         Spacer(modifier = modifier.width(16.dp))
         WarehouseName(warehouseName)
