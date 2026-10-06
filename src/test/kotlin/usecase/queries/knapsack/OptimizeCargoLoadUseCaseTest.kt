@@ -191,4 +191,243 @@ class OptimizeCargoLoadUseCaseTest {
             useCase(vehicle, listOf(badPkg))
         }
     }
+
+    @Test
+    fun `bulky low weight item is excluded when its volume exceeds capacity`() {
+        // Given
+        val bulkyItem = CargoItem(
+            id = "PKG-BULKY",
+            weightKg = 5,
+            priorityValue = 10,
+            volumeM3 = 2.0
+        )
+
+        val compactItem = CargoItem(
+            id = "PKG-COMPACT",
+            weightKg = 5,
+            priorityValue = 8,
+            volumeM3 = 0.5
+        )
+
+        // When
+        val result = optimizer(
+            items = listOf(bulkyItem, compactItem),
+            weightCapacityKg = 10,
+            volumeCapacityM3 = 1.0
+        )
+
+        // Then
+        assertEquals(
+            listOf(compactItem),
+            result.selectedItems
+        )
+    }
+
+    @Test
+    fun `bulky low weight item is excluded from selected cargo`() {
+        // Given
+        val bulkyItem = CargoItem(
+            id = "PKG-BULKY",
+            weightKg = 5,
+            priorityValue = 10,
+            volumeM3 = 2.0
+        )
+
+        // When
+        val result = optimizer(
+            items = listOf(bulkyItem),
+            weightCapacityKg = 10,
+            volumeCapacityM3 = 1.0
+        )
+
+        // Then
+        assertEquals(
+            emptyList(),
+            result.selectedItems
+        )
+    }
+
+    @Test
+    fun `dense high weight item is excluded when its weight exceeds capacity`() {
+        // Given
+        val denseItem = CargoItem(
+            id = "PKG-DENSE",
+            weightKg = 20,
+            priorityValue = 20,
+            volumeM3 = 0.2
+        )
+
+        val lightItem = CargoItem(
+            id = "PKG-LIGHT",
+            weightKg = 5,
+            priorityValue = 8,
+            volumeM3 = 0.2
+        )
+
+        // When
+        val result = optimizer(
+            items = listOf(denseItem, lightItem),
+            weightCapacityKg = 10,
+            volumeCapacityM3 = 1.0
+        )
+
+        // Then
+        assertEquals(
+            listOf(lightItem),
+            result.selectedItems
+        )
+    }
+
+    @Test
+    fun `dense high weight item cannot consume unavailable weight capacity`() {
+        // Given
+        val denseItem = CargoItem(
+            id = "PKG-DENSE",
+            weightKg = 20,
+            priorityValue = 20,
+            volumeM3 = 0.2
+        )
+
+        // When
+        val result = optimizer(
+            items = listOf(denseItem),
+            weightCapacityKg = 10,
+            volumeCapacityM3 = 1.0
+        )
+
+        // Then
+        assertEquals(
+            0,
+            result.totalWeightKg
+        )
+    }
+
+    @Test
+    fun `volume constraint changes the selected payload`() {
+        // Given
+        val bulkyHighValue = CargoItem(
+            id = "PKG-BULKY",
+            weightKg = 10,
+            priorityValue = 10,
+            volumeM3 = 0.8
+        )
+
+        val compactHighValue = CargoItem(
+            id = "PKG-COMPACT",
+            weightKg = 10,
+            priorityValue = 9,
+            volumeM3 = 0.2
+        )
+
+        val secondCompact = CargoItem(
+            id = "PKG-COMPACT-2",
+            weightKg = 10,
+            priorityValue = 8,
+            volumeM3 = 0.2
+        )
+
+        // When
+        val result = optimizer(
+            items = listOf(
+                bulkyHighValue,
+                compactHighValue,
+                secondCompact
+            ),
+            weightCapacityKg = 20,
+            volumeCapacityM3 = 0.5
+        )
+
+        // Then
+        assertEquals(
+            setOf(
+                compactHighValue,
+                secondCompact
+            ),
+            result.selectedItems.toSet()
+        )
+    }
+
+    @Test
+    fun `volume constrained payload has expected total priority`() {
+        // Given
+        val bulkyHighValue = CargoItem(
+            id = "PKG-BULKY",
+            weightKg = 10,
+            priorityValue = 10,
+            volumeM3 = 0.8
+        )
+
+        val compactHighValue = CargoItem(
+            id = "PKG-COMPACT",
+            weightKg = 10,
+            priorityValue = 9,
+            volumeM3 = 0.2
+        )
+
+        val secondCompact = CargoItem(
+            id = "PKG-COMPACT-2",
+            weightKg = 10,
+            priorityValue = 8,
+            volumeM3 = 0.2
+        )
+
+        // When
+        val result = optimizer(
+            items = listOf(
+                bulkyHighValue,
+                compactHighValue,
+                secondCompact
+            ),
+            weightCapacityKg = 20,
+            volumeCapacityM3 = 0.5
+        )
+
+        // Then
+        assertEquals(
+            17,
+            result.totalPriorityValue
+        )
+    }
+
+    @Test
+    fun `volume constrained payload uses available volume efficiently`() {
+        // Given
+        val bulkyHighValue = CargoItem(
+            id = "PKG-BULKY",
+            weightKg = 10,
+            priorityValue = 10,
+            volumeM3 = 0.8
+        )
+
+        val compactHighValue = CargoItem(
+            id = "PKG-COMPACT",
+            weightKg = 10,
+            priorityValue = 9,
+            volumeM3 = 0.2
+        )
+
+        val secondCompact = CargoItem(
+            id = "PKG-COMPACT-2",
+            weightKg = 10,
+            priorityValue = 8,
+            volumeM3 = 0.2
+        )
+
+        // When
+        val result = optimizer(
+            items = listOf(
+                bulkyHighValue,
+                compactHighValue,
+                secondCompact
+            ),
+            weightCapacityKg = 20,
+            volumeCapacityM3 = 0.5
+        )
+
+        // Then
+        assertEquals(
+            0.4,
+            result.totalVolumeM3
+        )
+    }
 }
