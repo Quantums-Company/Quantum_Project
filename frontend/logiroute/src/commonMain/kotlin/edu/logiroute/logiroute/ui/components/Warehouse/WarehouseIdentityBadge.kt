@@ -15,7 +15,7 @@ fun WarehouseIdentityBadge(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    RowCard(modifier) {
+    RowCard(modifier, onClick = onClick) {
         WarehouseHeaderDetails(warehouse)
         Spacer(modifier = Modifier.width(16.dp))
 
