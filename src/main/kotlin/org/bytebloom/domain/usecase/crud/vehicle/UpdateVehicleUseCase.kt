@@ -22,7 +22,8 @@ class UpdateVehicleUseCase(
                     id = existing.id,
                     maxCapacityKg = input.maxCapacityKg ?: existing.maxCapacityKg,
                     costPerKm = input.costPerKm ?: existing.costPerKm,
-                    currentWarehouse = input.currentWarehouse ?: existing.currentWarehouse
+                    currentWarehouse = input.currentWarehouse ?: existing.currentWarehouse,
+                    maxVolumeM3 = existing.maxVolumeM3
                 )
 
                 return vehicleRepository.update(updated)

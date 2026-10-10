@@ -23,7 +23,8 @@ class UpdatePackageUseCase(
                     weight = input.weight ?: existing.weight,
                     priority = input.priority ?: existing.priority,
                     originWarehouse = input.originWarehouse ?: existing.originWarehouse,
-                    destinationWarehouse = input.destinationWarehouse ?: existing.destinationWarehouse
+                    destinationWarehouse = input.destinationWarehouse ?: existing.destinationWarehouse,
+                    volumeM3 = existing.volumeM3
                 )
 
                 return packageRepository.update(updated)
@@ -35,3 +36,29 @@ class UpdatePackageUseCase(
         }
     }
 }
+/*
+    suspend operator fun invoke(input: PackageUpdateInput): Package {
+        when (val result = validator(input)) {
+            is ValidatorResult.Valid -> {
+                val existing = packageRepository.getById(input.id)
+                    ?: throw ResourceNotFoundException("Package '${input.id}' was not found")
+
+                val updated = Package(
+                    id = existing.id,
+                    weight = input.weight ?: existing.weight,
+                    priority = input.priority ?: existing.priority,
+                    originWarehouse = input.originWarehouse ?: existing.originWarehouse,
+                    destinationWarehouse = input.destinationWarehouse ?: existing.destinationWarehouse,
+                    volumeM3 = existing.volumeM3
+                )
+
+                return packageRepository.update(updated)
+            }
+
+            is ValidatorResult.Invalid -> {
+                throw EntityValidationException(result.violations)
+            }
+        }
+    }
+}
+ */
