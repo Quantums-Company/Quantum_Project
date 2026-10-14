@@ -36,7 +36,12 @@ import org.bytebloom.domain.usecase.crud.warehouse.DeleteWarehouseUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.GetWarehouseByIdUseCase
 import org.bytebloom.domain.usecase.crud.warehouse.UpdateWarehouseUseCase
 import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
-import org.bytebloom.domain.usecase.queries.*
+import org.bytebloom.domain.usecase.queries.FindCheapestSuitableVehicleUseCase
+import org.bytebloom.domain.usecase.queries.FindPackagesAboveWeightUseCase
+import org.bytebloom.domain.usecase.queries.FindPackagesByDestinationUseCase
+import org.bytebloom.domain.usecase.queries.FindPackagesByPriorityUseCase
+import org.bytebloom.domain.usecase.queries.FindStationedVehiclesByCapacityUseCase
+import org.bytebloom.domain.usecase.queries.GetWarehouseLoadFactorUseCase
 import org.bytebloom.domain.usecase.queries.backhaul.FindBackhaulOpportunityUseCase
 import org.bytebloom.domain.usecase.queries.classification.ClassifyPackageSectorUseCase
 import org.bytebloom.domain.usecase.queries.knapsack.OptimizeCargoLoadUseCase
