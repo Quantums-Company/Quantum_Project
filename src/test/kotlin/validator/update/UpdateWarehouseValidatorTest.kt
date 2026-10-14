@@ -28,7 +28,13 @@ class UpdateWarehouseValidatorTest {
 
     @Test
     fun `returns Valid when all fields are provided and valid`() {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name", regionalZone = "North", longitude = 35.0, latitude = 31.0)
+        val input = WarehouseUpdateInput(
+            id = "WH-001",
+            name = "New Name",
+            regionalZone = "North",
+            longitude = 35.0,
+            latitude = 31.0
+        )
 
         val result = validator(input)
 
@@ -223,12 +229,23 @@ class UpdateWarehouseValidatorTest {
 
     @Test
     fun `returns all violations when several inputs are invalid`() {
-        val input = WarehouseUpdateInput(id = "bad", name = "", regionalZone = " ", longitude = 500.0, latitude = -100.0)
+        val input = WarehouseUpdateInput(
+            id = "bad",
+            name = "",
+            regionalZone = " ",
+            longitude = 500.0,
+            latitude = -100.0
+        )
 
         val result = validator(input)
 
         val violations = violationsOf(result)
         assertThat(violations.map { it.field }).containsExactly(
-            ValidatorField.ID, ValidatorField.NAME, ValidatorField.REGIONAL_ZONE, ValidatorField.LATITUDE, ValidatorField.LONGITUDE)
+            ValidatorField.ID,
+            ValidatorField.NAME,
+            ValidatorField.REGIONAL_ZONE,
+            ValidatorField.LATITUDE,
+            ValidatorField.LONGITUDE
+        )
     }
 }
