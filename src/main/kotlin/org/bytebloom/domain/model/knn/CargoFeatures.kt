@@ -1,4 +1,4 @@
-package org.bytebloom.domain.model
+package org.bytebloom.domain.model.knn
 
 data class CargoFeatures(
     val latitude: Double,
