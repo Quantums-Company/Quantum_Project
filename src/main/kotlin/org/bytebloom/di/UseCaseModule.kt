@@ -53,6 +53,7 @@ import org.bytebloom.domain.usecase.queries.routing.VerifyHubLinkUseCase
 import org.bytebloom.domain.usecase.queries.shipment.EstimateShipmentDeliveryUseCase
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
+import org.bytebloom.domain.usecase.telemetry.TrackActiveFleetUseCase
 
 val useCaseModule = module {
 
@@ -149,6 +150,12 @@ val useCaseModule = module {
     factory { (hubTree: HubTree) ->
         TraceHubLineageUseCase(
             hubTree = hubTree
+        )
+    }
+
+    factory {
+        TrackActiveFleetUseCase(
+            telemetryStreamingService = get()
         )
     }
 }
