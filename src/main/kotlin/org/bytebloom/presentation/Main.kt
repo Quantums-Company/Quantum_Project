@@ -10,8 +10,10 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.model.Priority
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.domain.model.result.KnapsackResult
 import org.bytebloom.domain.shipment.ShipmentTracker
 import org.bytebloom.domain.usecase.queries.knapsack.OptimizeCargoLoadUseCase
+import org.koin.core.Koin
 import org.koin.core.context.startKoin
 
 private const val VEHICLE_MAX_CAPACITY_KG = 30.0
@@ -45,6 +47,20 @@ fun main() {
 
     println("=== Sub-Task 5: End-to-End Verification ===")
 
+    val context = setupVerificationEnvironment()
+    val optimizationResults = runCargoOptimization(koin, context)
+
+    printOptimizationResults(optimizationResults)
+    executeDispatchPipeline(context, optimizationResults.first)
+}
+
+private data class VerificationContext(
+    val warehouse: Warehouse,
+    val vehicle: Vehicle,
+    val packages: List<Package>
+)
+
+private fun setupVerificationEnvironment(): VerificationContext {
     val warehouse = Warehouse(
         id = "WH-001",
         name = "Main Warehouse",
@@ -62,34 +78,10 @@ fun main() {
     )
 
     val packages = listOf(
-        Package(
-            "PKG-001",
-            PKG_1_WEIGHT,
-            Priority.URGENT,
-            warehouse,
-            destination
-        ),
-        Package(
-            "PKG-002",
-            PKG_2_WEIGHT,
-            Priority.STANDARD,
-            warehouse,
-            destination
-        ),
-        Package(
-            "PKG-003",
-            PKG_3_WEIGHT,
-            Priority.URGENT,
-            warehouse,
-            destination
-        ),
-        Package(
-            "PKG-004",
-            PKG_4_WEIGHT,
-            Priority.LOW,
-            warehouse,
-            destination
-        )
+        Package("PKG-001", PKG_1_WEIGHT, Priority.URGENT, warehouse, destination),
+        Package("PKG-002", PKG_2_WEIGHT, Priority.STANDARD, warehouse, destination),
+        Package("PKG-003", PKG_3_WEIGHT, Priority.URGENT, warehouse, destination),
+        Package("PKG-004", PKG_4_WEIGHT, Priority.LOW, warehouse, destination)
     )
 
     packages.forEach(warehouse::addPackage)
@@ -103,22 +95,20 @@ fun main() {
 
     warehouse.addVehicle(vehicle)
 
-    val optimizeCargoLoadUseCase =
-        koin.get<OptimizeCargoLoadUseCase>()
+    return VerificationContext(warehouse, vehicle, packages)
+}
 
-    /*
-     * Original 1D optimization:
-     * weight constraint only.
-     */
+private fun runCargoOptimization(
+    koin: Koin,
+    context: VerificationContext
+): Pair<KnapsackResult, KnapsackResult> {
+    val optimizeCargoLoadUseCase = koin.get<OptimizeCargoLoadUseCase>()
+
     val weightOnlyResult = optimizeCargoLoadUseCase(
-        vehicle = vehicle,
-        candidatePackages = packages
+        vehicle = context.vehicle,
+        candidatePackages = context.packages
     )
 
-    /*
-     * Bonus 2D optimization:
-     * weight + physical volume.
-     */
     val volumeByPackageId = mapOf(
         "PKG-001" to PKG_1_VOLUME_M3,
         "PKG-002" to PKG_2_VOLUME_M3,
@@ -126,62 +116,42 @@ fun main() {
         "PKG-004" to PKG_4_VOLUME_M3
     )
 
-    val volumeAwareResult =
-        optimizeCargoLoadUseCase.optimizeWithVolume(
-            vehicle = vehicle,
-            candidatePackages = packages,
-            volumeByPackageId = volumeByPackageId,
-            maxVolumeM3 = VEHICLE_MAX_VOLUME_M3
-        )
+    val volumeAwareResult = optimizeCargoLoadUseCase.optimizeWithVolume(
+        vehicle = context.vehicle,
+        candidatePackages = context.packages,
+        volumeByPackageId = volumeByPackageId,
+        maxVolumeM3 = VEHICLE_MAX_VOLUME_M3
+    )
+
+    return Pair(weightOnlyResult, volumeAwareResult)
+}
+
+private fun printOptimizationResults(results: Pair<KnapsackResult, KnapsackResult>) {
+    val (weightOnlyResult, volumeAwareResult) = results
 
     println("\n=== Weight-Only Optimization ===")
-    println(
-        "Selected cargo: " +
-                weightOnlyResult.selectedItems.joinToString { it.id }
-    )
-    println(
-        "Total weight: ${weightOnlyResult.totalWeightKg} kg"
-    )
-    println(
-        "Total volume: ${weightOnlyResult.totalVolumeM3} m³"
-    )
-    println(
-        "Total priority: ${weightOnlyResult.totalPriorityValue}"
-    )
+    println("Selected cargo: " + weightOnlyResult.selectedItems.joinToString { it.id })
+    println("Total weight: ${weightOnlyResult.totalWeightKg} kg")
+    println("Total volume: ${weightOnlyResult.totalVolumeM3} m³")
+    println("Total priority: ${weightOnlyResult.totalPriorityValue}")
 
     println("\n=== Weight + Volume Optimization ===")
-    println(
-        "Selected cargo: " +
-                volumeAwareResult.selectedItems.joinToString { it.id }
-    )
-    println(
-        "Total weight: ${volumeAwareResult.totalWeightKg} kg"
-    )
-    println(
-        "Total volume: ${volumeAwareResult.totalVolumeM3} m³"
-    )
-    println(
-        "Total priority: ${volumeAwareResult.totalPriorityValue}"
-    )
+    println("Selected cargo: " + volumeAwareResult.selectedItems.joinToString { it.id })
+    println("Total weight: ${volumeAwareResult.totalWeightKg} kg")
+    println("Total volume: ${volumeAwareResult.totalVolumeM3} m³")
+    println("Total priority: ${volumeAwareResult.totalPriorityValue}")
 
     println("\n=== Constraint Trade-off ===")
-    println(
-        "Weight-only selection: " +
-                weightOnlyResult.selectedItems.joinToString { it.id }
-    )
-    println(
-        "Volume-aware selection: " +
-                volumeAwareResult.selectedItems.joinToString { it.id }
-    )
+    println("Weight-only selection: " + weightOnlyResult.selectedItems.joinToString { it.id })
+    println("Volume-aware selection: " + volumeAwareResult.selectedItems.joinToString { it.id })
+}
 
-    /*
-     * Dispatch continues to use the original weight-only result.
-     * The 2D optimization is demonstrated independently above.
-     */
-    val selectedPackages = packages.filter { pkg ->
-        weightOnlyResult.selectedItems.any { item ->
-            item.id == pkg.id
-        }
+private fun executeDispatchPipeline(
+    context: VerificationContext,
+    weightOnlyResult: KnapsackResult
+) {
+    val selectedPackages = context.packages.filter { pkg ->
+        weightOnlyResult.selectedItems.any { item -> item.id == pkg.id }
     }
 
     println("\nSelected packages for dispatch:")
@@ -194,21 +164,16 @@ fun main() {
 
     val order = DispatchOrder(
         packages = selectedPackages,
-        vehicle = vehicle,
-        warehouse = warehouse
+        vehicle = context.vehicle,
+        warehouse = context.warehouse
     )
 
     val outcome = dispatcher.dispatch(order)
 
     println("\nDispatch outcome: $outcome")
-
     println("\nShipment states:")
 
     selectedPackages.forEach { pkg ->
-        println(
-            "${pkg.id}: " +
-                    shipmentTracker.historyOf(pkg.id)
-                        .map { it.name }
-        )
+        println("${pkg.id}: " + shipmentTracker.historyOf(pkg.id).map { it.name })
     }
 }
