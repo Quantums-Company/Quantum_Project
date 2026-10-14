@@ -5,10 +5,8 @@ import org.bytebloom.data.repository.remote.RemotePackageRepository
 import org.bytebloom.data.repository.remote.RemoteRouteRepository
 import org.bytebloom.data.repository.remote.RemoteVehicleRepository
 import org.bytebloom.data.repository.remote.RemoteWarehouseRepository
-import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.domain.repository.WarehouseRepository
+import org.bytebloom.data.repository.training.PackageHistoryTrainingCargoRepository
+import org.bytebloom.domain.repository.*
 import org.bytebloom.domain.service.IdGenerator
 import org.koin.dsl.module
 
@@ -40,7 +38,11 @@ val repositoryModule = module {
             remoteDataSource = get()
         )
     }
-
+    single<TrainingCargoRepository> {
+        PackageHistoryTrainingCargoRepository(
+            packageRepository = get()
+        )
+    }
     single<IdGenerator> {
         UuidIdGenerator()
     }
