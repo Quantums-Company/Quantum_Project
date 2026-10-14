@@ -7,28 +7,37 @@ import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import java.time.Instant
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class RemoteRouteRepository(
     private val warehouseRepository: WarehouseRepository,
     private val remoteDataSource: RouteRemoteDataSource
 ) : RouteRepository {
 
-    private suspend fun mapper() = RouteDtoMapper(warehouseRepository.getAll().associateBy { it.id })
+    private suspend fun <T> loadWithMapper(load: suspend () -> T): Pair<T, RouteDtoMapper> = coroutineScope {
+        val result = async { load() }
+        val warehouses = async { warehouseRepository.getAll() }
+        result.await() to RouteDtoMapper(warehouses.await().associateBy { it.id } )
+    }
 
-    override suspend fun getAll(): List<Route> =
-        mapper().mapList(remoteDataSource.loadAll()).succeeded
+    override suspend fun getAll(): List<Route> {
+        val (dto, mapper) = loadWithMapper { remoteDataSource.loadAll() }
+        return mapper.mapList(dto).succeeded }
 
-    override suspend fun getById(id: String): Route? =
-        remoteDataSource.loadById(id)?.let {mapper().map(it) }
+    override suspend fun getById(id: String): Route? {
+        val (dto, mapper) = loadWithMapper { remoteDataSource.loadById(id) }
+            return dto?.let (mapper::map)
+    }
 
     override suspend fun create(route: Route): Route {
-        val dto = remoteDataSource.create(route.toRequestDto())
-        return dto?.let { mapper().map(it) } ?: route
+        val (dto, mapper) = loadWithMapper { remoteDataSource.create(route.toRequestDto())}
+        return dto?.let ( mapper::map)  ?: route
     }
 
     override suspend fun update(route: Route): Route {
-        val dto = remoteDataSource.update(route.id, route.toRequestDto())
-        return dto?.let { mapper().map(it) } ?: route
+        val (dto, mapper) = loadWithMapper { remoteDataSource.update(route.id, route.toRequestDto())}
+        return dto?.let ( mapper::map) ?: route
     }
 
     override suspend fun delete(id: String): Boolean =
