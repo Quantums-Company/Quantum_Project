@@ -1,5 +1,7 @@
 package org.bytebloom.data.repository.remote
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.bytebloom.data.remote.dto.vehicleDto.VehicleRequestDto
 import org.bytebloom.data.remote.mapper.VehicleDtoMapper
 import org.bytebloom.data.source.remote.VehicleRemoteDataSource
@@ -13,22 +15,30 @@ class RemoteVehicleRepository(
     private val remoteDataSource: VehicleRemoteDataSource
 ) : VehicleRepository {
 
-    private suspend fun mapper() = VehicleDtoMapper(warehouseRepository.getAll().associateBy { it.id })
+    private suspend fun <T> loadWithMapper(load: suspend () -> T): Pair<T, VehicleDtoMapper> = coroutineScope {
+        val result = async { load() }
+        val warehouses = async { warehouseRepository.getAll() }
+        result.await() to VehicleDtoMapper(warehouses.await().associateBy { it.id } )
+    }
 
-    override suspend fun getAll(): List<Vehicle> =
-        mapper() .mapList(remoteDataSource.loadAll()).succeeded
+    override suspend fun getAll(): List<Vehicle> {
+        val (dto, mapper) = loadWithMapper { remoteDataSource.loadAll() }
+        return mapper.mapList(dto).succeeded
+    }
 
-    override suspend fun getById(id: String): Vehicle? =
-        remoteDataSource.loadById(id)?.let { mapper() .map(it) }
+    override suspend fun getById(id: String): Vehicle? {
+        val (dto, mapper) = loadWithMapper { remoteDataSource.loadById(id) }
+        return dto?.let ( mapper::map )
+    }
 
     override suspend fun create(vehicle: Vehicle): Vehicle {
-        val dto = remoteDataSource.create(vehicle.toRequestDto())
-        return dto?.let { mapper() .map(it) } ?: vehicle
+        val (dto, mapper) = loadWithMapper { remoteDataSource.create(vehicle.toRequestDto()) }
+        return dto?.let ( mapper::map ) ?: vehicle
     }
 
     override suspend fun update(vehicle: Vehicle): Vehicle {
-        val dto = remoteDataSource.update(vehicle.id, vehicle.toRequestDto())
-        return dto?.let { mapper() .map(it) } ?: vehicle
+        val (dto, mapper) = loadWithMapper { remoteDataSource.update(vehicle.id, vehicle.toRequestDto())}
+        return dto?.let ( mapper::map ) ?: vehicle
     }
 
     override suspend fun delete(id: String): Boolean =
