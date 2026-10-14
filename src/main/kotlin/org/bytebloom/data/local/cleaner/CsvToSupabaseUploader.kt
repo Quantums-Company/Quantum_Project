@@ -21,6 +21,8 @@ import org.bytebloom.domain.model.Route
 import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import java.time.Instant
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class CsvToSupabaseUploader(
     private val client: SupabaseClient,
@@ -30,28 +32,29 @@ class CsvToSupabaseUploader(
     private val packageDataSource: CsvPackageDataSource
 ) {
 
-    suspend fun upload() {
+    suspend fun upload() = coroutineScope {
         val now = Instant.now().toString()
 
         // 1. Warehouses first — everything else depends on them.
         val warehouses = warehouseDataSource.loadAll().toDomain()
-        val warehousesById = warehouses.associateBy { it.id }
         uploadWarehouses(warehouses, now)
 
-        val warehouseReferenceMapper = WarehouseReferenceMapper(warehousesById)
+        val warehouseReferenceMapper = WarehouseReferenceMapper(warehouses.associateBy { it.id })
 
         // 2. Routes, vehicles, packages — depend on warehouses existing above.
-        val routes = RouteMapper(warehouseReferenceMapper).toDomain(routeDataSource.loadAll())
-        uploadRoutes(routes, now)
+        val routes = async { RouteMapper(warehouseReferenceMapper)
+            .toDomain(routeDataSource.loadAll())
+            .also { uploadRoutes(it, now) }}
 
-        val vehicles = VehicleMapper(warehouseReferenceMapper).toDomain(vehicleDataSource.loadAll())
-        uploadVehicles(vehicles, now)
+        val vehicles = async {
+            VehicleMapper(warehouseReferenceMapper).toDomain(vehicleDataSource.loadAll())
+                .also { uploadVehicles(it, now) } }
 
-        val packages = PackageMapper(warehouseReferenceMapper).toDomain(packageDataSource.loadAll())
-        uploadPackages(packages, now)
+        val packages = async { PackageMapper(warehouseReferenceMapper).toDomain(packageDataSource.loadAll())
+            .also { uploadPackages(it, now)} }
 
-        println("Upload complete: ${warehouses.size} warehouses, ${routes.size} routes, " +
-                "${vehicles.size} vehicles, ${packages.size} packages (synced at $now)")
+        println("Upload complete: ${warehouses.size} warehouses, ${routes.await().size} routes, " +
+                "${vehicles.await().size} vehicles, ${packages.await().size} packages (synced at $now)")
     }
 
     private suspend fun uploadWarehouses(warehouses: List<Warehouse>, syncedAt: String) {
