@@ -143,8 +143,7 @@ class KnapsackCargoOptimizer {
                     if (item.weightKg <= weight) {
                         maxOf(
                             grid[i - 1][weight],
-                            grid[i - 1][weight - item.weightKg] +
-                                    item.priorityValue
+                            grid[i - 1][weight - item.weightKg] + item.priorityValue
                         )
                     } else {
                         grid[i - 1][weight]
@@ -195,27 +194,36 @@ class KnapsackCargoOptimizer {
 
             for (weight in 0..weightCapacityKg) {
                 for (volume in 0..volumeCapacityUnits) {
-                    val withoutItem =
-                        grid[i - 1][weight][volume]
-
-                    val withItem =
-                        if (
-                            item.weightKg <= weight &&
-                            itemVolumeUnits <= volume
-                        ) {
-                            grid[i - 1][weight - item.weightKg][volume - itemVolumeUnits] +
-                                    item.priorityValue
-                        } else {
-                            withoutItem
-                        }
-
-                    grid[i][weight][volume] =
-                        maxOf(withoutItem, withItem)
+                    grid[i][weight][volume] = calculateBestValue(
+                        grid = grid,
+                        item = item,
+                        itemIndex = i,
+                        weight = weight,
+                        volume = volume,
+                        itemVolumeUnits = itemVolumeUnits
+                    )
                 }
             }
         }
 
         return grid
+    }
+
+    private fun calculateBestValue(
+        grid: Array<Array<IntArray>>,
+        item: CargoItem,
+        itemIndex: Int,
+        weight: Int,
+        volume: Int,
+        itemVolumeUnits: Int
+    ): Int {
+        val withoutItem = grid[itemIndex - 1][weight][volume]
+
+        val canFitItem = item.weightKg <= weight && itemVolumeUnits <= volume
+        if (!canFitItem) return withoutItem
+
+        val withItem = grid[itemIndex - 1][weight - item.weightKg][volume - itemVolumeUnits] + item.priorityValue
+        return maxOf(withoutItem, withItem)
     }
 
     private fun backtrackTwoDimensionalItems(
@@ -230,11 +238,8 @@ class KnapsackCargoOptimizer {
         var remainingVolume = volumeCapacityUnits
 
         for (i in items.size downTo 1) {
-            val currentValue =
-                grid[i][remainingWeight][remainingVolume]
-
-            val previousValue =
-                grid[i - 1][remainingWeight][remainingVolume]
+            val currentValue = grid[i][remainingWeight][remainingVolume]
+            val previousValue = grid[i - 1][remainingWeight][remainingVolume]
 
             if (currentValue != previousValue) {
                 val item = items[i - 1]
