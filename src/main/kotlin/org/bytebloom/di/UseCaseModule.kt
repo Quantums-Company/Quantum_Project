@@ -1,6 +1,7 @@
 package org.bytebloom.di
 
 import org.bytebloom.domain.knapsack.KnapsackCargoOptimizer
+import org.bytebloom.domain.knn.KNearestNeighborsClassifier
 import org.bytebloom.domain.performance.PackageTrackingIdGenerator
 import org.bytebloom.domain.pricing.factory.DecoratorFactory
 import org.bytebloom.domain.pricing.factory.DefaultDecoratorFactory
@@ -42,6 +43,7 @@ import org.bytebloom.domain.usecase.queries.FindPackagesByPriorityUseCase
 import org.bytebloom.domain.usecase.queries.FindStationedVehiclesByCapacityUseCase
 import org.bytebloom.domain.usecase.queries.GetWarehouseLoadFactorUseCase
 import org.bytebloom.domain.usecase.queries.backhaul.FindBackhaulOpportunityUseCase
+import org.bytebloom.domain.usecase.queries.classification.ClassifyPackageSectorUseCase
 import org.bytebloom.domain.usecase.queries.knapsack.OptimizeCargoLoadUseCase
 import org.bytebloom.domain.usecase.queries.planing.FindCargoRecoveryPlanUseCase
 import org.bytebloom.domain.usecase.queries.pricing.CalculatePricingUseCase
@@ -60,6 +62,7 @@ val useCaseModule = module {
     single<StrategyFactory> { DefaultStrategyFactory() }
     single<DecoratorFactory> { DefaultDecoratorFactory() }
     single { KnapsackCargoOptimizer() }
+    single { KNearestNeighborsClassifier() }
     single { PackageTrackingIdGenerator() }
 
     factory { BST<String>() }
@@ -105,6 +108,7 @@ val useCaseModule = module {
 
     factory { GreedyFleetDispatchUseCase() }
     factory { OptimizeCargoLoadUseCase(get()) }
+    factory { ClassifyPackageSectorUseCase(get(), get()) }
 
     factory { (graph: WarehouseGraph) ->
         FindOptimalPathUseCase(
