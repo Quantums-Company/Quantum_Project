@@ -89,6 +89,7 @@ class EstimateShipmentDeliveryUseCaseTest {
         val findOptimalPath = mockk<FindOptimalPathUseCase>()
 
         coEvery { packageRepository.getAll() } returns emptyList()
+        coEvery { routeRepository.getAll() } returns emptyList()
 
         val useCase = EstimateShipmentDeliveryUseCase(
             packageRepository,

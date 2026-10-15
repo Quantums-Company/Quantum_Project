@@ -33,71 +33,26 @@ class CsvDataCleaner(
     }
 
     suspend fun clean() {
+        val warehouses = loadValidWarehouses()
+        val warehouseReferenceMapper = WarehouseReferenceMapper(warehouses.associateBy { it.id })
 
-        /*
-         * 1. Read and validate warehouses.
-         *
-         * Warehouse does not depend on another entity,
-         * so it must be processed first.
-         */
-        val warehouses = warehouseDataSource
-            .loadAll()
-            .toDomain()
-
-        val warehousesById = warehouses.associateBy { it.id }
-
-        /*
-         * 2. Create the reference mapper.
-         *
-         * Routes, vehicles and packages depend on warehouses.
-         */
-        val warehouseReferenceMapper =
-            WarehouseReferenceMapper(warehousesById)
-
-        /*
-         * 3. Read and validate routes.
-         *
-         * RouteMapper removes routes whose warehouse references
-         * are not valid.
-         */
-        val routes = RouteMapper(
-            warehouseMapper = warehouseReferenceMapper
-        ).toDomain(
-            routeDataSource.loadAll()
-        )
-
-        /*
-         * 4. Read and validate vehicles.
-         *
-         * VehicleMapper removes vehicles whose current warehouse
-         * does not exist.
-         */
-        val vehicles = VehicleMapper(
-            warehouseMapper = warehouseReferenceMapper
-        ).toDomain(
-            vehicleDataSource.loadAll()
-        )
-
-        /*
-         * 5. Read and validate packages.
-         *
-         * PackageMapper removes packages whose origin or
-         * destination warehouse does not exist.
-         */
-        val packages = PackageMapper(
-            warehouseMapper = warehouseReferenceMapper
-        ).toDomain(
-            packageDataSource.loadAll()
-        )
-
-        /*
-         * 6. Write the clean data.
-         */
         writeWarehouses(warehouses)
-        writeRoutes(routes)
-        writeVehicles(vehicles)
-        writePackages(packages)
+        writeRoutes(loadRoutesWithValidWarehouses(warehouseReferenceMapper))
+        writeVehicles(loadVehiclesWithValidWarehouse(warehouseReferenceMapper))
+        writePackages(loadPackagesWithValidWarehouses(warehouseReferenceMapper))
     }
+
+    private suspend fun loadValidWarehouses(): List<Warehouse> =
+        warehouseDataSource.loadAll().toDomain()
+
+    private suspend fun loadRoutesWithValidWarehouses(mapper: WarehouseReferenceMapper): List<Route> =
+        RouteMapper(warehouseMapper = mapper).toDomain(routeDataSource.loadAll())
+
+    private suspend fun loadVehiclesWithValidWarehouse(mapper: WarehouseReferenceMapper): List<Vehicle> =
+        VehicleMapper(warehouseMapper = mapper).toDomain(vehicleDataSource.loadAll())
+
+    private suspend fun loadPackagesWithValidWarehouses(mapper: WarehouseReferenceMapper): List<Package> =
+        PackageMapper(warehouseMapper = mapper).toDomain(packageDataSource.loadAll())
 
     private fun writeWarehouses(
         warehouses: List<Warehouse>

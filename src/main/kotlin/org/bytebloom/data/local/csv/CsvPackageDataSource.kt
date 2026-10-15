@@ -63,7 +63,6 @@ class CsvPackageDataSource(
         throw CsvParsingException("Line $line: invalid priority value '$value'.")
     }
 
-    // Read-only CSV sources throw UnsupportedOperationException for write operations
     override suspend fun getById(): List<PackageRaw> =
         throw UnsupportedOperationException("CSV Data Source is read-only.")
 

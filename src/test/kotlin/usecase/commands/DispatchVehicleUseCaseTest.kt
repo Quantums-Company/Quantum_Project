@@ -125,8 +125,7 @@ class DispatchVehicleUseCaseTest {
     fun `should return false when vehicle is not stationed in warehouse`() {
         // Given
         val packages = queuePackages(weights = listOf(30.0))
-        val unstationedVehicle = createVehicle(maxCapacityKg = VEHICLE_CAPACITY_KG)
-
+        val unstationedVehicle = createVehicle(id = "TRK-002", maxCapacityKg = VEHICLE_CAPACITY_KG)
         // When
         val isDispatched = dispatchVehicle(packages, unstationedVehicle, warehouse)
 
@@ -171,8 +170,8 @@ class DispatchVehicleUseCaseTest {
         destinationWarehouse = DESTINATION
     )
 
-    private fun createVehicle(maxCapacityKg: Double) = Vehicle(
-        id = "TRK-001",
+    private fun createVehicle(id: String = "TRK-001", maxCapacityKg: Double) = Vehicle(
+        id = id,
         maxCapacityKg = maxCapacityKg,
         costPerKm = 2.5,
         currentWarehouse = warehouse

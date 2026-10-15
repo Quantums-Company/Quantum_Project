@@ -13,7 +13,6 @@ class DefaultStrategyFactory : StrategyFactory {
         registerStrategy(ShippingStrategyType.ECO, EcoStrategy())
         registerStrategy(ShippingStrategyType.EXPRESS, ExpressStrategy())
         registerStrategy(ShippingStrategyType.FRAGILE, FragileStrategy())
-        // any strategy can add here only
     }
 
     override fun getStrategy(strategyType: ShippingStrategyType): DispatchStrategy? {
