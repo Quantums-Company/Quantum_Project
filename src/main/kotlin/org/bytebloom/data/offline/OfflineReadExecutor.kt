@@ -28,9 +28,9 @@ class OfflineReadExecutor(
                 return localCall()
             }
             throw e
-        } catch (e: NetworkUnavailableException) {
+        } catch (_: NetworkUnavailableException) {
             return localCall()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return localCall()
         }
 
