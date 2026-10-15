@@ -33,10 +33,6 @@ suspend fun <T> retryWithBackoff(
     }
 }
 
-/**
- * Encapsulates default retry rules outside the exception block
- * to keep the handler clean and extensible.
- */
 private fun defaultRetryPredicate(e: Exception): Boolean {
     return e is NetworkUnavailableException
 }
