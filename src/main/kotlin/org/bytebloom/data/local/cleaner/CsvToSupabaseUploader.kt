@@ -35,26 +35,27 @@ class CsvToSupabaseUploader(
     suspend fun upload() = coroutineScope {
         val now = Instant.now().toString()
 
-        // 1. Warehouses first — everything else depends on them.
         val warehouses = warehouseDataSource.loadAll().toDomain()
         uploadWarehouses(warehouses, now)
-
         val warehouseReferenceMapper = WarehouseReferenceMapper(warehouses.associateBy { it.id })
 
-        // 2. Routes, vehicles, packages — depend on warehouses existing above.
-        val routes = async { RouteMapper(warehouseReferenceMapper)
-            .toDomain(routeDataSource.loadAll())
-            .also { uploadRoutes(it, now) }}
-
+        val routes = async {
+            RouteMapper(warehouseReferenceMapper).toDomain(routeDataSource.loadAll())
+                .also { uploadRoutes(it, now) }
+        }
         val vehicles = async {
             VehicleMapper(warehouseReferenceMapper).toDomain(vehicleDataSource.loadAll())
-                .also { uploadVehicles(it, now) } }
+                .also { uploadVehicles(it, now) }
+        }
+        val packages = async {
+            PackageMapper(warehouseReferenceMapper).toDomain(packageDataSource.loadAll())
+                .also { uploadPackages(it, now) }
+        }
 
-        val packages = async { PackageMapper(warehouseReferenceMapper).toDomain(packageDataSource.loadAll())
-            .also { uploadPackages(it, now)} }
-
-        println("Upload complete: ${warehouses.size} warehouses, ${routes.await().size} routes, " +
-                "${vehicles.await().size} vehicles, ${packages.await().size} packages (synced at $now)")
+        println(
+            "Upload complete: ${warehouses.size} warehouses, ${routes.await().size} routes, " +
+                    "${vehicles.await().size} vehicles, ${packages.await().size} packages (synced at $now)"
+        )
     }
 
     private suspend fun uploadWarehouses(warehouses: List<Warehouse>, syncedAt: String) {
