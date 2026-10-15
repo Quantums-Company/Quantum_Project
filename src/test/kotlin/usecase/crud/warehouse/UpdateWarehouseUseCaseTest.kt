@@ -1,6 +1,5 @@
 package usecase.crud.warehouse
 
-import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -19,8 +18,8 @@ import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.usecase.crud.warehouses.UpdateWarehouseUseCase
 import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-
 
 class UpdateWarehouseUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
@@ -107,7 +106,7 @@ class UpdateWarehouseUseCaseTest {
     }
 
     @Test
-    suspend fun `throws ResourceNotFoundException when warehouse does not exist`() {
+    fun `throws ResourceNotFoundException when warehouse does not exist`() = runTest {
         val input = WarehouseUpdateInput(id = "WH-999", name = "New Name")
         every { validator(input) } returns ValidatorResult.Valid
         coEvery { repository.getById("WH-999") } returns null
@@ -118,16 +117,18 @@ class UpdateWarehouseUseCaseTest {
     }
 
     @Test
-    fun `don't call repository update`() {
+    fun `don't call repository update when warehouse does not exist`() = runTest {
         val input = WarehouseUpdateInput(id = "WH-999", name = "New Name")
         every { validator(input) } returns ValidatorResult.Valid
         coEvery { repository.getById("WH-999") } returns null
 
+        assertThrows<ResourceNotFoundException> { useCase(input) }
+
         coVerify(exactly = 0) { repository.update(any()) }
     }
 
     @Test
-    suspend fun `throws EntityValidationException and skips repository when input is invalid`() {
+    fun `throws EntityValidationException and skips repository when input is invalid`() = runTest {
         val input = WarehouseUpdateInput(id = "WH-001")
         val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
         every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
@@ -140,7 +141,7 @@ class UpdateWarehouseUseCaseTest {
     }
 
     @Test
-    suspend fun `skips repository when input is invalid`() {
+    fun `skips repository when input is invalid`() = runTest {
         val input = WarehouseUpdateInput(id = "WH-001")
         val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
         every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
@@ -151,25 +152,29 @@ class UpdateWarehouseUseCaseTest {
     }
 
     @Test
-    fun `don't call repository update when id is invalid`() {
+    fun `don't call repository getById when input is invalid`() = runTest {
         val input = WarehouseUpdateInput(id = "WH-001")
         val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
         every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
+
+        assertThrows<EntityValidationException> { useCase(input) }
 
         coVerify(exactly = 0) { repository.getById(any()) }
     }
 
     @Test
-    fun `don't call repository update when id in valid`() {
+    fun `don't call repository update when input is invalid`() = runTest {
         val input = WarehouseUpdateInput(id = "WH-001")
         val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
         every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
+
+        assertThrows<EntityValidationException> { useCase(input) }
 
         coVerify(exactly = 0) { repository.update(any()) }
     }
 
     @Test
-    suspend fun `propagates repository exception when saving fails`() {
+    fun `propagates repository exception when saving fails`() = runTest {
         val input = WarehouseUpdateInput(id = "WH-001", name = "New Name")
         every { validator(input) } returns ValidatorResult.Valid
         coEvery { repository.getById("WH-001") } returns existing
