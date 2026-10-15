@@ -16,6 +16,9 @@ import org.bytebloom.domain.usecase.queries.knapsack.OptimizeCargoLoadUseCase
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 
+
+
+
 private const val VEHICLE_MAX_CAPACITY_KG = 30.0
 private const val VEHICLE_COST_PER_KM = 2.0
 private const val VEHICLE_MAX_VOLUME_M3 = 1.0
@@ -35,30 +38,39 @@ private const val WAREHOUSE_MAIN_LAT = 32.22
 private const val WAREHOUSE_DEST_LON = 35.93
 private const val WAREHOUSE_DEST_LAT = 32.20
 
+
 fun main() {
-    val koin = startKoin {
+    val koinApp = startKoin {
         modules(
             networkModule,
             repositoryModule,
             validatorModule,
             useCaseModule
         )
-    }.koin
+    }
 
-    println("=== Sub-Task 5: End-to-End Verification ===")
+    try {
+        val context = setupVerificationEnvironment()
 
-    val context = setupVerificationEnvironment()
-    val optimizationResults = runCargoOptimization(koin, context)
-
-    printOptimizationResults(optimizationResults)
-    executeDispatchPipeline(context, optimizationResults.first)
+        CliShell().start(
+            packages = context.packages,
+            startWarehouse = context.warehouse,
+            destinationWarehouse = context.destination
+        )
+    } finally {
+        koinApp.close()
+    }
 }
+
+
 
 private data class VerificationContext(
     val warehouse: Warehouse,
+    val destination: Warehouse,
     val vehicle: Vehicle,
     val packages: List<Package>
 )
+
 
 private fun setupVerificationEnvironment(): VerificationContext {
     val warehouse = Warehouse(
@@ -95,7 +107,7 @@ private fun setupVerificationEnvironment(): VerificationContext {
 
     warehouse.addVehicle(vehicle)
 
-    return VerificationContext(warehouse, vehicle, packages)
+    return VerificationContext(warehouse, destination, vehicle, packages)
 }
 
 private fun runCargoOptimization(
@@ -177,3 +189,4 @@ private fun executeDispatchPipeline(
         println("${pkg.id}: " + shipmentTracker.historyOf(pkg.id).map { it.name })
     }
 }
+
