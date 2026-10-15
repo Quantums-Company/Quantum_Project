@@ -13,6 +13,7 @@ import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.service.IdGenerator
 import org.koin.dsl.module
+import org.bytebloom.data.repository.training.LocalTrainingCargoRepository
 
 val repositoryModule = module {
 
@@ -43,9 +44,7 @@ val repositoryModule = module {
         )
     }
     single<TrainingCargoRepository> {
-        PackageHistoryTrainingCargoRepository(
-            packageRepository = get()
-        )
+        LocalTrainingCargoRepository()
     }
     single<IdGenerator> {
         UuidIdGenerator()
