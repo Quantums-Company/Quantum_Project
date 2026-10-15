@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase.crud.vehicle
+package org.bytebloom.domain.usecase.crud.vehicles
 
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException

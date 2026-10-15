@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.usecase.crud.route.DeleteRouteUseCase
+import org.bytebloom.domain.usecase.crud.routes.DeleteRouteUseCase
 import org.bytebloom.domain.validator.id.RouteIdValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

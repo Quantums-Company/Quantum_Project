@@ -13,12 +13,7 @@ import org.bytebloom.domain.model.exception.UnknownDataException
 import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 
-object SupabaseErrorTranslator {
-
-    private const val HTTP_BAD_REQUEST = 400
-    private const val HTTP_NOT_FOUND = 404
-    private const val HTTP_CONFLICT = 409
-    private const val HTTP_UNPROCESSABLE_ENTITY = 422
+class SupabaseErrorTranslator {
 
     @Suppress("TooGenericExceptionCaught")
     suspend fun <T> translate(
@@ -53,4 +48,11 @@ object SupabaseErrorTranslator {
             )
             else -> UnknownDataException("Unexpected Supabase error during $operation: ${e.message}", e)
         }
+
+    private companion object {
+        private const val HTTP_BAD_REQUEST = 400
+        private const val HTTP_NOT_FOUND = 404
+        private const val HTTP_CONFLICT = 409
+        private const val HTTP_UNPROCESSABLE_ENTITY = 422
     }
+}

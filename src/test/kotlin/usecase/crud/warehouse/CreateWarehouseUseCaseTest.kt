@@ -1,6 +1,5 @@
 package usecase.crud.warehouse
 
-import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -14,7 +13,8 @@ import org.bytebloom.domain.model.exception.DatabaseConflictException
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.usecase.crud.warehouse.CreateWarehouseUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.CreateWarehouseUseCase
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class CreateWarehouseUseCaseTest {
@@ -84,7 +84,7 @@ class CreateWarehouseUseCaseTest {
         every { idGenerator.next(EntityType.WAREHOUSE) } returns "WH-001"
         coEvery { repository.create(capture(savedWarehouse)) } answers { savedWarehouse.captured }
 
-        val result = useCase("Main Hub", "Central", 35.2, 31.9)
+        useCase("Main Hub", "Central", 35.2, 31.9)
 
         coVerify(exactly = 1) { repository.create(any()) }
     }
@@ -93,7 +93,7 @@ class CreateWarehouseUseCaseTest {
     fun `throws EntityValidationException when warehouse name is blank`() = runTest {
         every { idGenerator.next(EntityType.WAREHOUSE) } returns "WH-001"
 
-        assertThrows<EntityValidationException> { useCase("   ", "Central", 35.2, 31.9) }
+        assertThrows<EntityValidationException> { useCase("    ", "Central", 35.2, 31.9) }
     }
 
     @Test
@@ -106,6 +106,8 @@ class CreateWarehouseUseCaseTest {
     @Test
     fun `don't call repository create when warehouse name is empty`() = runTest {
         every { idGenerator.next(EntityType.WAREHOUSE) } returns "WH-001"
+
+        assertThrows<EntityValidationException> { useCase("", "Central", 35.2, 31.9) }
 
         coVerify(exactly = 0) { repository.create(any()) }
     }
@@ -129,6 +131,8 @@ class CreateWarehouseUseCaseTest {
     @Test
     fun `don't call repository create when coordinates are out of geographic range`() = runTest {
         every { idGenerator.next(EntityType.WAREHOUSE) } returns "WH-001"
+
+        assertThrows<EntityValidationException> { useCase("Main Hub", "Central", 190.0, 31.9) }
 
         coVerify(exactly = 0) { repository.create(any()) }
     }

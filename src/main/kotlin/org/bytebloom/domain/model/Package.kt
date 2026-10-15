@@ -6,7 +6,7 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.validator.FieldValidator
 
-class Package(
+data class Package(
     val id: String,
     val weight: Double,
     val priority: Priority,
@@ -27,8 +27,4 @@ class Package(
 
     fun redirectedTo(newDestination: Warehouse): Package =
         Package(id, weight, priority, originWarehouse, newDestination)
-
-    override fun equals(other: Any?): Boolean = other is Package && id == other.id
-
-    override fun hashCode(): Int = id.hashCode()
 }

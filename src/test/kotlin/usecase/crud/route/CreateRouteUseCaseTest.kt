@@ -14,7 +14,7 @@ import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.domain.repository.RouteRepository
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.usecase.crud.route.CreateRouteUseCase
+import org.bytebloom.domain.usecase.crud.routes.CreateRouteUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith

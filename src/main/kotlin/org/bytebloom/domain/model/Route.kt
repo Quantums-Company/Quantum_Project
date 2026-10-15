@@ -6,7 +6,7 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.validator.FieldValidator
 
-class Route(
+data class Route(
     val id: String,
     val distanceKm: Double,
     val typicalDelayMin: Int,

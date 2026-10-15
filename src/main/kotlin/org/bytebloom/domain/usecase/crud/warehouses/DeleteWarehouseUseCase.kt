@@ -1,18 +1,17 @@
-package org.bytebloom.domain.usecase.crud.warehouse
+package org.bytebloom.domain.usecase.crud.warehouses
 
 import org.bytebloom.domain.model.exception.EntityValidationException
-import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.validator.id.WarehouseIdValidator
 
-class GetWarehouseByIdUseCase(
+class DeleteWarehouseUseCase(
     private val warehouseRepository: WarehouseRepository,
     private val validator: WarehouseIdValidator
 ) {
-    suspend operator fun invoke(id: String): Warehouse? =
+    suspend operator fun invoke(id: String): Boolean =
         when (val result = validator(id)) {
-            is ValidatorResult.Valid -> warehouseRepository.getById(id)
+            is ValidatorResult.Valid -> warehouseRepository.delete(id)
             is ValidatorResult.Invalid -> throw EntityValidationException(result.violations)
         }
 }

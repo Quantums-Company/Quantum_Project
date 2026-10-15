@@ -4,6 +4,7 @@
 **/build/
 xcuserdata
 !src/**/build/
+src/resources/cache/*.csv
 local.properties
 .idea
 .DS_Store

@@ -5,7 +5,7 @@ import org.bytebloom.domain.validator.id.EntityIdValidator
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.validator.FieldValidator
 
-class Vehicle(
+data class Vehicle(
     val id: String,
     val maxCapacityKg: Double,
     val costPerKm: Double,
@@ -25,8 +25,4 @@ class Vehicle(
 
     fun reassignedTo(newWarehouse: Warehouse): Vehicle =
         Vehicle(id, maxCapacityKg, costPerKm, newWarehouse)
-
-    override fun equals(other: Any?): Boolean = other is Vehicle && id == other.id
-
-    override fun hashCode(): Int = id.hashCode()
 }
