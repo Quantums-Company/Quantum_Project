@@ -38,7 +38,6 @@ dependencies {
 
     testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.kotlinx.coroutines.core)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     testImplementation(libs.koin.test)
     testImplementation(libs.konsist)
