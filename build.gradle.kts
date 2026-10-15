@@ -41,6 +41,7 @@ dependencies {
 
     testImplementation(libs.koin.test)
     testImplementation(libs.konsist)
+    testImplementation(libs.koin.test.junit5)
 }
 
 kotlin {
