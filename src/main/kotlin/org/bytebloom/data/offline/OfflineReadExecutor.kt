@@ -3,7 +3,6 @@ package org.bytebloom.data.offline
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
-import org.bytebloom.domain.model.exception.NetworkUnavailableException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -20,23 +19,21 @@ class OfflineReadExecutor(
         saveSnapshot: suspend (T) -> Unit
     ): T {
         val remoteResult = try {
-            withTimeout(remoteTimeout) {
-                remoteCall()
-            }
-        } catch (e: CancellationException) {
-            if (e is TimeoutCancellationException) {
-                return localCall()
-            }
-            throw e
-        } catch (_: NetworkUnavailableException) {
+            withTimeout(remoteTimeout) { remoteCall() }
+        } catch (e: TimeoutCancellationException) {
             return localCall()
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
             return localCall()
         }
 
         try {
             saveSnapshot(remoteResult)
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
+            // A failed cache write must not hide fresh remote data from the caller.
         }
 
         return remoteResult
