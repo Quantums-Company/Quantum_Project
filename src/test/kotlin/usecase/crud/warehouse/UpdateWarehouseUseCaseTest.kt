@@ -17,7 +17,7 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.usecase.crud.warehouse.UpdateWarehouseUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.UpdateWarehouseUseCase
 import org.bytebloom.domain.validator.update.UpdateWarehouseValidator
 import org.junit.jupiter.api.assertThrows
 

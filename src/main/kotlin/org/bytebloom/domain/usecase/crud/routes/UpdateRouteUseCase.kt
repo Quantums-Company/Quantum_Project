@@ -1,4 +1,4 @@
-package org.bytebloom.domain.usecase.crud.route
+package org.bytebloom.domain.usecase.crud.routes
 
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.model.exception.ResourceNotFoundException

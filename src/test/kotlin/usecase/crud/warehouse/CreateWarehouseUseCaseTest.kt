@@ -14,7 +14,7 @@ import org.bytebloom.domain.model.exception.DatabaseConflictException
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.usecase.crud.warehouse.CreateWarehouseUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.CreateWarehouseUseCase
 import org.junit.jupiter.api.assertThrows
 
 class CreateWarehouseUseCaseTest {
