@@ -21,20 +21,23 @@ import org.bytebloom.domain.usecase.commands.DispatchVehicleUseCase
 import org.bytebloom.domain.usecase.commands.ReroutePackageUseCase
 import org.bytebloom.domain.usecase.crud.packages.CreatePackageUseCase
 import org.bytebloom.domain.usecase.crud.packages.DeletePackageUseCase
+import org.bytebloom.domain.usecase.crud.packages.GetAllPackagesUseCase
 import org.bytebloom.domain.usecase.crud.packages.GetPackageByIdUseCase
 import org.bytebloom.domain.usecase.crud.packages.UpdatePackageUseCase
-import org.bytebloom.domain.usecase.crud.route.CreateRouteUseCase
-import org.bytebloom.domain.usecase.crud.route.DeleteRouteUseCase
-import org.bytebloom.domain.usecase.crud.route.GetRouteByIdUseCase
-import org.bytebloom.domain.usecase.crud.route.UpdateRouteUseCase
-import org.bytebloom.domain.usecase.crud.vehicle.CreateVehicleUseCase
-import org.bytebloom.domain.usecase.crud.vehicle.DeleteVehicleUseCase
-import org.bytebloom.domain.usecase.crud.vehicle.GetVehicleByIdUseCase
-import org.bytebloom.domain.usecase.crud.vehicle.UpdateVehicleUseCase
-import org.bytebloom.domain.usecase.crud.warehouse.CreateWarehouseUseCase
-import org.bytebloom.domain.usecase.crud.warehouse.DeleteWarehouseUseCase
-import org.bytebloom.domain.usecase.crud.warehouse.GetWarehouseByIdUseCase
-import org.bytebloom.domain.usecase.crud.warehouse.UpdateWarehouseUseCase
+import org.bytebloom.domain.usecase.crud.routes.CreateRouteUseCase
+import org.bytebloom.domain.usecase.crud.routes.DeleteRouteUseCase
+import org.bytebloom.domain.usecase.crud.routes.GetRouteByIdUseCase
+import org.bytebloom.domain.usecase.crud.routes.UpdateRouteUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.CreateVehicleUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.DeleteVehicleUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.GetAllVehiclesUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.GetVehicleByIdUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.UpdateVehicleUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.CreateWarehouseUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.DeleteWarehouseUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.GetAllWarehousesUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.GetWarehouseByIdUseCase
+import org.bytebloom.domain.usecase.crud.warehouses.UpdateWarehouseUseCase
 import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
 import org.bytebloom.domain.usecase.queries.FindCheapestSuitableVehicleUseCase
 import org.bytebloom.domain.usecase.queries.FindPackagesAboveWeightUseCase
@@ -68,21 +71,25 @@ val useCaseModule = module {
     factory { BST<String>() }
     factory { AVLTree<String>() }
 
+    factory { GetAllWarehousesUseCase(get()) }
     factory { CreateWarehouseUseCase(get(), get()) }
     factory { GetWarehouseByIdUseCase(get(), get()) }
     factory { UpdateWarehouseUseCase(get(), get()) }
     factory { DeleteWarehouseUseCase(get(), get()) }
 
+    factory { GetAllPackagesUseCase(get()) }
     factory { CreatePackageUseCase(get(), get()) }
     factory { GetPackageByIdUseCase(get(), get()) }
     factory { UpdatePackageUseCase(get(), get()) }
     factory { DeletePackageUseCase(get(), get()) }
 
+    factory { GetAllVehiclesUseCase(get()) }
     factory { CreateRouteUseCase(get(), get()) }
     factory { GetRouteByIdUseCase(get(), get()) }
     factory { UpdateRouteUseCase(get(), get()) }
     factory { DeleteRouteUseCase(get(), get()) }
 
+    factory { GetAllVehiclesUseCase(get()) }
     factory { CreateVehicleUseCase(get(), get()) }
     factory { GetVehicleByIdUseCase(get(), get()) }
     factory { UpdateVehicleUseCase(get(), get()) }
