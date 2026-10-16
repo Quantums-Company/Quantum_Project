@@ -4,13 +4,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.bytebloom.domain.model.VehicleTelemetry
-import org.bytebloom.domain.service.TelemetryStreamingService
+import org.bytebloom.data.source.telemetry.TelemetryDataSource
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-class SimulatedTelemetryStreamingService(
+class SimulatedTelemetryDataSource(
     private val interval: Duration = DEFAULT_INTERVAL
-) : TelemetryStreamingService {
+) : TelemetryDataSource {
     companion object {
         private val DEFAULT_INTERVAL = 1.seconds
         private const val BASE_SPEED_KPH = 30.0
