@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transform
 import org.bytebloom.domain.model.VehicleTelemetry
 import org.bytebloom.domain.model.result.VehicleDelayNotification
-import org.bytebloom.domain.service.TelemetryStreamingService
+import org.bytebloom.domain.repository.TelemetryRepository
 
 class TrackActiveFleetUseCase(
-    private val telemetryStreamingService: TelemetryStreamingService,
+    private val telemetryRepository: TelemetryRepository,
     private val delaySpeedThresholdKph: Double = DEFAULT_DELAY_SPEED_THRESHOLD_KPH
 ) {
 
@@ -32,7 +32,7 @@ class TrackActiveFleetUseCase(
             val delayedVehicleIds = mutableSetOf<String>()
 
             emitAll(
-                telemetryStreamingService
+                telemetryRepository
                     .streamTelemetry(activeVehicleIds.toList())
                     .filter { telemetry -> telemetry.vehicleId in activeVehicleIds }
                     .transform { telemetry ->
