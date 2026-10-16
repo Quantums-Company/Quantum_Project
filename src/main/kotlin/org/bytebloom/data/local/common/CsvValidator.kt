@@ -1,4 +1,3 @@
-// data/local/common/CsvRowRules.kt
 package org.bytebloom.data.local.common
 
 import org.bytebloom.data.exception.CsvParsingException

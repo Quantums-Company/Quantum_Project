@@ -6,7 +6,7 @@ import org.bytebloom.domain.validator.id.EntityIdValidator
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.validator.FieldValidator
 
-class Warehouse(
+data class Warehouse(
     val id: String,
     val name: String,
     val regionalZone: String,
@@ -46,12 +46,4 @@ class Warehouse(
 
     override fun toString(): String =
         "Warehouse(id='$id', name=$name, regionalZone=$regionalZone, longitude=$longitude, latitude=$latitude)"
-
-    override fun hashCode(): Int = 31 * id.hashCode() + name.hashCode()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Warehouse) return false
-        return id == other.id && name == other.name
-    }
 }

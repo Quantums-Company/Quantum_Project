@@ -6,7 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.domain.usecase.crud.vehicle.DeleteVehicleUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.DeleteVehicleUseCase
 import org.bytebloom.domain.validator.id.VehicleIdValidator
 import org.bytebloom.domain.model.EntityType
 import org.bytebloom.domain.model.exception.EntityValidationException

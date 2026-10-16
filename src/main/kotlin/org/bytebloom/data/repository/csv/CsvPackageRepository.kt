@@ -1,52 +1,67 @@
 package org.bytebloom.data.repository.csv
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.bytebloom.data.mapper.PackageMapper
 import org.bytebloom.data.mapper.WarehouseReferenceMapper
 import org.bytebloom.data.source.csv.PackageDataSource
 import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.PackageRepository
+import org.bytebloom.domain.repository.WarehouseRepository
 
 class CsvPackageRepository(
-    private val warehousesById: Map<String, Warehouse>,
+    private val warehouseRepository: WarehouseRepository,
     private val csvPackageDataSource: PackageDataSource
 ) : PackageRepository {
-    private var cachedPackages = listOf<Package>()
+
+    private var cachedPackages: List<Package>? = null
+    private val mutex = Mutex()
 
     private suspend fun loadAll(): List<Package> {
-        val packageMapper = PackageMapper(WarehouseReferenceMapper(warehousesById))
-        val packageRaws = csvPackageDataSource.loadAll()
+        val warehousesById = warehouseRepository
+            .getAll()
+            .associateBy { it.id }
 
-        return packageMapper.toDomain(packageRaws)
+        val mapper = PackageMapper(
+            WarehouseReferenceMapper(warehousesById)
+        )
+
+        return mapper.toDomain(csvPackageDataSource.loadAll())
     }
 
-    suspend fun refresh() {
-        cachedPackages = loadAll()
-    }
+    suspend fun refresh(): List<Package> =
+        mutex.withLock {
+            loadAll().also { packages ->
+                cachedPackages = packages
+            }
+        }
 
-    init {
-        CoroutineScope(Dispatchers.IO).launch {
-            refresh()
+    override suspend fun getAll(): List<Package> {
+        cachedPackages?.let { return it }
+
+        return mutex.withLock {
+            cachedPackages
+                ?: loadAll().also { packages ->
+                    cachedPackages = packages
+                }
         }
     }
 
-    override suspend fun getAll(): List<Package> = cachedPackages
-    override suspend fun getById(id: String): Package? {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getById(id: String): Package? =
+        getAll().find { it.id == id }
 
-    override suspend fun create(pkg: Package): Package {
-        TODO("Not yet implemented")
-    }
+    override suspend fun create(pkg: Package): Package =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Create the package through the remote repository."
+        )
 
-    override suspend fun update(pkg: Package): Package {
-        TODO("Not yet implemented")
-    }
+    override suspend fun update(pkg: Package): Package =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Update the package through the remote repository."
+        )
 
-    override suspend fun delete(id: String): Boolean {
-        TODO("Not yet implemented")
-    }
+    override suspend fun delete(id: String): Boolean =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Delete the package through the remote repository."
+        )
 }

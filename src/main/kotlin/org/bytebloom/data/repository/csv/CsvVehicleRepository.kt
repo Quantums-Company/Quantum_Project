@@ -1,51 +1,67 @@
 package org.bytebloom.data.repository.csv
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.bytebloom.data.mapper.VehicleMapper
 import org.bytebloom.data.mapper.WarehouseReferenceMapper
 import org.bytebloom.data.source.csv.VehicleDataSource
 import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.VehicleRepository
+import org.bytebloom.domain.repository.WarehouseRepository
 
 class CsvVehicleRepository(
-    private val warehousesById: Map<String, Warehouse>,
+    private val warehouseRepository: WarehouseRepository,
     private val csvVehicleDataSource: VehicleDataSource
 ) : VehicleRepository {
-    private var cachedVehicles= listOf<Vehicle>()
 
-    private suspend fun loadAll():List<Vehicle>{
-        val vehicleMapper = VehicleMapper(WarehouseReferenceMapper(warehousesById))
-        val vehicleRaws = csvVehicleDataSource.loadAll()
+    private var cachedVehicles: List<Vehicle>? = null
+    private val mutex = Mutex()
 
-        return vehicleMapper.toDomain(vehicleRaws)
+    private suspend fun loadAll(): List<Vehicle> {
+        val warehousesById = warehouseRepository
+            .getAll()
+            .associateBy { it.id }
+
+        val mapper = VehicleMapper(
+            WarehouseReferenceMapper(warehousesById)
+        )
+
+        return mapper.toDomain(csvVehicleDataSource.loadAll())
     }
 
-    suspend fun refresh(){
-        cachedVehicles = loadAll()
-    }
+    suspend fun refresh(): List<Vehicle> =
+        mutex.withLock {
+            loadAll().also { vehicles ->
+                cachedVehicles = vehicles
+            }
+        }
 
-    init {
-        CoroutineScope(Dispatchers.IO).launch {
-            refresh()
+    override suspend fun getAll(): List<Vehicle> {
+        cachedVehicles?.let { return it }
+
+        return mutex.withLock {
+            cachedVehicles
+                ?: loadAll().also { vehicles ->
+                    cachedVehicles = vehicles
+                }
         }
     }
-    override suspend fun getAll(): List<Vehicle> = cachedVehicles
-    override suspend fun getById(id: String): Vehicle? {
-        TODO("Not yet implemented")
-    }
 
-    override suspend fun create(vehicle: Vehicle): Vehicle {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getById(id: String): Vehicle? =
+        getAll().find { it.id == id }
 
-    override suspend fun update(vehicle: Vehicle): Vehicle {
-        TODO("Not yet implemented")
-    }
+    override suspend fun create(vehicle: Vehicle): Vehicle =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Create the vehicle through the remote repository."
+        )
 
-    override suspend fun delete(id: String): Boolean {
-        TODO("Not yet implemented")
-    }
+    override suspend fun update(vehicle: Vehicle): Vehicle =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Update the vehicle through the remote repository."
+        )
+
+    override suspend fun delete(id: String): Boolean =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Delete the vehicle through the remote repository."
+        )
 }

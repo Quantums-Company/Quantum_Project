@@ -41,26 +41,36 @@ class AnalyzeTreePerformanceUseCaseTest {
     }
 
     @Test
-    fun `on ascending insertion order, AVL never needs more search steps than the unbalanced BST`() {
+    fun `on ascending insertion order, AVL's worst-case lookup is never worse than the unbalanced BST's`() {
         // Given — PKG-000001..000003 insert in sorted order, the exact case that degrades a plain BST
         val targetIds = listOf("PKG-000001", "PKG-000002", "PKG-000003")
 
         // When
         val report = useCase(packageCount = 3, targetTrackingIds = targetIds)
 
-        // Then — this is the actual performance claim this use case exists to demonstrate
+        // Then — AVL's balancing guarantees a better (or equal) WORST-CASE bound across the
+        // whole dataset. It does NOT guarantee every individual id is faster than in the
+        // unbalanced BST — a rebalance can push one element slightly deeper even as it
+        // shortens the tree's overall worst case (PKG-000001 is exactly that case here:
+        // 2 AVL steps vs 1 BST step, yet AVL's worst case is still better overall).
+        val maxBstSteps = report.results.maxOf { it.binarySearchTreeSteps }
+        val maxAvlSteps = report.results.maxOf { it.avlTreeSteps }
+        assertTrue(
+            maxAvlSteps <= maxBstSteps,
+            "Expected AVL worst case ($maxAvlSteps) <= BST worst case ($maxBstSteps)"
+        )
+
+        // The unbalanced BST degenerates into a linked list on ascending input: the last
+        // inserted id requires exactly N steps.
+        assertEquals(3, report.results.last { it.trackingId == "PKG-000003" }.binarySearchTreeSteps)
+
+        // AVL's self-balancing keeps every single lookup within ceil(log2(N+1)) steps — here, 2.
         report.results.forEach { result ->
             assertTrue(
-                result.avlTreeSteps <= result.binarySearchTreeSteps,
-                "Expected AVL (${result.avlTreeSteps}) <=" +
-                        " BST (${result.binarySearchTreeSteps}) for ${result.trackingId}"
+                result.avlTreeSteps <= 2,
+                "Expected AVL step count <= 2 for ${result.trackingId}, got ${result.avlTreeSteps}"
             )
         }
-        // The worst-case BST lookup (the last inserted id) takes exactly 3 steps on a fully right-skewed tree
-        assertEquals(
-            3,
-            report.results.last { it.trackingId == "PKG-000003" }.binarySearchTreeSteps
-        )
     }
 
     @Test

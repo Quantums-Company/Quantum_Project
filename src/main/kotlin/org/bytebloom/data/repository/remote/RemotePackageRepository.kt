@@ -7,28 +7,37 @@ import org.bytebloom.domain.model.Package
 import org.bytebloom.domain.repository.PackageRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import java.time.Instant
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class RemotePackageRepository(
     private val warehouseRepository: WarehouseRepository,
     private val remoteDataSource: PackageRemoteDataSource
 ) : PackageRepository {
 
-    private suspend fun mapper() = PackageDtoMapper(warehouseRepository.getAll().associateBy { it.id })
+    private suspend fun <T> loadWithMapper(load: suspend () -> T): Pair<T, PackageDtoMapper> = coroutineScope {
+        val result = async { load() }
+        val warehouses = async { warehouseRepository.getAll() }
+        result.await() to PackageDtoMapper(warehouses.await().associateBy { it.id } )
+    }
 
-    override suspend fun getAll(): List<Package> =
-        mapper().mapList(remoteDataSource.loadAll()).succeeded
+    override suspend fun getAll(): List<Package> {
+        val (dto, mapper) = loadWithMapper { remoteDataSource.loadAll() }
+        return mapper.mapList(dto).succeeded}
 
-    override suspend fun getById(id: String): Package? =
-        remoteDataSource.loadById(id)?.let { mapper().map(it) }
+    override suspend fun getById(id: String): Package? {
+        val (dto, mapper) = loadWithMapper { remoteDataSource.loadById(id) }
+        return dto?.let ( mapper::map )
+    }
 
     override suspend fun create(pkg: Package): Package {
-        val dto = remoteDataSource.create(pkg.toRequestDto())
-        return dto?.let { mapper().map(it) } ?: pkg
+        val (dto, mapper) =loadWithMapper { remoteDataSource.create(pkg.toRequestDto())}
+        return dto?.let ( mapper::map ) ?: pkg
     }
 
     override suspend fun update(pkg: Package): Package {
-        val dto = remoteDataSource.update(pkg.id, pkg.toRequestDto())
-        return dto?.let { mapper().map(it) } ?: pkg
+        val (dto, mapper) = loadWithMapper { remoteDataSource.update(pkg.id, pkg.toRequestDto())}
+        return dto?.let ( mapper::map)  ?: pkg
     }
 
     override suspend fun delete(id: String): Boolean =

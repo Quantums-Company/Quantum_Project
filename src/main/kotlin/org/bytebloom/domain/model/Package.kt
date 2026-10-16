@@ -6,12 +6,12 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.validator.FieldValidator
 
-class Package(
+data class Package(
     val id: String,
     val weight: Double,
     val priority: Priority,
     val originWarehouse: Warehouse,
-    val destinationWarehouse: Warehouse
+    val destinationWarehouse: Warehouse,
 ) {
     init {
         val rules = FieldValidator()

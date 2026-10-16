@@ -9,7 +9,7 @@ import org.bytebloom.domain.model.Vehicle
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.usecase.crud.vehicle.CreateVehicleUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.CreateVehicleUseCase
 import org.bytebloom.domain.model.exception.EntityValidationException
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertEquals

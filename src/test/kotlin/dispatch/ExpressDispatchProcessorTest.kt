@@ -147,6 +147,51 @@ class ExpressDispatchProcessorTest {
         verify(exactly = 0) { shipmentStateUpdater.markAsDispatched(any()) }
     }
 
+    @Test
+    fun `should reject with no packages when order is empty`() {
+        // Given
+        val order = createOrder()
+
+        // When
+        val outcome = expressProcessor.dispatch(order)
+
+        // Then
+        assertThat(outcome).isEqualTo(DispatchOutcome.Rejected(order, DispatchRejectionReason.NO_PACKAGES))
+    }
+
+    @Test
+    fun `should reject with package not in queue when a package was never queued`() {
+        // Given
+        val unqueuedPackage = Package(
+            id = "PKG-099", weight = 100.0, priority = Priority.URGENT,
+            originWarehouse = warehouse, destinationWarehouse = DESTINATION
+        )
+        val order = createOrder(unqueuedPackage)
+
+        // When
+        val outcome = expressProcessor.dispatch(order)
+
+        // Then
+        assertThat(outcome).isEqualTo(
+            DispatchOutcome.Rejected(order, DispatchRejectionReason.PACKAGE_NOT_IN_QUEUE)
+        )
+    }
+
+    @Test
+    fun `should reject with vehicle not stationed when vehicle is not in warehouse`() {
+        // Given
+        val order = createOrder(queueUrgentPackage(id = "PKG-001", weight = 300.0))
+        warehouse.removeVehicle(vehicle)
+
+        // When
+        val outcome = expressProcessor.dispatch(order)
+
+        // Then
+        assertThat(outcome).isEqualTo(
+            DispatchOutcome.Rejected(order, DispatchRejectionReason.VEHICLE_NOT_STATIONED)
+        )
+    }
+
     private fun queueUrgentPackage(id: String, weight: Double): Package =
         queuePackage(id, weight, Priority.URGENT)
 

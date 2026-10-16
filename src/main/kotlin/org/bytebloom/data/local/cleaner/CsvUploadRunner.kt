@@ -1,6 +1,8 @@
 package org.bytebloom.data.local.cleaner
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.bytebloom.data.local.csv.CsvPackageDataSource
 import org.bytebloom.data.local.csv.CsvRouteDataSource
 import org.bytebloom.data.local.csv.CsvVehicleDataSource
@@ -11,14 +13,26 @@ object CsvUploadRunner {
 
     @JvmStatic
     fun main(args: Array<String>) = runBlocking {
-        val uploader = CsvToSupabaseUploader(
-            client = SupabaseClientProvider.create(),
-            warehouseDataSource = CsvWarehouseDataSource(),
-            routeDataSource = CsvRouteDataSource(),
-            vehicleDataSource = CsvVehicleDataSource(),
-            packageDataSource = CsvPackageDataSource()
-        )
+        println("🚀 Starting CSV to Supabase upload process...")
 
-        uploader.upload()
+        try {
+            withContext(Dispatchers.IO) {
+                val supabaseClient = SupabaseClientProvider().create()
+
+                val uploader = CsvToSupabaseUploader(
+                    client = supabaseClient,
+                    warehouseDataSource = CsvWarehouseDataSource(),
+                    routeDataSource = CsvRouteDataSource(),
+                    vehicleDataSource = CsvVehicleDataSource(),
+                    packageDataSource = CsvPackageDataSource()
+                )
+
+                uploader.upload()
+            }
+            println("✅ CSV Data uploaded successfully to Supabase!")
+        } catch (e: Exception) {
+            println("❌ Failed to upload CSV data: ${e.message}")
+            e.printStackTrace()
+        }
     }
 }

@@ -13,7 +13,7 @@ import org.bytebloom.domain.model.validation.ValidatorError
 import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.domain.usecase.crud.vehicle.GetVehicleByIdUseCase
+import org.bytebloom.domain.usecase.crud.vehicles.GetVehicleByIdUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

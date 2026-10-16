@@ -1,47 +1,55 @@
 package org.bytebloom.data.repository.csv
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.bytebloom.data.mapper.toDomain
 import org.bytebloom.data.source.csv.WarehouseDataSource
 import org.bytebloom.domain.model.Warehouse
 import org.bytebloom.domain.repository.WarehouseRepository
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 class CsvWarehouseRepository(
     private val csvWarehouseDataSource: WarehouseDataSource
 ) : WarehouseRepository {
 
-    private var cachedWarehouses = listOf<Warehouse>()
-    private var isLoaded = false
-    private val mutex = Mutex() // Prevents duplicate concurrent loads
+    private var cachedWarehouses: List<Warehouse>? = null
+    private val mutex = Mutex()
 
-    suspend fun refresh() {
+    private suspend fun loadAll(): List<Warehouse> =
+        csvWarehouseDataSource.loadAll().toDomain()
+
+    suspend fun refresh(): List<Warehouse> =
         mutex.withLock {
-            cachedWarehouses = csvWarehouseDataSource.loadAll().toDomain()
-            isLoaded = true
+            loadAll().also { warehouses ->
+                cachedWarehouses = warehouses
+            }
         }
-    }
 
     override suspend fun getAll(): List<Warehouse> {
-        if (!isLoaded) {
-            refresh()
+        cachedWarehouses?.let { return it }
+
+        return mutex.withLock {
+            cachedWarehouses
+                ?: loadAll().also { warehouses ->
+                    cachedWarehouses = warehouses
+                }
         }
-        return cachedWarehouses
     }
 
-    override suspend fun getById(id: String): Warehouse? {
-        return getAll().find { it.id == id }
-    }
+    override suspend fun getById(id: String): Warehouse? =
+        getAll().find { it.id == id }
 
-    override suspend fun create(warehouse: Warehouse): Warehouse {
-        TODO("Not yet implemented")
-    }
+    override suspend fun create(warehouse: Warehouse): Warehouse =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Create the warehouse through the remote repository."
+        )
 
-    override suspend fun update(warehouse: Warehouse): Warehouse {
-        TODO("Not yet implemented")
-    }
+    override suspend fun update(warehouse: Warehouse): Warehouse =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Update the warehouse through the remote repository."
+        )
 
-    override suspend fun delete(id: String): Boolean {
-        TODO("Not yet implemented")
-    }
+    override suspend fun delete(id: String): Boolean =
+        throw UnsupportedOperationException(
+            "CSV repository is read-only. Delete the warehouse through the remote repository."
+        )
 }

@@ -22,6 +22,8 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import org.bytebloom.di.telemetryModule
+import org.bytebloom.domain.usecase.telemetry.TrackActiveFleetUseCase
 
 class KoinTestModulesTest : KoinTest {
 
@@ -37,13 +39,16 @@ class KoinTestModulesTest : KoinTest {
 
     private val getPackageById: GetPackageByIdUseCase by inject()
 
+    private val trackActiveFleet: TrackActiveFleetUseCase by inject()
+
     @BeforeEach
     fun setUp() {
         startKoin {
             modules(
                 validatorModule,
                 useCaseModule,
-                fakeRepositoryModule
+                fakeRepositoryModule,
+                telemetryModule
             )
         }
     }
@@ -69,5 +74,14 @@ class KoinTestModulesTest : KoinTest {
         coVerify(exactly = 1) {
             packageRepository.getById("PKG-001")
         }
+    }
+
+    @Test
+    fun `resolves telemetry tracking use case from koin`() {
+        // When
+        val useCase = trackActiveFleet
+
+        // Then
+        assertNotNull(useCase)
     }
 }

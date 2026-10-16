@@ -18,5 +18,5 @@ enum class ValidatorField(val displayName: String) {
     ENTITY("Entity"),
     FEE("Fee"),
     MULTIPLIER("multiplier"),
-    PREMIUM("premium"),
+    PREMIUM("premium")
 }
