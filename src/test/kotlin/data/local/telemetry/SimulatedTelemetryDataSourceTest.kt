@@ -5,19 +5,19 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.data.local.telemetry.SimulatedTelemetryStreamingService
+import org.bytebloom.data.local.telemetry.SimulatedTelemetryDataSource
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-class SimulatedTelemetryStreamingServiceTest {
+class SimulatedTelemetryDataSourceTest {
 
     @Test
     fun `emits requested number of telemetry updates`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService(
+        val service = SimulatedTelemetryDataSource(
             interval = 1.seconds
         )
 
@@ -34,7 +34,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `emits telemetry for each requested vehicle`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService()
+        val service = SimulatedTelemetryDataSource()
 
         // When
         val updates = service
@@ -52,7 +52,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `emits valid GPS coordinates and fuel percentage`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService()
+        val service = SimulatedTelemetryDataSource()
 
         // When
         val updates = service
@@ -73,7 +73,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `emits no updates for an empty fleet`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService()
+        val service = SimulatedTelemetryDataSource()
 
         // When
         val updates = service
@@ -87,7 +87,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `emits the first update immediately without waiting`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService(interval = 1.seconds)
+        val service = SimulatedTelemetryDataSource(interval = 1.seconds)
 
         // When
         service.streamTelemetry(listOf("TRK-001")).first()
@@ -99,7 +99,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `waits one interval between consecutive updates`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService(interval = 1.seconds)
+        val service = SimulatedTelemetryDataSource(interval = 1.seconds)
 
         // When
         service.streamTelemetry(listOf("TRK-001")).take(3).toList()
@@ -111,7 +111,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `burns one percent of fuel per update`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService(interval = 1.milliseconds)
+        val service = SimulatedTelemetryDataSource(interval = 1.milliseconds)
 
         // When
         val updates = service.streamTelemetry(listOf("TRK-001")).take(3).toList()
@@ -123,7 +123,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `fuel stays at zero instead of refilling`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService(interval = 1.milliseconds)
+        val service = SimulatedTelemetryDataSource(interval = 1.milliseconds)
 
         // When
         val updates = service.streamTelemetry(listOf("TRK-001")).take(150).toList()
@@ -135,7 +135,7 @@ class SimulatedTelemetryStreamingServiceTest {
     @Test
     fun `vehicle stays stopped for several consecutive updates`() = runTest {
         // Given
-        val service = SimulatedTelemetryStreamingService(interval = 1.milliseconds)
+        val service = SimulatedTelemetryDataSource(interval = 1.milliseconds)
 
         // When
         val updates = service.streamTelemetry(listOf("TRK-001")).take(5).toList()
