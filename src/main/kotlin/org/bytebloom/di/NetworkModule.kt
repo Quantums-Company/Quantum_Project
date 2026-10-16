@@ -13,13 +13,14 @@ import org.bytebloom.data.source.remote.RouteRemoteDataSource
 import org.bytebloom.data.source.remote.VehicleRemoteDataSource
 import org.bytebloom.data.source.remote.WarehouseRemoteDataSource
 import org.koin.dsl.module
+import org.bytebloom.data.remote.util.RateLimiter
 
 val networkModule = module {
     single { SupabaseClientProvider() }
     single { SupabaseErrorTranslator() }
 
-    single { RemoteExecutor(errorTranslator = get()) }
-
+    single { RateLimiter() }
+    single { RemoteExecutor(errorTranslator = get(), rateLimiter = get()) }
     single<SupabaseClient> {
         get<SupabaseClientProvider>().create()
     }
