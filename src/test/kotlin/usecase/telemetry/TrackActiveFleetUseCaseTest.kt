@@ -6,16 +6,16 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.domain.model.VehicleTelemetry
 import org.bytebloom.domain.model.result.VehicleDelayNotification
-import org.bytebloom.domain.service.TelemetryStreamingService
+import org.bytebloom.domain.repository.TelemetryRepository
 import org.bytebloom.domain.usecase.telemetry.TrackActiveFleetUseCase
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class TrackActiveFleetUseCaseTest {
 
-    private class FakeTelemetryStreamingService(
+    private class FakeTelemetryRepository(
         private val updates: List<VehicleTelemetry>
-    ) : TelemetryStreamingService {
+    ) : TelemetryRepository {
 
         override fun streamTelemetry(
             vehicleIds: List<String>
@@ -25,7 +25,7 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `emits notification for active vehicle moving below threshold`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(
+        val repository = FakeTelemetryRepository(
             listOf(
                 VehicleTelemetry(
                     vehicleId = "TRK-001",
@@ -36,7 +36,7 @@ class TrackActiveFleetUseCaseTest {
                 )
             )
         )
-        val useCase = TrackActiveFleetUseCase(service)
+        val useCase = TrackActiveFleetUseCase(repository)
 
         // When
         val notifications = useCase(setOf("TRK-001")).toList()
@@ -48,7 +48,7 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `does not notify for vehicle moving above threshold`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(
+        val repository = FakeTelemetryRepository(
             listOf(
                 VehicleTelemetry(
                     vehicleId = "TRK-001",
@@ -59,7 +59,7 @@ class TrackActiveFleetUseCaseTest {
                 )
             )
         )
-        val useCase = TrackActiveFleetUseCase(service)
+        val useCase = TrackActiveFleetUseCase(repository)
 
         // When
         val notifications = useCase(setOf("TRK-001")).toList()
@@ -71,7 +71,7 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `ignores updates from vehicles outside active fleet`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(
+        val repository = FakeTelemetryRepository(
             listOf(
                 VehicleTelemetry(
                     vehicleId = "TRK-999",
@@ -82,7 +82,7 @@ class TrackActiveFleetUseCaseTest {
                 )
             )
         )
-        val useCase = TrackActiveFleetUseCase(service)
+        val useCase = TrackActiveFleetUseCase(repository)
 
         // When
         val notifications = useCase(setOf("TRK-001")).toList()
@@ -94,8 +94,8 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `returns no notifications when active fleet is empty`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(emptyList())
-        val useCase = TrackActiveFleetUseCase(service)
+        val repository = FakeTelemetryRepository(emptyList())
+        val useCase = TrackActiveFleetUseCase(repository)
 
         // When
         val notifications = useCase(emptySet()).toList()
@@ -107,10 +107,10 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `notifies only once while the vehicle stays delayed`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(
+        val repository = FakeTelemetryRepository(
             listOf(telemetry(speedKph = 0.0), telemetry(speedKph = 0.0), telemetry(speedKph = 3.0))
         )
-        val useCase = TrackActiveFleetUseCase(service)
+        val useCase = TrackActiveFleetUseCase(repository)
 
         // When
         val notifications = useCase(setOf("TRK-001")).toList()
@@ -122,10 +122,10 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `notifies again after the vehicle recovers and gets delayed again`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(
+        val repository = FakeTelemetryRepository(
             listOf(telemetry(speedKph = 0.0), telemetry(speedKph = 40.0), telemetry(speedKph = 1.0))
         )
-        val useCase = TrackActiveFleetUseCase(service)
+        val useCase = TrackActiveFleetUseCase(repository)
 
         // When
         val notifications = useCase(setOf("TRK-001")).toList()
@@ -137,14 +137,14 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `tracks each vehicle delay independently`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(
+        val repository = FakeTelemetryRepository(
             listOf(
                 telemetry(vehicleId = "TRK-001", speedKph = 0.0),
                 telemetry(vehicleId = "TRK-002", speedKph = 0.0),
                 telemetry(vehicleId = "TRK-001", speedKph = 0.0)
             )
         )
-        val useCase = TrackActiveFleetUseCase(service)
+        val useCase = TrackActiveFleetUseCase(repository)
 
         // When
         val notifications = useCase(setOf("TRK-001", "TRK-002")).toList()
@@ -156,8 +156,8 @@ class TrackActiveFleetUseCaseTest {
     @Test
     fun `starts with fresh delay state for every collection`() = runTest {
         // Given
-        val service = FakeTelemetryStreamingService(listOf(telemetry(speedKph = 0.0)))
-        val notificationsFlow = TrackActiveFleetUseCase(service)(setOf("TRK-001"))
+        val repository = FakeTelemetryRepository(listOf(telemetry(speedKph = 0.0)))
+        val notificationsFlow = TrackActiveFleetUseCase(repository)(setOf("TRK-001"))
 
         // When
         val firstCollection = notificationsFlow.toList()
