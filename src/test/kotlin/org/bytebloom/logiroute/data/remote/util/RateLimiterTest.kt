@@ -1,5 +1,6 @@
 package org.bytebloom.logiroute.data.remote.util
 
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -8,11 +9,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
-import org.bytebloom.logiroute.data.remote.util.RateLimiter
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RateLimiterTest {
@@ -31,7 +29,7 @@ class RateLimiterTest {
     }
 
     @Test
-    fun `starts with a full bucket`() {
+    fun `should start with a full bucket`() {
         // Given
         val limiter = rateLimiter(capacity = 10)
 
@@ -39,11 +37,11 @@ class RateLimiterTest {
         val acquired = List(10) { limiter.tryAcquire() }
 
         // Then
-        assertTrue(acquired.all { it })
+        assertThat(acquired).containsExactlyElementsIn(List(10) { true })
     }
 
     @Test
-    fun `tryAcquire returns false immediately when the bucket is empty`() {
+    fun `should reject token immediately when bucket is empty`() {
         // Given
         val limiter = rateLimiter(capacity = 10)
         limiter.drain()
@@ -52,11 +50,11 @@ class RateLimiterTest {
         val acquired = limiter.tryAcquire()
 
         // Then
-        assertFalse(acquired)
+        assertThat(acquired).isFalse()
     }
 
     @Test
-    fun `refills tokens based on elapsed time`() {
+    fun `should refill one token when 200 milliseconds have passed`() {
         // Given
         val limiter = rateLimiter(capacity = 10, refillRatePerSecond = 5)
         limiter.drain()
@@ -67,11 +65,11 @@ class RateLimiterTest {
         val secondAttempt = limiter.tryAcquire()
 
         // Then
-        assertEquals(listOf(true, false), listOf(firstAttempt, secondAttempt))
+        assertThat(listOf(firstAttempt, secondAttempt)).containsExactly(true, false).inOrder()
     }
 
     @Test
-    fun `does not refill before a whole token has accumulated`() {
+    fun `should not refill when less than a whole token has accumulated`() {
         // Given
         val limiter = rateLimiter(capacity = 10, refillRatePerSecond = 5)
         limiter.drain()
@@ -81,11 +79,11 @@ class RateLimiterTest {
         val acquired = limiter.tryAcquire()
 
         // Then
-        assertFalse(acquired)
+        assertThat(acquired).isFalse()
     }
 
     @Test
-    fun `never refills above the bucket capacity`() {
+    fun `should not refill above bucket capacity when a long time has passed`() {
         // Given
         val limiter = rateLimiter(capacity = 10, refillRatePerSecond = 5)
         limiter.drain()
@@ -95,11 +93,11 @@ class RateLimiterTest {
         val acquiredCount = List(20) { limiter.tryAcquire() }.count { it }
 
         // Then
-        assertEquals(10, acquiredCount)
+        assertThat(acquiredCount).isEqualTo(10)
     }
 
     @Test
-    fun `acquire suspends until the next token is refilled`() = runTest {
+    fun `should wait for next token when acquiring from an empty bucket`() = runTest {
         // Given
         val limiter = RateLimiter(
             maxBucketCapacity = 1,
@@ -112,11 +110,11 @@ class RateLimiterTest {
         limiter.acquire()
 
         // Then
-        assertEquals(200L, currentTime)
+        assertThat(currentTime).isEqualTo(200L)
     }
 
     @Test
-    fun `acquire returns without waiting when a token is available`() = runTest {
+    fun `should acquire without waiting when a token is available`() = runTest {
         // Given
         val limiter = RateLimiter(nanoClock = { testScheduler.currentTime * 1_000_000L })
 
@@ -124,11 +122,11 @@ class RateLimiterTest {
         limiter.acquire()
 
         // Then
-        assertEquals(0L, currentTime)
+        assertThat(currentTime).isEqualTo(0L)
     }
 
     @Test
-    fun `hands out exactly the capacity under concurrent requests`() = runBlocking {
+    fun `should hand out exactly the capacity when requests are concurrent`() = runBlocking {
         // Given
         val limiter = rateLimiter(capacity = 10)
 
@@ -138,24 +136,24 @@ class RateLimiterTest {
         }
 
         // Then
-        assertEquals(10, results.count { it })
+        assertThat(results.count { it }).isEqualTo(10)
     }
 
     @Test
-    fun `rejects a non positive capacity`() {
+    fun `should throw illegal argument exception when capacity is not positive`() {
         // When
-        val result = runCatching { rateLimiter(capacity = 0) }
+        val action = { rateLimiter(capacity = 0) }
 
         // Then
-        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+        assertFailsWith<IllegalArgumentException> { action() }
     }
 
     @Test
-    fun `rejects a non positive refill rate`() {
+    fun `should throw illegal argument exception when refill rate is not positive`() {
         // When
-        val result = runCatching { rateLimiter(refillRatePerSecond = 0) }
+        val action = { rateLimiter(refillRatePerSecond = 0) }
 
         // Then
-        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+        assertFailsWith<IllegalArgumentException> { action() }
     }
 }

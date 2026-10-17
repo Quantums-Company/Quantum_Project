@@ -142,10 +142,11 @@ class ShipmentTrackerTest {
             val pkg = createPackage(id = "PKG-001")
             shipmentTracker.markAsDispatched(createOrder(pkg))
 
-            // When & Then
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipmentTracker.markAsDispatched(createOrder(pkg))
-            }
+            // When
+            val action = { shipmentTracker.markAsDispatched(createOrder(pkg)) }
+
+            // Then
+            assertFailsWith<IllegalShipmentTransitionException> { action() }
             assertThat(shipmentTracker.stateOf(pkg.id)).isInstanceOf(InTransitState::class.java)
         }
     }
