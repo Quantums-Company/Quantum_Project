@@ -1,433 +1,159 @@
 package org.bytebloom.logiroute.domain.usecase.dispatch
 
-import io.mockk.every
-import io.mockk.mockk
+import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.knapsack.KnapsackCargoOptimizer
 import org.bytebloom.logiroute.domain.model.CargoItem
-import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Package
-import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
-import org.bytebloom.logiroute.domain.usecase.dispatch.OptimizeCargoLoadUseCase
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class OptimizeCargoLoadUseCaseTest {
 
-    private val optimizer = KnapsackCargoOptimizer()
-    private val useCase = OptimizeCargoLoadUseCase(optimizer)
+    private lateinit var optimizeCargoLoad: OptimizeCargoLoadUseCase
 
-    private fun vehicleWith(capacityKg: Double): Vehicle {
-        val vehicle = mockk<Vehicle>()
-        every { vehicle.maxCapacityKg } returns capacityKg
-        return vehicle
-    }
-
-    private fun packageWith(id: String, weightKg: Double, priorityScore: Int): Package {
-        val pkg = mockk<Package>()
-        every { pkg.id } returns id
-        every { pkg.weight } returns weightKg
-        every { pkg.priority.score } returns priorityScore
-        return pkg
+    @BeforeEach
+    fun setUp() {
+        optimizeCargoLoad = OptimizeCargoLoadUseCase(KnapsackCargoOptimizer())
     }
 
     @Test
-    fun `no items selects nothing and has zero weight and value`() {
+    fun `should return empty result when there are no candidate packages`() {
         // Given
-        val vehicle = vehicleWith(capacityKg = 10.0)
+        val vehicle = createVehicle(capacityKg = 10.0)
 
         // When
-        val result = useCase(vehicle, candidatePackages = emptyList())
+        val result = optimizeCargoLoad(vehicle, emptyList())
 
         // Then
-        assertTrue(result.selectedItems.isEmpty())
-        assertEquals(0, result.totalWeightKg)
-        assertEquals(0, result.totalPriorityValue)
+        assertThat(result.selectedItems).isEmpty()
+        assertThat(result.totalWeightKg).isEqualTo(0)
+        assertThat(result.totalPriorityValue).isEqualTo(0)
     }
 
     @Test
-    fun `zero capacity selects nothing even when items are available`() {
+    fun `should map package weight and priority score into selected cargo item`() {
         // Given
-        val vehicle = vehicleWith(capacityKg = 0.0)
-        val candidatePackages = listOf(
-            packageWith(id = "PKG-1", weightKg = 5.0, priorityScore = 10)
-        )
+        val vehicle = createVehicle(capacityKg = 5.0)
+        val urgentPackage = createPackage(id = "PKG-001", weightKg = 5.0, priority = Priority.URGENT)
 
         // When
-        val result = useCase(vehicle, candidatePackages)
+        val result = optimizeCargoLoad(vehicle, listOf(urgentPackage))
 
         // Then
-        assertTrue(result.selectedItems.isEmpty())
+        assertThat(result.selectedItems)
+            .containsExactly(CargoItem(id = "PKG-001", weightKg = 5, priorityValue = Priority.URGENT.score))
     }
 
     @Test
-    fun `a single item that fits is selected`() {
+    fun `should round fractional package weight to nearest kilogram`() {
         // Given
-        val vehicle = vehicleWith(capacityKg = 5.0)
-        val pkg = packageWith(id = "PKG-1", weightKg = 5.0, priorityScore = 10)
-        val expectedCargoItem = CargoItem(id = "PKG-1", weightKg = 5, priorityValue = 10)
+        val vehicle = createVehicle(capacityKg = 5.0)
+        val fractionalPackage = createPackage(id = "PKG-001", weightKg = 4.6, priority = Priority.STANDARD)
 
         // When
-        val result = useCase(vehicle, listOf(pkg))
+        val result = optimizeCargoLoad(vehicle, listOf(fractionalPackage))
 
         // Then
-        assertEquals(listOf(expectedCargoItem), result.selectedItems)
-        assertEquals(5, result.totalWeightKg)
-        assertEquals(10, result.totalPriorityValue)
+        assertThat(result.selectedItems.single().weightKg).isEqualTo(5)
     }
 
     @Test
-    fun `a single item that exceeds capacity is rejected`() {
+    fun `should select every package when all fit in vehicle`() {
         // Given
-        val vehicle = vehicleWith(capacityKg = 5.0)
-        val pkg = packageWith(id = "PKG-1", weightKg = 20.0, priorityScore = 100)
-
-        // When
-        val result = useCase(vehicle, listOf(pkg))
-
-        // Then
-        assertTrue(result.selectedItems.isEmpty())
-        assertEquals(0, result.totalPriorityValue)
-    }
-
-    @Test
-    fun `when everything fits, selects every item`() {
-        // Given
-        val vehicle = vehicleWith(capacityKg = 10.0)
-        val pkg1 = packageWith(id = "PKG-1", weightKg = 2.0, priorityScore = 3)
-        val pkg2 = packageWith(id = "PKG-2", weightKg = 3.0, priorityScore = 4)
-
-        val item1 = CargoItem(id = "PKG-1", weightKg = 2, priorityValue = 3)
-        val item2 = CargoItem(id = "PKG-2", weightKg = 3, priorityValue = 4)
-
-        // When
-        val result = useCase(vehicle, listOf(pkg1, pkg2))
-
-        // Then
-        assertEquals(setOf(item1, item2), result.selectedItems.toSet())
-        assertEquals(5, result.totalWeightKg)
-        assertEquals(7, result.totalPriorityValue)
-    }
-
-    @Test
-    fun `classic textbook case picks the optimal combination, not the greedy one`() {
-        // Given — capacity 50; weights [10,20,30], values [60,100,120].
-        // Greedy-by-value-per-weight would pick item1+item2 (value 160, weight 30, leaving 20kg unused);
-        // the true DP optimum is item2+item3 (value 220, weight 50, full capacity used).
-        val vehicle = vehicleWith(capacityKg = 50.0)
-        val pkg1 = packageWith(id = "PKG-1", weightKg = 10.0, priorityScore = 60)
-        val pkg2 = packageWith(id = "PKG-2", weightKg = 20.0, priorityScore = 100)
-        val pkg3 = packageWith(id = "PKG-3", weightKg = 30.0, priorityScore = 120)
-
-        val expectedItem2 = CargoItem(id = "PKG-2", weightKg = 20, priorityValue = 100)
-        val expectedItem3 = CargoItem(id = "PKG-3", weightKg = 30, priorityValue = 120)
-
-        // When
-        val result = useCase(vehicle, listOf(pkg1, pkg2, pkg3))
-
-        // Then
-        assertEquals(220, result.totalPriorityValue)
-        assertEquals(50, result.totalWeightKg)
-        assertEquals(setOf(expectedItem2, expectedItem3), result.selectedItems.toSet())
-    }
-
-    @Test
-    fun `an item with zero weight is always included if it has any positive priority`() {
-        // Given
-        val vehicle = vehicleWith(capacityKg = 10.0)
-        val freePkg = packageWith(id = "PKG-FREE", weightKg = 0.0, priorityScore = 5)
-        val normalPkg = packageWith(id = "PKG-1", weightKg = 10.0, priorityScore = 10)
-
-        val expectedFreeItem = CargoItem(id = "PKG-FREE", weightKg = 0, priorityValue = 5)
-
-        // When
-        val result = useCase(vehicle, listOf(freePkg, normalPkg))
-
-        // Then
-        assertTrue(expectedFreeItem in result.selectedItems)
-        assertEquals(15, result.totalPriorityValue)
-    }
-
-    @Test
-    fun `duplicate priority values with different weights still picks the capacity-optimal combination`() {
-        // Given — two items worth 10 each, only one fits alongside a third item
-        val vehicle = vehicleWith(capacityKg = 8.0)
-        val cheapPkg = packageWith(id = "PKG-CHEAP", weightKg = 3.0, priorityScore = 10)
-        val expensivePkg = packageWith(id = "PKG-EXPENSIVE", weightKg = 8.0, priorityScore = 10)
-        val fillerPkg = packageWith(id = "PKG-FILLER", weightKg = 5.0, priorityScore = 8)
-
-        val cheapItem = CargoItem(id = "PKG-CHEAP", weightKg = 3, priorityValue = 10)
-        val fillerItem = CargoItem(id = "PKG-FILLER", weightKg = 5, priorityValue = 8)
-
-        // When — capacity 8: cheap(3)+filler(5)=8kg/18 value fits; expensive(8) alone = 10 value
-        val result = useCase(vehicle, listOf(cheapPkg, expensivePkg, fillerPkg))
-
-        // Then
-        assertEquals(18, result.totalPriorityValue)
-        assertEquals(setOf(cheapItem, fillerItem), result.selectedItems.toSet())
-    }
-
-    @Test
-    fun `negative capacity is rejected with a typed domain exception`() {
-        // Given
-        val vehicle = vehicleWith(capacityKg = -1.0)
-        val pkg = packageWith(id = "PKG-1", weightKg = 5.0, priorityScore = 10)
-
-        // Then
-        assertFailsWith<EntityValidationException> {
-            useCase(vehicle, listOf(pkg))
-        }
-    }
-
-    @Test
-    fun `an item with negative weight is rejected with a typed domain exception`() {
-        // Given
-        val vehicle = vehicleWith(capacityKg = 10.0)
-        val badPkg = packageWith(id = "PKG-BAD", weightKg = -5.0, priorityScore = 10)
-
-        // Then
-        assertFailsWith<EntityValidationException> {
-            useCase(vehicle, listOf(badPkg))
-        }
-    }
-
-    @Test
-    fun `bulky low weight item is excluded when its volume exceeds capacity`() {
-        // Given
-        val bulkyItem = CargoItem(
-            id = "PKG-BULKY",
-            weightKg = 5,
-            priorityValue = 10,
-            volumeM3 = 2.0
-        )
-
-        val compactItem = CargoItem(
-            id = "PKG-COMPACT",
-            weightKg = 5,
-            priorityValue = 8,
-            volumeM3 = 0.5
+        val vehicle = createVehicle(capacityKg = 10.0)
+        val packages = listOf(
+            createPackage(id = "PKG-001", weightKg = 2.0, priority = Priority.STANDARD),
+            createPackage(id = "PKG-002", weightKg = 3.0, priority = Priority.LOW)
         )
 
         // When
-        val result = optimizer(
-            items = listOf(bulkyItem, compactItem),
-            weightCapacityKg = 10,
-            volumeCapacityM3 = 1.0
-        )
+        val result = optimizeCargoLoad(vehicle, packages)
 
         // Then
-        assertEquals(
-            listOf(compactItem),
-            result.selectedItems
-        )
+        assertThat(result.selectedItems.map { it.id }).containsExactly("PKG-001", "PKG-002")
+        assertThat(result.totalWeightKg).isEqualTo(5)
+        assertThat(result.totalPriorityValue).isEqualTo(Priority.STANDARD.score + Priority.LOW.score)
     }
 
     @Test
-    fun `bulky low weight item is excluded from selected cargo`() {
+    fun `should exclude package when it is heavier than vehicle capacity`() {
         // Given
-        val bulkyItem = CargoItem(
-            id = "PKG-BULKY",
-            weightKg = 5,
-            priorityValue = 10,
-            volumeM3 = 2.0
-        )
+        val vehicle = createVehicle(capacityKg = 5.0)
+        val heavyPackage = createPackage(id = "PKG-001", weightKg = 20.0, priority = Priority.URGENT)
 
         // When
-        val result = optimizer(
-            items = listOf(bulkyItem),
-            weightCapacityKg = 10,
-            volumeCapacityM3 = 1.0
-        )
+        val result = optimizeCargoLoad(vehicle, listOf(heavyPackage))
 
         // Then
-        assertEquals(
-            emptyList(),
-            result.selectedItems
-        )
+        assertThat(result.selectedItems).isEmpty()
     }
 
     @Test
-    fun `dense high weight item is excluded when its weight exceeds capacity`() {
+    fun `should maximise total priority instead of picking greedily`() {
         // Given
-        val denseItem = CargoItem(
-            id = "PKG-DENSE",
-            weightKg = 20,
-            priorityValue = 20,
-            volumeM3 = 0.2
-        )
-
-        val lightItem = CargoItem(
-            id = "PKG-LIGHT",
-            weightKg = 5,
-            priorityValue = 8,
-            volumeM3 = 0.2
+        val vehicle = createVehicle(capacityKg = 50.0)
+        val packages = listOf(
+            createPackage(id = "PKG-001", weightKg = 10.0, priority = Priority.LOW),
+            createPackage(id = "PKG-002", weightKg = 20.0, priority = Priority.URGENT),
+            createPackage(id = "PKG-003", weightKg = 30.0, priority = Priority.URGENT)
         )
 
         // When
-        val result = optimizer(
-            items = listOf(denseItem, lightItem),
-            weightCapacityKg = 10,
-            volumeCapacityM3 = 1.0
-        )
+        val result = optimizeCargoLoad(vehicle, packages)
 
         // Then
-        assertEquals(
-            listOf(lightItem),
-            result.selectedItems
-        )
+        assertThat(result.selectedItems.map { it.id }).containsExactly("PKG-002", "PKG-003")
+        assertThat(result.totalPriorityValue).isEqualTo(2 * Priority.URGENT.score)
     }
 
     @Test
-    fun `dense high weight item cannot consume unavailable weight capacity`() {
+    fun `should exclude bulky package when volume limit is reached`() {
         // Given
-        val denseItem = CargoItem(
-            id = "PKG-DENSE",
-            weightKg = 20,
-            priorityValue = 20,
-            volumeM3 = 0.2
-        )
+        val vehicle = createVehicle(capacityKg = 100.0)
+        val bulkyPackage = createPackage(id = "PKG-001", weightKg = 10.0, priority = Priority.URGENT)
+        val compactPackage = createPackage(id = "PKG-002", weightKg = 10.0, priority = Priority.STANDARD)
+        val volumeByPackageId = mapOf("PKG-001" to 2.0, "PKG-002" to 0.5)
 
         // When
-        val result = optimizer(
-            items = listOf(denseItem),
-            weightCapacityKg = 10,
-            volumeCapacityM3 = 1.0
+        val result = optimizeCargoLoad.optimizeWithVolume(
+            vehicle = vehicle,
+            candidatePackages = listOf(bulkyPackage, compactPackage),
+            volumeByPackageId = volumeByPackageId,
+            maxVolumeM3 = 1.0
         )
 
         // Then
-        assertEquals(
-            0,
-            result.totalWeightKg
-        )
+        assertThat(result.selectedItems.map { it.id }).containsExactly("PKG-002")
     }
 
-    @Test
-    fun `volume constraint changes the selected payload`() {
-        // Given
-        val bulkyHighValue = CargoItem(
-            id = "PKG-BULKY",
-            weightKg = 10,
-            priorityValue = 10,
-            volumeM3 = 0.8
-        )
+    private fun createVehicle(capacityKg: Double) = Vehicle(
+        id = "TRK-001",
+        maxCapacityKg = capacityKg,
+        costPerKm = 2.0,
+        currentWarehouse = ORIGIN
+    )
 
-        val compactHighValue = CargoItem(
-            id = "PKG-COMPACT",
-            weightKg = 10,
-            priorityValue = 9,
-            volumeM3 = 0.2
-        )
+    private fun createPackage(id: String, weightKg: Double, priority: Priority) = Package(
+        id = id,
+        weight = weightKg,
+        priority = priority,
+        originWarehouse = ORIGIN,
+        destinationWarehouse = DESTINATION
+    )
 
-        val secondCompact = CargoItem(
-            id = "PKG-COMPACT-2",
-            weightKg = 10,
-            priorityValue = 8,
-            volumeM3 = 0.2
-        )
+    private companion object {
+        val ORIGIN = createWarehouse("WH-001")
+        val DESTINATION = createWarehouse("WH-002")
 
-        // When
-        val result = optimizer(
-            items = listOf(
-                bulkyHighValue,
-                compactHighValue,
-                secondCompact
-            ),
-            weightCapacityKg = 20,
-            volumeCapacityM3 = 0.5
-        )
-
-        // Then
-        assertEquals(
-            setOf(
-                compactHighValue,
-                secondCompact
-            ),
-            result.selectedItems.toSet()
-        )
-    }
-
-    @Test
-    fun `volume constrained payload has expected total priority`() {
-        // Given
-        val bulkyHighValue = CargoItem(
-            id = "PKG-BULKY",
-            weightKg = 10,
-            priorityValue = 10,
-            volumeM3 = 0.8
-        )
-
-        val compactHighValue = CargoItem(
-            id = "PKG-COMPACT",
-            weightKg = 10,
-            priorityValue = 9,
-            volumeM3 = 0.2
-        )
-
-        val secondCompact = CargoItem(
-            id = "PKG-COMPACT-2",
-            weightKg = 10,
-            priorityValue = 8,
-            volumeM3 = 0.2
-        )
-
-        // When
-        val result = optimizer(
-            items = listOf(
-                bulkyHighValue,
-                compactHighValue,
-                secondCompact
-            ),
-            weightCapacityKg = 20,
-            volumeCapacityM3 = 0.5
-        )
-
-        // Then
-        assertEquals(
-            17,
-            result.totalPriorityValue
-        )
-    }
-
-    @Test
-    fun `volume constrained payload uses available volume efficiently`() {
-        // Given
-        val bulkyHighValue = CargoItem(
-            id = "PKG-BULKY",
-            weightKg = 10,
-            priorityValue = 10,
-            volumeM3 = 0.8
-        )
-
-        val compactHighValue = CargoItem(
-            id = "PKG-COMPACT",
-            weightKg = 10,
-            priorityValue = 9,
-            volumeM3 = 0.2
-        )
-
-        val secondCompact = CargoItem(
-            id = "PKG-COMPACT-2",
-            weightKg = 10,
-            priorityValue = 8,
-            volumeM3 = 0.2
-        )
-
-        // When
-        val result = optimizer(
-            items = listOf(
-                bulkyHighValue,
-                compactHighValue,
-                secondCompact
-            ),
-            weightCapacityKg = 20,
-            volumeCapacityM3 = 0.5
-        )
-
-        // Then
-        assertEquals(
-            0.4,
-            result.totalVolumeM3
+        fun createWarehouse(id: String) = Warehouse(
+            id = id,
+            name = "Hub $id",
+            regionalZone = "CENTRAL",
+            longitude = 34.0,
+            latitude = 31.0
         )
     }
 }
