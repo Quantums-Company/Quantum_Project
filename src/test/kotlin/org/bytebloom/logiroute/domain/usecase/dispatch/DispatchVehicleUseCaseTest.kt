@@ -146,7 +146,7 @@ class DispatchVehicleUseCaseTest {
     }
 
     @Test
-    fun `a vehicle can always carry zero weight`() {
+    fun `should allow vehicle to carry zero weight`() {
         // Given
         val vehicle = createVehicle(maxCapacityKg = 100.0)
 
@@ -159,7 +159,7 @@ class DispatchVehicleUseCaseTest {
 
     private fun queuePackages(weights: List<Double>, firstId: Int = 1): List<Package> =
         weights.mapIndexed { index, weight ->
-            createPackage(id = "PKG-%03d".format(firstId + index), weight = weight)
+            createPackage(id = "PKG-" + (firstId + index).toString().padStart(3, '0'), weight = weight)
         }.onEach(warehouse::addPackage)
 
     private fun createPackage(id: String, weight: Double) = Package(
