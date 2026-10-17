@@ -1,7 +1,6 @@
-package org.bytebloom.logiroute.data.repository.telemetry
+package org.bytebloom.logiroute.data.telemetry
 
 import kotlinx.coroutines.flow.Flow
-import org.bytebloom.logiroute.data.source.telemetry.TelemetryDataSource
 import org.bytebloom.logiroute.domain.model.VehicleTelemetry
 import org.bytebloom.logiroute.domain.repository.TelemetryRepository
 

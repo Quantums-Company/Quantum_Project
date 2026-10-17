@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.data.repository.offline
+package org.bytebloom.logiroute.data.offline.repository
 
 import org.bytebloom.logiroute.data.csv.cache.CsvSnapshotStore
 import org.bytebloom.logiroute.data.offline.OfflineReadExecutor

@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.data.repository.training
+package org.bytebloom.logiroute.data.training
 
 import org.bytebloom.logiroute.domain.knn.toCargoFeatures
 import org.bytebloom.logiroute.domain.model.Package

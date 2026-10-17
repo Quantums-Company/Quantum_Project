@@ -1,10 +1,9 @@
-package org.bytebloom.logiroute.data.local.telemetry
+package org.bytebloom.logiroute.data.telemetry
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.bytebloom.logiroute.domain.model.VehicleTelemetry
-import org.bytebloom.logiroute.data.source.telemetry.TelemetryDataSource
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
