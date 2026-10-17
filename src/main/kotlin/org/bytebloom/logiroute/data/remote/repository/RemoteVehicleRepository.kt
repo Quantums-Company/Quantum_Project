@@ -1,10 +1,10 @@
-package org.bytebloom.logiroute.data.repository.remote
+package org.bytebloom.logiroute.data.remote.repository
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import org.bytebloom.logiroute.data.remote.dto.vehicleDto.VehicleRequestDto
+import org.bytebloom.logiroute.data.remote.dto.VehicleRequestDto
 import org.bytebloom.logiroute.data.remote.mapper.VehicleDtoMapper
-import org.bytebloom.logiroute.data.source.remote.VehicleRemoteDataSource
+import org.bytebloom.logiroute.data.remote.datasource.VehicleRemoteDataSource
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository

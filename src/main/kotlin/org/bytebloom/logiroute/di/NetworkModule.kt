@@ -8,10 +8,10 @@ import org.bytebloom.logiroute.data.remote.datasource.SdkRouteDataSource
 import org.bytebloom.logiroute.data.remote.datasource.SdkVehicleDataSource
 import org.bytebloom.logiroute.data.remote.datasource.SdkWarehouseDataSource
 import org.bytebloom.logiroute.data.remote.util.RemoteExecutor
-import org.bytebloom.logiroute.data.source.remote.PackageRemoteDataSource
-import org.bytebloom.logiroute.data.source.remote.RouteRemoteDataSource
-import org.bytebloom.logiroute.data.source.remote.VehicleRemoteDataSource
-import org.bytebloom.logiroute.data.source.remote.WarehouseRemoteDataSource
+import org.bytebloom.logiroute.data.remote.datasource.PackageRemoteDataSource
+import org.bytebloom.logiroute.data.remote.datasource.RouteRemoteDataSource
+import org.bytebloom.logiroute.data.remote.datasource.VehicleRemoteDataSource
+import org.bytebloom.logiroute.data.remote.datasource.WarehouseRemoteDataSource
 import org.koin.dsl.module
 import org.bytebloom.logiroute.data.remote.util.RateLimiter
 

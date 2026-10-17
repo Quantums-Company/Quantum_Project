@@ -1,6 +1,6 @@
 package org.bytebloom.logiroute.data.remote.mapper
 
-import org.bytebloom.logiroute.data.remote.dto.routeDto.RouteResponseDto
+import org.bytebloom.logiroute.data.remote.dto.RouteResponseDto
 import org.bytebloom.logiroute.domain.model.Route
 import org.bytebloom.logiroute.domain.model.Warehouse
 

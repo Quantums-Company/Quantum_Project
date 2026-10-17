@@ -4,10 +4,9 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import org.bytebloom.logiroute.data.remote.dto.warehouseDto.WarehouseRequestDto
-import org.bytebloom.logiroute.data.remote.dto.warehouseDto.WarehouseResponseDto
+import org.bytebloom.logiroute.data.remote.dto.WarehouseRequestDto
+import org.bytebloom.logiroute.data.remote.dto.WarehouseResponseDto
 import org.bytebloom.logiroute.data.remote.util.RemoteExecutor
-import org.bytebloom.logiroute.data.source.remote.WarehouseRemoteDataSource
 
 class SdkWarehouseDataSource(
     private val client: SupabaseClient,

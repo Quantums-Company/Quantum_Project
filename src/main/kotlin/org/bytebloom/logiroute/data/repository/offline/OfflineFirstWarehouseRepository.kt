@@ -3,7 +3,7 @@ package org.bytebloom.logiroute.data.repository.offline
 import org.bytebloom.logiroute.data.csv.cache.CsvSnapshotStore
 import org.bytebloom.logiroute.data.offline.OfflineReadExecutor
 import org.bytebloom.logiroute.data.csv.repository.CsvWarehouseRepository
-import org.bytebloom.logiroute.data.repository.remote.RemoteWarehouseRepository
+import org.bytebloom.logiroute.data.remote.repository.RemoteWarehouseRepository
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 

@@ -1,8 +1,8 @@
-package org.bytebloom.logiroute.data.repository.remote
+package org.bytebloom.logiroute.data.remote.repository
 
-import org.bytebloom.logiroute.data.remote.dto.packageDto.PackageRequestDto
+import org.bytebloom.logiroute.data.remote.dto.PackageRequestDto
 import org.bytebloom.logiroute.data.remote.mapper.PackageDtoMapper
-import org.bytebloom.logiroute.data.source.remote.PackageRemoteDataSource
+import org.bytebloom.logiroute.data.remote.datasource.PackageRemoteDataSource
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository

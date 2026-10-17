@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.data.source.remote
+package org.bytebloom.logiroute.data.remote.datasource
 
 interface RemoteDataSource<Response, Request> {
     suspend fun loadAll(): List<Response>

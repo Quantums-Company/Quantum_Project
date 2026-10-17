@@ -10,10 +10,10 @@ import org.bytebloom.logiroute.data.repository.offline.OfflineFirstPackageReposi
 import org.bytebloom.logiroute.data.repository.offline.OfflineFirstRouteRepository
 import org.bytebloom.logiroute.data.repository.offline.OfflineFirstVehicleRepository
 import org.bytebloom.logiroute.data.repository.offline.OfflineFirstWarehouseRepository
-import org.bytebloom.logiroute.data.repository.remote.RemotePackageRepository
-import org.bytebloom.logiroute.data.repository.remote.RemoteRouteRepository
-import org.bytebloom.logiroute.data.repository.remote.RemoteVehicleRepository
-import org.bytebloom.logiroute.data.repository.remote.RemoteWarehouseRepository
+import org.bytebloom.logiroute.data.remote.repository.RemotePackageRepository
+import org.bytebloom.logiroute.data.remote.repository.RemoteRouteRepository
+import org.bytebloom.logiroute.data.remote.repository.RemoteVehicleRepository
+import org.bytebloom.logiroute.data.remote.repository.RemoteWarehouseRepository
 import org.bytebloom.logiroute.data.repository.training.PackageHistoryTrainingCargoRepository
 import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.repository.RouteRepository

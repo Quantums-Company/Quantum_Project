@@ -12,10 +12,10 @@ import org.bytebloom.logiroute.data.csv.mapper.VehicleMapper
 import org.bytebloom.logiroute.data.csv.mapper.WarehouseReferenceMapper
 import org.bytebloom.logiroute.data.csv.mapper.toDomain
 import org.bytebloom.logiroute.data.remote.datasource.TableName
-import org.bytebloom.logiroute.data.remote.dto.packageDto.PackageRequestDto
-import org.bytebloom.logiroute.data.remote.dto.routeDto.RouteRequestDto
-import org.bytebloom.logiroute.data.remote.dto.vehicleDto.VehicleRequestDto
-import org.bytebloom.logiroute.data.remote.dto.warehouseDto.WarehouseRequestDto
+import org.bytebloom.logiroute.data.remote.dto.PackageRequestDto
+import org.bytebloom.logiroute.data.remote.dto.RouteRequestDto
+import org.bytebloom.logiroute.data.remote.dto.VehicleRequestDto
+import org.bytebloom.logiroute.data.remote.dto.WarehouseRequestDto
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Route
 import org.bytebloom.logiroute.domain.model.Vehicle

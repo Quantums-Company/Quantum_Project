@@ -1,10 +1,10 @@
-package org.bytebloom.logiroute.data.remote.dto.packageDto
+package org.bytebloom.logiroute.data.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PackageResponseDto(
+data class PackageRequestDto(
     @SerialName("id")
     val id: String = "",
     @SerialName("weight")
@@ -15,8 +15,6 @@ data class PackageResponseDto(
     val destinationWarehouseId: String = "",
     @SerialName("priority")
     val priority: String = "",
-    @SerialName("created_at")
-    val createdAt: String? = null,
     @SerialName("updated_at")
-    val updatedAt: String? = null
+    val updatedAt: String = ""
 )

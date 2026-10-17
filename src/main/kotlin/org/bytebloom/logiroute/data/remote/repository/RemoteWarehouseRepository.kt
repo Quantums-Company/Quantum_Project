@@ -1,10 +1,8 @@
-package org.bytebloom.logiroute.data.repository.remote
+package org.bytebloom.logiroute.data.remote.repository
 
-import org.bytebloom.logiroute.data.remote.dto.warehouseDto.WarehouseRequestDto
-import org.bytebloom.logiroute.data.remote.dto.warehouseDto.WarehouseResponseDto
-import org.bytebloom.logiroute.data.remote.mapper.EntityMapper
+import org.bytebloom.logiroute.data.remote.dto.WarehouseRequestDto
 import org.bytebloom.logiroute.data.remote.mapper.WarehouseDtoMapper
-import org.bytebloom.logiroute.data.source.remote.WarehouseRemoteDataSource
+import org.bytebloom.logiroute.data.remote.datasource.WarehouseRemoteDataSource
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import java.time.Instant

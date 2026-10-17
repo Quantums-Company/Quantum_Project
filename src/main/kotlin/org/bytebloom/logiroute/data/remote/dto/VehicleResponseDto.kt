@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.data.remote.dto.vehicleDto
+package org.bytebloom.logiroute.data.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

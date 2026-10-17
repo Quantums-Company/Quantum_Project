@@ -4,10 +4,9 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import org.bytebloom.logiroute.data.remote.dto.routeDto.RouteRequestDto
-import org.bytebloom.logiroute.data.remote.dto.routeDto.RouteResponseDto
+import org.bytebloom.logiroute.data.remote.dto.RouteRequestDto
+import org.bytebloom.logiroute.data.remote.dto.RouteResponseDto
 import org.bytebloom.logiroute.data.remote.util.RemoteExecutor
-import org.bytebloom.logiroute.data.source.remote.RouteRemoteDataSource
 
 class SdkRouteDataSource(
     private val client: SupabaseClient,
