@@ -1,11 +1,11 @@
 package org.bytebloom.logiroute.architecture
 
+import com.google.common.truth.Truth.assertThat
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.architecture.KoArchitectureCreator.assertArchitecture
 import com.lemonappdev.konsist.api.architecture.Layer
 import com.lemonappdev.konsist.api.ext.list.withNameEndingWith
 import com.lemonappdev.konsist.api.ext.list.withPackage
-import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlinx.serialization.Serializable
 import org.junit.jupiter.api.Test
 
@@ -18,72 +18,117 @@ class CleanArchitectureTest {
     private val diLayer by lazy { Layer("di", "org.bytebloom.logiroute.di..") }
 
     @Test
-    fun `clean architecture layers have correct dependencies`() {
-        scope.assertArchitecture {
-            presentationLayer.dependsOn(domainLayer, diLayer)
-            diLayer.dependsOn(domainLayer, dataLayer)
-            dataLayer.dependsOn(domainLayer)
-            domainLayer.dependsOnNothing()
-        }
+    fun `should keep correct dependencies between clean architecture layers`() {
+        // Given
+        val productionScope = scope
+
+        // When
+        val violation = runCatching {
+            productionScope.assertArchitecture {
+                presentationLayer.dependsOn(domainLayer, diLayer)
+                diLayer.dependsOn(domainLayer, dataLayer)
+                dataLayer.dependsOn(domainLayer)
+                domainLayer.dependsOnNothing()
+            }
+        }.exceptionOrNull()
+
+        // Then
+        assertThat(violation).isNull()
     }
 
     @Test
-    fun `domain layer must not import third party libraries`() {
-        scope
-            .files
-            .withPackage("org.bytebloom.logiroute.domain..")
-            .assertTrue { file ->
-                file.imports.none { import ->
+    fun `should not import third party libraries in domain layer`() {
+        // Given
+        val domainFiles = scope.files.withPackage("org.bytebloom.logiroute.domain..")
+
+        // When
+        val filesWithThirdPartyImports = domainFiles
+            .filter { file ->
+                file.imports.any { import ->
                     import.name.contains("supabase") ||
                             import.name.contains("postgrest") ||
                             import.name.contains("sql")
                 }
             }
+            .map { it.name }
+
+        // Then
+        assertThat(filesWithThirdPartyImports).isEmpty()
     }
 
     @Test
-    fun `use case classes must end with UseCase suffix`() {
-        scope
-            .classes()
-            .withPackage("org.bytebloom.logiroute.domain.usecase..")
-            .assertTrue { it.hasNameEndingWith("UseCase") }
+    fun `should end use case class names with UseCase suffix`() {
+        // Given
+        val useCaseClasses = scope.classes().withPackage("org.bytebloom.logiroute.domain.usecase..")
+
+        // When
+        val invalidClassNames = useCaseClasses
+            .filterNot { it.hasNameEndingWith("UseCase") }
+            .map { it.name }
+
+        // Then
+        assertThat(invalidClassNames).isEmpty()
     }
 
     @Test
-    fun `validator classes must end with Validator suffix`() {
-        scope
-            .classes()
-            .withPackage("org.bytebloom.logiroute.domain.validator..")
-            .assertTrue { it.hasNameEndingWith("Validator") }
+    fun `should end validator class names with Validator suffix`() {
+        // Given
+        val validatorClasses = scope.classes().withPackage("org.bytebloom.logiroute.domain.validator..")
+
+        // When
+        val invalidClassNames = validatorClasses
+            .filterNot { it.hasNameEndingWith("Validator") }
+            .map { it.name }
+
+        // Then
+        assertThat(invalidClassNames).isEmpty()
     }
 
     @Test
-    fun `invoke functions inside use cases must have operator modifier`() {
-        scope
-            .classes()
-            .withNameEndingWith("UseCase")
-            .assertTrue {
+    fun `should mark invoke function as public operator in every use case`() {
+        // Given
+        val useCaseClasses = scope.classes().withNameEndingWith("UseCase")
+
+        // When
+        val invalidClassNames = useCaseClasses
+            .filterNot {
                 it.hasFunction { function ->
                     function.name == "invoke" &&
                             function.hasPublicOrDefaultModifier &&
                             function.hasOperatorModifier
                 }
             }
+            .map { it.name }
+
+        // Then
+        assertThat(invalidClassNames).isEmpty()
     }
 
     @Test
-    fun `dto classes must end with Dto suffix`() {
-        scope
-            .classes()
-            .withPackage("org.bytebloom.logiroute.data.remote.dto..")
-            .assertTrue { it.hasNameEndingWith("Dto") }
+    fun `should end dto class names with Dto suffix`() {
+        // Given
+        val dtoClasses = scope.classes().withPackage("org.bytebloom.logiroute.data.remote.dto..")
+
+        // When
+        val invalidClassNames = dtoClasses
+            .filterNot { it.hasNameEndingWith("Dto") }
+            .map { it.name }
+
+        // Then
+        assertThat(invalidClassNames).isEmpty()
     }
 
     @Test
-    fun `dto classes must be annotated with Serializable`() {
-        scope
-            .classes()
-            .withPackage("org.bytebloom.logiroute.data.remote.dto..")
-            .assertTrue { it.hasAnnotationOf(Serializable::class) }
+    fun `should annotate every dto class with Serializable`() {
+        // Given
+        val dtoClasses = scope.classes().withPackage("org.bytebloom.logiroute.data.remote.dto..")
+
+        // When
+        val invalidClassNames = dtoClasses
+            .filterNot { it.hasAnnotationOf(Serializable::class) }
+            .map { it.name }
+
+        // Then
+        assertThat(invalidClassNames).isEmpty()
     }
 }

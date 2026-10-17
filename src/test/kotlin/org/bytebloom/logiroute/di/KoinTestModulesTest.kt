@@ -1,5 +1,6 @@
 package org.bytebloom.logiroute.di
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -9,6 +10,8 @@ import org.bytebloom.logiroute.domain.repository.RouteRepository
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import org.bytebloom.logiroute.domain.service.IdGenerator
+import org.bytebloom.logiroute.domain.usecase.packages.GetPackageByIdUseCase
+import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,9 +20,6 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
 
 class KoinTestModulesTest : KoinTest {
 
@@ -33,7 +33,7 @@ class KoinTestModulesTest : KoinTest {
         single<IdGenerator> { mockk() }
     }
 
-    private val getPackageById: org.bytebloom.logiroute.domain.usecase.packages.GetPackageByIdUseCase by inject()
+    private val getPackageById: GetPackageByIdUseCase by inject()
 
     private val trackActiveFleet: TrackActiveFleetUseCase by inject()
 
@@ -55,7 +55,7 @@ class KoinTestModulesTest : KoinTest {
     }
 
     @Test
-    fun `resolves use case from koin using a mocked repository`() = runTest {
+    fun `should resolve use case from koin using a mocked repository`() = runTest {
         // Given
         coEvery {
             packageRepository.getById("PKG-001")
@@ -65,19 +65,18 @@ class KoinTestModulesTest : KoinTest {
         val result = getPackageById("PKG-001")
 
         // Then
-        assertNull(result)
-
+        assertThat(result).isNull()
         coVerify(exactly = 1) {
             packageRepository.getById("PKG-001")
         }
     }
 
     @Test
-    fun `resolves telemetry tracking use case from koin`() {
+    fun `should resolve telemetry tracking use case from koin`() {
         // When
         val useCase = trackActiveFleet
 
         // Then
-        assertNotNull(useCase)
+        assertThat(useCase).isNotNull()
     }
 }
