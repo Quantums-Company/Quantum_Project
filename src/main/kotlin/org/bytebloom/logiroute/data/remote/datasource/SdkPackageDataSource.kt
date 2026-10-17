@@ -14,6 +14,15 @@ class SdkPackageDataSource(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : PackageRemoteDataSource {
 
+    private suspend fun fetchById(id: String): PackageResponseDto? =
+        client.from(TableName.PACKAGES)
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull<PackageResponseDto>()
+
     override suspend fun loadAll(): List<PackageResponseDto> =
         remoteExecutor.execute("getAll packages", ioDispatcher) {
             client.from(TableName.PACKAGES).select().decodeList<PackageResponseDto>()
@@ -21,20 +30,19 @@ class SdkPackageDataSource(
 
     override suspend fun loadById(id: String): PackageResponseDto? =
         remoteExecutor.execute("getById package '$id'", ioDispatcher) {
-            client.from(TableName.PACKAGES).select { filter { eq("id", id) } }.
-            decodeSingleOrNull<PackageResponseDto>()
+            fetchById(id)
         }
 
     override suspend fun create(request: PackageRequestDto): PackageResponseDto? =
         remoteExecutor.execute("create package '${request.id}'", ioDispatcher) {
             client.from(TableName.PACKAGES).insert(request)
-            loadById(request.id)
+            fetchById(request.id)
         }
 
     override suspend fun update(id: String, request: PackageRequestDto): PackageResponseDto? =
         remoteExecutor.execute("update package '$id'", ioDispatcher) {
             client.from(TableName.PACKAGES).update(request) { filter { eq("id", id) } }
-            loadById(id)
+            fetchById(id)
         }
 
     override suspend fun delete(id: String): Boolean =

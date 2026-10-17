@@ -14,6 +14,15 @@ class SdkRouteDataSource(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : RouteRemoteDataSource {
 
+    private suspend fun fetchById(id: String): RouteResponseDto? =
+        client.from(TableName.ROUTES)
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull<RouteResponseDto>()
+
     override suspend fun loadAll(): List<RouteResponseDto> =
         remoteExecutor.execute("getAll routes", ioDispatcher) {
             client.from(TableName.ROUTES).select().decodeList<RouteResponseDto>()
@@ -21,20 +30,19 @@ class SdkRouteDataSource(
 
     override suspend fun loadById(id: String): RouteResponseDto? =
         remoteExecutor.execute("getById route '$id'", ioDispatcher) {
-            client.from(TableName.ROUTES).select { filter { eq("id", id) } }.
-            decodeSingleOrNull<RouteResponseDto>()
+            fetchById(id)
         }
 
     override suspend fun create(request: RouteRequestDto): RouteResponseDto? =
         remoteExecutor.execute("create route '${request.id}'", ioDispatcher) {
             client.from(TableName.ROUTES).insert(request)
-            loadById(request.id)
+            fetchById(request.id)
         }
 
     override suspend fun update(id: String, request: RouteRequestDto): RouteResponseDto? =
         remoteExecutor.execute("update route '$id'", ioDispatcher) {
             client.from(TableName.ROUTES).update(request) { filter { eq("id", id) } }
-            loadById(id)
+            fetchById(id)
         }
 
     override suspend fun delete(id: String): Boolean =

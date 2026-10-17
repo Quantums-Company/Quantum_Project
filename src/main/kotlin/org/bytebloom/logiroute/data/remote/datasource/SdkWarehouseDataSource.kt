@@ -14,6 +14,15 @@ class SdkWarehouseDataSource(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : WarehouseRemoteDataSource {
 
+    private suspend fun fetchById(id: String): WarehouseResponseDto? =
+        client.from(TableName.WAREHOUSES)
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull<WarehouseResponseDto>()
+
     override suspend fun loadAll(): List<WarehouseResponseDto> =
         remoteExecutor.execute("getAll warehouses", ioDispatcher) {
             client.from(TableName.WAREHOUSES).select().decodeList<WarehouseResponseDto>()
@@ -21,20 +30,19 @@ class SdkWarehouseDataSource(
 
     override suspend fun loadById(id: String): WarehouseResponseDto? =
         remoteExecutor.execute("getById warehouse '$id'", ioDispatcher) {
-            client.from(TableName.WAREHOUSES).select { filter { eq("id", id) } }
-                .decodeSingleOrNull<WarehouseResponseDto>()
+            fetchById(id)
         }
 
     override suspend fun create(request: WarehouseRequestDto): WarehouseResponseDto? =
         remoteExecutor.execute("create warehouse '${request.id}'", ioDispatcher) {
             client.from(TableName.WAREHOUSES).insert(request)
-            loadById(request.id)
+            fetchById(request.id)
         }
 
     override suspend fun update(id: String, request: WarehouseRequestDto): WarehouseResponseDto? =
         remoteExecutor.execute("update warehouse '$id'", ioDispatcher) {
             client.from(TableName.WAREHOUSES).update(request) { filter { eq("id", id) } }
-            loadById(id)
+            fetchById(id)
         }
 
     override suspend fun delete(id: String): Boolean =
