@@ -1,129 +1,116 @@
 package org.bytebloom.logiroute.domain.usecase.dispatch
 
-import org.junit.jupiter.api.Test
+import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.dispatch.FindCargoRecoveryPlanUseCase
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class FindCargoRecoveryPlanUseCaseTest {
 
-    private val useCase = FindCargoRecoveryPlanUseCase()
+    private lateinit var findCargoRecoveryPlan: FindCargoRecoveryPlanUseCase
+    private lateinit var warehouse: Warehouse
+    private lateinit var failedVehicle: Vehicle
 
-    private fun warehouseWith(id: String = "WH-001") =
-        Warehouse(
+    @BeforeEach
+    fun setUp() {
+        findCargoRecoveryPlan = FindCargoRecoveryPlanUseCase()
+        warehouse = createWarehouse("WH-001")
+        failedVehicle = createVehicle("TRK-001")
+        warehouse.addVehicle(failedVehicle)
+    }
+
+    @Test
+    fun `should return null when warehouse has no packages`() {
+        // Given
+        warehouse.addVehicle(createVehicle("TRK-002"))
+
+        // When
+        val plan = findCargoRecoveryPlan(failedVehicle)
+
+        // Then
+        assertThat(plan).isNull()
+    }
+
+    @Test
+    fun `should return null when no healthy vehicle is available`() {
+        // Given
+        queuePackages(count = 1)
+
+        // When
+        val plan = findCargoRecoveryPlan(failedVehicle)
+
+        // Then
+        assertThat(plan).isNull()
+    }
+
+    @Test
+    fun `should assign affected packages to the only healthy vehicle when one is available`() {
+        // Given
+        val healthyVehicle = createVehicle("TRK-002")
+        warehouse.addVehicle(healthyVehicle)
+        queuePackages(count = 5)
+
+        // When
+        val plan = findCargoRecoveryPlan(failedVehicle)
+
+        // Then
+        assertThat(plan).isNotNull()
+        assertThat(plan!!.failedVehicleId).isEqualTo(failedVehicle.id)
+        assertThat(listOf(healthyVehicle.id)).containsAtLeastElementsIn(plan.rescueVehicleByPackageId.values)
+    }
+
+    @Test
+    fun `should never assign packages back to failed vehicle when several healthy vehicles exist`() {
+        // Given
+        val healthyOne = createVehicle("TRK-002")
+        val healthyTwo = createVehicle("TRK-003")
+        warehouse.addVehicle(healthyOne)
+        warehouse.addVehicle(healthyTwo)
+        queuePackages(count = 8)
+
+        // When
+        val plan = findCargoRecoveryPlan(failedVehicle)
+
+        // Then
+        assertThat(plan).isNotNull()
+        assertThat(plan!!.rescueVehicleByPackageId.values).doesNotContain(failedVehicle.id)
+        assertThat(listOf(healthyOne.id, healthyTwo.id))
+            .containsAtLeastElementsIn(plan.rescueVehicleByPackageId.values)
+    }
+
+    private fun queuePackages(count: Int) {
+        repeat(count) { index ->
+            warehouse.addPackage(createPackage(id = "PKG-" + (index + 1).toString().padStart(3, '0')))
+        }
+    }
+
+    private fun createVehicle(id: String) = Vehicle(
+        id = id,
+        maxCapacityKg = 500.0,
+        costPerKm = 2.0,
+        currentWarehouse = warehouse
+    )
+
+    private fun createPackage(id: String) = Package(
+        id = id,
+        weight = 10.0,
+        priority = Priority.STANDARD,
+        originWarehouse = warehouse,
+        destinationWarehouse = DESTINATION
+    )
+
+    private companion object {
+        val DESTINATION = createWarehouse("WH-002")
+
+        fun createWarehouse(id: String) = Warehouse(
             id = id,
-            name = "Hub",
-            regionalZone = "Central",
+            name = "Hub $id",
+            regionalZone = "CENTRAL",
             longitude = 34.0,
             latitude = 31.0
         )
-
-    private fun vehicleWith(id: String, warehouse: Warehouse) =
-        Vehicle(
-            id = id,
-            maxCapacityKg = 500.0,
-            costPerKm = 2.0,
-            currentWarehouse = warehouse
-        )
-
-    private fun packageWith(
-        id: String,
-        origin: Warehouse,
-        destination: Warehouse,
-        weight: Double = 10.0
-    ) = Package(
-        id = id,
-        weight = weight,
-        priority = Priority.STANDARD,
-        originWarehouse = origin,
-        destinationWarehouse = destination
-    )
-
-    @Test
-    fun `when the warehouse has no packages should return null without building a ring`() {
-        // Given
-        val warehouse = warehouseWith()
-        val failedVehicle = vehicleWith("TRK-001", warehouse)
-        val healthyVehicle = vehicleWith("TRK-002", warehouse)
-
-        warehouse.addVehicle(failedVehicle)
-        warehouse.addVehicle(healthyVehicle)
-
-        // When
-        val result = useCase(failedVehicle)
-
-        // Then
-        assertNull(result)
-    }
-
-    @Test
-    fun `when there is no other vehicle to recover to should return null`() {
-        // Given
-        val warehouse = warehouseWith()
-        val destination = warehouseWith("WH-002")
-        val failedVehicle = vehicleWith("TRK-001", warehouse)
-
-        warehouse.addVehicle(failedVehicle)
-        warehouse.addPackage(packageWith("PKG-001", warehouse, destination))
-
-        // When
-        val result = useCase(failedVehicle)
-
-        // Then
-        assertNull(result)
-    }
-
-    @Test
-    fun `should reroute affected packages to healthy vehicles avoiding the failed one`() {
-        // Given
-        val warehouse = warehouseWith()
-        val destination = warehouseWith("WH-002")
-        val failedVehicle = vehicleWith("TRK-001", warehouse)
-        val healthyVehicle = vehicleWith("TRK-002", warehouse)
-
-        warehouse.addVehicle(failedVehicle)
-        warehouse.addVehicle(healthyVehicle)
-
-        repeat(5) { index ->
-            warehouse.addPackage(packageWith("PKG-00$index", warehouse, destination))
-        }
-
-        // When
-        val result = useCase(failedVehicle)
-
-        // Then
-        assertNotNull(result, "Expected a recovery plan, got null")
-        assertEquals(failedVehicle.id, result.failedVehicleId)
-        assertTrue(result.rescueVehicleByPackageId.values.all { it == healthyVehicle.id })
-    }
-
-    @Test
-    fun `with multiple healthy vehicles, no rerouted package ever lands back on the failed vehicle`() {
-        // Given
-        val warehouse = warehouseWith()
-        val destination = warehouseWith("WH-002")
-        val failedVehicle = vehicleWith("TRK-001", warehouse)
-        val healthyOne = vehicleWith("TRK-002", warehouse)
-        val healthyTwo = vehicleWith("TRK-003", warehouse)
-
-        listOf(failedVehicle, healthyOne, healthyTwo).forEach(warehouse::addVehicle)
-
-        repeat(8) { index ->
-            warehouse.addPackage(packageWith("PKG-10$index", warehouse, destination, weight = 5.0))
-        }
-
-        // When
-        val result = useCase(failedVehicle)
-
-        // Then
-        assertNotNull(result) //
-        assertTrue(result.rescueVehicleByPackageId.values.none { it == failedVehicle.id })
-        assertTrue(result.rescueVehicleByPackageId.values.all { it == healthyOne.id || it == healthyTwo.id })
     }
 }
