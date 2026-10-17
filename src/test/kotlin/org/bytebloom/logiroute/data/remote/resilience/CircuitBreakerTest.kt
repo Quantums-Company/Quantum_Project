@@ -1,11 +1,11 @@
 package org.bytebloom.logiroute.data.remote.resilience
 
-import kotlinx.coroutines.runBlocking
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.data.remote.exception.CallNotPermittedException
 import java.io.IOException
 import java.time.Duration
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 
@@ -24,18 +24,22 @@ class CircuitBreakerTest {
     )
 
     @Test
-    fun `starts closed and allows successful calls`() = runBlocking {
+    fun `should start closed and allow successful calls`() = runTest {
+        // Given
         val breaker = createBreaker()
 
-        assertEquals(CircuitState.CLOSED, breaker.currentState)
-        assertEquals("OK", breaker.execute { "OK" })
-        assertEquals(CircuitState.CLOSED, breaker.currentState)
+        // When & Then
+        assertThat(breaker.currentState).isEqualTo(CircuitState.CLOSED)
+        assertThat(breaker.execute { "OK" }).isEqualTo("OK")
+        assertThat(breaker.currentState).isEqualTo(CircuitState.CLOSED)
     }
 
     @Test
-    fun `opens after five consecutive network failures`() = runBlocking {
+    fun `should open after five consecutive network failures`() = runTest {
+        // Given
         val breaker = createBreaker()
 
+        // When
         repeat(5) {
             assertFailsWith<IOException> {
                 breaker.execute<String> {
@@ -44,13 +48,14 @@ class CircuitBreakerTest {
             }
         }
 
-        assertEquals(CircuitState.OPEN, breaker.currentState)
+        // Then
+        assertThat(breaker.currentState).isEqualTo(CircuitState.OPEN)
     }
 
     @Test
-    fun `open circuit rejects calls without running block`() = runBlocking {
+    fun `should reject calls without running block when circuit is open`() = runTest {
+        // Given
         val breaker = createBreaker()
-
         repeat(5) {
             assertFailsWith<IOException> {
                 breaker.execute<String> {
@@ -58,9 +63,9 @@ class CircuitBreakerTest {
                 }
             }
         }
-
         var blockCalled = false
 
+        // When
         assertFailsWith<CallNotPermittedException> {
             breaker.execute {
                 blockCalled = true
@@ -68,13 +73,14 @@ class CircuitBreakerTest {
             }
         }
 
+        // Then
         assertFalse(blockCalled)
     }
 
     @Test
-    fun `successful probe closes circuit after five seconds`() = runBlocking {
+    fun `should close circuit after successful probe when open duration has passed`() = runTest {
+        // Given
         val breaker = createBreaker()
-
         repeat(5) {
             assertFailsWith<IOException> {
                 breaker.execute<String> {
@@ -82,17 +88,20 @@ class CircuitBreakerTest {
                 }
             }
         }
-
         nowNanos += Duration.ofSeconds(5).toNanos()
 
-        assertEquals("Recovered", breaker.execute { "Recovered" })
-        assertEquals(CircuitState.CLOSED, breaker.currentState)
+        // When
+        val result = breaker.execute { "Recovered" }
+
+        // Then
+        assertThat(result).isEqualTo("Recovered")
+        assertThat(breaker.currentState).isEqualTo(CircuitState.CLOSED)
     }
 
     @Test
-    fun `failed probe reopens circuit for another five seconds`() = runBlocking {
+    fun `should reopen circuit for another five seconds when probe fails`() = runTest {
+        // Given
         val breaker = createBreaker()
-
         repeat(5) {
             assertFailsWith<IOException> {
                 breaker.execute<String> {
@@ -100,16 +109,17 @@ class CircuitBreakerTest {
                 }
             }
         }
-
         nowNanos += Duration.ofSeconds(5).toNanos()
 
+        // When
         assertFailsWith<IOException> {
             breaker.execute<String> {
                 throw IOException("Probe failed")
             }
         }
 
-        assertEquals(CircuitState.OPEN, breaker.currentState)
+        // Then
+        assertThat(breaker.currentState).isEqualTo(CircuitState.OPEN)
 
         assertFailsWith<CallNotPermittedException> {
             breaker.execute { "Too early" }
@@ -117,14 +127,14 @@ class CircuitBreakerTest {
 
         nowNanos += Duration.ofSeconds(5).toNanos()
 
-        assertEquals("Recovered", breaker.execute { "Recovered" })
-        assertEquals(CircuitState.CLOSED, breaker.currentState)
+        assertThat(breaker.execute { "Recovered" }).isEqualTo("Recovered")
+        assertThat(breaker.currentState).isEqualTo(CircuitState.CLOSED)
     }
 
     @Test
-    fun `non network failure does not count toward threshold`() = runBlocking {
+    fun `should not count non network failure toward threshold`() = runTest {
+        // Given
         val breaker = createBreaker()
-
         repeat(4) {
             assertFailsWith<IOException> {
                 breaker.execute<String> {
@@ -133,13 +143,15 @@ class CircuitBreakerTest {
             }
         }
 
+        // When
         assertFailsWith<IllegalArgumentException> {
             breaker.execute<String> {
                 throw IllegalArgumentException("Invalid input")
             }
         }
 
-        assertEquals(CircuitState.CLOSED, breaker.currentState)
+        // Then
+        assertThat(breaker.currentState).isEqualTo(CircuitState.CLOSED)
 
         // The non-network failure resets the consecutive-failure streak.
         assertFailsWith<IOException> {
@@ -148,6 +160,6 @@ class CircuitBreakerTest {
             }
         }
 
-        assertEquals(CircuitState.CLOSED, breaker.currentState)
+        assertThat(breaker.currentState).isEqualTo(CircuitState.CLOSED)
     }
 }
