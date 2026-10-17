@@ -6,7 +6,8 @@ import kotlinx.coroutines.withContext
 import org.bytebloom.data.remote.client.SupabaseErrorTranslator
 
 class RemoteExecutor(
-    private val errorTranslator: SupabaseErrorTranslator
+    private val errorTranslator: SupabaseErrorTranslator,
+    private val rateLimiter: RateLimiter
 ) {
     suspend fun <T> execute(
         operation: String,
@@ -14,6 +15,7 @@ class RemoteExecutor(
         block: suspend () -> T
     ): T = withContext(dispatcher) {
         retryWithBackoff {
+            rateLimiter.acquire()
             errorTranslator.translate(operation, block)
         }.getOrThrow()
     }
