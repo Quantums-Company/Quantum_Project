@@ -2,7 +2,7 @@ package org.bytebloom.logiroute.domain.usecase.dispatch
 
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.result.CargoRecoveryPlan
-import org.bytebloom.logiroute.domain.vehicleReshuffling.ConsistentHashingRing
+import org.bytebloom.logiroute.domain.reshuffling.ConsistentHashingRing
 
 class FindCargoRecoveryPlanUseCase {
 

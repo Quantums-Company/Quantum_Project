@@ -12,7 +12,7 @@ import org.bytebloom.logiroute.domain.routing.bfs.BidirectionalBreadthFirstRoute
 import org.bytebloom.logiroute.domain.routing.dijkstra.DijkstraRouter
 import org.bytebloom.logiroute.domain.tree.binary.AVLTree
 import org.bytebloom.logiroute.domain.tree.binary.BST
-import org.bytebloom.logiroute.domain.tree.hierarchicalHub.HubTree
+import org.bytebloom.logiroute.domain.tree.hub.HubTree
 import org.bytebloom.logiroute.domain.usecase.analytics.AnalyzeTreePerformanceUseCase
 import org.bytebloom.logiroute.domain.usecase.crud.warehouses.TraceHubLineageUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.AddVehicleToHubUseCase
@@ -47,6 +47,7 @@ import org.bytebloom.logiroute.domain.usecase.crud.vehicles.FindStationedVehicle
 import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseLoadFactorUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.FindBackhaulOpportunityUseCase
 import org.bytebloom.logiroute.domain.usecase.classification.ClassifyPackageSectorUseCase
+import org.bytebloom.logiroute.domain.usecase.crud.routes.GetAllRoutesUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.OptimizeCargoLoadUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.FindCargoRecoveryPlanUseCase
 import org.bytebloom.logiroute.domain.usecase.pricing.CalculatePricingUseCase
@@ -83,7 +84,7 @@ val useCaseModule = module {
     factory { UpdatePackageUseCase(get(), get()) }
     factory { DeletePackageUseCase(get(), get()) }
 
-    factory { GetAllVehiclesUseCase(get()) }
+    factory { GetAllRoutesUseCase(get()) }
     factory { CreateRouteUseCase(get(), get()) }
     factory { GetRouteByIdUseCase(get(), get()) }
     factory { UpdateRouteUseCase(get(), get()) }

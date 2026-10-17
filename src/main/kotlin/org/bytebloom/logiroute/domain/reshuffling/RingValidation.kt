@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.domain.vehicleReshuffling
+package org.bytebloom.logiroute.domain.reshuffling
 
 data class VehicleValidation(
     val slot: Int,

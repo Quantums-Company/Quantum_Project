@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.domain.tree.hierarchicalHub
+package org.bytebloom.logiroute.domain.tree.hub
 
 import org.bytebloom.logiroute.domain.model.Warehouse
 

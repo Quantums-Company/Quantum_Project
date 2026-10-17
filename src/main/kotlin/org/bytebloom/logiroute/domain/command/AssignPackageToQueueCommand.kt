@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.domain.commandPattern
+package org.bytebloom.logiroute.domain.command
 
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Warehouse

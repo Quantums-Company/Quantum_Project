@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.domain.commandPattern
+package org.bytebloom.logiroute.domain.command
 
 class CommandInvoker {
 

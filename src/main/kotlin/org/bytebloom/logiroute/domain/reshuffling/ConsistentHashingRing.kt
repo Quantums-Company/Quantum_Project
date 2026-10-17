@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.domain.vehicleReshuffling
+package org.bytebloom.logiroute.domain.reshuffling
 
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Vehicle
