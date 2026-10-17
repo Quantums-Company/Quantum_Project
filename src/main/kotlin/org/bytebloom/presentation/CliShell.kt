@@ -22,7 +22,7 @@ import org.bytebloom.domain.repository.VehicleRepository
 import org.bytebloom.domain.repository.WarehouseRepository
 import org.bytebloom.domain.routing.WarehouseGraph
 import org.bytebloom.domain.routing.WarehouseGraphBuilder
-import org.bytebloom.domain.service.TelemetryStreamingService
+import org.bytebloom.domain.repository.TelemetryRepository
 import org.bytebloom.domain.usecase.queries.classification.ClassifyPackageSectorUseCase
 import org.bytebloom.domain.usecase.queries.routing.FindOptimalPathUseCase
 import org.bytebloom.domain.usecase.telemetry.TrackActiveFleetUseCase
@@ -40,7 +40,7 @@ class CliShell : KoinComponent {
     private val vehicleRepository: VehicleRepository by inject()
 
     private val classifyPackage: ClassifyPackageSectorUseCase by inject()
-    private val telemetryService: TelemetryStreamingService by inject()
+    private val telemetryRepository: TelemetryRepository by inject()
     private val trackActiveFleet: TrackActiveFleetUseCase by inject()
 
     fun start() = runBlocking {
@@ -267,7 +267,7 @@ class CliShell : KoinComponent {
         try {
             coroutineScope {
                 launch {
-                    telemetryService
+                    telemetryRepository
                         .streamTelemetry(vehicleIds.toList())
                         .collect { telemetry ->
                             println(

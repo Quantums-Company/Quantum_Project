@@ -166,7 +166,6 @@ val useCaseModule = module {
 
     factory {
         TrackActiveFleetUseCase(
-            telemetryStreamingService = get()
-        )
+            telemetryRepository = get()        )
     }
 }

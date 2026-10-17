@@ -1,9 +1,9 @@
-package org.bytebloom.domain.service
+package org.bytebloom.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import org.bytebloom.domain.model.VehicleTelemetry
 
-interface TelemetryStreamingService {
+interface TelemetryRepository {
 
     fun streamTelemetry(
         vehicleIds: List<String>
