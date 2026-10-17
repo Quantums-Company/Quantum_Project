@@ -1,156 +1,136 @@
 package org.bytebloom.logiroute.domain.usecase.dispatch
 
-import org.junit.jupiter.api.Test
+import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.dispatch.GreedyFleetDispatchUseCase
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class GreedyFleetDispatchUseCaseTest {
 
-    private val useCase = GreedyFleetDispatchUseCase()
-    private val homeWarehouse = Warehouse(
-        id = "WH-001",
-        name = "Hub",
-        regionalZone = "Central",
-        longitude = 34.0,
-        latitude = 31.0
-    )
+    private lateinit var greedyFleetDispatch: GreedyFleetDispatchUseCase
+    private lateinit var northCentralVehicle: Vehicle
+    private lateinit var centralSouthVehicle: Vehicle
+    private lateinit var southEastVehicle: Vehicle
+    private lateinit var fleet: List<Vehicle>
+    private lateinit var coverageOf: (Vehicle) -> Set<String>
 
-    private val vehicleA = Vehicle(
-        id = "TRK-001",
-        maxCapacityKg = 500.0,
-        costPerKm = 2.0,
-        currentWarehouse = homeWarehouse
-    )
-    private val vehicleB = Vehicle(
-        id = "TRK-002",
-        maxCapacityKg = 500.0,
-        costPerKm = 2.0,
-        currentWarehouse = homeWarehouse
-    )
-    private val vehicleC = Vehicle(
-        id = "TRK-003",
-        maxCapacityKg = 500.0,
-        costPerKm = 2.0,
-        currentWarehouse = homeWarehouse
-    )
+    @BeforeEach
+    fun setUp() {
+        greedyFleetDispatch = GreedyFleetDispatchUseCase()
+        northCentralVehicle = createVehicle("TRK-001")
+        centralSouthVehicle = createVehicle("TRK-002")
+        southEastVehicle = createVehicle("TRK-003")
+        fleet = listOf(northCentralVehicle, centralSouthVehicle, southEastVehicle)
 
-    private val coverage: Map<Vehicle, Set<String>> = mapOf(
-        vehicleA to setOf("NORTH", "CENTRAL"),
-        vehicleB to setOf("CENTRAL", "SOUTH"),
-        vehicleC to setOf("SOUTH", "EAST")
-    )
-    private val coverageOf: (Vehicle) -> Set<String> = { vehicle -> coverage[vehicle].orEmpty() }
+        val coverage = mapOf(
+            northCentralVehicle to setOf(NORTH, CENTRAL),
+            centralSouthVehicle to setOf(CENTRAL, SOUTH),
+            southEastVehicle to setOf(SOUTH, EAST)
+        )
+        coverageOf = { vehicle -> coverage[vehicle].orEmpty() }
+    }
 
     @Test
-    fun `selects the fewest vehicles that fully cover every target zone`() {
+    fun `should select fewest vehicles when they can fully cover all target zones`() {
         // Given
-        val targetZones = setOf("NORTH", "CENTRAL", "SOUTH", "EAST")
+        val targetZones = setOf(NORTH, CENTRAL, SOUTH, EAST)
 
         // When
-        val result = useCase(
-            targetZones,
-            listOf(vehicleA, vehicleB, vehicleC),
-            coverageOf
-        )
+        val result = greedyFleetDispatch(targetZones, fleet, coverageOf)
 
         // Then
-        assertTrue(result.isFullyCovered)
-        assertEquals(emptySet(), result.uncoveredZones)
-        assertEquals(targetZones, result.coveredZones)
-        assertEquals(2, result.selectedVehicles.size)
-        assertEquals(setOf(vehicleA, vehicleC), result.selectedVehicles.toSet())
+        assertThat(result.isFullyCovered).isTrue()
+        assertThat(result.coveredZones).isEqualTo(targetZones)
+        assertThat(result.selectedVehicles).containsExactly(northCentralVehicle, southEastVehicle)
     }
 
     @Test
-    fun `reports uncovered zones when no vehicle can reach them`() {
-        // Given — WEST is not covered by any vehicle in the fleet
-        val targetZones = setOf("NORTH", "CENTRAL", "WEST")
-
-        // When
-        val result = useCase(
-            targetZones,
-            listOf(vehicleA, vehicleB, vehicleC),
-            coverageOf
-        )
-
-        // Then
-        assertTrue(!result.isFullyCovered)
-        assertEquals(setOf("WEST"), result.uncoveredZones)
-        assertEquals(setOf("NORTH", "CENTRAL"), result.coveredZones)
-    }
-
-    @Test
-    fun `empty target zones selects no vehicles and is trivially fully covered`() {
-        // When
-        val result = useCase(
-            emptySet(),
-            listOf(vehicleA, vehicleB, vehicleC),
-            coverageOf
-        )
-
-        // Then
-        assertTrue(result.isFullyCovered)
-        assertTrue(result.selectedVehicles.isEmpty())
-    }
-
-    @Test
-    fun `no available vehicles leaves every target zone uncovered`() {
+    fun `should skip vehicle when it adds no new zones`() {
         // Given
-        val targetZones = setOf("NORTH", "SOUTH")
+        val targetZones = setOf(NORTH, CENTRAL, SOUTH, EAST)
 
         // When
-        val result = useCase(
-            targetZones,
-            emptyList(),
-            coverageOf
-        )
+        val result = greedyFleetDispatch(targetZones, fleet, coverageOf)
 
         // Then
-        assertTrue(!result.isFullyCovered)
-        assertEquals(targetZones, result.uncoveredZones)
-        assertTrue(result.selectedVehicles.isEmpty())
+        assertThat(result.selectedVehicles).doesNotContain(centralSouthVehicle)
     }
 
     @Test
-    fun `never selects a vehicle that adds zero new zones`() {
-        // Given — vehicleA and vehicleC alone already cover everything;
-        // vehicleB adds nothing new once picked order allows
-        val targetZones = setOf("NORTH", "CENTRAL", "SOUTH", "EAST")
+    fun `should report uncovered zones when no vehicle can reach them`() {
+        // Given
+        val targetZones = setOf(NORTH, CENTRAL, WEST)
 
         // When
-        val result = useCase(
-            targetZones,
-            listOf(vehicleA, vehicleB, vehicleC),
-            coverageOf
-        )
+        val result = greedyFleetDispatch(targetZones, fleet, coverageOf)
 
-        // Then — every selected vehicle actually contributed at least one zone at the moment it was picked
-        assertTrue(result.selectedVehicles.size <= 3)
-        assertTrue(result.isFullyCovered)
+        // Then
+        assertThat(result.isFullyCovered).isFalse()
+        assertThat(result.uncoveredZones).containsExactly(WEST)
+        assertThat(result.coveredZones).containsExactly(NORTH, CENTRAL)
     }
 
     @Test
-    fun `on a tie in zones covered, picks the first candidate in list order (deterministic via maxByOrNull)`() {
-        // Given — vehicleA and vehicleB both cover exactly {"NORTH"} and nothing else, vehicleA listed first
-        val tiedCoverage: (Vehicle) -> Set<String> = { vehicle ->
-            when (vehicle) {
-                vehicleA -> setOf("NORTH")
-                vehicleB -> setOf("NORTH")
-                else -> emptySet()
-            }
-        }
+    fun `should select no vehicles when target zones are empty`() {
+        // Given
+        val targetZones = emptySet<String>()
 
         // When
-        val result = useCase(
-            setOf("NORTH"),
-            listOf(vehicleA, vehicleB),
-            tiedCoverage
-        )
+        val result = greedyFleetDispatch(targetZones, fleet, coverageOf)
 
         // Then
-        assertEquals(listOf(vehicleA), result.selectedVehicles)
+        assertThat(result.isFullyCovered).isTrue()
+        assertThat(result.selectedVehicles).isEmpty()
+    }
+
+    @Test
+    fun `should leave every zone uncovered when no vehicles are available`() {
+        // Given
+        val targetZones = setOf(NORTH, SOUTH)
+
+        // When
+        val result = greedyFleetDispatch(targetZones, emptyList(), coverageOf)
+
+        // Then
+        assertThat(result.isFullyCovered).isFalse()
+        assertThat(result.uncoveredZones).isEqualTo(targetZones)
+        assertThat(result.selectedVehicles).isEmpty()
+    }
+
+    @Test
+    fun `should pick first vehicle in list order when vehicles tie on coverage`() {
+        // Given
+        val tiedCoverage: (Vehicle) -> Set<String> = { setOf(NORTH) }
+        val tiedFleet = listOf(northCentralVehicle, centralSouthVehicle)
+
+        // When
+        val result = greedyFleetDispatch(setOf(NORTH), tiedFleet, tiedCoverage)
+
+        // Then
+        assertThat(result.selectedVehicles).containsExactly(northCentralVehicle)
+    }
+
+    private fun createVehicle(id: String) = Vehicle(
+        id = id,
+        maxCapacityKg = 500.0,
+        costPerKm = 2.0,
+        currentWarehouse = HOME_WAREHOUSE
+    )
+
+    private companion object {
+        const val NORTH = "NORTH"
+        const val CENTRAL = "CENTRAL"
+        const val SOUTH = "SOUTH"
+        const val EAST = "EAST"
+        const val WEST = "WEST"
+
+        val HOME_WAREHOUSE = Warehouse(
+            id = "WH-001",
+            name = "Hub",
+            regionalZone = "CENTRAL",
+            longitude = 34.0,
+            latitude = 31.0
+        )
     }
 }
