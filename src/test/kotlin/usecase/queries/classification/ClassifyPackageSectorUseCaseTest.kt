@@ -13,7 +13,7 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
 import org.bytebloom.logiroute.domain.repository.TrainingCargoRepository
-import org.bytebloom.logiroute.domain.usecase.queries.classification.ClassifyPackageSectorUseCase
+import org.bytebloom.logiroute.domain.usecase.classification.ClassifyPackageSectorUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

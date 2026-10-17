@@ -8,7 +8,7 @@ import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
-import org.bytebloom.logiroute.domain.usecase.queries.FindCheapestSuitableVehicleUseCase
+import org.bytebloom.logiroute.domain.usecase.crud.vehicles.FindCheapestSuitableVehicleUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

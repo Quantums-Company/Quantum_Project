@@ -7,7 +7,7 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.IllegalShipmentTransitionException
 import org.bytebloom.logiroute.domain.shipment.Shipment
-import org.bytebloom.logiroute.domain.usecase.commands.ReroutePackageUseCase
+import org.bytebloom.logiroute.domain.usecase.dispatch.ReroutePackageUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

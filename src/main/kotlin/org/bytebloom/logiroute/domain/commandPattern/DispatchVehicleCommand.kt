@@ -3,7 +3,7 @@ package org.bytebloom.logiroute.domain.commandPattern
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.commands.DispatchVehicleUseCase
+import org.bytebloom.logiroute.domain.usecase.dispatch.DispatchVehicleUseCase
 
 class DispatchVehicleCommand(
     private val dispatchVehicleUseCase: DispatchVehicleUseCase,

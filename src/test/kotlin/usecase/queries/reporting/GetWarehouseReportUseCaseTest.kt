@@ -12,7 +12,7 @@ import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.result.WarehouseReport
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
-import org.bytebloom.logiroute.domain.usecase.queries.reporting.GetWarehouseReportUseCase
+import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseReportUseCase
 
 class GetWarehouseReportUseCaseTest {
     private val repository = mockk<WarehouseRepository>()

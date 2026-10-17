@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import org.bytebloom.logiroute.domain.performance.PackageTrackingIdGenerator
 import org.bytebloom.logiroute.domain.tree.binary.AVLTree
 import org.bytebloom.logiroute.domain.tree.binary.BST
-import org.bytebloom.logiroute.domain.usecase.AnalyzeTreePerformanceUseCase
+import org.bytebloom.logiroute.domain.usecase.analytics.AnalyzeTreePerformanceUseCase
 import org.junit.jupiter.api.BeforeEach
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -23,7 +23,7 @@ import org.bytebloom.logiroute.domain.pricing.factory.StrategyFactory
 import org.bytebloom.logiroute.domain.pricing.strategy.DispatchStrategy
 import org.bytebloom.logiroute.domain.pricing.strategy.ShippingStrategyType
 import org.bytebloom.logiroute.domain.repository.RouteRepository
-import org.bytebloom.logiroute.domain.usecase.queries.pricing.CalculatePricingUseCase
+import org.bytebloom.logiroute.domain.usecase.pricing.CalculatePricingUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith

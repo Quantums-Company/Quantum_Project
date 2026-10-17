@@ -4,13 +4,13 @@ import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.junit.jupiter.api.Test
 import io.mockk.mockk
 import org.bytebloom.logiroute.domain.repository.RouteRepository
-import org.bytebloom.logiroute.domain.usecase.queries.routing.FindOptimalPathUseCase
+import org.bytebloom.logiroute.domain.usecase.routing.FindOptimalPathUseCase
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Route
 import io.mockk.coEvery
-import org.bytebloom.logiroute.domain.usecase.queries.shipment.EstimateShipmentDeliveryUseCase
+import org.bytebloom.logiroute.domain.usecase.shipment.EstimateShipmentDeliveryUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlinx.coroutines.test.runTest
 class EstimateShipmentDeliveryUseCaseTest {

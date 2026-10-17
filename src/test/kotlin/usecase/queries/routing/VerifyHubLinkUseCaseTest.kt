@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.routing.common.RouteFinder
-import org.bytebloom.logiroute.domain.usecase.queries.routing.VerifyHubLinkUseCase
+import org.bytebloom.logiroute.domain.usecase.routing.VerifyHubLinkUseCase
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

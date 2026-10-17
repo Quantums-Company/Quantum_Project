@@ -7,7 +7,7 @@ import org.bytebloom.logiroute.domain.model.CargoItem
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
-import org.bytebloom.logiroute.domain.usecase.queries.knapsack.OptimizeCargoLoadUseCase
+import org.bytebloom.logiroute.domain.usecase.dispatch.OptimizeCargoLoadUseCase
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

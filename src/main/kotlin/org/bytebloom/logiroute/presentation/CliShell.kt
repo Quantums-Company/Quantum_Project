@@ -23,8 +23,8 @@ import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import org.bytebloom.logiroute.domain.routing.WarehouseGraph
 import org.bytebloom.logiroute.domain.routing.WarehouseGraphBuilder
 import org.bytebloom.logiroute.domain.repository.TelemetryRepository
-import org.bytebloom.logiroute.domain.usecase.queries.classification.ClassifyPackageSectorUseCase
-import org.bytebloom.logiroute.domain.usecase.queries.routing.FindOptimalPathUseCase
+import org.bytebloom.logiroute.domain.usecase.classification.ClassifyPackageSectorUseCase
+import org.bytebloom.logiroute.domain.usecase.routing.FindOptimalPathUseCase
 import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

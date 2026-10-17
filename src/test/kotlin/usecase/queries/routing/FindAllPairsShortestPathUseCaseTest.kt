@@ -7,7 +7,7 @@ import io.mockk.verify
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.routing.WarehouseGraph
 import org.bytebloom.logiroute.domain.routing.common.RouteFinder
-import org.bytebloom.logiroute.domain.usecase.queries.routing.FindAllPairsShortestPathUseCase
+import org.bytebloom.logiroute.domain.usecase.routing.FindAllPairsShortestPathUseCase
 import org.junit.jupiter.api.BeforeEach
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

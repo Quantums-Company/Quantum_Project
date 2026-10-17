@@ -1,7 +1,7 @@
 package org.bytebloom.logiroute.domain.tree.hierarchicalHub
 
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.queries.GetWarehouseLoadFactorUseCase
+import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseLoadFactorUseCase
 
 class HubTreeBuilder(
     private val getWarehouseLoadFactor: GetWarehouseLoadFactorUseCase
