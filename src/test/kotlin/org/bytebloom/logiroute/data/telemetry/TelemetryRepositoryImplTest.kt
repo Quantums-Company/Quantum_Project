@@ -1,14 +1,12 @@
 package org.bytebloom.logiroute.data.telemetry
 
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.logiroute.data.telemetry.TelemetryRepositoryImpl
-import org.bytebloom.logiroute.data.telemetry.TelemetryDataSource
 import org.bytebloom.logiroute.domain.model.VehicleTelemetry
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 class TelemetryRepositoryImplTest {
 
@@ -26,7 +24,7 @@ class TelemetryRepositoryImplTest {
     }
 
     @Test
-    fun `streams telemetry updates from the data source`() = runTest {
+    fun `should stream telemetry updates from data source`() = runTest {
         // Given
         val update = VehicleTelemetry("TRK-001", 31.5, 35.0, 40.0, 80.0)
         val repository = TelemetryRepositoryImpl(FakeTelemetryDataSource(listOf(update)))
@@ -35,11 +33,11 @@ class TelemetryRepositoryImplTest {
         val updates = repository.streamTelemetry(listOf("TRK-001")).toList()
 
         // Then
-        assertEquals(listOf(update), updates)
+        assertThat(updates).containsExactly(update)
     }
 
     @Test
-    fun `passes the requested vehicle ids to the data source`() = runTest {
+    fun `should pass requested vehicle ids to data source`() = runTest {
         // Given
         val dataSource = FakeTelemetryDataSource(emptyList())
         val repository = TelemetryRepositoryImpl(dataSource)
@@ -48,6 +46,6 @@ class TelemetryRepositoryImplTest {
         repository.streamTelemetry(listOf("TRK-001", "TRK-002")).toList()
 
         // Then
-        assertEquals(listOf("TRK-001", "TRK-002"), dataSource.requestedVehicleIds)
+        assertThat(dataSource.requestedVehicleIds).containsExactly("TRK-001", "TRK-002").inOrder()
     }
 }

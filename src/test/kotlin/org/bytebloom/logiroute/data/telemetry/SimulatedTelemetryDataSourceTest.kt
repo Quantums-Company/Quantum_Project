@@ -1,21 +1,19 @@
 package org.bytebloom.logiroute.data.telemetry
 
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.logiroute.data.telemetry.SimulatedTelemetryDataSource
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class SimulatedTelemetryDataSourceTest {
 
     @Test
-    fun `emits requested number of telemetry updates`() = runTest {
+    fun `should emit requested number of telemetry updates`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource(
             interval = 1.seconds
@@ -28,11 +26,11 @@ class SimulatedTelemetryDataSourceTest {
             .toList()
 
         // Then
-        assertEquals(2, updates.size)
+        assertThat(updates).hasSize(2)
     }
 
     @Test
-    fun `emits telemetry for each requested vehicle`() = runTest {
+    fun `should emit telemetry for each requested vehicle`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource()
 
@@ -43,14 +41,11 @@ class SimulatedTelemetryDataSourceTest {
             .toList()
 
         // Then
-        assertEquals(
-            setOf("TRK-001", "TRK-002"),
-            updates.map { it.vehicleId }.toSet()
-        )
+        assertThat(updates.map { it.vehicleId }).containsExactly("TRK-001", "TRK-002")
     }
 
     @Test
-    fun `emits valid GPS coordinates and fuel percentage`() = runTest {
+    fun `should emit valid gps coordinates and fuel percentage`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource()
 
@@ -61,17 +56,17 @@ class SimulatedTelemetryDataSourceTest {
             .toList()
 
         // Then
-        assertTrue(
+        assertThat(
             updates.all {
                 it.latitude in -90.0..90.0 &&
                         it.longitude in -180.0..180.0 &&
                         it.fuelPercent in 0.0..100.0
             }
-        )
+        ).isTrue()
     }
 
     @Test
-    fun `emits no updates for an empty fleet`() = runTest {
+    fun `should emit no updates when fleet is empty`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource()
 
@@ -81,11 +76,11 @@ class SimulatedTelemetryDataSourceTest {
             .toList()
 
         // Then
-        assertTrue(updates.isEmpty())
+        assertThat(updates).isEmpty()
     }
 
     @Test
-    fun `emits the first update immediately without waiting`() = runTest {
+    fun `should emit first update immediately without waiting`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource(interval = 1.seconds)
 
@@ -93,11 +88,11 @@ class SimulatedTelemetryDataSourceTest {
         service.streamTelemetry(listOf("TRK-001")).first()
 
         // Then
-        assertEquals(0L, currentTime)
+        assertThat(currentTime).isEqualTo(0L)
     }
 
     @Test
-    fun `waits one interval between consecutive updates`() = runTest {
+    fun `should wait one interval between consecutive updates`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource(interval = 1.seconds)
 
@@ -105,11 +100,11 @@ class SimulatedTelemetryDataSourceTest {
         service.streamTelemetry(listOf("TRK-001")).take(3).toList()
 
         // Then
-        assertEquals(2_000L, currentTime)
+        assertThat(currentTime).isEqualTo(2_000L)
     }
 
     @Test
-    fun `burns one percent of fuel per update`() = runTest {
+    fun `should burn one percent of fuel per update`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource(interval = 1.milliseconds)
 
@@ -117,11 +112,11 @@ class SimulatedTelemetryDataSourceTest {
         val updates = service.streamTelemetry(listOf("TRK-001")).take(3).toList()
 
         // Then
-        assertEquals(listOf(100.0, 99.0, 98.0), updates.map { it.fuelPercent })
+        assertThat(updates.map { it.fuelPercent }).containsExactly(100.0, 99.0, 98.0).inOrder()
     }
 
     @Test
-    fun `fuel stays at zero instead of refilling`() = runTest {
+    fun `should keep fuel at zero when tank is empty`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource(interval = 1.milliseconds)
 
@@ -129,11 +124,11 @@ class SimulatedTelemetryDataSourceTest {
         val updates = service.streamTelemetry(listOf("TRK-001")).take(150).toList()
 
         // Then
-        assertEquals(List(50) { 0.0 }, updates.takeLast(50).map { it.fuelPercent })
+        assertThat(updates.takeLast(50).map { it.fuelPercent }).containsExactlyElementsIn(List(50) { 0.0 })
     }
 
     @Test
-    fun `vehicle stays stopped for several consecutive updates`() = runTest {
+    fun `should keep vehicle stopped for several consecutive updates`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource(interval = 1.milliseconds)
 
@@ -141,6 +136,6 @@ class SimulatedTelemetryDataSourceTest {
         val updates = service.streamTelemetry(listOf("TRK-001")).take(5).toList()
 
         // Then
-        assertEquals(listOf(true, true, true, false, false), updates.map { it.speedKph == 0.0 })
+        assertThat(updates.map { it.speedKph == 0.0 }).containsExactly(true, true, true, false, false).inOrder()
     }
 }

@@ -1,20 +1,18 @@
 package org.bytebloom.logiroute.data.remote.util
 
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.data.remote.client.SupabaseErrorTranslator
-import org.bytebloom.logiroute.data.remote.util.RateLimiter
-import org.bytebloom.logiroute.data.remote.util.RemoteExecutor
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RemoteExecutorTest {
 
     @Test
-    fun `returns the result of the remote call`() = runTest {
+    fun `should return result of remote call when a token is available`() = runTest {
         // Given
         val executor = RemoteExecutor(
             errorTranslator = SupabaseErrorTranslator(),
@@ -25,11 +23,11 @@ class RemoteExecutorTest {
         val result = executor.execute("load", StandardTestDispatcher(testScheduler)) { "data" }
 
         // Then
-        assertEquals("data", result)
+        assertThat(result).isEqualTo("data")
     }
 
     @Test
-    fun `waits for a token before calling remote when the bucket is empty`() = runTest {
+    fun `should wait for a token before calling remote when bucket is empty`() = runTest {
         // Given
         val executor = RemoteExecutor(
             errorTranslator = SupabaseErrorTranslator(),
@@ -46,6 +44,6 @@ class RemoteExecutorTest {
         executor.execute("second call", dispatcher) { Unit }
 
         // Then
-        assertEquals(200L, currentTime)
+        assertThat(currentTime).isEqualTo(200L)
     }
 }

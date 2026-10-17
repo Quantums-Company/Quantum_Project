@@ -1,16 +1,14 @@
 package org.bytebloom.logiroute.domain.usecase.routing
 
-import org.junit.jupiter.api.Test
+import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.routing.WarehouseGraph
 import org.bytebloom.logiroute.domain.routing.common.RouteFinder
-import org.bytebloom.logiroute.domain.usecase.routing.FindAllPairsShortestPathUseCase
 import org.junit.jupiter.api.BeforeEach
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class FindAllPairsShortestPathUseCaseTest {
 
@@ -43,29 +41,28 @@ class FindAllPairsShortestPathUseCaseTest {
     @BeforeEach
     fun setUp() {
         graph = WarehouseGraph()
-        // One-directional: A -> B (5km) -> C (3km). No reverse edges, no A->C direct edge.
         graph.addRoute(warehouseA, warehouseB, distanceKm = 5.0)
         graph.addRoute(warehouseB, warehouseC, distanceKm = 3.0)
         useCase = FindAllPairsShortestPathUseCase(routeFinder, graph)
     }
 
     @Test
-    fun `distance from a warehouse to itself is always zero, without asking RouteFinder`() {
-        // Given — no stubs needed for A->A, B->B, C->C
+    fun `should return zero distance from a warehouse to itself without asking route finder`() {
+        // Given
         every { routeFinder.findShortestPath(any(), any()) } returns null
 
         // When
         val result = useCase()
 
         // Then
-        assertEquals(0.0, result.getValue(warehouseA).getValue(warehouseA))
-        assertEquals(0.0, result.getValue(warehouseB).getValue(warehouseB))
-        assertEquals(0.0, result.getValue(warehouseC).getValue(warehouseC))
+        assertThat(result.getValue(warehouseA).getValue(warehouseA)).isEqualTo(0.0)
+        assertThat(result.getValue(warehouseB).getValue(warehouseB)).isEqualTo(0.0)
+        assertThat(result.getValue(warehouseC).getValue(warehouseC)).isEqualTo(0.0)
         verify(exactly = 0) { routeFinder.findShortestPath(warehouseA, warehouseA) }
     }
 
     @Test
-    fun `sums real graph edge weights along the path RouteFinder returns`() {
+    fun `should sum graph edge weights along the path returned by route finder`() {
         // Given
         every {
             routeFinder.findShortestPath(warehouseA, warehouseB)
@@ -90,14 +87,14 @@ class FindAllPairsShortestPathUseCaseTest {
         val result = useCase()
 
         // Then
-        assertEquals(5.0, result.getValue(warehouseA).getValue(warehouseB))
-        assertEquals(8.0, result.getValue(warehouseA).getValue(warehouseC))
-        assertEquals(3.0, result.getValue(warehouseB).getValue(warehouseC))
+        assertThat(result.getValue(warehouseA).getValue(warehouseB)).isEqualTo(5.0)
+        assertThat(result.getValue(warehouseA).getValue(warehouseC)).isEqualTo(8.0)
+        assertThat(result.getValue(warehouseB).getValue(warehouseC)).isEqualTo(3.0)
     }
 
     @Test
-    fun `when RouteFinder reports no path, distance is positive infinity`() {
-        // Given — one-directional graph, so B->A genuinely has no path
+    fun `should return infinite distance when route finder reports no path`() {
+        // Given
         every {
             routeFinder.findShortestPath(warehouseB, warehouseA)
         } returns null
@@ -121,12 +118,12 @@ class FindAllPairsShortestPathUseCaseTest {
         val result = useCase()
 
         // Then
-        assertTrue(result.getValue(warehouseB).getValue(warehouseA).isInfinite())
+        assertThat(result.getValue(warehouseB).getValue(warehouseA)).isPositiveInfinity()
     }
 
     @Test
     fun `should treat hop as infinite when edge weight is missing`() {
-        // Given — RouteFinder claims a direct A->C hop, but no such edge was ever added to the graph
+        // Given
         every {
             routeFinder.findShortestPath(warehouseA, warehouseC)
         } returns listOf(warehouseA, warehouseC)
@@ -150,11 +147,11 @@ class FindAllPairsShortestPathUseCaseTest {
         val result = useCase()
 
         // Then
-        assertTrue(result.getValue(warehouseA).getValue(warehouseC).isInfinite())
+        assertThat(result.getValue(warehouseA).getValue(warehouseC)).isPositiveInfinity()
     }
 
     @Test
-    fun `an empty graph returns an empty result and never calls RouteFinder`() {
+    fun `should return empty result without calling route finder when graph is empty`() {
         // Given
         val emptyGraph = WarehouseGraph()
         val emptyUseCase = FindAllPairsShortestPathUseCase(routeFinder, emptyGraph)
@@ -163,7 +160,7 @@ class FindAllPairsShortestPathUseCaseTest {
         val result = emptyUseCase()
 
         // Then
-        assertTrue(result.isEmpty())
+        assertThat(result).isEmpty()
         verify(exactly = 0) { routeFinder.findShortestPath(any(), any()) }
     }
 }
