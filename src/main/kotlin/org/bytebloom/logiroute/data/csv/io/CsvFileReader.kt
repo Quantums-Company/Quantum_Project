@@ -51,9 +51,9 @@ private val seedDirectory: String = DEFAULT_CSV_DIRECTORY
                 }
             }
         } catch (e: IOException) {
-            throw CsvParsingException(
-                "Failed reading '${file.path}': ${e.message}"
-            )
+            val exception = CsvParsingException("Failed reading '${file.path}': ${e.message}")
+            exception.initCause(e)
+            throw exception
         }
 
         return CsvLoadReport(rows, skipped)

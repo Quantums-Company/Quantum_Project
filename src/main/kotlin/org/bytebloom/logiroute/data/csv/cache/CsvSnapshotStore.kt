@@ -12,6 +12,13 @@ class CsvSnapshotStore(
     private val writer: CsvFileWriter,
     private val cacheDirectory: File = File("src/resources/cache")
 ) {
+    companion object {
+        private val SPECIAL_CSV_CHARS = charArrayOf(',', '"', '\n', '\r')
+    }
+
+    private fun String.containsSpecialCsvChars(): Boolean =
+        any { it in SPECIAL_CSV_CHARS }
+
     fun saveWarehouses(items: List<Warehouse>) {
         save(
             CsvTablesName.WAREHOUSE,
@@ -79,7 +86,7 @@ class CsvSnapshotStore(
 
     private fun row(vararg values: String): String =
         values.joinToString(",") { value ->
-            if (value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) {
+            if (value.containsSpecialCsvChars()) {
                 "\"${value.replace("\"", "\"\"")}\""
             } else {
                 value

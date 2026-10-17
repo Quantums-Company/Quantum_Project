@@ -1,10 +1,9 @@
 package org.bytebloom.logiroute.domain.tree.hub
 
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseLoadFactorUseCase
 
 class HubTreeBuilder(
-    private val getWarehouseLoadFactor: GetWarehouseLoadFactorUseCase
+    private val getWarehouseLoadFactor: org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseLoadFactorUseCase
 ) {
 
     fun build(warehouses: List<Warehouse>): HubTree {

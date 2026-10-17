@@ -14,44 +14,29 @@ import org.bytebloom.logiroute.domain.tree.binary.AVLTree
 import org.bytebloom.logiroute.domain.tree.binary.BST
 import org.bytebloom.logiroute.domain.tree.hub.HubTree
 import org.bytebloom.logiroute.domain.usecase.analytics.AnalyzeTreePerformanceUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.TraceHubLineageUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.AddVehicleToHubUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.AssignPackageToCargoQueueUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.DispatchVehicleUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.ReroutePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.CreatePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.DeletePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.GetAllPackagesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.GetPackageByIdUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.UpdatePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.routes.CreateRouteUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.routes.DeleteRouteUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.routes.GetRouteByIdUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.routes.UpdateRouteUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.CreateVehicleUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.DeleteVehicleUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.GetAllVehiclesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.GetVehicleByIdUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.UpdateVehicleUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.CreateWarehouseUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.DeleteWarehouseUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetAllWarehousesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseByIdUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.UpdateWarehouseUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.GreedyFleetDispatchUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.FindCheapestSuitableVehicleUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.FindPackagesAboveWeightUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.FindPackagesByDestinationUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.packages.FindPackagesByPriorityUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.FindStationedVehiclesByCapacityUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseLoadFactorUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.FindBackhaulOpportunityUseCase
 import org.bytebloom.logiroute.domain.usecase.classification.ClassifyPackageSectorUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.routes.GetAllRoutesUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.OptimizeCargoLoadUseCase
 import org.bytebloom.logiroute.domain.usecase.dispatch.FindCargoRecoveryPlanUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.CreatePackageUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.DeletePackageUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.FindPackagesAboveWeightUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByDestinationUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByPriorityUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.GetAllPackagesUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.GetPackageByIdUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.UpdatePackageUseCase
 import org.bytebloom.logiroute.domain.usecase.pricing.CalculatePricingUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseReportUseCase
+import org.bytebloom.logiroute.domain.usecase.routes.CreateRouteUseCase
+import org.bytebloom.logiroute.domain.usecase.routes.DeleteRouteUseCase
+import org.bytebloom.logiroute.domain.usecase.routes.GetAllRoutesUseCase
+import org.bytebloom.logiroute.domain.usecase.routes.GetRouteByIdUseCase
+import org.bytebloom.logiroute.domain.usecase.routes.UpdateRouteUseCase
 import org.bytebloom.logiroute.domain.usecase.routing.FindAllPairsShortestPathUseCase
 import org.bytebloom.logiroute.domain.usecase.routing.FindFewestHopsRouteUseCase
 import org.bytebloom.logiroute.domain.usecase.routing.FindOptimalPathUseCase
@@ -60,6 +45,21 @@ import org.bytebloom.logiroute.domain.usecase.shipment.EstimateShipmentDeliveryU
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.CreateVehicleUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.DeleteVehicleUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.FindCheapestSuitableVehicleUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.FindStationedVehiclesByCapacityUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.GetAllVehiclesUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.GetVehicleByIdUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.UpdateVehicleUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.CreateWarehouseUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.DeleteWarehouseUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.GetAllWarehousesUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseByIdUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseLoadFactorUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseReportUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.TraceHubLineageUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.UpdateWarehouseUseCase
 
 val useCaseModule = module {
 
@@ -73,10 +73,30 @@ val useCaseModule = module {
     factory { AVLTree<String>() }
 
     factory { GetAllWarehousesUseCase(get()) }
-    factory { CreateWarehouseUseCase(get(), get()) }
-    factory { GetWarehouseByIdUseCase(get(), get()) }
-    factory { UpdateWarehouseUseCase(get(), get()) }
-    factory { DeleteWarehouseUseCase(get(), get()) }
+    factory {
+        CreateWarehouseUseCase(
+            get(),
+            get()
+        )
+    }
+    factory {
+        GetWarehouseByIdUseCase(
+            get(),
+            get()
+        )
+    }
+    factory {
+        UpdateWarehouseUseCase(
+            get(),
+            get()
+        )
+    }
+    factory {
+        DeleteWarehouseUseCase(
+            get(),
+            get()
+        )
+    }
 
     factory { GetAllPackagesUseCase(get()) }
     factory { CreatePackageUseCase(get(), get()) }
