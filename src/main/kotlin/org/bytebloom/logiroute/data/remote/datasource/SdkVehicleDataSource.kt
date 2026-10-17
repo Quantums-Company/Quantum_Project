@@ -14,6 +14,15 @@ class SdkVehicleDataSource(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : VehicleRemoteDataSource {
 
+    private suspend fun fetchById(id: String): VehicleResponseDto? =
+        client.from(TableName.VEHICLES)
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull<VehicleResponseDto>()
+
     override suspend fun loadAll(): List<VehicleResponseDto> =
         remoteExecutor.execute("getAll vehicles", ioDispatcher) {
             client.from(TableName.VEHICLES).select().decodeList<VehicleResponseDto>()
@@ -21,20 +30,19 @@ class SdkVehicleDataSource(
 
     override suspend fun loadById(id: String): VehicleResponseDto? =
         remoteExecutor.execute("getById vehicle '$id'", ioDispatcher) {
-            client.from(TableName.VEHICLES).select { filter { eq("id", id) } }.
-            decodeSingleOrNull<VehicleResponseDto>()
+            fetchById(id)
         }
 
     override suspend fun create(request: VehicleRequestDto): VehicleResponseDto? =
         remoteExecutor.execute("create vehicle '${request.id}'", ioDispatcher) {
             client.from(TableName.VEHICLES).insert(request)
-            loadById(request.id)
+            fetchById(request.id)
         }
 
     override suspend fun update(id: String, request: VehicleRequestDto): VehicleResponseDto? =
         remoteExecutor.execute("update vehicle '$id'", ioDispatcher) {
             client.from(TableName.VEHICLES).update(request) { filter { eq("id", id) } }
-            loadById(id)
+            fetchById(id)
         }
 
     override suspend fun delete(id: String): Boolean =
