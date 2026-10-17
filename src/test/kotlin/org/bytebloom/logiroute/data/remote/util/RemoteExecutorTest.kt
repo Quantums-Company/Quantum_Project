@@ -39,12 +39,10 @@ class RemoteExecutorTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
 
         executor.execute("first call", dispatcher) {
-            Unit
         }
 
         // When
         executor.execute("second call", dispatcher) {
-            Unit
         }
 
         // Then
