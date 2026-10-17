@@ -8,7 +8,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.EntityType
-import org.bytebloom.logiroute.domain.model.Route
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
@@ -20,94 +19,163 @@ import kotlin.test.assertFailsWith
 
 class CreateRouteUseCaseTest {
 
-    private lateinit var routeRepository: RouteRepository
-    private lateinit var idGenerator: IdGenerator
-    private lateinit var createRoute: CreateRouteUseCase
+    private val routeRepository: RouteRepository = mockk()
+    private val idGenerator: IdGenerator = mockk()
+    private lateinit var useCase: CreateRouteUseCase
+
+    private val generatedRouteId = "RT-001"
+    private val originWarehouse = createWarehouse(id = "WH-001", name = "Ramallah Hub")
+    private val destinationWarehouse = createWarehouse(id = "WH-002", name = "Nablus Depot")
+    private val validDistanceKm = 120.0
+    private val validTypicalDelayMin = 15
 
     @BeforeEach
     fun setUp() {
-        routeRepository = mockk()
-        idGenerator = mockk()
-        every { idGenerator.next(EntityType.ROUTE) } returns GENERATED_ROUTE_ID
+        every { idGenerator.next(EntityType.ROUTE) } returns generatedRouteId
         coEvery { routeRepository.create(any()) } answers { firstArg() }
-        createRoute = CreateRouteUseCase(
-            routeRepository,
-            idGenerator
-        )
+        useCase = CreateRouteUseCase(routeRepository, idGenerator)
     }
 
     @Test
     fun `should return created route with generated id when input is valid`() = runTest {
-        val distanceKm = 150.5
-        val createdRoute = createRouteWith(distanceKm = distanceKm, typicalDelayMin = 20)
+        // When
+        val result = useCase(validDistanceKm, validTypicalDelayMin, originWarehouse, destinationWarehouse)
 
-        assertThat(createdRoute.id).isEqualTo(GENERATED_ROUTE_ID)
-        assertThat(createdRoute.distanceKm).isEqualTo(distanceKm)
-        assertThat(createdRoute.originWarehouse).isEqualTo(ORIGIN)
-        assertThat(createdRoute.destinationWarehouse).isEqualTo(DESTINATION)
+        // Then
+        assertThat(result.id).isEqualTo(generatedRouteId)
+    }
+
+    @Test
+    fun `should return created route with provided details when input is valid`() = runTest {
+        // Given
+        val distanceKm = 150.5
+        val typicalDelayMin = 20
+
+        // When
+        val result = useCase(distanceKm, typicalDelayMin, originWarehouse, destinationWarehouse)
+
+        // Then
+        assertThat(result.distanceKm).isEqualTo(distanceKm)
+        assertThat(result.typicalDelayMin).isEqualTo(typicalDelayMin)
+        assertThat(result.originWarehouse).isEqualTo(originWarehouse)
+        assertThat(result.destinationWarehouse).isEqualTo(destinationWarehouse)
     }
 
     @Test
     fun `should save route through repository exactly once when input is valid`() = runTest {
-        createRouteWith(distanceKm = 100.0)
+        // Given
+        val distanceKm = 100.0
 
+        // When
+        useCase(distanceKm, validTypicalDelayMin, originWarehouse, destinationWarehouse)
+
+        // Then
         coVerify(exactly = 1) {
-            routeRepository.create(match { it.id == GENERATED_ROUTE_ID && it.distanceKm == 100.0 })
+            routeRepository.create(match { it.id == generatedRouteId && it.distanceKm == distanceKm })
         }
     }
 
     @Test
-    fun `should request a new route id from id generator`() = runTest {
-        createRouteWith()
+    fun `should request a new route id from id generator when input is valid`() = runTest {
+        // When
+        useCase(validDistanceKm, validTypicalDelayMin, originWarehouse, destinationWarehouse)
+
+        // Then
         verify(exactly = 1) { idGenerator.next(EntityType.ROUTE) }
     }
 
     @Test
-    fun `should throw validation exception when user enters zero or negative distance`() = runTest {
-        assertFailsWith<EntityValidationException> { createRouteWith(distanceKm = 0.0) }
-        assertFailsWith<EntityValidationException> { createRouteWith(distanceKm = -45.0) }
-        coVerify(exactly = 0) { routeRepository.create(any()) }
+    fun `should throw validation exception when distance is zero`() = runTest {
+        // Given
+        val zeroDistanceKm = 0.0
+
+        // When
+        val action = suspend {
+            useCase(zeroDistanceKm, validTypicalDelayMin, originWarehouse, destinationWarehouse)
+        }
+
+        // Then
+        assertFailsWith<EntityValidationException> { action() }
     }
 
     @Test
-    fun `should throw validation exception when user enters negative typical delay`() = runTest {
-        assertFailsWith<EntityValidationException> { createRouteWith(typicalDelayMin = -15) }
-        coVerify(exactly = 0) { routeRepository.create(any()) }
+    fun `should throw validation exception when distance is negative`() = runTest {
+        // Given
+        val negativeDistanceKm = -45.0
+
+        // When
+        val action = suspend {
+            useCase(negativeDistanceKm, validTypicalDelayMin, originWarehouse, destinationWarehouse)
+        }
+
+        // Then
+        assertFailsWith<EntityValidationException> { action() }
+    }
+
+    @Test
+    fun `should throw validation exception when typical delay is negative`() = runTest {
+        // Given
+        val negativeDelayMin = -15
+
+        // When
+        val action = suspend {
+            useCase(validDistanceKm, negativeDelayMin, originWarehouse, destinationWarehouse)
+        }
+
+        // Then
+        assertFailsWith<EntityValidationException> { action() }
     }
 
     @Test
     fun `should throw validation exception when origin and destination are the same warehouse`() = runTest {
-        assertFailsWith<EntityValidationException> {
-            createRouteWith(origin = ORIGIN, destination = ORIGIN)
+        // When
+        val action = suspend {
+            useCase(validDistanceKm, validTypicalDelayMin, originWarehouse, originWarehouse)
         }
+
+        // Then
+        assertFailsWith<EntityValidationException> { action() }
+    }
+
+    @Test
+    fun `should not save route when input is invalid`() = runTest {
+        // Given
+        val zeroDistanceKm = 0.0
+
+        // When
+        runCatching {
+            useCase(zeroDistanceKm, validTypicalDelayMin, originWarehouse, destinationWarehouse)
+        }
+
+        // Then
         coVerify(exactly = 0) { routeRepository.create(any()) }
     }
 
     @Test
     fun `should propagate network exception when repository is unreachable`() = runTest {
+        // Given
         coEvery { routeRepository.create(any()) } throws NetworkUnavailableException()
 
-        assertFailsWith<NetworkUnavailableException> { createRouteWith() }
+        // When
+        val action = suspend {
+            useCase(validDistanceKm, validTypicalDelayMin, originWarehouse, destinationWarehouse)
+        }
+
+        // Then
+        assertFailsWith<NetworkUnavailableException> { action() }
     }
 
-    private suspend fun createRouteWith(
-        distanceKm: Double = 120.0,
-        typicalDelayMin: Int = 15,
-        origin: Warehouse = ORIGIN,
-        destination: Warehouse = DESTINATION
-    ): Route = createRoute(distanceKm, typicalDelayMin, origin, destination)
-
-    private companion object {
-        const val GENERATED_ROUTE_ID = "RT-001"
-        val ORIGIN = createWarehouse(id = "WH-001", name = "Ramallah Hub")
-        val DESTINATION = createWarehouse(id = "WH-002", name = "Nablus Depot")
-
-        fun createWarehouse(id: String, name: String) = Warehouse(
-            id = id,
-            name = name,
-            regionalZone = "West Bank",
-            longitude = 35.2,
-            latitude = 31.9
-        )
-    }
+    private fun createWarehouse(
+        id: String = "WH-001",
+        name: String = "Ramallah Hub",
+        regionalZone: String = "West Bank",
+        longitude: Double = 35.2,
+        latitude: Double = 31.9
+    ) = Warehouse(
+        id = id,
+        name = name,
+        regionalZone = regionalZone,
+        longitude = longitude,
+        latitude = latitude
+    )
 }

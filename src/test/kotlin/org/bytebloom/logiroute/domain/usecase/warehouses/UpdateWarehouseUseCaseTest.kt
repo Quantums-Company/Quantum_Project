@@ -5,7 +5,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.DatabaseConflictException
@@ -17,173 +16,182 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import org.bytebloom.logiroute.domain.validator.update.UpdateWarehouseValidator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertFailsWith
 
 class UpdateWarehouseUseCaseTest {
-    private val repository = mockk<WarehouseRepository>()
-    private val validator = mockk<UpdateWarehouseValidator>()
-    private val useCase = UpdateWarehouseUseCase(
-        repository,
-        validator
+
+    private val repository: WarehouseRepository = mockk()
+    private val validator: UpdateWarehouseValidator = mockk()
+    private lateinit var useCase: UpdateWarehouseUseCase
+
+    private val existingWarehouse = createWarehouse(
+        id = "WH-001",
+        name = "Old Name",
+        regionalZone = "North",
+        longitude = 35.0,
+        latitude = 31.0
     )
-    private val existing = Warehouse("WH-001", "Old Name", "North", 35.0, 31.0)
 
-    @Test
-    fun `updates only the provided fields and keeps the id`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name", latitude = 32.5)
-        val savedWarehouse = slot<Warehouse>()
-        every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns existing
-        coEvery { repository.update(capture(savedWarehouse)) } answers { savedWarehouse.captured }
-
-        val result = useCase(input)
-
-        assertThat(result.id).isEqualTo("WH-001")
+    @BeforeEach
+    fun setUp() {
+        useCase = UpdateWarehouseUseCase(repository, validator)
     }
 
     @Test
-    fun `updates only the provided fields and keeps the name`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name", latitude = 32.5)
-        val savedWarehouse = slot<Warehouse>()
+    fun `should apply provided fields when update input has only some fields`() = runTest {
+        // Given
+        val newName = "New Name"
+        val newLatitude = 32.5
+        val input = createUpdateInput(name = newName, latitude = newLatitude)
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns existing
-        coEvery { repository.update(capture(savedWarehouse)) } answers { savedWarehouse.captured }
+        coEvery { repository.getById(existingWarehouse.id) } returns existingWarehouse
+        coEvery { repository.update(any()) } answers { firstArg() }
 
+        // When
         val result = useCase(input)
 
-        assertThat(result.name).isEqualTo("New Name")
+        // Then
+        assertThat(result.name).isEqualTo(newName)
+        assertThat(result.latitude).isEqualTo(newLatitude)
     }
 
     @Test
-    fun `updates only the provided fields and keeps the latitude`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name", latitude = 32.5)
-        val savedWarehouse = slot<Warehouse>()
+    fun `should keep existing fields when they are not provided in update input`() = runTest {
+        // Given
+        val input = createUpdateInput(name = "New Name", latitude = 32.5)
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns existing
-        coEvery { repository.update(capture(savedWarehouse)) } answers { savedWarehouse.captured }
+        coEvery { repository.getById(existingWarehouse.id) } returns existingWarehouse
+        coEvery { repository.update(any()) } answers { firstArg() }
 
+        // When
         val result = useCase(input)
 
-        assertThat(result.latitude).isEqualTo(32.5)
+        // Then
+        assertThat(result.id).isEqualTo(existingWarehouse.id)
+        assertThat(result.regionalZone).isEqualTo(existingWarehouse.regionalZone)
+        assertThat(result.longitude).isEqualTo(existingWarehouse.longitude)
     }
 
     @Test
-    fun `updates only the provided fields and keeps the regionalZone`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name", latitude = 32.5)
-        val savedWarehouse = slot<Warehouse>()
+    fun `should call repository update exactly once when input is valid`() = runTest {
+        // Given
+        val input = createUpdateInput(name = "New Name")
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns existing
-        coEvery { repository.update(capture(savedWarehouse)) } answers { savedWarehouse.captured }
+        coEvery { repository.getById(existingWarehouse.id) } returns existingWarehouse
+        coEvery { repository.update(any()) } answers { firstArg() }
 
-        val result = useCase(input)
-
-        assertThat(result.regionalZone).isEqualTo("North")
-    }
-
-    @Test
-    fun `updates only the provided fields and keeps the longitude`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name", latitude = 32.5)
-        val savedWarehouse = slot<Warehouse>()
-        every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns existing
-        coEvery { repository.update(capture(savedWarehouse)) } answers { savedWarehouse.captured }
-
-        val result = useCase(input)
-
-        assertThat(result.longitude).isEqualTo(35.0)
-    }
-
-    @Test
-    fun `call repository update exactly once`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name", latitude = 32.5)
-        val savedWarehouse = slot<Warehouse>()
-        every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns existing
-        coEvery { repository.update(capture(savedWarehouse)) } answers { savedWarehouse.captured }
-
+        // When
         useCase(input)
 
+        // Then
         coVerify(exactly = 1) { repository.update(any()) }
     }
 
     @Test
-    fun `throws ResourceNotFoundException when warehouse does not exist`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-999", name = "New Name")
+    fun `should throw resource not found exception with warehouse id when warehouse does not exist`() = runTest {
+        // Given
+        val unknownWarehouseId = "WH-999"
+        val input = createUpdateInput(id = unknownWarehouseId, name = "New Name")
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-999") } returns null
+        coEvery { repository.getById(unknownWarehouseId) } returns null
 
-        val exception = assertThrows<ResourceNotFoundException> { useCase(input) }
+        // When
+        val action = suspend { useCase(input) }
 
-        assertThat(exception).hasMessageThat().contains("WH-999")
+        // Then
+        val exception = assertFailsWith<ResourceNotFoundException> { action() }
+        assertThat(exception).hasMessageThat().contains(unknownWarehouseId)
     }
 
     @Test
-    fun `don't call repository update when warehouse does not exist`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-999", name = "New Name")
+    fun `should not call repository update when warehouse does not exist`() = runTest {
+        // Given
+        val unknownWarehouseId = "WH-999"
+        val input = createUpdateInput(id = unknownWarehouseId, name = "New Name")
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-999") } returns null
+        coEvery { repository.getById(unknownWarehouseId) } returns null
 
-        assertThrows<ResourceNotFoundException> { useCase(input) }
+        // When
+        runCatching { useCase(input) }
 
+        // Then
         coVerify(exactly = 0) { repository.update(any()) }
     }
 
     @Test
-    fun `throws EntityValidationException and skips repository when input is invalid`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001")
+    fun `should throw validation exception with violations when input is invalid`() = runTest {
+        // Given
+        val input = createUpdateInput()
         val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
         every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
 
-        val exception = assertThrows<EntityValidationException> { useCase(input) }
+        // When
+        val action = suspend { useCase(input) }
 
+        // Then
+        val exception = assertFailsWith<EntityValidationException> { action() }
         assertThat(exception.violations).containsExactly(error)
+    }
+
+    @Test
+    fun `should not call repository when input is invalid`() = runTest {
+        // Given
+        val input = createUpdateInput()
+        val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
+        every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
+
+        // When
+        runCatching { useCase(input) }
+
+        // Then
         coVerify(exactly = 0) { repository.getById(any()) }
         coVerify(exactly = 0) { repository.update(any()) }
     }
 
     @Test
-    fun `skips repository when input is invalid`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001")
-        val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
-        every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
-
-        val exception = assertThrows<EntityValidationException> { useCase(input) }
-
-        assertThat(exception.violations).containsExactly(error)
-    }
-
-    @Test
-    fun `don't call repository getById when input is invalid`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001")
-        val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
-        every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
-
-        assertThrows<EntityValidationException> { useCase(input) }
-
-        coVerify(exactly = 0) { repository.getById(any()) }
-    }
-
-    @Test
-    fun `don't call repository update when input is invalid`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001")
-        val error = ValidatorError.NoFieldsProvided(ValidatorField.ENTITY)
-        every { validator(input) } returns ValidatorResult.Invalid(listOf(error))
-
-        assertThrows<EntityValidationException> { useCase(input) }
-
-        coVerify(exactly = 0) { repository.update(any()) }
-    }
-
-    @Test
-    fun `propagates repository exception when saving fails`() = runTest {
-        val input = WarehouseUpdateInput(id = "WH-001", name = "New Name")
+    fun `should propagate repository exception when saving fails`() = runTest {
+        // Given
+        val conflictMessage = "Name already used"
+        val input = createUpdateInput(name = "New Name")
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns existing
-        coEvery { repository.update(any()) } throws DatabaseConflictException("Name already used")
+        coEvery { repository.getById(existingWarehouse.id) } returns existingWarehouse
+        coEvery { repository.update(any()) } throws DatabaseConflictException(conflictMessage)
 
-        val exception = assertThrows<DatabaseConflictException> { useCase(input) }
+        // When
+        val action = suspend { useCase(input) }
 
-        assertThat(exception).hasMessageThat().isEqualTo("Name already used")
+        // Then
+        val exception = assertFailsWith<DatabaseConflictException> { action() }
+        assertThat(exception).hasMessageThat().isEqualTo(conflictMessage)
     }
+
+    private fun createWarehouse(
+        id: String = "WH-001",
+        name: String = "Main Hub",
+        regionalZone: String = "North",
+        longitude: Double = 35.0,
+        latitude: Double = 31.0
+    ) = Warehouse(
+        id = id,
+        name = name,
+        regionalZone = regionalZone,
+        longitude = longitude,
+        latitude = latitude
+    )
+
+    private fun createUpdateInput(
+        id: String = "WH-001",
+        name: String? = null,
+        regionalZone: String? = null,
+        longitude: Double? = null,
+        latitude: Double? = null
+    ) = WarehouseUpdateInput(
+        id = id,
+        name = name,
+        regionalZone = regionalZone,
+        longitude = longitude,
+        latitude = latitude
+    )
 }

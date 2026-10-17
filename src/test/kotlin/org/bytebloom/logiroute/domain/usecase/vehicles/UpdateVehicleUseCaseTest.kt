@@ -1,6 +1,8 @@
 package org.bytebloom.logiroute.domain.usecase.vehicles
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -8,154 +10,123 @@ import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
-import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.model.input.update.VehicleUpdateInput
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
 import org.bytebloom.logiroute.domain.validator.update.UpdateVehicleValidator
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 class UpdateVehicleUseCaseTest {
 
+    private val vehicleRepository: VehicleRepository = mockk()
+    private val validator: UpdateVehicleValidator = mockk()
+    private lateinit var useCase: UpdateVehicleUseCase
+
+    @BeforeEach
+    fun setUp() {
+        useCase = UpdateVehicleUseCase(vehicleRepository, validator)
+    }
+
     @Test
-    fun `should update vehicle successfully`() = runTest {
+    fun `should return updated vehicle when input is valid and vehicle exists`() = runTest {
         // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<UpdateVehicleValidator>()
-
-        val warehouse = Warehouse(
-            id = "WH-001",
-            name = "Main Warehouse",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
-        val existingVehicle = Vehicle(
-            id = "TRK-001",
-            maxCapacityKg = 200.0,
-            costPerKm = 5.0,
-            currentWarehouse = warehouse
-        )
-
-        val input = VehicleUpdateInput(
-            id = "TRK-001",
-            maxCapacityKg = 300.0,
-            costPerKm = 4.0,
-            currentWarehouse = warehouse
-        )
-
-        val updatedVehicle = Vehicle(
-            id = "TRK-001",
-            maxCapacityKg = 300.0,
-            costPerKm = 4.0,
-            currentWarehouse = warehouse
-        )
-
+        val existingVehicle = createVehicle(maxCapacityKg = 200.0, costPerKm = 5.0)
+        val input = createUpdateInput(maxCapacityKg = 300.0, costPerKm = 4.0)
+        val updatedVehicle = createVehicle(maxCapacityKg = 300.0, costPerKm = 4.0)
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { vehicleRepository.getById("TRK-001") } returns existingVehicle
+        coEvery { vehicleRepository.getById(existingVehicle.id) } returns existingVehicle
         coEvery { vehicleRepository.update(any()) } returns updatedVehicle
-
-        val useCase = UpdateVehicleUseCase(
-            vehicleRepository,
-            validator
-        )
 
         // When
         val result = useCase(input)
 
         // Then
-        assertEquals(updatedVehicle, result)
+        assertThat(result).isEqualTo(updatedVehicle)
     }
 
-
     @Test
-    fun `should throw exception when vehicle does not exist`() = runTest {
+    fun `should throw resource not found exception when vehicle does not exist`() = runTest {
         // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<UpdateVehicleValidator>()
-
-        val warehouse = Warehouse(
-            id = "WH-001",
-            name = "Main Warehouse",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
-        val input = VehicleUpdateInput(
-            id = "TRK-999",
-            maxCapacityKg = 300.0,
-            costPerKm = 4.0,
-            currentWarehouse = warehouse
-        )
-
+        val unknownVehicleId = "TRK-999"
+        val input = createUpdateInput(id = unknownVehicleId, maxCapacityKg = 300.0)
         every { validator(input) } returns ValidatorResult.Valid
-        coEvery { vehicleRepository.getById("TRK-999") } returns null
+        coEvery { vehicleRepository.getById(unknownVehicleId) } returns null
 
-        val useCase = UpdateVehicleUseCase(
-            vehicleRepository,
-            validator
-        )
+        // When
+        val action = suspend { useCase(input) }
 
-        // When & Then
-        var exception: ResourceNotFoundException? = null
-
-        try {
-            useCase(input)
-        } catch (e: ResourceNotFoundException) {
-            exception = e
-        }
-
-        assertNotNull(exception)
+        // Then
+        assertFailsWith<ResourceNotFoundException> { action() }
     }
-
 
     @Test
-    fun `should throw exception when vehicle update validation fails`() = runTest {
+    fun `should throw validation exception when vehicle update input is invalid`() = runTest {
         // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<UpdateVehicleValidator>()
+        val input = createUpdateInput(maxCapacityKg = -100.0)
+        val violation = ValidatorError.NotPositive(ValidatorField.MAX_CAPACITY_KG)
+        every { validator(input) } returns ValidatorResult.Invalid(listOf(violation))
 
-        val warehouse = Warehouse(
-            id = "WH-001",
-            name = "Main Warehouse",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
+        // When
+        val action = suspend { useCase(input) }
 
-        val input = VehicleUpdateInput(
-            id = "TRK-001",
-            maxCapacityKg = -100.0,
-            costPerKm = 5.0,
-            currentWarehouse = warehouse
-        )
-
-        val violation = ValidatorError.NotPositive(
-            ValidatorField.MAX_CAPACITY_KG
-        )
-
-        every { validator(input) } returns
-                ValidatorResult.Invalid(listOf(violation))
-
-        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.UpdateVehicleUseCase(
-            vehicleRepository,
-            validator
-        )
-
-        // When & Then
-        var exception: EntityValidationException? = null
-
-        try {
-            useCase(input)
-        } catch (e: EntityValidationException) {
-            exception = e
-        }
-
-        assertNotNull(exception)
+        // Then
+        assertFailsWith<EntityValidationException> { action() }
     }
+
+    @Test
+    fun `should not call repository when vehicle update input is invalid`() = runTest {
+        // Given
+        val input = createUpdateInput(maxCapacityKg = -100.0)
+        val violation = ValidatorError.NotPositive(ValidatorField.MAX_CAPACITY_KG)
+        every { validator(input) } returns ValidatorResult.Invalid(listOf(violation))
+
+        // When
+        runCatching { useCase(input) }
+
+        // Then
+        coVerify(exactly = 0) { vehicleRepository.getById(any()) }
+        coVerify(exactly = 0) { vehicleRepository.update(any()) }
+    }
+
+    private fun createWarehouse(
+        id: String = "WH-001",
+        name: String = "Main Warehouse",
+        regionalZone: String = "North",
+        longitude: Double = 35.0,
+        latitude: Double = 32.0
+    ) = Warehouse(
+        id = id,
+        name = name,
+        regionalZone = regionalZone,
+        longitude = longitude,
+        latitude = latitude
+    )
+
+    private fun createVehicle(
+        id: String = "TRK-001",
+        maxCapacityKg: Double = 200.0,
+        costPerKm: Double = 5.0,
+        currentWarehouse: Warehouse = createWarehouse()
+    ) = Vehicle(
+        id = id,
+        maxCapacityKg = maxCapacityKg,
+        costPerKm = costPerKm,
+        currentWarehouse = currentWarehouse
+    )
+
+    private fun createUpdateInput(
+        id: String = "TRK-001",
+        maxCapacityKg: Double? = null,
+        costPerKm: Double? = null,
+        currentWarehouse: Warehouse? = null
+    ) = VehicleUpdateInput(
+        id = id,
+        maxCapacityKg = maxCapacityKg,
+        costPerKm = costPerKm,
+        currentWarehouse = currentWarehouse
+    )
 }
