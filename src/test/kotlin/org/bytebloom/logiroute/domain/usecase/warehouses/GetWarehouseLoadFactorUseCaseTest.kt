@@ -47,7 +47,7 @@ class GetWarehouseLoadFactorUseCaseTest {
         warehouse.addPackage(testPackage)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseLoadFactorUseCase()
+            GetWarehouseLoadFactorUseCase()
 
         // When
         val result = useCase(warehouse)
@@ -87,7 +87,7 @@ class GetWarehouseLoadFactorUseCaseTest {
         warehouse.addPackage(testPackage)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseLoadFactorUseCase()
+            GetWarehouseLoadFactorUseCase()
 
         // When
         val result = useCase(warehouse)

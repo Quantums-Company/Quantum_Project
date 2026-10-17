@@ -16,7 +16,7 @@ import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 class GetWarehouseReportUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
     private val useCase =
-        org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseReportUseCase(repository)
+        GetWarehouseReportUseCase(repository)
 
     private fun createWarehouse(id: String) =
         Warehouse(id = id, name = "Warehouse $id", regionalZone = "Central", longitude = 35.0, latitude = 31.0)

@@ -23,7 +23,7 @@ class DeletePackageUseCaseTest {
     private val packageRepository = mockk<PackageRepository>()
     private val validator = mockk<PackageIdValidator>()
 
-    private val useCase = org.bytebloom.logiroute.domain.usecase.packages.DeletePackageUseCase(
+    private val useCase = DeletePackageUseCase(
         packageRepository = packageRepository,
         validator = validator
     )

@@ -53,7 +53,7 @@ class FindPackagesAboveWeightUseCaseTest {
             packageRepository.getAll()
         } returns listOf(lightPackage, heavyPackage)
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesAboveWeightUseCase(
+        val useCase = FindPackagesAboveWeightUseCase(
             packageRepository
         )
 
@@ -98,7 +98,7 @@ class FindPackagesAboveWeightUseCaseTest {
             packageRepository.getAll()
         } returns listOf(packageAtMinimumWeight)
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesAboveWeightUseCase(
+        val useCase = FindPackagesAboveWeightUseCase(
             packageRepository
         )
 

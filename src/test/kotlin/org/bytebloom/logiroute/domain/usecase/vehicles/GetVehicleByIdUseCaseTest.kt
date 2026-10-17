@@ -43,7 +43,7 @@ class GetVehicleByIdUseCaseTest {
         every { validator("TRK-001") } returns ValidatorResult.Valid
         coEvery { vehicleRepository.getById("TRK-001") } returns vehicle
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.GetVehicleByIdUseCase(
+        val useCase = GetVehicleByIdUseCase(
             vehicleRepository,
             validator
         )
@@ -70,7 +70,7 @@ class GetVehicleByIdUseCaseTest {
         every { validator("INVALID") } returns
                 ValidatorResult.Invalid(listOf(violation))
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.GetVehicleByIdUseCase(
+        val useCase = GetVehicleByIdUseCase(
             vehicleRepository,
             validator
         )

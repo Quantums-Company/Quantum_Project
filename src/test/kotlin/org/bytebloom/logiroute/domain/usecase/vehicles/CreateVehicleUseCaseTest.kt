@@ -27,7 +27,7 @@ class CreateVehicleUseCaseTest {
         latitude = 32.0
     )
 
-    private val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.CreateVehicleUseCase(
+    private val useCase = CreateVehicleUseCase(
         vehicleRepository = vehicleRepository,
         idGenerator = idGenerator
     )

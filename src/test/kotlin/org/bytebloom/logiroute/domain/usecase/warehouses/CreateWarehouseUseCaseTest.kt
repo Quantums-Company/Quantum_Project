@@ -20,7 +20,7 @@ class CreateWarehouseUseCaseTest {
 
     private val repository = mockk<WarehouseRepository>()
     private val idGenerator = mockk<IdGenerator>()
-    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.CreateWarehouseUseCase(
+    private val useCase = CreateWarehouseUseCase(
         repository,
         idGenerator
     )

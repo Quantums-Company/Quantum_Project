@@ -26,7 +26,7 @@ class DeleteVehicleUseCaseTest {
         every { validator("TRK-001") } returns ValidatorResult.Valid
         coEvery { vehicleRepository.delete("TRK-001") } returns true
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.DeleteVehicleUseCase(
+        val useCase = DeleteVehicleUseCase(
             vehicleRepository,
             validator
         )
@@ -54,7 +54,7 @@ class DeleteVehicleUseCaseTest {
         every { validator("INVALID") } returns
                 ValidatorResult.Invalid(listOf(violation))
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.DeleteVehicleUseCase(
+        val useCase = DeleteVehicleUseCase(
             vehicleRepository,
             validator
         )

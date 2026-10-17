@@ -22,7 +22,7 @@ class CreateRouteUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
     private lateinit var idGenerator: IdGenerator
-    private lateinit var createRoute: org.bytebloom.logiroute.domain.usecase.routes.CreateRouteUseCase
+    private lateinit var createRoute: CreateRouteUseCase
 
     @BeforeEach
     fun setUp() {
@@ -30,7 +30,7 @@ class CreateRouteUseCaseTest {
         idGenerator = mockk()
         every { idGenerator.next(EntityType.ROUTE) } returns GENERATED_ROUTE_ID
         coEvery { routeRepository.create(any()) } answers { firstArg() }
-        createRoute = org.bytebloom.logiroute.domain.usecase.routes.CreateRouteUseCase(
+        createRoute = CreateRouteUseCase(
             routeRepository,
             idGenerator
         )

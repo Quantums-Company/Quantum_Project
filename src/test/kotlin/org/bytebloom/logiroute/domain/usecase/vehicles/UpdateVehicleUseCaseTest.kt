@@ -59,7 +59,7 @@ class UpdateVehicleUseCaseTest {
         coEvery { vehicleRepository.getById("TRK-001") } returns existingVehicle
         coEvery { vehicleRepository.update(any()) } returns updatedVehicle
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.UpdateVehicleUseCase(
+        val useCase = UpdateVehicleUseCase(
             vehicleRepository,
             validator
         )
@@ -96,7 +96,7 @@ class UpdateVehicleUseCaseTest {
         every { validator(input) } returns ValidatorResult.Valid
         coEvery { vehicleRepository.getById("TRK-999") } returns null
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.UpdateVehicleUseCase(
+        val useCase = UpdateVehicleUseCase(
             vehicleRepository,
             validator
         )

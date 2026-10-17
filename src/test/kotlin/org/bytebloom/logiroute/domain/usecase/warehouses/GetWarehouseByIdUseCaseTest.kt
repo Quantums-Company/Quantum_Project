@@ -22,7 +22,7 @@ class GetWarehouseByIdUseCaseTest {
 
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<WarehouseIdValidator>()
-    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseByIdUseCase(
+    private val useCase = GetWarehouseByIdUseCase(
         repository,
         validator
     )

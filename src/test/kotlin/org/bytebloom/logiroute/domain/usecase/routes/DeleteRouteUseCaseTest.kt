@@ -18,12 +18,12 @@ import kotlin.test.assertFailsWith
 class DeleteRouteUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
-    private lateinit var deleteRoute: org.bytebloom.logiroute.domain.usecase.routes.DeleteRouteUseCase
+    private lateinit var deleteRoute: DeleteRouteUseCase
 
     @BeforeEach
     fun setUp() {
         routeRepository = mockk()
-        deleteRoute = org.bytebloom.logiroute.domain.usecase.routes.DeleteRouteUseCase(
+        deleteRoute = DeleteRouteUseCase(
             routeRepository,
             RouteIdValidator()
         )

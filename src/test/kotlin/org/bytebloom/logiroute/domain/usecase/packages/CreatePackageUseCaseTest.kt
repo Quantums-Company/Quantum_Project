@@ -32,7 +32,7 @@ class CreatePackageUseCaseTest {
             latitude = 32.0
         )
 
-    private val useCase = org.bytebloom.logiroute.domain.usecase.packages.CreatePackageUseCase(
+    private val useCase = CreatePackageUseCase(
         packageRepository = packageRepository,
         idGenerator = idGenerator
     )

@@ -45,7 +45,7 @@ class GetPackageByIdUseCaseTest {
             latitude = 32.0
         )
 
-    private val useCase = org.bytebloom.logiroute.domain.usecase.packages.GetPackageByIdUseCase(
+    private val useCase = GetPackageByIdUseCase(
         packageRepository = packageRepository,
         validator = validator
     )

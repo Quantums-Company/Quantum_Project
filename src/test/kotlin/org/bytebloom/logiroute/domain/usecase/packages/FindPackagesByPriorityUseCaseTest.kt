@@ -53,7 +53,7 @@ class FindPackagesByPriorityUseCaseTest {
             packageRepository.getAll()
         } returns listOf(firstPackage, secondPackage)
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByPriorityUseCase(
+        val useCase = FindPackagesByPriorityUseCase(
             packageRepository
         )
 
@@ -101,7 +101,7 @@ class FindPackagesByPriorityUseCaseTest {
             packageRepository.getAll()
         } returns listOf(standardPackage)
 
-        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByPriorityUseCase(
+        val useCase = FindPackagesByPriorityUseCase(
             packageRepository
         )
 

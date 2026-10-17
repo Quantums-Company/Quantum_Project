@@ -61,7 +61,7 @@ class FindCheapestSuitableVehicleUseCaseTest {
         } returns listOf(expensiveVehicle, cheapestVehicle)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.vehicles.FindCheapestSuitableVehicleUseCase(
+            FindCheapestSuitableVehicleUseCase(
                 vehicleRepository
             )
 
@@ -121,7 +121,7 @@ class FindCheapestSuitableVehicleUseCaseTest {
         } returns listOf(unsuitableVehicle, suitableVehicle)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.vehicles.FindCheapestSuitableVehicleUseCase(
+            FindCheapestSuitableVehicleUseCase(
                 vehicleRepository
             )
 

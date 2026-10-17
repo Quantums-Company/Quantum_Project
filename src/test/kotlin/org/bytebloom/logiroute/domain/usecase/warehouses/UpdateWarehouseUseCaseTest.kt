@@ -23,7 +23,7 @@ import org.junit.jupiter.api.assertThrows
 class UpdateWarehouseUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<UpdateWarehouseValidator>()
-    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.UpdateWarehouseUseCase(
+    private val useCase = UpdateWarehouseUseCase(
         repository,
         validator
     )

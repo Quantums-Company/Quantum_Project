@@ -44,7 +44,7 @@ class UpdatePackageUseCaseTest {
             latitude = 32.0
         )
 
-    private val useCase = org.bytebloom.logiroute.domain.usecase.packages.UpdatePackageUseCase(
+    private val useCase = UpdatePackageUseCase(
         packageRepository = packageRepository,
         validator = validator
     )

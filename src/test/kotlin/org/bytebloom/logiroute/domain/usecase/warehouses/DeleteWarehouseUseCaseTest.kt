@@ -21,7 +21,7 @@ class DeleteWarehouseUseCaseTest {
 
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<WarehouseIdValidator>()
-    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.DeleteWarehouseUseCase(
+    private val useCase = DeleteWarehouseUseCase(
         repository,
         validator
     )

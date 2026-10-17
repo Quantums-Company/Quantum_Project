@@ -36,7 +36,7 @@ class FindStationedVehiclesByCapacityUseCaseTest {
         warehouse.addVehicle(unsuitableVehicle)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.vehicles.FindStationedVehiclesByCapacityUseCase()
+            FindStationedVehiclesByCapacityUseCase()
 
 
         // When
@@ -68,7 +68,7 @@ class FindStationedVehiclesByCapacityUseCaseTest {
         warehouse.addVehicle(vehicle)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.vehicles.FindStationedVehiclesByCapacityUseCase()
+            FindStationedVehiclesByCapacityUseCase()
 
         // When
         val result = useCase(warehouse, 100.0)

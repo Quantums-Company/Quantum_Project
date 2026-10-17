@@ -20,12 +20,12 @@ import kotlin.test.assertFailsWith
 class GetRouteByIdUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
-    private lateinit var getRouteById: org.bytebloom.logiroute.domain.usecase.routes.GetRouteByIdUseCase
+    private lateinit var getRouteById: GetRouteByIdUseCase
 
     @BeforeEach
     fun setUp() {
         routeRepository = mockk()
-        getRouteById = org.bytebloom.logiroute.domain.usecase.routes.GetRouteByIdUseCase(
+        getRouteById = GetRouteByIdUseCase(
             routeRepository,
             RouteIdValidator()
         )

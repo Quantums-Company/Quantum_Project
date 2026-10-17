@@ -40,7 +40,7 @@ class TraceHubLineageUseCaseTest {
         latitude = 1.0
     )
 
-    private lateinit var useCase: org.bytebloom.logiroute.domain.usecase.warehouses.TraceHubLineageUseCase
+    private lateinit var useCase: TraceHubLineageUseCase
 
     @BeforeEach
     fun setUp() {
@@ -51,7 +51,7 @@ class TraceHubLineageUseCaseTest {
         globalNode.addChild(regionalNode)
         regionalNode.addChild(localNode)
 
-        useCase = org.bytebloom.logiroute.domain.usecase.warehouses.TraceHubLineageUseCase(
+        useCase = TraceHubLineageUseCase(
             HubTree(globalNode)
         )
     }

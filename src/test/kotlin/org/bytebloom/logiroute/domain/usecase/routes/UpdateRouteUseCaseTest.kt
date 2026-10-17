@@ -20,14 +20,14 @@ import kotlin.test.assertFailsWith
 class UpdateRouteUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
-    private lateinit var updateRoute: org.bytebloom.logiroute.domain.usecase.routes.UpdateRouteUseCase
+    private lateinit var updateRoute: UpdateRouteUseCase
 
     @BeforeEach
     fun setUp() {
         routeRepository = mockk()
         coEvery { routeRepository.getById(ROUTE_ID) } returns createExistingRoute()
         coEvery { routeRepository.update(any()) } answers { firstArg() }
-        updateRoute = org.bytebloom.logiroute.domain.usecase.routes.UpdateRouteUseCase(
+        updateRoute = UpdateRouteUseCase(
             routeRepository,
             UpdateRouteValidator()
         )

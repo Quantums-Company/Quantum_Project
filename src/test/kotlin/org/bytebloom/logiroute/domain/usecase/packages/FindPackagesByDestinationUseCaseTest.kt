@@ -46,7 +46,7 @@ class FindPackagesByDestinationUseCaseTest {
         } returns listOf(testPackage)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByDestinationUseCase(
+            FindPackagesByDestinationUseCase(
                 packageRepository
             )
 
@@ -102,7 +102,7 @@ class FindPackagesByDestinationUseCaseTest {
         } returns listOf(testPackage)
 
         val useCase =
-            org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByDestinationUseCase(
+            FindPackagesByDestinationUseCase(
                 packageRepository
             )
 
