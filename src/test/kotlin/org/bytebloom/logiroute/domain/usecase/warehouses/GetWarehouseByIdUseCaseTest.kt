@@ -1,6 +1,5 @@
 package org.bytebloom.logiroute.domain.usecase.warehouses
 
-import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -16,61 +15,107 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import org.bytebloom.logiroute.domain.validator.id.WarehouseIdValidator
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 class GetWarehouseByIdUseCaseTest {
 
-    private val repository = mockk<WarehouseRepository>()
-    private val validator = mockk<WarehouseIdValidator>()
-    private val useCase = GetWarehouseByIdUseCase(
-        repository,
-        validator
-    )
-    private val warehouse = Warehouse("WH-001", "Main Hub", "Central", 35.2, 31.9)
+    private val repository: WarehouseRepository = mockk()
+    private val validator: WarehouseIdValidator = mockk()
+    private lateinit var useCase: GetWarehouseByIdUseCase
+
+    @BeforeEach
+    fun setUp() {
+        useCase = GetWarehouseByIdUseCase(repository, validator)
+    }
 
     @Test
-    fun `returns warehouse when id is valid and warehouse exists`() = runTest {
-        every { validator("WH-001") } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } returns warehouse
+    fun `should return warehouse when id is valid and warehouse exists`() = runTest {
+        // Given
+        val warehouse = createWarehouse(id = "WH-001")
+        every { validator(warehouse.id) } returns ValidatorResult.Valid
+        coEvery { repository.getById(warehouse.id) } returns warehouse
 
-        val result = useCase("WH-001")
+        // When
+        val result = useCase(warehouse.id)
 
+        // Then
         assertThat(result).isEqualTo(warehouse)
     }
 
     @Test
-    fun `returns null when id is valid but warehouse does not exist`() = runTest {
-        every { validator("WH-999") } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-999") } returns null
+    fun `should return null when id is valid but warehouse does not exist`() = runTest {
+        // Given
+        val unknownWarehouseId = "WH-999"
+        every { validator(unknownWarehouseId) } returns ValidatorResult.Valid
+        coEvery { repository.getById(unknownWarehouseId) } returns null
 
-        val result = useCase("WH-999")
+        // When
+        val result = useCase(unknownWarehouseId)
 
+        // Then
         assertThat(result).isNull()
     }
 
     @Test
-    fun `skips repository when id is invalid`() = runTest {
-        val error = ValidatorError.InvalidIdFormat(ValidatorField.ID, EntityType.WAREHOUSE)
-        every { validator("bad-id") } returns ValidatorResult.Invalid(listOf(error))
+    fun `should throw validation exception with id violation when id is invalid`() = runTest {
+        // Given
+        val invalidId = "bad-id"
+        val error = createInvalidIdError()
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(error))
 
-        val exception = assertThrows<EntityValidationException> { useCase("bad-id") }
+        // When
+        val action = suspend { useCase(invalidId) }
 
+        // Then
+        val exception = assertFailsWith<EntityValidationException> { action() }
         assertThat(exception.violations).containsExactly(error)
     }
 
     @Test
-    fun `don't call repository get by id when id is invalid`() = runTest {
-        val error = ValidatorError.InvalidIdFormat(ValidatorField.ID, EntityType.WAREHOUSE)
-        every { validator("bad-id") } returns ValidatorResult.Invalid(listOf(error))
+    fun `should not call repository when id is invalid`() = runTest {
+        // Given
+        val invalidId = "bad-id"
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(createInvalidIdError()))
 
+        // When
+        runCatching { useCase(invalidId) }
+
+        // Then
         coVerify(exactly = 0) { repository.getById(any()) }
     }
 
     @Test
-    fun `propagates repository exception when fetching fails`() = runTest {
-        every { validator("WH-001") } returns ValidatorResult.Valid
-        coEvery { repository.getById("WH-001") } throws NetworkUnavailableException()
+    fun `should propagate repository exception when fetching fails`() = runTest {
+        // Given
+        val warehouseId = "WH-001"
+        every { validator(warehouseId) } returns ValidatorResult.Valid
+        coEvery { repository.getById(warehouseId) } throws NetworkUnavailableException()
 
-        assertThrows<NetworkUnavailableException> { useCase("WH-001") }
+        // When
+        val action = suspend { useCase(warehouseId) }
+
+        // Then
+        assertFailsWith<NetworkUnavailableException> { action() }
     }
+
+    private fun createWarehouse(
+        id: String = "WH-001",
+        name: String = "Main Hub",
+        regionalZone: String = "Central",
+        longitude: Double = 35.2,
+        latitude: Double = 31.9
+    ) = Warehouse(
+        id = id,
+        name = name,
+        regionalZone = regionalZone,
+        longitude = longitude,
+        latitude = latitude
+    )
+
+    private fun createInvalidIdError() = ValidatorError.InvalidIdFormat(
+        ValidatorField.ID,
+        EntityType.WAREHOUSE
+    )
 }

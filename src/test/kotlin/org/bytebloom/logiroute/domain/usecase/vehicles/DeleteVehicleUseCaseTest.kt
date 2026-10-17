@@ -1,73 +1,75 @@
 package org.bytebloom.logiroute.domain.usecase.vehicles
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
-import org.bytebloom.logiroute.domain.repository.VehicleRepository
-import org.bytebloom.logiroute.domain.validator.id.VehicleIdValidator
 import org.bytebloom.logiroute.domain.model.EntityType
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.repository.VehicleRepository
+import org.bytebloom.logiroute.domain.validator.id.VehicleIdValidator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 class DeleteVehicleUseCaseTest {
 
+    private val vehicleRepository: VehicleRepository = mockk()
+    private val validator: VehicleIdValidator = mockk()
+    private lateinit var useCase: DeleteVehicleUseCase
+
+    @BeforeEach
+    fun setUp() {
+        useCase = DeleteVehicleUseCase(vehicleRepository, validator)
+    }
+
     @Test
-    fun `should delete vehicle successfully`() = runTest {
+    fun `should return true when vehicle is deleted`() = runTest {
         // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<VehicleIdValidator>()
-
-        every { validator("TRK-001") } returns ValidatorResult.Valid
-        coEvery { vehicleRepository.delete("TRK-001") } returns true
-
-        val useCase = DeleteVehicleUseCase(
-            vehicleRepository,
-            validator
-        )
+        val vehicleId = "TRK-001"
+        every { validator(vehicleId) } returns ValidatorResult.Valid
+        coEvery { vehicleRepository.delete(vehicleId) } returns true
 
         // When
-        val result = useCase("TRK-001")
-
+        val result = useCase(vehicleId)
 
         // Then
-        assertTrue(result)
+        assertThat(result).isTrue()
     }
-
 
     @Test
-    fun `should throw exception when vehicle id is invalid`() = runTest {
+    fun `should throw validation exception when vehicle id is invalid`() = runTest {
         // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<VehicleIdValidator>()
+        val invalidId = "INVALID"
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(createInvalidIdError()))
 
-        val violation = ValidatorError.InvalidIdFormat(
-            ValidatorField.ID,
-            EntityType.VEHICLE
-        )
+        // When
+        val action = suspend { useCase(invalidId) }
 
-        every { validator("INVALID") } returns
-                ValidatorResult.Invalid(listOf(violation))
-
-        val useCase = DeleteVehicleUseCase(
-            vehicleRepository,
-            validator
-        )
-
-        // When & Then
-        var exception: EntityValidationException? = null
-
-        try {
-            useCase("INVALID")
-        } catch (e: EntityValidationException) {
-            exception = e
-        }
-
-        assertNotNull(exception)
+        // Then
+        assertFailsWith<EntityValidationException> { action() }
     }
+
+    @Test
+    fun `should not call repository when vehicle id is invalid`() = runTest {
+        // Given
+        val invalidId = "INVALID"
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(createInvalidIdError()))
+
+        // When
+        runCatching { useCase(invalidId) }
+
+        // Then
+        coVerify(exactly = 0) { vehicleRepository.delete(any()) }
+    }
+
+    private fun createInvalidIdError() = ValidatorError.InvalidIdFormat(
+        ValidatorField.ID,
+        EntityType.VEHICLE
+    )
 }

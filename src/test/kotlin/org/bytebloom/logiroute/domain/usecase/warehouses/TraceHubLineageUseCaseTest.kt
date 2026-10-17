@@ -1,38 +1,35 @@
 package org.bytebloom.logiroute.domain.usecase.warehouses
 
-import org.junit.jupiter.api.Test
+import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.tree.hub.HubTree
 import org.bytebloom.logiroute.domain.tree.hub.HubTreeNode
 import org.bytebloom.logiroute.domain.tree.hub.HubType
 import org.junit.jupiter.api.BeforeEach
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class TraceHubLineageUseCaseTest {
 
-    private val globalWarehouse = Warehouse(
+    private val globalWarehouse = createWarehouse(
         id = "WH-001",
         name = "Global",
         regionalZone = "World",
         longitude = 0.0,
         latitude = 0.0
     )
-    private val regionalWarehouse = Warehouse(
+    private val regionalWarehouse = createWarehouse(
         id = "WH-002",
         name = "Regional",
-        regionalZone = "North",
         longitude = 34.0,
         latitude = 31.0
     )
-    private val localWarehouse = Warehouse(
+    private val localWarehouse = createWarehouse(
         id = "WH-003",
         name = "Local",
-        regionalZone = "North",
         longitude = 34.1,
         latitude = 31.1
     )
-    private val unrelatedWarehouse = Warehouse(
+    private val unrelatedWarehouse = createWarehouse(
         id = "WH-999",
         name = "Outsider",
         regionalZone = "Nowhere",
@@ -51,44 +48,60 @@ class TraceHubLineageUseCaseTest {
         globalNode.addChild(regionalNode)
         regionalNode.addChild(localNode)
 
-        useCase = TraceHubLineageUseCase(
-            HubTree(globalNode)
-        )
+        useCase = TraceHubLineageUseCase(HubTree(globalNode))
     }
 
     @Test
-    fun `leaf warehouse lineage walks all the way up to the global root`() {
+    fun `should walk all the way up to the global root when warehouse is a leaf`() {
         // When
         val lineage = useCase(localWarehouse)
 
         // Then
-        assertEquals(listOf(localWarehouse, regionalWarehouse, globalWarehouse), lineage)
+        assertThat(lineage)
+            .containsExactly(localWarehouse, regionalWarehouse, globalWarehouse)
+            .inOrder()
     }
 
     @Test
-    fun `global root warehouse lineage is just itself`() {
+    fun `should return only itself when warehouse is the global root`() {
         // When
         val lineage = useCase(globalWarehouse)
 
         // Then
-        assertEquals(listOf(globalWarehouse), lineage)
+        assertThat(lineage).containsExactly(globalWarehouse)
     }
 
     @Test
-    fun `a warehouse not present anywhere in the tree returns an empty lineage`() {
-        // When
-        val lineage = useCase(unrelatedWarehouse)
-
-        // Then
-        assertTrue(lineage.isEmpty())
-    }
-
-    @Test
-    fun `intermediate regional warehouse lineage includes only itself and the global root`() {
+    fun `should include only itself and the global root when warehouse is regional`() {
         // When
         val lineage = useCase(regionalWarehouse)
 
         // Then
-        assertEquals(listOf(regionalWarehouse, globalWarehouse), lineage)
+        assertThat(lineage)
+            .containsExactly(regionalWarehouse, globalWarehouse)
+            .inOrder()
     }
+
+    @Test
+    fun `should return empty lineage when warehouse is not present in the tree`() {
+        // When
+        val lineage = useCase(unrelatedWarehouse)
+
+        // Then
+        assertThat(lineage).isEmpty()
+    }
+
+    private fun createWarehouse(
+        id: String = "WH-001",
+        name: String = "Main Warehouse",
+        regionalZone: String = "North",
+        longitude: Double = 35.0,
+        latitude: Double = 32.0
+    ) = Warehouse(
+        id = id,
+        name = name,
+        regionalZone = regionalZone,
+        longitude = longitude,
+        latitude = latitude
+    )
 }
