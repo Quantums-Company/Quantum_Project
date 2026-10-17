@@ -1,8 +1,8 @@
 package usecase.queries
 
-import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.usecase.queries.FindStationedVehiclesByCapacityUseCase
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.usecase.queries.FindStationedVehiclesByCapacityUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

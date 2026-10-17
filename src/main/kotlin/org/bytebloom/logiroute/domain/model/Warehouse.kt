@@ -1,0 +1,49 @@
+package org.bytebloom.logiroute.domain.model
+
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.sorting.quickSortCargoByWeight
+import org.bytebloom.logiroute.domain.validator.id.EntityIdValidator
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
+import org.bytebloom.logiroute.domain.validator.FieldValidator
+
+data class Warehouse(
+    val id: String,
+    val name: String,
+    val regionalZone: String,
+    val longitude: Double,
+    val latitude: Double
+) {
+    init {
+        val rules = FieldValidator()
+        val violations = listOfNotNull(
+            EntityIdValidator().validate(id, EntityType.WAREHOUSE),
+            rules.requiredText(name, ValidatorField.NAME),
+            rules.requiredText(regionalZone, ValidatorField.REGIONAL_ZONE),
+            rules.latitude(latitude),
+            rules.longitude(longitude)
+        )
+        if (violations.isNotEmpty()) throw EntityValidationException(violations)
+    }
+
+    private val _cargoQueue = mutableListOf<Package>()
+    val cargoQueue: List<Package> get() = _cargoQueue
+
+    private val _outgoingRoutes = mutableListOf<Route>()
+    val outgoingRoutes: List<Route> get() = _outgoingRoutes
+
+    private val _stationedVehicles = mutableListOf<Vehicle>()
+    val stationedVehicles: List<Vehicle> get() = _stationedVehicles
+
+    fun addPackage(pkg: Package): Boolean = _cargoQueue.add(pkg)
+    fun removePackage(pkg: Package): Boolean = _cargoQueue.remove(pkg)
+    fun addRoute(route: Route): Boolean = _outgoingRoutes.add(route)
+    fun addVehicle(vehicle: Vehicle): Boolean = _stationedVehicles.add(vehicle)
+    fun removeVehicle(vehicle: Vehicle): Boolean = _stationedVehicles.remove(vehicle)
+    fun containsPackage(pkg: Package): Boolean = pkg in _cargoQueue
+    fun hasVehicle(vehicle: Vehicle): Boolean = vehicle in _stationedVehicles
+    fun sortCargoByWeight() { quickSortCargoByWeight(_cargoQueue) }
+    fun removeVehicleById(vehicleId: String): Boolean = _stationedVehicles.removeIf { it.id == vehicleId }
+
+    override fun toString(): String =
+        "Warehouse(id='$id', name=$name, regionalZone=$regionalZone, longitude=$longitude, latitude=$latitude)"
+}

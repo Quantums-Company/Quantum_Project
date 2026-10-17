@@ -1,13 +1,13 @@
 package usecase.commands
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.exception.EntityValidationException
-import org.bytebloom.domain.model.exception.IllegalShipmentTransitionException
-import org.bytebloom.domain.shipment.Shipment
-import org.bytebloom.domain.usecase.commands.ReroutePackageUseCase
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.model.exception.IllegalShipmentTransitionException
+import org.bytebloom.logiroute.domain.shipment.Shipment
+import org.bytebloom.logiroute.domain.usecase.commands.ReroutePackageUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

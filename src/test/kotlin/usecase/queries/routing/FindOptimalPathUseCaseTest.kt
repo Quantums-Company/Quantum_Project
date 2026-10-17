@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.routing.common.RouteFinder
-import org.bytebloom.domain.usecase.queries.routing.FindOptimalPathUseCase
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.routing.common.RouteFinder
+import org.bytebloom.logiroute.domain.usecase.queries.routing.FindOptimalPathUseCase
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 

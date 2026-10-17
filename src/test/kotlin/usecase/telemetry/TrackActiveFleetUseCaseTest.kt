@@ -4,10 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.domain.model.VehicleTelemetry
-import org.bytebloom.domain.model.result.VehicleDelayNotification
-import org.bytebloom.domain.repository.TelemetryRepository
-import org.bytebloom.domain.usecase.telemetry.TrackActiveFleetUseCase
+import org.bytebloom.logiroute.domain.model.VehicleTelemetry
+import org.bytebloom.logiroute.domain.model.result.VehicleDelayNotification
+import org.bytebloom.logiroute.domain.repository.TelemetryRepository
+import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

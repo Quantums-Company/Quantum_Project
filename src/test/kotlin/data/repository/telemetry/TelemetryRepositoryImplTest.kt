@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.data.repository.telemetry.TelemetryRepositoryImpl
-import org.bytebloom.data.source.telemetry.TelemetryDataSource
-import org.bytebloom.domain.model.VehicleTelemetry
+import org.bytebloom.logiroute.data.repository.telemetry.TelemetryRepositoryImpl
+import org.bytebloom.logiroute.data.source.telemetry.TelemetryDataSource
+import org.bytebloom.logiroute.domain.model.VehicleTelemetry
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

@@ -1,0 +1,37 @@
+package org.bytebloom.logiroute.domain.usecase.crud.routes
+
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
+import org.bytebloom.logiroute.domain.model.Route
+import org.bytebloom.logiroute.domain.repository.RouteRepository
+import org.bytebloom.logiroute.domain.model.input.update.RouteUpdateInput
+import org.bytebloom.logiroute.domain.validator.update.UpdateRouteValidator
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+
+class UpdateRouteUseCase(
+    private val routeRepository: RouteRepository,
+    private val validator: UpdateRouteValidator
+) {
+    suspend operator fun invoke(input: RouteUpdateInput): Route {
+        when (val result = validator(input)) {
+            is ValidatorResult.Valid -> {
+                val existing = routeRepository.getById(input.id)
+                    ?: throw ResourceNotFoundException("Route '${input.id}' was not found")
+
+                val updated = Route(
+                    id = existing.id,
+                    distanceKm = input.distanceKm ?: existing.distanceKm,
+                    typicalDelayMin = input.typicalDelayMin ?: existing.typicalDelayMin,
+                    originWarehouse = input.originWarehouse ?: existing.originWarehouse,
+                    destinationWarehouse = input.destinationWarehouse ?: existing.destinationWarehouse
+                )
+
+                return routeRepository.update(updated)
+            }
+
+            is ValidatorResult.Invalid -> {
+                throw EntityValidationException(result.violations)
+            }
+        }
+    }
+}

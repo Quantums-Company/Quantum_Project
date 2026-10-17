@@ -1,0 +1,29 @@
+package org.bytebloom.logiroute.domain.usecase.queries.reporting
+
+import org.bytebloom.logiroute.domain.repository.WarehouseRepository
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.result.WarehouseReport
+
+class GetWarehouseReportUseCase(
+    private val warehouseRepository: WarehouseRepository,
+) {
+
+    suspend operator fun invoke(
+        warehouseId: String
+    ): WarehouseReport? {
+        val warehousesById = warehouseRepository.getAll().associateBy { it.id }
+        val warehouse = warehousesById[warehouseId] ?: return null
+
+        val packages = warehouse.cargoQueue
+
+        val vehicles = warehouse.stationedVehicles
+
+        return WarehouseReport(
+            warehouseId = warehouse.id,
+            packageCount = packages.size,
+            totalPackageWeight = packages.sumOf(Package::weight),
+            totalVehicleCapacity = vehicles.sumOf(Vehicle::maxCapacityKg)
+        )
+    }
+}

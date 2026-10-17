@@ -1,11 +1,11 @@
 package usecase
 
 import org.junit.jupiter.api.Test
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.tree.hierarchicalHub.HubTree
-import org.bytebloom.domain.tree.hierarchicalHub.HubTreeNode
-import org.bytebloom.domain.tree.hierarchicalHub.HubType
-import org.bytebloom.domain.usecase.TraceHubLineageUseCase
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.tree.hierarchicalHub.HubTree
+import org.bytebloom.logiroute.domain.tree.hierarchicalHub.HubTreeNode
+import org.bytebloom.logiroute.domain.tree.hierarchicalHub.HubType
+import org.bytebloom.logiroute.domain.usecase.TraceHubLineageUseCase
 import org.junit.jupiter.api.BeforeEach
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

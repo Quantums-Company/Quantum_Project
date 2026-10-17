@@ -1,0 +1,43 @@
+package org.bytebloom.logiroute.data.mapper
+
+import org.bytebloom.logiroute.data.raw.PackageRaw
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Warehouse
+
+class PackageMapper(
+    private val warehouseMapper: WarehouseReferenceMapper
+) {
+
+    private fun PackageRaw.toDomain(
+        originWarehouse: Warehouse,
+        destinationWarehouse: Warehouse
+    ): Package {
+        val pkg = Package(
+            id = id,
+            weight = weight,
+            priority = priority,
+            originWarehouse = originWarehouse,
+            destinationWarehouse = destinationWarehouse
+        )
+
+        pkg.originWarehouse.addPackage(pkg)
+        return pkg
+    }
+
+    private fun map(raw: PackageRaw): Package? {
+
+        val origin = warehouseMapper.map(
+            raw.originWarehouseId
+        ) ?: return null
+
+        val destination = warehouseMapper.map(
+            raw.destinationWarehouseId
+        ) ?: return null
+
+        return raw.toDomain(origin, destination)
+    }
+    fun toDomain(packageRaws: List<PackageRaw>): List<Package> {
+        return packageRaws.mapNotNull(::map)
+    }
+}
+

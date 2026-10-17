@@ -1,10 +1,10 @@
 package validator.id
 
-import org.bytebloom.domain.model.EntityType
-import org.bytebloom.domain.model.validation.ValidatorError
-import org.bytebloom.domain.model.validation.ValidatorField
-import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.validator.id.PackageIdValidator
+import org.bytebloom.logiroute.domain.model.EntityType
+import org.bytebloom.logiroute.domain.model.validation.ValidatorError
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.validator.id.PackageIdValidator
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

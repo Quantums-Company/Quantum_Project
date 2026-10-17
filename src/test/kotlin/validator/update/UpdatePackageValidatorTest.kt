@@ -2,14 +2,14 @@ package validator.update
 
 import io.mockk.every
 import io.mockk.mockk
-import org.bytebloom.domain.model.EntityType
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.input.update.PackageUpdateInput
-import org.bytebloom.domain.model.validation.ValidatorError
-import org.bytebloom.domain.model.validation.ValidatorField
-import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.validator.update.UpdatePackageValidator
+import org.bytebloom.logiroute.domain.model.EntityType
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.input.update.PackageUpdateInput
+import org.bytebloom.logiroute.domain.model.validation.ValidatorError
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.validator.update.UpdatePackageValidator
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

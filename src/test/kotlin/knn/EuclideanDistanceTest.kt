@@ -1,8 +1,8 @@
 package knn
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.domain.knn.EuclideanDistance
-import org.bytebloom.domain.model.knn.CargoFeatures
+import org.bytebloom.logiroute.domain.knn.EuclideanDistance
+import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.junit.jupiter.api.Test
 
 class EuclideanDistanceTest {

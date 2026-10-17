@@ -5,15 +5,15 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.domain.knn.KNearestNeighborsClassifier
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Region
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.knn.CargoFeatures
-import org.bytebloom.domain.model.knn.LabeledCargoRecord
-import org.bytebloom.domain.repository.TrainingCargoRepository
-import org.bytebloom.domain.usecase.queries.classification.ClassifyPackageSectorUseCase
+import org.bytebloom.logiroute.domain.knn.KNearestNeighborsClassifier
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Region
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
+import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
+import org.bytebloom.logiroute.domain.repository.TrainingCargoRepository
+import org.bytebloom.logiroute.domain.usecase.queries.classification.ClassifyPackageSectorUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

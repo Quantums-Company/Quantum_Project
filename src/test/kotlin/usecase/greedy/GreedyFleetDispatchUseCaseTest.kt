@@ -1,9 +1,9 @@
 package usecase.greedy
 
 import org.junit.jupiter.api.Test
-import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.usecase.greedy.GreedyFleetDispatchUseCase
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.usecase.greedy.GreedyFleetDispatchUseCase
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

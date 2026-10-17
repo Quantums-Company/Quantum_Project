@@ -1,0 +1,11 @@
+package org.bytebloom.logiroute.domain.usecase
+
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.tree.hierarchicalHub.HubTree
+
+class TraceHubLineageUseCase(
+    private val hubTree: HubTree
+) {
+    operator fun invoke(warehouse: Warehouse): List<Warehouse> =
+        hubTree.lineageFrom(warehouse)
+}
