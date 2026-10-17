@@ -1,7 +1,7 @@
 package validator.id
 
-import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.validator.id.VehicleIdValidator
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.validator.id.VehicleIdValidator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

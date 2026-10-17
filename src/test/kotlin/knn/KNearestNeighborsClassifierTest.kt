@@ -1,10 +1,10 @@
 package knn
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.domain.knn.KNearestNeighborsClassifier
-import org.bytebloom.domain.model.Region
-import org.bytebloom.domain.model.knn.CargoFeatures
-import org.bytebloom.domain.model.knn.LabeledCargoRecord
+import org.bytebloom.logiroute.domain.knn.KNearestNeighborsClassifier
+import org.bytebloom.logiroute.domain.model.Region
+import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
+import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
 import org.junit.jupiter.api.Test
 
 class KNearestNeighborsClassifierTest {

@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.data.local.telemetry.SimulatedTelemetryDataSource
+import org.bytebloom.logiroute.data.telemetry.SimulatedTelemetryDataSource
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

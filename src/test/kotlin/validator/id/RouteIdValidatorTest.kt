@@ -1,11 +1,11 @@
 package validator.id
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.domain.model.EntityType
-import org.bytebloom.domain.model.validation.ValidatorError
-import org.bytebloom.domain.model.validation.ValidatorField
-import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.validator.id.RouteIdValidator
+import org.bytebloom.logiroute.domain.model.EntityType
+import org.bytebloom.logiroute.domain.model.validation.ValidatorError
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.validator.id.RouteIdValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource

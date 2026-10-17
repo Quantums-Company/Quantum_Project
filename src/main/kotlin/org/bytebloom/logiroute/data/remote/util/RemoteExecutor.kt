@@ -1,0 +1,22 @@
+package org.bytebloom.logiroute.data.remote.util
+
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.bytebloom.logiroute.data.remote.client.SupabaseErrorTranslator
+
+class RemoteExecutor(
+    private val errorTranslator: SupabaseErrorTranslator,
+    private val rateLimiter: RateLimiter
+) {
+    suspend fun <T> execute(
+        operation: String,
+        dispatcher: CoroutineDispatcher = Dispatchers.IO,
+        block: suspend () -> T
+    ): T = withContext(dispatcher) {
+        retryWithBackoff {
+            rateLimiter.acquire()
+            errorTranslator.translate(operation, block)
+        }.getOrThrow()
+    }
+}

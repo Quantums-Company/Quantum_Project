@@ -7,13 +7,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.domain.model.EntityType
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.exception.DatabaseConflictException
-import org.bytebloom.domain.model.exception.EntityValidationException
-import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.usecase.crud.warehouses.CreateWarehouseUseCase
+import org.bytebloom.logiroute.domain.model.EntityType
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.exception.DatabaseConflictException
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.repository.WarehouseRepository
+import org.bytebloom.logiroute.domain.service.IdGenerator
+import org.bytebloom.logiroute.domain.usecase.crud.warehouses.CreateWarehouseUseCase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 

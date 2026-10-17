@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test
 
 class CleanArchitectureTest {
     private val scope by lazy { Konsist.scopeFromProject() }
-    private val presentationLayer by lazy { Layer("presentation", "org.bytebloom.presentation..") }
-    private val domainLayer by lazy { Layer("domain", "org.bytebloom.domain..") }
-    private val dataLayer by lazy { Layer("data", "org.bytebloom.data..") }
-    private val diLayer by lazy { Layer("di", "org.bytebloom.di..") }
+    private val presentationLayer by lazy { Layer("presentation", "org.bytebloom.logiroute.presentation..") }
+    private val domainLayer by lazy { Layer("domain", "org.bytebloom.logiroute.domain..") }
+    private val dataLayer by lazy { Layer("data", "org.bytebloom.logiroute.data..") }
+    private val diLayer by lazy { Layer("di", "org.bytebloom.logiroute.di..") }
 
     @Test
     fun `clean architecture layers have correct dependencies`() {
@@ -30,7 +30,7 @@ class CleanArchitectureTest {
     fun `domain layer must not import third party libraries`() {
         scope
             .files
-            .withPackage("org.bytebloom.domain..")
+            .withPackage("org.bytebloom.logiroute.domain..")
             .assertTrue { file ->
                 file.imports.none { import ->
                     import.name.contains("supabase") ||
@@ -44,7 +44,7 @@ class CleanArchitectureTest {
     fun `use case classes must end with UseCase suffix`() {
         scope
             .classes()
-            .withPackage("org.bytebloom.domain.usecase..")
+            .withPackage("org.bytebloom.logiroute.domain.usecase..")
             .assertTrue { it.hasNameEndingWith("UseCase") }
     }
 
@@ -52,7 +52,7 @@ class CleanArchitectureTest {
     fun `validator classes must end with Validator suffix`() {
         scope
             .classes()
-            .withPackage("org.bytebloom.domain.validator..")
+            .withPackage("org.bytebloom.logiroute.domain.validator..")
             .assertTrue { it.hasNameEndingWith("Validator") }
     }
 
@@ -74,7 +74,7 @@ class CleanArchitectureTest {
     fun `dto classes must end with Dto suffix`() {
         scope
             .classes()
-            .withPackage("org.bytebloom.data.remote.dto..")
+            .withPackage("org.bytebloom.logiroute.data.remote.dto..")
             .assertTrue { it.hasNameEndingWith("Dto") }
     }
 
@@ -82,7 +82,7 @@ class CleanArchitectureTest {
     fun `dto classes must be annotated with Serializable`() {
         scope
             .classes()
-            .withPackage("org.bytebloom.data.remote.dto..")
+            .withPackage("org.bytebloom.logiroute.data.remote.dto..")
             .assertTrue { it.hasAnnotationOf(Serializable::class) }
     }
 }

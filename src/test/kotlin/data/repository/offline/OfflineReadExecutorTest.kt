@@ -2,8 +2,8 @@ package data.repository.offline
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.data.offline.OfflineReadExecutor
-import org.bytebloom.domain.model.exception.NetworkUnavailableException
+import org.bytebloom.logiroute.data.offline.OfflineReadExecutor
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

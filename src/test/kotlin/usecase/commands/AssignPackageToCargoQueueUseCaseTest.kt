@@ -1,10 +1,10 @@
 package usecase.commands
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.usecase.commands.AssignPackageToCargoQueueUseCase
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.usecase.dispatch.AssignPackageToCargoQueueUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

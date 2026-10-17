@@ -1,11 +1,11 @@
 package usecase.queries.planing
 
 import org.junit.jupiter.api.Test
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.usecase.queries.planing.FindCargoRecoveryPlanUseCase
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.usecase.dispatch.FindCargoRecoveryPlanUseCase
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull

@@ -4,14 +4,14 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.di.useCaseModule
-import org.bytebloom.di.validatorModule
-import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.repository.RouteRepository
-import org.bytebloom.domain.repository.VehicleRepository
-import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.service.IdGenerator
-import org.bytebloom.domain.usecase.crud.packages.GetPackageByIdUseCase
+import org.bytebloom.logiroute.di.useCaseModule
+import org.bytebloom.logiroute.di.validatorModule
+import org.bytebloom.logiroute.domain.repository.PackageRepository
+import org.bytebloom.logiroute.domain.repository.RouteRepository
+import org.bytebloom.logiroute.domain.repository.VehicleRepository
+import org.bytebloom.logiroute.domain.repository.WarehouseRepository
+import org.bytebloom.logiroute.domain.service.IdGenerator
+import org.bytebloom.logiroute.domain.usecase.crud.packages.GetPackageByIdUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,8 +22,8 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.bytebloom.di.telemetryModule
-import org.bytebloom.domain.usecase.telemetry.TrackActiveFleetUseCase
+import org.bytebloom.logiroute.di.telemetryModule
+import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
 
 class KoinTestModulesTest : KoinTest {
 

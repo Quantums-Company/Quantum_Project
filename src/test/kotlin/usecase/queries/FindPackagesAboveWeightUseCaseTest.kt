@@ -3,11 +3,11 @@ package usecase.queries
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.repository.PackageRepository
-import org.bytebloom.domain.usecase.queries.FindPackagesAboveWeightUseCase
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.repository.PackageRepository
+import org.bytebloom.logiroute.domain.usecase.crud.packages.FindPackagesAboveWeightUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

@@ -6,13 +6,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.result.WarehouseReport
-import org.bytebloom.domain.repository.WarehouseRepository
-import org.bytebloom.domain.usecase.queries.reporting.GetWarehouseReportUseCase
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.result.WarehouseReport
+import org.bytebloom.logiroute.domain.repository.WarehouseRepository
+import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseReportUseCase
 
 class GetWarehouseReportUseCaseTest {
     private val repository = mockk<WarehouseRepository>()

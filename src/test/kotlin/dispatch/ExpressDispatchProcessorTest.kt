@@ -3,16 +3,16 @@ package dispatch
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import io.mockk.verify
-import org.bytebloom.domain.dispatch.DispatchNotifier
-import org.bytebloom.domain.dispatch.DispatchOrder
-import org.bytebloom.domain.dispatch.DispatchOutcome
-import org.bytebloom.domain.dispatch.DispatchRejectionReason
-import org.bytebloom.domain.dispatch.ExpressDispatchProcessor
-import org.bytebloom.domain.dispatch.ShipmentStateUpdater
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
-import org.bytebloom.domain.model.Vehicle
-import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.dispatch.DispatchNotifier
+import org.bytebloom.logiroute.domain.dispatch.DispatchOrder
+import org.bytebloom.logiroute.domain.dispatch.DispatchOutcome
+import org.bytebloom.logiroute.domain.dispatch.DispatchRejectionReason
+import org.bytebloom.logiroute.domain.dispatch.ExpressDispatchProcessor
+import org.bytebloom.logiroute.domain.dispatch.ShipmentStateUpdater
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Warehouse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

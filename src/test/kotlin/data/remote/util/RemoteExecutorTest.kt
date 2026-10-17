@@ -4,9 +4,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.data.remote.client.SupabaseErrorTranslator
-import org.bytebloom.data.remote.util.RateLimiter
-import org.bytebloom.data.remote.util.RemoteExecutor
+import org.bytebloom.logiroute.data.remote.client.SupabaseErrorTranslator
+import org.bytebloom.logiroute.data.remote.util.RateLimiter
+import org.bytebloom.logiroute.data.remote.util.RemoteExecutor
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
