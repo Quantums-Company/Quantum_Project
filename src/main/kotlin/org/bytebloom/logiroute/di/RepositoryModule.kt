@@ -1,11 +1,11 @@
 package org.bytebloom.logiroute.di
 
-import org.bytebloom.logiroute.data.local.common.UuidIdGenerator
+import org.bytebloom.logiroute.data.id.UuidIdGenerator
 import org.bytebloom.logiroute.data.offline.OfflineReadExecutor
-import org.bytebloom.logiroute.data.repository.csv.CsvPackageRepository
-import org.bytebloom.logiroute.data.repository.csv.CsvRouteRepository
-import org.bytebloom.logiroute.data.repository.csv.CsvVehicleRepository
-import org.bytebloom.logiroute.data.repository.csv.CsvWarehouseRepository
+import org.bytebloom.logiroute.data.csv.repository.CsvPackageRepository
+import org.bytebloom.logiroute.data.csv.repository.CsvRouteRepository
+import org.bytebloom.logiroute.data.csv.repository.CsvVehicleRepository
+import org.bytebloom.logiroute.data.csv.repository.CsvWarehouseRepository
 import org.bytebloom.logiroute.data.repository.offline.OfflineFirstPackageRepository
 import org.bytebloom.logiroute.data.repository.offline.OfflineFirstRouteRepository
 import org.bytebloom.logiroute.data.repository.offline.OfflineFirstVehicleRepository

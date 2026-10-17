@@ -1,8 +1,8 @@
 package org.bytebloom.logiroute.data.repository.offline
 
-import org.bytebloom.logiroute.data.offline.CsvSnapshotStore
+import org.bytebloom.logiroute.data.csv.cache.CsvSnapshotStore
 import org.bytebloom.logiroute.data.offline.OfflineReadExecutor
-import org.bytebloom.logiroute.data.repository.csv.CsvVehicleRepository
+import org.bytebloom.logiroute.data.csv.repository.CsvVehicleRepository
 import org.bytebloom.logiroute.data.repository.remote.RemoteVehicleRepository
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.repository.VehicleRepository

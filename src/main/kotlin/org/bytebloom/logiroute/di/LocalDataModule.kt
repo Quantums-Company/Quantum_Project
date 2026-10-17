@@ -1,22 +1,22 @@
 package org.bytebloom.logiroute.di
 
-import org.bytebloom.logiroute.data.local.cleaner.CsvWriter
-import org.bytebloom.logiroute.data.local.common.CsvFileReader
-import org.bytebloom.logiroute.data.local.csv.CsvPackageDataSource
-import org.bytebloom.logiroute.data.local.csv.CsvRouteDataSource
-import org.bytebloom.logiroute.data.local.csv.CsvVehicleDataSource
-import org.bytebloom.logiroute.data.local.csv.CsvWarehouseDataSource
-import org.bytebloom.logiroute.data.offline.CsvSnapshotStore
-import org.bytebloom.logiroute.data.source.csv.PackageDataSource
-import org.bytebloom.logiroute.data.source.csv.RouteDataSource
-import org.bytebloom.logiroute.data.source.csv.VehicleDataSource
-import org.bytebloom.logiroute.data.source.csv.WarehouseDataSource
+import org.bytebloom.logiroute.data.csv.io.CsvFileWriter
+import org.bytebloom.logiroute.data.csv.io.CsvFileReader
+import org.bytebloom.logiroute.data.csv.datasource.CsvPackageDataSource
+import org.bytebloom.logiroute.data.csv.datasource.CsvRouteDataSource
+import org.bytebloom.logiroute.data.csv.datasource.CsvVehicleDataSource
+import org.bytebloom.logiroute.data.csv.datasource.CsvWarehouseDataSource
+import org.bytebloom.logiroute.data.csv.cache.CsvSnapshotStore
+import org.bytebloom.logiroute.data.csv.datasource.PackageDataSource
+import org.bytebloom.logiroute.data.csv.datasource.RouteDataSource
+import org.bytebloom.logiroute.data.csv.datasource.VehicleDataSource
+import org.bytebloom.logiroute.data.csv.datasource.WarehouseDataSource
 import org.koin.dsl.module
 import java.io.File
 
 val localDataModule = module {
     single { CsvFileReader() }
-    single { CsvWriter() }
+    single { CsvFileWriter() }
 
     single {
         CsvSnapshotStore(
