@@ -1,100 +1,77 @@
 package org.bytebloom.logiroute.domain.usecase.packages
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.logiroute.domain.model.EntityType
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
-import org.bytebloom.logiroute.domain.model.validation.ValidatorError
-import org.bytebloom.logiroute.domain.model.validation.ValidatorField
-import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.validator.id.PackageIdValidator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class DeletePackageUseCaseTest {
 
-    private val packageRepository = mockk<PackageRepository>()
-    private val validator = mockk<PackageIdValidator>()
+    private lateinit var packageRepository: PackageRepository
+    private lateinit var deletePackage: DeletePackageUseCase
 
-    private val useCase = DeletePackageUseCase(
-        packageRepository = packageRepository,
-        validator = validator
-    )
-
-    @Test
-    fun `deletes package successfully`() = runTest {
-        // Given
-        val id = "PKG-001"
-
-        every { validator(id) } returns ValidatorResult.Valid
-        coEvery { packageRepository.delete(id) } returns true
-
-        // When
-        val result = useCase(id)
-
-        // Then
-        assertTrue(result)
-
-        coVerify(exactly = 1) {
-            packageRepository.delete(id)
-        }
+    @BeforeEach
+    fun setUp() {
+        packageRepository = mockk()
+        deletePackage = DeletePackageUseCase(packageRepository, PackageIdValidator())
     }
 
     @Test
-    fun `returns false when package cannot be deleted`() = runTest {
+    fun `should return true when repository deletes the package`() = runTest {
         // Given
-        val id = "PKG-404"
-
-        every { validator(id) } returns ValidatorResult.Valid
-        coEvery { packageRepository.delete(id) } returns false
+        coEvery { packageRepository.delete(PACKAGE_ID) } returns true
 
         // When
-        val result = useCase(id)
+        val isDeleted = deletePackage(PACKAGE_ID)
 
         // Then
-        assertFalse(result)
-
-        coVerify(exactly = 1) {
-            packageRepository.delete(id)
-        }
+        assertThat(isDeleted).isTrue()
+        coVerify(exactly = 1) { packageRepository.delete(PACKAGE_ID) }
     }
 
     @Test
-    fun `throws validation exception when package id is invalid`() = runTest {
+    fun `should return false when repository cannot delete the package`() = runTest {
         // Given
-        val invalidId = "WH-001"
-
-        every {
-            validator(invalidId)
-        } returns ValidatorResult.Invalid(
-            listOf(
-                ValidatorError.InvalidIdFormat(
-                    field = ValidatorField.ID,
-                    entityType = EntityType.PACKAGE
-                )
-            )
-        )
+        coEvery { packageRepository.delete(MISSING_ID) } returns false
 
         // When
-        val exception = assertFailsWith<EntityValidationException> {
-            useCase(invalidId)
-        }
+        val isDeleted = deletePackage(MISSING_ID)
 
         // Then
-        assertEquals(
-            ValidatorField.ID,
-            exception.violations.single().field
-        )
+        assertThat(isDeleted).isFalse()
+    }
 
-        coVerify(exactly = 0) {
-            packageRepository.delete(invalidId)
-        }
+    @ParameterizedTest
+    @ValueSource(strings = ["", "WH-001", "PKG-12", "pkg-001"])
+    fun `should throw validation exception and skip repository when id is invalid`(invalidId: String) = runTest {
+        // Given: invalidId from @ValueSource
+
+        // When / Then
+        assertFailsWith<EntityValidationException> { deletePackage(invalidId) }
+        coVerify(exactly = 0) { packageRepository.delete(any()) }
+    }
+
+    @Test
+    fun `should propagate network exception when repository fails`() = runTest {
+        // Given
+        coEvery { packageRepository.delete(PACKAGE_ID) } throws NetworkUnavailableException()
+
+        // When / Then
+        assertFailsWith<NetworkUnavailableException> { deletePackage(PACKAGE_ID) }
+    }
+
+    private companion object {
+        const val PACKAGE_ID = "PKG-001"
+        const val MISSING_ID = "PKG-404"
     }
 }
