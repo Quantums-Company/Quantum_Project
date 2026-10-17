@@ -15,7 +15,6 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.PackageRepository
-import org.bytebloom.logiroute.domain.usecase.crud.packages.GetPackageByIdUseCase
 import org.bytebloom.logiroute.domain.validator.id.PackageIdValidator
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -46,7 +45,7 @@ class GetPackageByIdUseCaseTest {
             latitude = 32.0
         )
 
-    private val useCase = GetPackageByIdUseCase(
+    private val useCase = org.bytebloom.logiroute.domain.usecase.packages.GetPackageByIdUseCase(
         packageRepository = packageRepository,
         validator = validator
     )

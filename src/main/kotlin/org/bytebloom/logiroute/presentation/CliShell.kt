@@ -4,6 +4,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -18,19 +19,19 @@ import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.repository.RouteRepository
+import org.bytebloom.logiroute.domain.repository.TelemetryRepository
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import org.bytebloom.logiroute.domain.routing.WarehouseGraph
 import org.bytebloom.logiroute.domain.routing.WarehouseGraphBuilder
-import org.bytebloom.logiroute.domain.repository.TelemetryRepository
 import org.bytebloom.logiroute.domain.usecase.classification.ClassifyPackageSectorUseCase
 import org.bytebloom.logiroute.domain.usecase.routing.FindOptimalPathUseCase
 import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
+import java.io.IOException
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.SupervisorJob
 
 class CliShell : KoinComponent {
 
@@ -88,75 +89,107 @@ class CliShell : KoinComponent {
                         "${data.vehicles.size} vehicles."
             )
 
-            while (true) {
+            var isRunning = true
+            while (isRunning) {
                 printMenu()
-
-                when (readInput("Choose an option: ")) {
-                    "1" -> {
-                        if (routeJob?.isActive == true) {
-                            println("Route calculation is already running.")
-                            continue
-                        }
-
-                        val origin = selectWarehouse(data.warehouses, "Origin")
-                            ?: continue
-                        val destination =
-                            selectWarehouse(data.warehouses, "Destination")
-                                ?: continue
-
-                        routeJob = appScope.launch {
-                            calculateRoute(origin, destination, graph)
-                        }
-                    }
-
-                    "2" -> {
-                        val selectedPackage = selectPackage(data.packages)
-                            ?: continue
-
-                        appScope.launch {
-                            classifySelectedPackage(selectedPackage)
-                        }
-                    }
-
-                    "3" -> {
-                        if (telemetryJob?.isActive == true) {
-                            println("Telemetry is already running.")
-                        } else if (data.vehicles.isEmpty()) {
-                            println("No vehicles are available.")
-                        } else {
-                            telemetryJob = appScope.launch {
-                                streamTelemetry(data.vehicles)
-                            }
-                            println("Telemetry started. Choose 4 to stop it.")
-                        }
-                    }
-
-                    "4" -> {
-                        val runningJob = telemetryJob
-                        if (runningJob?.isActive == true) {
-                            runningJob.cancelAndJoin()
-                            telemetryJob = null
-                            println("Telemetry stopped.")
-                        } else {
-                            println("Telemetry is not running.")
-                        }
-                    }
-
-                    "0", null -> {
-                        println("Shutting down CLI...")
-                        break
-                    }
-
-                    else -> println("Invalid option. Please choose 0-4.")
+                val choice = readInput("Choose an option: ")
+                if (choice == "0" || choice == null) {
+                    println("Shutting down CLI...")
+                    isRunning = false
+                } else {
+                    val result = processOption(choice, routeJob, telemetryJob, appScope, data, graph)
+                    routeJob = result.routeJob
+                    telemetryJob = result.telemetryJob
                 }
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
-            println("Unable to run CLI: ${e.message}")
+        } catch (e: IOException) {
+            println("Unable to run CLI due to IO error: ${e.message}")
+        } catch (e: IllegalStateException) {
+            println("Unable to run CLI due to state error: ${e.message}")
         } finally {
             appJob.cancelAndJoin()
             println("CLI stopped.")
+        }
+    }
+
+    private suspend fun processOption(
+        choice: String,
+        currentRouteJob: Job?,
+        currentTelemetryJob: Job?,
+        appScope: CoroutineScope,
+        data: DataSnapshot,
+        graph: WarehouseGraph
+    ): OptionState {
+        var newRouteJob = currentRouteJob
+        var newTelemetryJob = currentTelemetryJob
+
+        when (choice) {
+            "1" -> newRouteJob = executeRouteCalculation(currentRouteJob, appScope, data.warehouses, graph)
+            "2" -> executePackageClassification(appScope, data.packages)
+            "3" -> newTelemetryJob = executeTelemetryStart(currentTelemetryJob, appScope, data.vehicles)
+            "4" -> newTelemetryJob = executeTelemetryStop(currentTelemetryJob)
+            else -> println("Invalid option. Please choose 0-4.")
+        }
+
+        return OptionState(newRouteJob, newTelemetryJob)
+    }
+
+    private fun executeRouteCalculation(
+        currentJob: Job?,
+        scope: CoroutineScope,
+        warehouses: List<Warehouse>,
+        graph: WarehouseGraph
+    ): Job? {
+        if (currentJob?.isActive == true) {
+            println("Route calculation is already running.")
+            return currentJob
+        }
+
+        val origin = selectWarehouse(warehouses, "Origin") ?: return currentJob
+        val destination = selectWarehouse(warehouses, "Destination") ?: return currentJob
+
+        return scope.launch {
+            calculateRoute(origin, destination, graph)
+        }
+    }
+
+    private fun executePackageClassification(scope: CoroutineScope, packages: List<Package>) {
+        val selectedPackage = selectPackage(packages) ?: return
+        scope.launch {
+            classifySelectedPackage(selectedPackage)
+        }
+    }
+
+    private fun executeTelemetryStart(
+        currentJob: Job?,
+        scope: CoroutineScope,
+        vehicles: List<Vehicle>
+    ): Job? {
+        if (currentJob?.isActive == true) {
+            println("Telemetry is already running.")
+            return currentJob
+        }
+        if (vehicles.isEmpty()) {
+            println("No vehicles are available.")
+            return null
+        }
+        val job = scope.launch {
+            streamTelemetry(vehicles)
+        }
+        println("Telemetry started. Choose 4 to stop it.")
+        return job
+    }
+
+    private suspend fun executeTelemetryStop(currentJob: Job?): Job? {
+        return if (currentJob?.isActive == true) {
+            currentJob.cancelAndJoin()
+            println("Telemetry stopped.")
+            null
+        } else {
+            println("Telemetry is not running.")
+            currentJob
         }
     }
 
@@ -256,8 +289,10 @@ class CliShell : KoinComponent {
             println("Predicted sector for ${pkg.id}: $region")
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
-            println("Classification failed: ${e.message}")
+        } catch (e: IllegalArgumentException) {
+            println("Classification failed due to invalid arguments: ${e.message}")
+        } catch (e: IllegalStateException) {
+            println("Classification failed due to state issue: ${e.message}")
         }
     }
 
@@ -287,8 +322,8 @@ class CliShell : KoinComponent {
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
-            println("\nTelemetry stopped due to an error: ${e.message}")
+        } catch (e: IllegalStateException) {
+            println("\nTelemetry stopped due to state issue: ${e.message}")
         }
     }
 
@@ -312,6 +347,11 @@ class CliShell : KoinComponent {
             """.trimIndent()
         )
     }
+
+    private data class OptionState(
+        val routeJob: Job?,
+        val telemetryJob: Job?
+    )
 
     private data class DataSnapshot(
         val warehouses: List<Warehouse>,

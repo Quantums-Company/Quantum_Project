@@ -14,7 +14,6 @@ import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.repository.RouteRepository
 import org.bytebloom.logiroute.domain.service.IdGenerator
-import org.bytebloom.logiroute.domain.usecase.crud.routes.CreateRouteUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
@@ -23,7 +22,7 @@ class CreateRouteUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
     private lateinit var idGenerator: IdGenerator
-    private lateinit var createRoute: CreateRouteUseCase
+    private lateinit var createRoute: org.bytebloom.logiroute.domain.usecase.routes.CreateRouteUseCase
 
     @BeforeEach
     fun setUp() {
@@ -31,7 +30,10 @@ class CreateRouteUseCaseTest {
         idGenerator = mockk()
         every { idGenerator.next(EntityType.ROUTE) } returns GENERATED_ROUTE_ID
         coEvery { routeRepository.create(any()) } answers { firstArg() }
-        createRoute = CreateRouteUseCase(routeRepository, idGenerator)
+        createRoute = org.bytebloom.logiroute.domain.usecase.routes.CreateRouteUseCase(
+            routeRepository,
+            idGenerator
+        )
     }
 
     @Test

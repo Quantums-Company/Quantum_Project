@@ -12,11 +12,11 @@ import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.result.WarehouseReport
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseReportUseCase
 
 class GetWarehouseReportUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
-    private val useCase = GetWarehouseReportUseCase(repository)
+    private val useCase =
+        org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseReportUseCase(repository)
 
     private fun createWarehouse(id: String) =
         Warehouse(id = id, name = "Warehouse $id", regionalZone = "Central", longitude = 35.0, latitude = 31.0)

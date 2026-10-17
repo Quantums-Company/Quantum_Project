@@ -13,7 +13,6 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.GetVehicleByIdUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -44,7 +43,7 @@ class GetVehicleByIdUseCaseTest {
         every { validator("TRK-001") } returns ValidatorResult.Valid
         coEvery { vehicleRepository.getById("TRK-001") } returns vehicle
 
-        val useCase = GetVehicleByIdUseCase(
+        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.GetVehicleByIdUseCase(
             vehicleRepository,
             validator
         )
@@ -71,7 +70,7 @@ class GetVehicleByIdUseCaseTest {
         every { validator("INVALID") } returns
                 ValidatorResult.Invalid(listOf(violation))
 
-        val useCase = GetVehicleByIdUseCase(
+        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.GetVehicleByIdUseCase(
             vehicleRepository,
             validator
         )

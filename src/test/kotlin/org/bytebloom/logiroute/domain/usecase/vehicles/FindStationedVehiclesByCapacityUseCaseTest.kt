@@ -2,7 +2,6 @@ package org.bytebloom.logiroute.domain.usecase.vehicles
 
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.FindStationedVehiclesByCapacityUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -36,7 +35,8 @@ class FindStationedVehiclesByCapacityUseCaseTest {
         warehouse.addVehicle(suitableVehicle)
         warehouse.addVehicle(unsuitableVehicle)
 
-        val useCase = FindStationedVehiclesByCapacityUseCase()
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.vehicles.FindStationedVehiclesByCapacityUseCase()
 
 
         // When
@@ -67,7 +67,8 @@ class FindStationedVehiclesByCapacityUseCaseTest {
 
         warehouse.addVehicle(vehicle)
 
-        val useCase = FindStationedVehiclesByCapacityUseCase()
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.vehicles.FindStationedVehiclesByCapacityUseCase()
 
         // When
         val result = useCase(warehouse, 100.0)

@@ -1,5 +1,6 @@
 package org.bytebloom.logiroute.data.csv.seeding
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -12,6 +13,7 @@ import org.bytebloom.logiroute.data.remote.client.SupabaseClientProvider
 object CsvUploadRunner {
 
     @JvmStatic
+    @Suppress("TooGenericExceptionCaught")
     fun main(args: Array<String>) = runBlocking {
         println("🚀 Starting CSV to Supabase upload process...")
 
@@ -30,6 +32,8 @@ object CsvUploadRunner {
                 uploader.upload()
             }
             println("✅ CSV Data uploaded successfully to Supabase!")
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("❌ Failed to upload CSV data: ${e.message}")
             e.printStackTrace()

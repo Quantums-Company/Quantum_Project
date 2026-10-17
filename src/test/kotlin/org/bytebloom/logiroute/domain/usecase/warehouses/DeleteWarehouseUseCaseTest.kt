@@ -13,7 +13,6 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.DeleteWarehouseUseCase
 import org.bytebloom.logiroute.domain.validator.id.WarehouseIdValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -22,7 +21,10 @@ class DeleteWarehouseUseCaseTest {
 
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<WarehouseIdValidator>()
-    private val useCase = DeleteWarehouseUseCase(repository, validator)
+    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.DeleteWarehouseUseCase(
+        repository,
+        validator
+    )
 
     @Test
     fun `returns true when warehouse is deleted`() = runTest {

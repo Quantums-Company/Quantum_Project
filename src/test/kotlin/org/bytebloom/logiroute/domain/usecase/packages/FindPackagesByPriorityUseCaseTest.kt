@@ -7,7 +7,6 @@ import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.PackageRepository
-import org.bytebloom.logiroute.domain.usecase.crud.packages.FindPackagesByPriorityUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -54,7 +53,9 @@ class FindPackagesByPriorityUseCaseTest {
             packageRepository.getAll()
         } returns listOf(firstPackage, secondPackage)
 
-        val useCase = FindPackagesByPriorityUseCase(packageRepository)
+        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByPriorityUseCase(
+            packageRepository
+        )
 
         // When
         val result = useCase(Priority.URGENT)
@@ -100,7 +101,9 @@ class FindPackagesByPriorityUseCaseTest {
             packageRepository.getAll()
         } returns listOf(standardPackage)
 
-        val useCase = FindPackagesByPriorityUseCase(packageRepository)
+        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByPriorityUseCase(
+            packageRepository
+        )
 
         // When
         val result = useCase(Priority.URGENT)

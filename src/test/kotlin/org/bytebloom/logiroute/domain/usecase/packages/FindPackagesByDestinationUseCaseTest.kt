@@ -7,7 +7,6 @@ import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.PackageRepository
-import org.bytebloom.logiroute.domain.usecase.crud.packages.FindPackagesByDestinationUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -46,7 +45,10 @@ class FindPackagesByDestinationUseCaseTest {
             packageRepository.getAll()
         } returns listOf(testPackage)
 
-        val useCase = FindPackagesByDestinationUseCase(packageRepository)
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByDestinationUseCase(
+                packageRepository
+            )
 
 
         // When
@@ -99,7 +101,10 @@ class FindPackagesByDestinationUseCaseTest {
             packageRepository.getAll()
         } returns listOf(testPackage)
 
-        val useCase = FindPackagesByDestinationUseCase(packageRepository)
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByDestinationUseCase(
+                packageRepository
+            )
 
         // When
         val result = useCase(destinationWarehouse)

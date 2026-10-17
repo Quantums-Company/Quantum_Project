@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.repository.RouteRepository
-import org.bytebloom.logiroute.domain.usecase.crud.routes.DeleteRouteUseCase
 import org.bytebloom.logiroute.domain.validator.id.RouteIdValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,12 +18,15 @@ import kotlin.test.assertFailsWith
 class DeleteRouteUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
-    private lateinit var deleteRoute: DeleteRouteUseCase
+    private lateinit var deleteRoute: org.bytebloom.logiroute.domain.usecase.routes.DeleteRouteUseCase
 
     @BeforeEach
     fun setUp() {
         routeRepository = mockk()
-        deleteRoute = DeleteRouteUseCase(routeRepository, RouteIdValidator())
+        deleteRoute = org.bytebloom.logiroute.domain.usecase.routes.DeleteRouteUseCase(
+            routeRepository,
+            RouteIdValidator()
+        )
     }
 
     @Test

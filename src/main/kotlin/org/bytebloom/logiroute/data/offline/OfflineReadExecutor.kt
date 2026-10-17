@@ -13,6 +13,7 @@ class OfflineReadExecutor(
         private val DEFAULT_REMOTE_TIMEOUT = 3.seconds
     }
 
+    @Suppress("SwallowedException")
     suspend fun <T> read(
         remoteCall: suspend () -> T,
         localCall: suspend () -> T,
@@ -20,7 +21,7 @@ class OfflineReadExecutor(
     ): T {
         val remoteResult = try {
             withTimeout(remoteTimeout) { remoteCall() }
-        } catch (e: TimeoutCancellationException) {
+        } catch (_: TimeoutCancellationException) {
             return localCall()
         } catch (e: CancellationException) {
             throw e

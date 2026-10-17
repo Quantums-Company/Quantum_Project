@@ -5,7 +5,6 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.tree.hub.HubTree
 import org.bytebloom.logiroute.domain.tree.hub.HubTreeNode
 import org.bytebloom.logiroute.domain.tree.hub.HubType
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.TraceHubLineageUseCase
 import org.junit.jupiter.api.BeforeEach
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,7 +40,7 @@ class TraceHubLineageUseCaseTest {
         latitude = 1.0
     )
 
-    private lateinit var useCase: TraceHubLineageUseCase
+    private lateinit var useCase: org.bytebloom.logiroute.domain.usecase.warehouses.TraceHubLineageUseCase
 
     @BeforeEach
     fun setUp() {
@@ -52,7 +51,9 @@ class TraceHubLineageUseCaseTest {
         globalNode.addChild(regionalNode)
         regionalNode.addChild(localNode)
 
-        useCase = TraceHubLineageUseCase(HubTree(globalNode))
+        useCase = org.bytebloom.logiroute.domain.usecase.warehouses.TraceHubLineageUseCase(
+            HubTree(globalNode)
+        )
     }
 
     @Test

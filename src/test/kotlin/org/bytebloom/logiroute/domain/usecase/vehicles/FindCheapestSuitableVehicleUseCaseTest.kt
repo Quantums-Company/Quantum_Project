@@ -8,7 +8,6 @@ import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.FindCheapestSuitableVehicleUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -61,7 +60,10 @@ class FindCheapestSuitableVehicleUseCaseTest {
             vehicleRepository.getAll()
         } returns listOf(expensiveVehicle, cheapestVehicle)
 
-        val useCase = FindCheapestSuitableVehicleUseCase(vehicleRepository)
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.vehicles.FindCheapestSuitableVehicleUseCase(
+                vehicleRepository
+            )
 
         // When
         val result = useCase(listOf(testPackage))
@@ -118,7 +120,10 @@ class FindCheapestSuitableVehicleUseCaseTest {
             vehicleRepository.getAll()
         } returns listOf(unsuitableVehicle, suitableVehicle)
 
-        val useCase = FindCheapestSuitableVehicleUseCase(vehicleRepository)
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.vehicles.FindCheapestSuitableVehicleUseCase(
+                vehicleRepository
+            )
 
         // When
         val result = useCase(listOf(testPackage))

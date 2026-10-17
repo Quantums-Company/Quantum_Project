@@ -9,11 +9,10 @@ import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.repository.RouteRepository
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
-import org.bytebloom.logiroute.domain.usecase.crud.packages.GetAllPackagesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.routes.GetAllRoutesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.GetAllVehiclesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetAllWarehousesUseCase
-import org.bytebloom.logiroute.presentation.OfflineFirstTestRunner
+import org.bytebloom.logiroute.domain.usecase.packages.GetAllPackagesUseCase
+import org.bytebloom.logiroute.domain.usecase.routes.GetAllRoutesUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.GetAllVehiclesUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.GetAllWarehousesUseCase
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -24,10 +23,22 @@ import org.koin.test.junit5.KoinTestExtension
 class OfflineFirstTestRunnerTest : KoinTest {
 
     private val testModule = module {
-        factory { GetAllWarehousesUseCase(warehouseRepository = mockWarehouseRepository()) }
-        factory { GetAllPackagesUseCase(packageRepository = mockPackageRepository()) }
+        factory {
+            GetAllWarehousesUseCase(
+                warehouseRepository = mockWarehouseRepository()
+            )
+        }
+        factory {
+            GetAllPackagesUseCase(
+                packageRepository = mockPackageRepository()
+            )
+        }
         factory { GetAllRoutesUseCase(routeRepository = mockRouteRepository()) }
-        factory { GetAllVehiclesUseCase(vehicleRepository = mockVehicleRepository()) }
+        factory {
+            GetAllVehiclesUseCase(
+                vehicleRepository = mockVehicleRepository()
+            )
+        }
     }
 
     @JvmField

@@ -11,7 +11,6 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.PackageRepository
-import org.bytebloom.logiroute.domain.usecase.crud.packages.DeletePackageUseCase
 import org.bytebloom.logiroute.domain.validator.id.PackageIdValidator
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -24,7 +23,7 @@ class DeletePackageUseCaseTest {
     private val packageRepository = mockk<PackageRepository>()
     private val validator = mockk<PackageIdValidator>()
 
-    private val useCase = DeletePackageUseCase(
+    private val useCase = org.bytebloom.logiroute.domain.usecase.packages.DeletePackageUseCase(
         packageRepository = packageRepository,
         validator = validator
     )

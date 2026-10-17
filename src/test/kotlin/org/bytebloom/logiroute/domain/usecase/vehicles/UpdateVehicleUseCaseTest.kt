@@ -13,7 +13,6 @@ import org.bytebloom.logiroute.domain.model.input.update.VehicleUpdateInput
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.UpdateVehicleUseCase
 import org.bytebloom.logiroute.domain.validator.update.UpdateVehicleValidator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -60,7 +59,7 @@ class UpdateVehicleUseCaseTest {
         coEvery { vehicleRepository.getById("TRK-001") } returns existingVehicle
         coEvery { vehicleRepository.update(any()) } returns updatedVehicle
 
-        val useCase = UpdateVehicleUseCase(
+        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.UpdateVehicleUseCase(
             vehicleRepository,
             validator
         )
@@ -97,7 +96,7 @@ class UpdateVehicleUseCaseTest {
         every { validator(input) } returns ValidatorResult.Valid
         coEvery { vehicleRepository.getById("TRK-999") } returns null
 
-        val useCase = UpdateVehicleUseCase(
+        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.UpdateVehicleUseCase(
             vehicleRepository,
             validator
         )
@@ -143,7 +142,7 @@ class UpdateVehicleUseCaseTest {
         every { validator(input) } returns
                 ValidatorResult.Invalid(listOf(violation))
 
-        val useCase = UpdateVehicleUseCase(
+        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.UpdateVehicleUseCase(
             vehicleRepository,
             validator
         )

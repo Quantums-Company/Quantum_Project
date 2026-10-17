@@ -13,7 +13,6 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.service.IdGenerator
-import org.bytebloom.logiroute.domain.usecase.crud.packages.CreatePackageUseCase
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -33,7 +32,7 @@ class CreatePackageUseCaseTest {
             latitude = 32.0
         )
 
-    private val useCase = CreatePackageUseCase(
+    private val useCase = org.bytebloom.logiroute.domain.usecase.packages.CreatePackageUseCase(
         packageRepository = packageRepository,
         idGenerator = idGenerator
     )

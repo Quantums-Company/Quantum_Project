@@ -13,7 +13,6 @@ import org.bytebloom.logiroute.domain.model.exception.DatabaseConflictException
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import org.bytebloom.logiroute.domain.service.IdGenerator
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.CreateWarehouseUseCase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -21,7 +20,10 @@ class CreateWarehouseUseCaseTest {
 
     private val repository = mockk<WarehouseRepository>()
     private val idGenerator = mockk<IdGenerator>()
-    private val useCase = CreateWarehouseUseCase(repository, idGenerator)
+    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.CreateWarehouseUseCase(
+        repository,
+        idGenerator
+    )
 
     @Test
     fun `creates warehouse with generated id when data is valid`() = runTest {

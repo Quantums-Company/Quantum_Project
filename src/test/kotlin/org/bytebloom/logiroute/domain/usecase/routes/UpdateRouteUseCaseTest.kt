@@ -12,7 +12,6 @@ import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.logiroute.domain.model.input.update.RouteUpdateInput
 import org.bytebloom.logiroute.domain.repository.RouteRepository
-import org.bytebloom.logiroute.domain.usecase.crud.routes.UpdateRouteUseCase
 import org.bytebloom.logiroute.domain.validator.update.UpdateRouteValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,14 +20,17 @@ import kotlin.test.assertFailsWith
 class UpdateRouteUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
-    private lateinit var updateRoute: UpdateRouteUseCase
+    private lateinit var updateRoute: org.bytebloom.logiroute.domain.usecase.routes.UpdateRouteUseCase
 
     @BeforeEach
     fun setUp() {
         routeRepository = mockk()
         coEvery { routeRepository.getById(ROUTE_ID) } returns createExistingRoute()
         coEvery { routeRepository.update(any()) } answers { firstArg() }
-        updateRoute = UpdateRouteUseCase(routeRepository, UpdateRouteValidator())
+        updateRoute = org.bytebloom.logiroute.domain.usecase.routes.UpdateRouteUseCase(
+            routeRepository,
+            UpdateRouteValidator()
+        )
     }
 
     @Test

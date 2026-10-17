@@ -4,7 +4,6 @@ import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseLoadFactorUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -47,7 +46,8 @@ class GetWarehouseLoadFactorUseCaseTest {
         warehouse.addVehicle(vehicle)
         warehouse.addPackage(testPackage)
 
-        val useCase = GetWarehouseLoadFactorUseCase()
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseLoadFactorUseCase()
 
         // When
         val result = useCase(warehouse)
@@ -86,7 +86,8 @@ class GetWarehouseLoadFactorUseCaseTest {
 
         warehouse.addPackage(testPackage)
 
-        val useCase = GetWarehouseLoadFactorUseCase()
+        val useCase =
+            org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseLoadFactorUseCase()
 
         // When
         val result = useCase(warehouse)

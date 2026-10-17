@@ -9,7 +9,6 @@ import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
 import org.bytebloom.logiroute.domain.service.IdGenerator
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.CreateVehicleUseCase
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,7 +27,7 @@ class CreateVehicleUseCaseTest {
         latitude = 32.0
     )
 
-    private val useCase = CreateVehicleUseCase(
+    private val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.CreateVehicleUseCase(
         vehicleRepository = vehicleRepository,
         idGenerator = idGenerator
     )

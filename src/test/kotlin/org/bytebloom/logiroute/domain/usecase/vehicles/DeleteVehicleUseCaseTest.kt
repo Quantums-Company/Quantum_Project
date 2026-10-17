@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.DeleteVehicleUseCase
 import org.bytebloom.logiroute.domain.validator.id.VehicleIdValidator
 import org.bytebloom.logiroute.domain.model.EntityType
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
@@ -27,7 +26,7 @@ class DeleteVehicleUseCaseTest {
         every { validator("TRK-001") } returns ValidatorResult.Valid
         coEvery { vehicleRepository.delete("TRK-001") } returns true
 
-        val useCase = DeleteVehicleUseCase(
+        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.DeleteVehicleUseCase(
             vehicleRepository,
             validator
         )
@@ -55,7 +54,7 @@ class DeleteVehicleUseCaseTest {
         every { validator("INVALID") } returns
                 ValidatorResult.Invalid(listOf(violation))
 
-        val useCase = DeleteVehicleUseCase(
+        val useCase = org.bytebloom.logiroute.domain.usecase.vehicles.DeleteVehicleUseCase(
             vehicleRepository,
             validator
         )

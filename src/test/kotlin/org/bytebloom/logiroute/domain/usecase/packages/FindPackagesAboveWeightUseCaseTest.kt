@@ -7,7 +7,6 @@ import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.repository.PackageRepository
-import org.bytebloom.logiroute.domain.usecase.crud.packages.FindPackagesAboveWeightUseCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -54,7 +53,9 @@ class FindPackagesAboveWeightUseCaseTest {
             packageRepository.getAll()
         } returns listOf(lightPackage, heavyPackage)
 
-        val useCase = FindPackagesAboveWeightUseCase(packageRepository)
+        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesAboveWeightUseCase(
+            packageRepository
+        )
 
         // When
         val result = useCase(100.0)
@@ -97,7 +98,9 @@ class FindPackagesAboveWeightUseCaseTest {
             packageRepository.getAll()
         } returns listOf(packageAtMinimumWeight)
 
-        val useCase = FindPackagesAboveWeightUseCase(packageRepository)
+        val useCase = org.bytebloom.logiroute.domain.usecase.packages.FindPackagesAboveWeightUseCase(
+            packageRepository
+        )
 
         // When
         val result = useCase(100.0)

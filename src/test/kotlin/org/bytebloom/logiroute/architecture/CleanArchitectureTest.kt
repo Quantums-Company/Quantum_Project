@@ -10,7 +10,8 @@ import kotlinx.serialization.Serializable
 import org.junit.jupiter.api.Test
 
 class CleanArchitectureTest {
-    private val scope by lazy { Konsist.scopeFromProject() }
+    private val scope by lazy { Konsist.scopeFromProduction() }
+
     private val presentationLayer by lazy { Layer("presentation", "org.bytebloom.logiroute.presentation..") }
     private val domainLayer by lazy { Layer("domain", "org.bytebloom.logiroute.domain..") }
     private val dataLayer by lazy { Layer("data", "org.bytebloom.logiroute.data..") }

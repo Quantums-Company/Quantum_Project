@@ -16,7 +16,6 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.UpdateWarehouseUseCase
 import org.bytebloom.logiroute.domain.validator.update.UpdateWarehouseValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,7 +23,10 @@ import org.junit.jupiter.api.assertThrows
 class UpdateWarehouseUseCaseTest {
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<UpdateWarehouseValidator>()
-    private val useCase = UpdateWarehouseUseCase(repository, validator)
+    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.UpdateWarehouseUseCase(
+        repository,
+        validator
+    )
     private val existing = Warehouse("WH-001", "Old Name", "North", 35.0, 31.0)
 
     @Test

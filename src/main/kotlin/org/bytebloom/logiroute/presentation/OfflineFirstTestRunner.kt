@@ -1,10 +1,10 @@
 package org.bytebloom.logiroute.presentation
 
 import kotlinx.coroutines.runBlocking
-import org.bytebloom.logiroute.domain.usecase.crud.packages.GetAllPackagesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.routes.GetAllRoutesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.vehicles.GetAllVehiclesUseCase
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetAllWarehousesUseCase
+import org.bytebloom.logiroute.domain.usecase.packages.GetAllPackagesUseCase
+import org.bytebloom.logiroute.domain.usecase.routes.GetAllRoutesUseCase
+import org.bytebloom.logiroute.domain.usecase.vehicles.GetAllVehiclesUseCase
+import org.bytebloom.logiroute.domain.usecase.warehouses.GetAllWarehousesUseCase
 import org.koin.core.Koin
 
 class OfflineFirstTestRunner(
@@ -13,7 +13,7 @@ class OfflineFirstTestRunner(
     private val getAllWarehouses: GetAllWarehousesUseCase by lazy { koin.get() }
     private val getAllRoutes: GetAllRoutesUseCase by lazy { koin.get() }
     private val getAllVehicles: GetAllVehiclesUseCase by lazy { koin.get() }
-    private val getAllPackages: GetAllPackagesUseCase by lazy { koin.get() }
+    private val getAllPackages:GetAllPackagesUseCase by lazy { koin.get() }
 
     fun run() = runBlocking {
         var isRunning = true

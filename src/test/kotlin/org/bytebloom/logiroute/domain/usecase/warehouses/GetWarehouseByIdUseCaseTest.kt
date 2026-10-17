@@ -15,7 +15,6 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
-import org.bytebloom.logiroute.domain.usecase.crud.warehouses.GetWarehouseByIdUseCase
 import org.bytebloom.logiroute.domain.validator.id.WarehouseIdValidator
 import org.junit.jupiter.api.assertThrows
 
@@ -23,7 +22,10 @@ class GetWarehouseByIdUseCaseTest {
 
     private val repository = mockk<WarehouseRepository>()
     private val validator = mockk<WarehouseIdValidator>()
-    private val useCase = GetWarehouseByIdUseCase(repository, validator)
+    private val useCase = org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseByIdUseCase(
+        repository,
+        validator
+    )
     private val warehouse = Warehouse("WH-001", "Main Hub", "Central", 35.2, 31.9)
 
     @Test

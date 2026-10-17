@@ -10,7 +10,6 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.repository.RouteRepository
-import org.bytebloom.logiroute.domain.usecase.crud.routes.GetRouteByIdUseCase
 import org.bytebloom.logiroute.domain.validator.id.RouteIdValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,12 +20,15 @@ import kotlin.test.assertFailsWith
 class GetRouteByIdUseCaseTest {
 
     private lateinit var routeRepository: RouteRepository
-    private lateinit var getRouteById: GetRouteByIdUseCase
+    private lateinit var getRouteById: org.bytebloom.logiroute.domain.usecase.routes.GetRouteByIdUseCase
 
     @BeforeEach
     fun setUp() {
         routeRepository = mockk()
-        getRouteById = GetRouteByIdUseCase(routeRepository, RouteIdValidator())
+        getRouteById = org.bytebloom.logiroute.domain.usecase.routes.GetRouteByIdUseCase(
+            routeRepository,
+            RouteIdValidator()
+        )
     }
 
     @Test
