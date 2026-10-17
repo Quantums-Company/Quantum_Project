@@ -7,11 +7,10 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.exception.IllegalShipmentTransitionException
 import org.bytebloom.logiroute.domain.shipment.Shipment
-import org.bytebloom.logiroute.domain.usecase.dispatch.ReroutePackageUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertFailsWith
 
 class ReroutePackageUseCaseTest {
 
@@ -26,66 +25,60 @@ class ReroutePackageUseCaseTest {
     inner class AllowedBeforeDispatch {
 
         @Test
-        fun `reroutes a freshly created shipment to the new destination`() {
+        fun `should redirect cargo to new destination when shipment is created`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val shipment = Shipment(createPackage())
 
             // When
-            val rerouted = reroutePackage(shipment, newDestination)
+            val rerouted = reroutePackage(shipment, NEW_DESTINATION)
 
             // Then
-            assertThat(rerouted.cargo).isEqualTo(createPackage().redirectedTo(newDestination))
+            assertThat(rerouted.cargo).isEqualTo(createPackage().redirectedTo(NEW_DESTINATION))
         }
 
         @Test
-        fun `reroutes a shipment already assigned to a vehicle`() {
+        fun `should redirect cargo to new destination when shipment is assigned to vehicle`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val shipment = Shipment(createPackage()).assignToVehicle()
 
             // When
-            val rerouted = reroutePackage(shipment, newDestination)
+            val rerouted = reroutePackage(shipment, NEW_DESTINATION)
 
             // Then
-            assertThat(rerouted.cargo.destinationWarehouse).isEqualTo(newDestination)
+            assertThat(rerouted.cargo.destinationWarehouse).isEqualTo(NEW_DESTINATION)
         }
 
         @Test
-        fun `rerouting does not change the shipment's current state`() {
+        fun `should keep shipment state unchanged when rerouted`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val shipment = Shipment(createPackage()).assignToVehicle()
 
             // When
-            val rerouted = reroutePackage(shipment, newDestination)
+            val rerouted = reroutePackage(shipment, NEW_DESTINATION)
 
             // Then
             assertThat(rerouted.state).isEqualTo(shipment.state)
         }
 
         @Test
-        fun `does not modify the original shipment`() {
+        fun `should leave original shipment untouched when rerouted`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val shipment = Shipment(createPackage())
 
             // When
-            reroutePackage(shipment, newDestination)
+            reroutePackage(shipment, NEW_DESTINATION)
 
             // Then
             assertThat(shipment.cargo.destinationWarehouse).isEqualTo(ORIGINAL_DESTINATION)
         }
 
         @Test
-        fun `throws EntityValidationException when rerouted to its own origin warehouse`() {
+        fun `should throw validation exception when new destination is the origin`() {
             // Given
             val shipment = Shipment(createPackage())
 
-            // When & Then
-            assertThrows<EntityValidationException> {
-                reroutePackage(shipment, ORIGIN)
-            }
+            // When / Then
+            assertFailsWith<EntityValidationException> { reroutePackage(shipment, ORIGIN) }
         }
     }
 
@@ -93,14 +86,13 @@ class ReroutePackageUseCaseTest {
     inner class RejectedOnceDispatched {
 
         @Test
-        fun `cannot reroute a shipment that is in transit`() {
+        fun `should throw transition exception when shipment is in transit`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val inTransit = Shipment(createPackage()).assignToVehicle().startTransit()
 
             // When
-            val exception = assertThrows<IllegalShipmentTransitionException> {
-                reroutePackage(inTransit, newDestination)
+            val exception = assertFailsWith<IllegalShipmentTransitionException> {
+                reroutePackage(inTransit, NEW_DESTINATION)
             }
 
             // Then
@@ -108,37 +100,30 @@ class ReroutePackageUseCaseTest {
         }
 
         @Test
-        fun `cannot reroute a shipment that has already been delivered`() {
+        fun `should throw transition exception when shipment is delivered`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val delivered = Shipment(createPackage()).assignToVehicle().startTransit().markDelivered()
 
-            // When & Then
-            assertThrows<IllegalShipmentTransitionException> {
-                reroutePackage(delivered, newDestination)
-            }
+            // When / Then
+            assertFailsWith<IllegalShipmentTransitionException> { reroutePackage(delivered, NEW_DESTINATION) }
         }
 
         @Test
-        fun `cannot reroute a shipment whose delivery already failed`() {
+        fun `should throw transition exception when shipment delivery failed`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val failed = Shipment(createPackage()).assignToVehicle().startTransit().markDeliveryFailed()
 
-            // When & Then
-            assertThrows<IllegalShipmentTransitionException> {
-                reroutePackage(failed, newDestination)
-            }
+            // When / Then
+            assertFailsWith<IllegalShipmentTransitionException> { reroutePackage(failed, NEW_DESTINATION) }
         }
 
         @Test
-        fun `leaves the cargo untouched when rerouting is rejected`() {
+        fun `should leave cargo untouched when rerouting is rejected`() {
             // Given
-            val newDestination = createWarehouse(id = "WH-003", name = "Hebron Depot")
             val delivered = Shipment(createPackage()).assignToVehicle().startTransit().markDelivered()
 
             // When
-            runCatching { reroutePackage(delivered, newDestination) }
+            runCatching { reroutePackage(delivered, NEW_DESTINATION) }
 
             // Then
             assertThat(delivered.cargo.destinationWarehouse).isEqualTo(ORIGINAL_DESTINATION)
@@ -156,11 +141,12 @@ class ReroutePackageUseCaseTest {
     private companion object {
         val ORIGIN = createWarehouse(id = "WH-001", name = "Ramallah Hub")
         val ORIGINAL_DESTINATION = createWarehouse(id = "WH-002", name = "Nablus Depot")
+        val NEW_DESTINATION = createWarehouse(id = "WH-003", name = "Hebron Depot")
 
         fun createWarehouse(id: String, name: String) = Warehouse(
             id = id,
             name = name,
-            regionalZone = "West Bank",
+            regionalZone = "CENTRAL",
             longitude = 35.2,
             latitude = 31.9
         )
