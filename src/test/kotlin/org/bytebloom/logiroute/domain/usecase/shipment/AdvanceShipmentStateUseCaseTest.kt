@@ -1,5 +1,6 @@
 package org.bytebloom.logiroute.domain.usecase.shipment
 
+import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
@@ -11,311 +12,222 @@ import org.bytebloom.logiroute.domain.shipment.state.CreatedState
 import org.bytebloom.logiroute.domain.shipment.state.DeliveredState
 import org.bytebloom.logiroute.domain.shipment.state.DeliveryFailedState
 import org.bytebloom.logiroute.domain.shipment.state.InTransitState
-import org.bytebloom.logiroute.domain.usecase.shipment.AdvanceShipmentStateUseCase
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import kotlin.test.assertFailsWith
-import kotlin.test.assertIs
-import kotlin.test.assertSame
 
 class AdvanceShipmentStateUseCaseTest {
 
-    private val useCase = AdvanceShipmentStateUseCase()
+    private lateinit var advanceShipmentState: AdvanceShipmentStateUseCase
 
-    private val origin = Warehouse(
-        id = "WH-001",
-        name = "A",
-        regionalZone = "North",
-        longitude = 34.0,
-        latitude = 31.0
-    )
-
-    private val destination = Warehouse(
-        id = "WH-002",
-        name = "B",
-        regionalZone = "South",
-        longitude = 34.1,
-        latitude = 31.1
-    )
-
-    private val cargo = Package(
-        id = "PKG-001",
-        weight = 10.0,
-        priority = Priority.STANDARD,
-        originWarehouse = origin,
-        destinationWarehouse = destination
-    )
+    @BeforeEach
+    fun setUp() {
+        advanceShipmentState = AdvanceShipmentStateUseCase()
+    }
 
     @Test
-    fun `a new shipment starts in CreatedState`() {
+    fun `should start in created state when shipment is new`() {
         // Given
-        val shipment = Shipment(cargo)
+        val shipment = createdShipment()
+
+        // When
+        val state = shipment.state
 
         // Then
-        assertIs<CreatedState>(shipment.state)
+        assertThat(state).isInstanceOf(CreatedState::class.java)
     }
 
     @Nested
     inner class SuccessfulTransitions {
 
         @Test
-        fun `moves from Created to AssignedToVehicle`() {
+        fun `should move to assigned state when vehicle is assigned to created shipment`() {
             // Given
-            val shipment = Shipment(cargo)
+            val shipment = createdShipment()
 
             // When
-            val result = useCase(
-                shipment,
-                ShipmentTransitionAction.ASSIGN_TO_VEHICLE
-            )
+            val result = advanceShipmentState(shipment, ShipmentTransitionAction.ASSIGN_TO_VEHICLE)
 
             // Then
-            assertIs<AssignedToVehicleState>(result.state)
+            assertThat(result.state).isInstanceOf(AssignedToVehicleState::class.java)
         }
 
         @Test
-        fun `moves from AssignedToVehicle to InTransit`() {
+        fun `should move to in transit state when assigned shipment starts transit`() {
             // Given
-            val shipment = Shipment(cargo)
-                .assignToVehicle()
+            val shipment = assignedShipment()
 
             // When
-            val result = useCase(
-                shipment,
-                ShipmentTransitionAction.START_TRANSIT
-            )
+            val result = advanceShipmentState(shipment, ShipmentTransitionAction.START_TRANSIT)
 
             // Then
-            assertIs<InTransitState>(result.state)
+            assertThat(result.state).isInstanceOf(InTransitState::class.java)
         }
 
         @Test
-        fun `moves from InTransit to Delivered`() {
+        fun `should move to delivered state when in transit shipment is delivered`() {
             // Given
-            val shipment = Shipment(cargo)
-                .assignToVehicle()
-                .startTransit()
+            val shipment = inTransitShipment()
 
             // When
-            val result = useCase(
-                shipment,
+            val result = advanceShipmentState(shipment, ShipmentTransitionAction.MARK_DELIVERED)
+
+            // Then
+            assertThat(result.state).isInstanceOf(DeliveredState::class.java)
+        }
+
+        @Test
+        fun `should move to delivery failed state when in transit shipment fails`() {
+            // Given
+            val shipment = inTransitShipment()
+
+            // When
+            val result = advanceShipmentState(shipment, ShipmentTransitionAction.MARK_DELIVERY_FAILED)
+
+            // Then
+            assertThat(result.state).isInstanceOf(DeliveryFailedState::class.java)
+        }
+
+        @Test
+        fun `should keep same cargo when shipment moves through full lifecycle`() {
+            // Given
+            val shipment = createdShipment()
+
+            // When
+            val delivered = listOf(
+                ShipmentTransitionAction.ASSIGN_TO_VEHICLE,
+                ShipmentTransitionAction.START_TRANSIT,
                 ShipmentTransitionAction.MARK_DELIVERED
-            )
+            ).fold(shipment) { current, action -> advanceShipmentState(current, action) }
 
             // Then
-            assertIs<DeliveredState>(result.state)
-        }
-
-        @Test
-        fun `moves from InTransit to DeliveryFailed`() {
-            // Given
-            val shipment = Shipment(cargo)
-                .assignToVehicle()
-                .startTransit()
-
-            // When
-            val result = useCase(
-                shipment,
-                ShipmentTransitionAction.MARK_DELIVERY_FAILED
-            )
-
-            // Then
-            assertIs<DeliveryFailedState>(result.state)
-        }
-
-        @Test
-        fun `preserves the same cargo reference across transitions`() {
-            // Given
-            val shipment = Shipment(cargo)
-
-            // When
-            val result = shipment
-                .assignToVehicle()
-                .startTransit()
-                .markDelivered()
-
-            // Then
-            assertSame(cargo, result.cargo)
+            assertThat(delivered.cargo).isSameInstanceAs(CARGO)
         }
     }
 
     @Nested
     inner class IllegalTransitionsFromCreated {
 
-        private val shipment = Shipment(cargo)
+        @ParameterizedTest
+        @EnumSource(names = ["START_TRANSIT", "MARK_DELIVERED", "MARK_DELIVERY_FAILED"])
+        fun `should reject action when shipment is not yet assigned`(action: ShipmentTransitionAction) {
+            // Given
+            val shipment = createdShipment()
 
-        @Test
-        fun `cannot start transit before vehicle assignment`() {
+            // When
             val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.START_TRANSIT
-                )
+                advanceShipmentState(shipment, action)
             }
 
-            assertEquals("CREATED", exception.currentState)
-            assertEquals("start transit", exception.attemptedAction)
+            // Then
+            assertThat(exception.currentState).isEqualTo("CREATED")
         }
 
         @Test
-        fun `cannot mark shipment as delivered directly`() {
+        fun `should describe attempted action when transit starts before assignment`() {
+            // Given
+            val shipment = createdShipment()
+
+            // When
             val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.MARK_DELIVERED
-                )
+                advanceShipmentState(shipment, ShipmentTransitionAction.START_TRANSIT)
             }
 
-            assertEquals("CREATED", exception.currentState)
-        }
-
-        @Test
-        fun `cannot mark shipment as failed directly`() {
-            val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.MARK_DELIVERY_FAILED
-                )
-            }
-
-            assertEquals("CREATED", exception.currentState)
+            // Then
+            assertThat(exception.attemptedAction).isEqualTo("start transit")
         }
     }
 
     @Nested
     inner class IllegalTransitionsFromAssignedToVehicle {
 
-        private val shipment = Shipment(cargo)
-            .assignToVehicle()
+        @ParameterizedTest
+        @EnumSource(names = ["ASSIGN_TO_VEHICLE", "MARK_DELIVERED", "MARK_DELIVERY_FAILED"])
+        fun `should reject action when shipment is assigned but not in transit`(action: ShipmentTransitionAction) {
+            // Given
+            val shipment = assignedShipment()
 
-        @Test
-        fun `cannot assign shipment to another vehicle`() {
+            // When
             val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.ASSIGN_TO_VEHICLE
-                )
+                advanceShipmentState(shipment, action)
             }
 
-            assertEquals(
-                "ASSIGNED_TO_VEHICLE",
-                exception.currentState
-            )
-        }
-
-        @Test
-        fun `cannot mark shipment as delivered before transit`() {
-            val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.MARK_DELIVERED
-                )
-            }
-
-            assertEquals(
-                "ASSIGNED_TO_VEHICLE",
-                exception.currentState
-            )
-        }
-
-        @Test
-        fun `cannot mark shipment as failed before transit`() {
-            val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.MARK_DELIVERY_FAILED
-                )
-            }
-
-            assertEquals(
-                "ASSIGNED_TO_VEHICLE",
-                exception.currentState
-            )
+            // Then
+            assertThat(exception.currentState).isEqualTo("ASSIGNED_TO_VEHICLE")
         }
     }
 
     @Nested
     inner class IllegalTransitionsFromInTransit {
 
-        private val shipment = Shipment(cargo)
-            .assignToVehicle()
-            .startTransit()
+        @ParameterizedTest
+        @EnumSource(names = ["ASSIGN_TO_VEHICLE", "START_TRANSIT"])
+        fun `should reject action when shipment is already in transit`(action: ShipmentTransitionAction) {
+            // Given
+            val shipment = inTransitShipment()
 
-        @Test
-        fun `cannot assign shipment to another vehicle`() {
+            // When
             val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.ASSIGN_TO_VEHICLE
-                )
+                advanceShipmentState(shipment, action)
             }
 
-            assertEquals("IN_TRANSIT", exception.currentState)
-        }
-
-        @Test
-        fun `cannot start transit twice`() {
-            val exception = assertFailsWith<IllegalShipmentTransitionException> {
-                useCase(
-                    shipment,
-                    ShipmentTransitionAction.START_TRANSIT
-                )
-            }
-
-            assertEquals("IN_TRANSIT", exception.currentState)
+            // Then
+            assertThat(exception.currentState).isEqualTo("IN_TRANSIT")
         }
     }
 
     @Nested
     inner class TerminalStates {
 
-        @Test
-        fun `delivered shipment cannot transition again`() {
-            val shipment = Shipment(cargo)
-                .assignToVehicle()
-                .startTransit()
-                .markDelivered()
+        @ParameterizedTest
+        @EnumSource(ShipmentTransitionAction::class)
+        fun `should reject any action when shipment is delivered`(action: ShipmentTransitionAction) {
+            // Given
+            val shipment = deliveredShipment()
 
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.assignToVehicle()
-            }
-
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.startTransit()
-            }
-
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.markDelivered()
-            }
-
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.markDeliveryFailed()
-            }
+            // When / Then
+            assertFailsWith<IllegalShipmentTransitionException> { advanceShipmentState(shipment, action) }
         }
 
-        @Test
-        fun `failed shipment cannot transition again`() {
-            val shipment = Shipment(cargo)
-                .assignToVehicle()
-                .startTransit()
-                .markDeliveryFailed()
+        @ParameterizedTest
+        @EnumSource(ShipmentTransitionAction::class)
+        fun `should reject any action when shipment delivery failed`(action: ShipmentTransitionAction) {
+            // Given
+            val shipment = failedShipment()
 
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.assignToVehicle()
-            }
-
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.startTransit()
-            }
-
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.markDelivered()
-            }
-
-            assertFailsWith<IllegalShipmentTransitionException> {
-                shipment.markDeliveryFailed()
-            }
+            // When / Then
+            assertFailsWith<IllegalShipmentTransitionException> { advanceShipmentState(shipment, action) }
         }
+    }
+
+    private fun createdShipment() = Shipment(CARGO)
+
+    private fun assignedShipment() = createdShipment().assignToVehicle()
+
+    private fun inTransitShipment() = assignedShipment().startTransit()
+
+    private fun deliveredShipment() = inTransitShipment().markDelivered()
+
+    private fun failedShipment() = inTransitShipment().markDeliveryFailed()
+
+    private companion object {
+        val CARGO = Package(
+            id = "PKG-001",
+            weight = 10.0,
+            priority = Priority.STANDARD,
+            originWarehouse = createWarehouse("WH-001"),
+            destinationWarehouse = createWarehouse("WH-002")
+        )
+
+        fun createWarehouse(id: String) = Warehouse(
+            id = id,
+            name = "Hub $id",
+            regionalZone = "CENTRAL",
+            longitude = 34.0,
+            latitude = 31.0
+        )
     }
 }

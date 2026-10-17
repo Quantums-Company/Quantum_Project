@@ -1,115 +1,85 @@
 package org.bytebloom.logiroute.domain.usecase.packages
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.repository.PackageRepository
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 class FindPackagesByDestinationUseCaseTest {
 
-    @Test
-    fun `should return packages by destination warehouse`() = runTest {
-        // Given
-        val packageRepository = mockk<PackageRepository>()
+    private lateinit var packageRepository: PackageRepository
+    private lateinit var findPackagesByDestination: FindPackagesByDestinationUseCase
 
-        val originWarehouse = Warehouse(
-            id = "WH-001",
-            name = "Origin",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
-        val destinationWarehouse = Warehouse(
-            id = "WH-002",
-            name = "Destination",
-            regionalZone = "South",
-            longitude = 35.1,
-            latitude = 32.1
-        )
-
-        val testPackage = Package(
-            id = "PKG-000001",
-            weight = 100.0,
-            priority = Priority.STANDARD,
-            originWarehouse = originWarehouse,
-            destinationWarehouse = destinationWarehouse
-        )
-
-        coEvery {
-            packageRepository.getAll()
-        } returns listOf(testPackage)
-
-        val useCase =
-            FindPackagesByDestinationUseCase(
-                packageRepository
-            )
-
-
-        // When
-        val result = useCase(destinationWarehouse)
-
-        // Then
-        assertEquals(listOf(testPackage), result)
+    @BeforeEach
+    fun setUp() {
+        packageRepository = mockk()
+        findPackagesByDestination = FindPackagesByDestinationUseCase(packageRepository)
     }
 
+    @Test
+    fun `should return only packages heading to requested destination`() = runTest {
+        // Given
+        val toTarget = createPackage(id = "PKG-001", destination = TARGET_WAREHOUSE)
+        val toOther = createPackage(id = "PKG-002", destination = OTHER_WAREHOUSE)
+        coEvery { packageRepository.getAll() } returns listOf(toTarget, toOther)
+
+        // When
+        val result = findPackagesByDestination(TARGET_WAREHOUSE)
+
+        // Then
+        assertThat(result).containsExactly(toTarget)
+    }
 
     @Test
-    fun `should not return packages with different destination`() = runTest {
-
+    fun `should return empty list when no package heads to requested destination`() = runTest {
         // Given
-        val packageRepository = mockk<PackageRepository>()
+        coEvery { packageRepository.getAll() } returns listOf(
+            createPackage(id = "PKG-001", destination = OTHER_WAREHOUSE)
+        )
 
-        val originWarehouse = Warehouse(
-            id = "WH-001",
-            name = "Origin",
-            regionalZone = "North",
+        // When
+        val result = findPackagesByDestination(TARGET_WAREHOUSE)
+
+        // Then
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `should propagate network exception when repository fails`() = runTest {
+        // Given
+        coEvery { packageRepository.getAll() } throws NetworkUnavailableException()
+
+        // When / Then
+        assertFailsWith<NetworkUnavailableException> { findPackagesByDestination(TARGET_WAREHOUSE) }
+    }
+
+    private fun createPackage(id: String, destination: Warehouse) = Package(
+        id = id,
+        weight = 10.0,
+        priority = Priority.STANDARD,
+        originWarehouse = ORIGIN_WAREHOUSE,
+        destinationWarehouse = destination
+    )
+
+    private companion object {
+        val ORIGIN_WAREHOUSE = createWarehouse("WH-001")
+        val TARGET_WAREHOUSE = createWarehouse("WH-002")
+        val OTHER_WAREHOUSE = createWarehouse("WH-003")
+
+        fun createWarehouse(id: String) = Warehouse(
+            id = id,
+            name = "Test Warehouse",
+            regionalZone = "CENTRAL",
             longitude = 35.0,
             latitude = 32.0
         )
-
-        val destinationWarehouse = Warehouse(
-            id = "WH-002",
-            name = "Destination",
-            regionalZone = "South",
-            longitude = 35.1,
-            latitude = 32.1
-        )
-
-        val otherWarehouse = Warehouse(
-            id = "WH-003",
-            name = "Other",
-            regionalZone = "East",
-            longitude = 35.2,
-            latitude = 32.2
-        )
-
-        val testPackage = Package(
-            id = "PKG-000002",
-            weight = 100.0,
-            priority = Priority.STANDARD,
-            originWarehouse = originWarehouse,
-            destinationWarehouse = otherWarehouse
-        )
-
-        coEvery {
-            packageRepository.getAll()
-        } returns listOf(testPackage)
-
-        val useCase =
-            FindPackagesByDestinationUseCase(
-                packageRepository
-            )
-
-        // When
-        val result = useCase(destinationWarehouse)
-
-        // Then
-        assertEquals(emptyList<Package>(), result)
     }
 }

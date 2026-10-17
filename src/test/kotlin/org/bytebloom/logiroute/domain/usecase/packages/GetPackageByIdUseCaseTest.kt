@@ -1,127 +1,96 @@
 package org.bytebloom.logiroute.domain.usecase.packages
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import org.bytebloom.logiroute.domain.model.EntityType
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
-import org.bytebloom.logiroute.domain.model.validation.ValidatorError
-import org.bytebloom.logiroute.domain.model.validation.ValidatorField
-import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.validator.id.PackageIdValidator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNull
-import kotlin.test.assertSame
 
 class GetPackageByIdUseCaseTest {
 
-    private val packageRepository = mockk<PackageRepository>()
-    private val validator = mockk<PackageIdValidator>()
+    private lateinit var packageRepository: PackageRepository
+    private lateinit var getPackageById: GetPackageByIdUseCase
 
-    private fun packageItem(): Package =
-        Package(
-            id = "PKG-001",
-            weight = 10.0,
-            priority = Priority.STANDARD,
-            originWarehouse = warehouse("WH-001"),
-            destinationWarehouse = warehouse("WH-002")
-        )
+    @BeforeEach
+    fun setUp() {
+        packageRepository = mockk()
+        getPackageById = GetPackageByIdUseCase(packageRepository, PackageIdValidator())
+    }
 
-    private fun warehouse(id: String): Warehouse =
-        Warehouse(
-            id = id,
-            name = "Test Warehouse",
-            regionalZone = "CENTRAL",
-            longitude = 35.0,
-            latitude = 32.0
-        )
+    @Test
+    fun `should return package when it exists in repository`() = runTest {
+        // Given
+        val existingPackage = createPackage()
+        coEvery { packageRepository.getById(PACKAGE_ID) } returns existingPackage
 
-    private val useCase = GetPackageByIdUseCase(
-        packageRepository = packageRepository,
-        validator = validator
+        // When
+        val result = getPackageById(PACKAGE_ID)
+
+        // Then
+        assertThat(result).isSameInstanceAs(existingPackage)
+    }
+
+    @Test
+    fun `should return null when package does not exist`() = runTest {
+        // Given
+        coEvery { packageRepository.getById(MISSING_ID) } returns null
+
+        // When
+        val result = getPackageById(MISSING_ID)
+
+        // Then
+        assertThat(result).isNull()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", "WH-001", "PKG-12", "pkg-001"])
+    fun `should throw validation exception and skip repository when id is invalid`(invalidId: String) = runTest {
+        // Given: invalidId from @ValueSource
+
+        // When / Then
+        assertFailsWith<EntityValidationException> { getPackageById(invalidId) }
+        coVerify(exactly = 0) { packageRepository.getById(any()) }
+    }
+
+    @Test
+    fun `should propagate network exception when repository fails`() = runTest {
+        // Given
+        coEvery { packageRepository.getById(PACKAGE_ID) } throws NetworkUnavailableException()
+
+        // When / Then
+        assertFailsWith<NetworkUnavailableException> { getPackageById(PACKAGE_ID) }
+    }
+
+    private fun createPackage() = Package(
+        id = PACKAGE_ID,
+        weight = 10.0,
+        priority = Priority.STANDARD,
+        originWarehouse = createWarehouse("WH-001"),
+        destinationWarehouse = createWarehouse("WH-002")
     )
 
-    @Test
-    fun `returns package when id is valid and package exists`() = runTest {
-        // Given
-        val id = "PKG-001"
-        val expectedPackage = packageItem()
+    private fun createWarehouse(id: String) = Warehouse(
+        id = id,
+        name = "Test Warehouse",
+        regionalZone = "CENTRAL",
+        longitude = 35.0,
+        latitude = 32.0
+    )
 
-        every { validator(id) } returns ValidatorResult.Valid
-        coEvery { packageRepository.getById(id) } returns expectedPackage
-
-        // When
-        val result = useCase(id)
-
-        // Then
-        assertSame(expectedPackage, result)
-
-        verify(exactly = 1) {
-            validator(id)
-        }
-
-        coVerify(exactly = 1) {
-            packageRepository.getById(id)
-        }
-    }
-
-    @Test
-    fun `returns null when package does not exist`() = runTest {
-        // Given
-        val id = "PKG-999"
-
-        every { validator(id) } returns ValidatorResult.Valid
-        coEvery { packageRepository.getById(id) } returns null
-
-        // When
-        val result = useCase(id)
-
-        // Then
-        assertNull(result)
-
-        coVerify(exactly = 1) {
-            packageRepository.getById(id)
-        }
-    }
-
-    @Test
-    fun `throws validation exception when package id is invalid`() = runTest {
-        // Given
-        val invalidId = "WH-001"
-
-        every {
-            validator(invalidId)
-        } returns ValidatorResult.Invalid(
-            listOf(
-                ValidatorError.InvalidIdFormat(
-                    field = ValidatorField.ID,
-                    entityType = EntityType.PACKAGE
-                )
-            )
-        )
-
-        // When
-        val exception = assertFailsWith<EntityValidationException> {
-            useCase(invalidId)
-        }
-
-        // Then
-        assertEquals(
-            ValidatorField.ID,
-            exception.violations.single().field
-        )
-
-        coVerify(exactly = 0) {
-            packageRepository.getById(invalidId)
-        }
+    private companion object {
+        const val PACKAGE_ID = "PKG-001"
+        const val MISSING_ID = "PKG-999"
     }
 }
