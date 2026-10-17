@@ -1,114 +1,80 @@
 package org.bytebloom.logiroute.domain.usecase.packages
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.repository.PackageRepository
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 class FindPackagesByPriorityUseCaseTest {
 
+    private lateinit var packageRepository: PackageRepository
+    private lateinit var findPackagesByPriority: FindPackagesByPriorityUseCase
+
+    @BeforeEach
+    fun setUp() {
+        packageRepository = mockk()
+        findPackagesByPriority = FindPackagesByPriorityUseCase(packageRepository)
+    }
+
     @Test
-    fun `should return packages by priority sorted by id`() = runTest {
+    fun `should return only packages with requested priority sorted by id`() = runTest {
         // Given
-        val packageRepository = mockk<PackageRepository>()
+        val secondUrgent = createPackage(id = "PKG-002", priority = Priority.URGENT)
+        val standard = createPackage(id = "PKG-003", priority = Priority.STANDARD)
+        val firstUrgent = createPackage(id = "PKG-001", priority = Priority.URGENT)
+        coEvery { packageRepository.getAll() } returns listOf(secondUrgent, standard, firstUrgent)
 
-        val originWarehouse = Warehouse(
-            id = "WH-001",
-            name = "Origin",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
+        // When
+        val result = findPackagesByPriority(Priority.URGENT)
 
-        val destinationWarehouse = Warehouse(
-            id = "WH-002",
-            name = "Destination",
-            regionalZone = "South",
-            longitude = 35.1,
-            latitude = 32.1
-        )
+        // Then
+        assertThat(result).containsExactly(firstUrgent, secondUrgent).inOrder()
+    }
 
-        val firstPackage = Package(
-            id = "PKG-000002",
-            weight = 100.0,
-            priority = Priority.URGENT,
-            originWarehouse = originWarehouse,
-            destinationWarehouse = destinationWarehouse
-        )
-
-        val secondPackage = Package(
-            id = "PKG-000001",
-            weight = 150.0,
-            priority = Priority.URGENT,
-            originWarehouse = originWarehouse,
-            destinationWarehouse = destinationWarehouse
-        )
-
-        coEvery {
-            packageRepository.getAll()
-        } returns listOf(firstPackage, secondPackage)
-
-        val useCase = FindPackagesByPriorityUseCase(
-            packageRepository
+    @Test
+    fun `should return empty list when no package has requested priority`() = runTest {
+        // Given
+        coEvery { packageRepository.getAll() } returns listOf(
+            createPackage(id = "PKG-001", priority = Priority.LOW)
         )
 
         // When
-        val result = useCase(Priority.URGENT)
+        val result = findPackagesByPriority(Priority.URGENT)
 
         // Then
-        assertEquals(
-            listOf(secondPackage, firstPackage),
-            result
-        )
+        assertThat(result).isEmpty()
     }
-
 
     @Test
-    fun `should not return packages with different priority`() = runTest {
+    fun `should propagate network exception when repository fails`() = runTest {
         // Given
-        val packageRepository = mockk<PackageRepository>()
+        coEvery { packageRepository.getAll() } throws NetworkUnavailableException()
 
-        val originWarehouse = Warehouse(
-            id = "WH-001",
-            name = "Origin",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
-        val destinationWarehouse = Warehouse(
-            id = "WH-002",
-            name = "Destination",
-            regionalZone = "South",
-            longitude = 35.1,
-            latitude = 32.1
-        )
-
-        val standardPackage = Package(
-            id = "PKG-000003",
-            weight = 100.0,
-            priority = Priority.STANDARD,
-            originWarehouse = originWarehouse,
-            destinationWarehouse = destinationWarehouse
-        )
-
-        coEvery {
-            packageRepository.getAll()
-        } returns listOf(standardPackage)
-
-        val useCase = FindPackagesByPriorityUseCase(
-            packageRepository
-        )
-
-        // When
-        val result = useCase(Priority.URGENT)
-
-        // Then
-        assertEquals(emptyList<Package>(), result)
+        // When / Then
+        assertFailsWith<NetworkUnavailableException> { findPackagesByPriority(Priority.URGENT) }
     }
+
+    private fun createPackage(id: String, priority: Priority) = Package(
+        id = id,
+        weight = 10.0,
+        priority = priority,
+        originWarehouse = createWarehouse("WH-001"),
+        destinationWarehouse = createWarehouse("WH-002")
+    )
+
+    private fun createWarehouse(id: String) = Warehouse(
+        id = id,
+        name = "Test Warehouse",
+        regionalZone = "CENTRAL",
+        longitude = 35.0,
+        latitude = 32.0
+    )
 }
