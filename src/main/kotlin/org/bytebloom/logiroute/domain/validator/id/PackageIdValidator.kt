@@ -1,0 +1,9 @@
+package org.bytebloom.logiroute.domain.validator.id
+
+import org.bytebloom.logiroute.domain.model.EntityType
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+
+class PackageIdValidator {
+    private val entityIdValidator = EntityIdValidator()
+    operator fun invoke(id: String): ValidatorResult = entityIdValidator(id, EntityType.PACKAGE)
+}

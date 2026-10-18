@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
 }
 
-group = "org.bytebloom"
+group = "org.bytebloom.logiroute"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -38,10 +38,10 @@ dependencies {
 
     testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.kotlinx.coroutines.core)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     testImplementation(libs.koin.test)
     testImplementation(libs.konsist)
+    testImplementation(libs.koin.test.junit5)
 }
 
 kotlin {
