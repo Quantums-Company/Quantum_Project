@@ -1,12 +1,12 @@
+
 package org.bytebloom.logiroute.domain.validator.update
 
-import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.input.update.WarehouseUpdateInput
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
-import org.bytebloom.logiroute.domain.validator.update.UpdateWarehouseValidator
+import org.junit.jupiter.api.Test
 
 class UpdateWarehouseValidatorTest {
 
@@ -18,16 +18,20 @@ class UpdateWarehouseValidatorTest {
     }
 
     @Test
-    fun `returns Valid when id is valid and one field is provided`() {
+    fun `should return valid when one update field is provided`() {
+        // Given
         val input = WarehouseUpdateInput(id = "WH-001", name = "New Name")
 
+        // When
         val result = validator(input)
 
+        // Then
         assertThat(result).isEqualTo(ValidatorResult.Valid)
     }
 
     @Test
-    fun `returns Valid when all fields are provided and valid`() {
+    fun `should return valid when all update fields are valid`() {
+        // Given
         val input = WarehouseUpdateInput(
             id = "WH-001",
             name = "New Name",
@@ -36,199 +40,118 @@ class UpdateWarehouseValidatorTest {
             latitude = 31.0
         )
 
+        // When
         val result = validator(input)
 
+        // Then
         assertThat(result).isEqualTo(ValidatorResult.Valid)
     }
 
     @Test
-    fun `returns single violation when nothing is provided to update`() {
+    fun `should return NoFieldsProvided violation when no update fields are provided`() {
+        // Given
         val input = WarehouseUpdateInput(id = "WH-001")
 
+        // When
         val result = validator(input)
 
+        // Then
         val violations = violationsOf(result)
         assertThat(violations).hasSize(1)
+
+        val error = violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.NoFieldsProvided::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.ENTITY)
     }
 
     @Test
-    fun `returns NoFieldsProvided violation type when nothing is provided to update`() {
-        val input = WarehouseUpdateInput(id = "WH-001")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.NoFieldsProvided::class.java)
-    }
-
-    @Test
-    fun `sets ENTITY field in violation when nothing is provided to update`() {
-        val input = WarehouseUpdateInput(id = "WH-001")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.ENTITY)
-    }
-
-    @Test
-    fun `returns single violation when id is invalid`() {
+    fun `should return InvalidIdFormat violation when id is invalid`() {
+        // Given
         val input = WarehouseUpdateInput(id = "bad-id", name = "New Name")
 
+        // When
         val result = validator(input)
 
+        // Then
         val violations = violationsOf(result)
         assertThat(violations).hasSize(1)
+
+        val error = violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.InvalidIdFormat::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.ID)
     }
 
     @Test
-    fun `returns InvalidIdFormat violation type when id is invalid`() {
-        val input = WarehouseUpdateInput(id = "bad-id", name = "New Name")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.InvalidIdFormat::class.java)
-    }
-
-    @Test
-    fun `sets ID field in violation when id is invalid`() {
-        val input = WarehouseUpdateInput(id = "bad-id", name = "New Name")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.ID)
-    }
-
-    @Test
-    fun `returns single violation when provided name is blank`() {
+    fun `should return Blank violation when provided name is blank`() {
+        // Given
         val input = WarehouseUpdateInput(id = "WH-001", name = " ")
 
+        // When
         val result = validator(input)
 
+        // Then
         val violations = violationsOf(result)
         assertThat(violations).hasSize(1)
+
+        val error = violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.Blank::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.NAME)
     }
 
     @Test
-    fun `returns Blank violation type when provided name is blank`() {
-        val input = WarehouseUpdateInput(id = "WH-001", name = " ")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.Blank::class.java)
-    }
-
-    @Test
-    fun `sets NAME field in violation when provided name is blank`() {
-        val input = WarehouseUpdateInput(id = "WH-001", name = " ")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.NAME)
-    }
-
-    @Test
-    fun `returns single violation when provided regional zone is blank`() {
+    fun `should return Blank violation when provided regional zone is blank`() {
+        // Given
         val input = WarehouseUpdateInput(id = "WH-001", regionalZone = "")
 
+        // When
         val result = validator(input)
 
+        // Then
         val violations = violationsOf(result)
         assertThat(violations).hasSize(1)
+
+        val error = violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.Blank::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.REGIONAL_ZONE)
     }
 
     @Test
-    fun `returns Blank violation type when provided regional zone is blank`() {
-        val input = WarehouseUpdateInput(id = "WH-001", regionalZone = "")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.Blank::class.java)
-    }
-
-    @Test
-    fun `sets REGIONAL_ZONE field in violation when provided regional zone is blank`() {
-        val input = WarehouseUpdateInput(id = "WH-001", regionalZone = "")
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.REGIONAL_ZONE)
-    }
-
-    @Test
-    fun `returns single violation when latitude is out of range`() {
+    fun `should return OutOfRange violation when latitude is out of range`() {
+        // Given
         val input = WarehouseUpdateInput(id = "WH-001", latitude = 91.0)
 
+        // When
         val result = validator(input)
 
+        // Then
         val violations = violationsOf(result)
         assertThat(violations).hasSize(1)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.OutOfRange::class.java)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.LATITUDE)
+
+        val error = violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.OutOfRange::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.LATITUDE)
     }
 
     @Test
-    fun `returns OutOfRange violation type when latitude is out of range`() {
-        val input = WarehouseUpdateInput(id = "WH-001", latitude = 91.0)
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations).hasSize(1)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.OutOfRange::class.java)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.LATITUDE)
-    }
-
-    @Test
-    fun `sets LATITUDE field in violation when latitude is out of range`() {
-        val input = WarehouseUpdateInput(id = "WH-001", latitude = 91.0)
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations).hasSize(1)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.OutOfRange::class.java)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.LATITUDE)
-    }
-
-    @Test
-    fun `returns single violation when longitude is out of range`() {
+    fun `should return OutOfRange violation when longitude is out of range`() {
+        // Given
         val input = WarehouseUpdateInput(id = "WH-001", longitude = 181.0)
 
+        // When
         val result = validator(input)
 
+        // Then
         val violations = violationsOf(result)
         assertThat(violations).hasSize(1)
+
+        val error = violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.OutOfRange::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.LONGITUDE)
     }
 
     @Test
-    fun `returns OutOfRange violation type when longitude is out of range`() {
-        val input = WarehouseUpdateInput(id = "WH-001", longitude = 181.0)
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first()).isInstanceOf(ValidatorError.OutOfRange::class.java)
-    }
-
-    @Test
-    fun `sets LONGITUDE field in violation when longitude is out of range`() {
-        val input = WarehouseUpdateInput(id = "WH-001", longitude = 181.0)
-
-        val result = validator(input)
-
-        val violations = violationsOf(result)
-        assertThat(violations.first().field).isEqualTo(ValidatorField.LONGITUDE)
-    }
-
-    @Test
-    fun `returns all violations when several inputs are invalid`() {
+    fun `should return all violations when multiple inputs are invalid`() {
+        // Given
         val input = WarehouseUpdateInput(
             id = "bad",
             name = "",
@@ -237,15 +160,21 @@ class UpdateWarehouseValidatorTest {
             latitude = -100.0
         )
 
+        // When
         val result = validator(input)
 
+        // Then
         val violations = violationsOf(result)
-        assertThat(violations.map { it.field }).containsExactly(
-            ValidatorField.ID,
-            ValidatorField.NAME,
-            ValidatorField.REGIONAL_ZONE,
-            ValidatorField.LATITUDE,
-            ValidatorField.LONGITUDE
+
+        assertThat(violations).hasSize(5)
+        assertThat(violations.map { it.field }.toSet()).isEqualTo(
+            setOf(
+                ValidatorField.ID,
+                ValidatorField.NAME,
+                ValidatorField.REGIONAL_ZONE,
+                ValidatorField.LATITUDE,
+                ValidatorField.LONGITUDE
+            )
         )
     }
 }
