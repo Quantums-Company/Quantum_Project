@@ -35,10 +35,10 @@ class ClassifyPackageSectorUseCaseTest {
         val incomingPackage = createPackage(destinationLatitude = 30.1, destinationLongitude = -100.2, weight = 110.0)
 
         // When
-        val sector = classifyPackageSector(incomingPackage)
+        val region = classifyPackageSector(incomingPackage)
 
         // Then
-        assertThat(sector).isEqualTo(Region.WEST)
+        assertThat(region).isEqualTo(Region.WEST)
     }
 
     @Test
@@ -48,10 +48,10 @@ class ClassifyPackageSectorUseCaseTest {
         val incomingPackage = createPackage(destinationLatitude = 40.1, destinationLongitude = -75.1, weight = 480.0)
 
         // When
-        val sector = classifyPackageSector(incomingPackage)
+        val region = classifyPackageSector(incomingPackage)
 
         // Then
-        assertThat(sector).isEqualTo(Region.EAST)
+        assertThat(region).isEqualTo(Region.EAST)
     }
 
     @Test

@@ -12,39 +12,39 @@ class MajorityVoteSelectorTest {
     private val majorityVoteSelector = MajorityVoteSelector()
 
     @Test
-    fun `should select the sector with the most votes`() {
+    fun `should select the region with the most votes`() {
         // Given
         val neighbors = recordsIn(Region.EAST, Region.WEST, Region.WEST, Region.NORTH, Region.WEST)
 
         // When
-        val sector = majorityVoteSelector.select(neighbors)
+        val region = majorityVoteSelector.select(neighbors)
 
         // Then
-        assertThat(sector).isEqualTo(Region.WEST)
+        assertThat(region).isEqualTo(Region.WEST)
     }
 
     @Test
-    fun `should select the sector of the nearest neighbor when votes are tied`() {
+    fun `should select the region of the nearest neighbor when votes are tied`() {
         // Given
         val neighbors = recordsIn(Region.EAST, Region.WEST, Region.WEST, Region.EAST, Region.NORTH)
 
         // When
-        val sector = majorityVoteSelector.select(neighbors)
+        val region = majorityVoteSelector.select(neighbors)
 
         // Then
-        assertThat(sector).isEqualTo(Region.EAST)
+        assertThat(region).isEqualTo(Region.EAST)
     }
 
     @Test
-    fun `should select the only neighbor sector when there is one neighbor`() {
+    fun `should select the only neighbor region when there is one neighbor`() {
         // Given
         val neighbors = recordsIn(Region.SOUTH)
 
         // When
-        val sector = majorityVoteSelector.select(neighbors)
+        val region = majorityVoteSelector.select(neighbors)
 
         // Then
-        assertThat(sector).isEqualTo(Region.SOUTH)
+        assertThat(region).isEqualTo(Region.SOUTH)
     }
 
     @Test
@@ -57,7 +57,7 @@ class MajorityVoteSelectorTest {
     }
 
     private fun recordsIn(vararg sectors: Region): List<LabeledCargoRecord> =
-        sectors.map { sector -> LabeledCargoRecord(ANY_FEATURES, sector) }
+        sectors.map { region -> LabeledCargoRecord(ANY_FEATURES, region) }
 
     private companion object {
         val ANY_FEATURES = CargoFeatures(latitude = 0.0, longitude = 0.0, weightKg = 0.0)

@@ -53,7 +53,10 @@ class SimulatedTelemetryDataSource(
                 )
             }
 
+            if (calculateRemainingFuel(tick) <= MIN_FUEL_PERCENT) return@flow  // tank is empty: the stream ends
+
             tick++
+
             delay(interval)
         }
     }

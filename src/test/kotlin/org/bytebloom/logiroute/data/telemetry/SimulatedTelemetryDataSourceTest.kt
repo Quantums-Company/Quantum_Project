@@ -116,15 +116,16 @@ class SimulatedTelemetryDataSourceTest {
     }
 
     @Test
-    fun `should keep fuel at zero when tank is empty`() = runTest {
+    fun `should end the stream with an empty tank`() = runTest {
         // Given
         val service = SimulatedTelemetryDataSource(interval = 1.milliseconds)
 
         // When
-        val updates = service.streamTelemetry(listOf("TRK-001")).take(150).toList()
+        val updates = service.streamTelemetry(listOf("TRK-001")).toList()
 
         // Then
-        assertThat(updates.takeLast(50).map { it.fuelPercent }).containsExactlyElementsIn(List(50) { 0.0 })
+        assertThat(updates).hasSize(101)
+        assertThat(updates.last().fuelPercent).isEqualTo(0.0)
     }
 
     @Test

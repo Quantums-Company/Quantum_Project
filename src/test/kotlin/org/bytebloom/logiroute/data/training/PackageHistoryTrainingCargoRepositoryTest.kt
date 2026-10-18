@@ -71,7 +71,7 @@ class PackageHistoryTrainingCargoRepositoryTest {
         val records = trainingCargoRepository.getTrainingRecords()
 
         // Then
-        assertThat(records.single().sector).isEqualTo(Region.EAST)
+        assertThat(records.single().region).isEqualTo(Region.EAST)
     }
 
     @Test
@@ -94,7 +94,7 @@ class PackageHistoryTrainingCargoRepositoryTest {
         val records = trainingCargoRepository.getTrainingRecords()
 
         // Then
-        assertThat(records.single().sector).isEqualTo(Region.NORTH)
+        assertThat(records.single().region).isEqualTo(Region.NORTH)
     }
 
     @Test
@@ -123,7 +123,7 @@ class PackageHistoryTrainingCargoRepositoryTest {
         val records = trainingCargoRepository.getTrainingRecords()
 
         // Then
-        assertThat(records.map { it.sector }).containsExactly(Region.SOUTH)
+        assertThat(records.map { it.region }).containsExactly(Region.SOUTH)
     }
 
     private fun createPackage(id: String, weight: Double, destination: Warehouse) = Package(
