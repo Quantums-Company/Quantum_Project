@@ -38,7 +38,7 @@ class ClassificationPresenter(
     private val computeDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : Presenter<ClassificationState>(ClassificationState(), parentScope) {
 
-    private val packagesById = MutableStateFlow<Map<String, Package>>(emptyMap())
+    private var packagesById: Map<String, Package> = emptyMap()
     private var job: Job? = null
 
     fun load() {
@@ -47,7 +47,7 @@ class ClassificationPresenter(
 
         job = scope.launch {
             val packages = guarded(onFailure = ::showFailure) { getAllPackages() } ?: return@launch
-            packagesById.value = packages.associateBy { it.id }
+            packagesById = packages.associateBy { it.id }
             update {
                 ClassificationState(
                     status = ClassificationStatus.READY,
@@ -67,7 +67,7 @@ class ClassificationPresenter(
     }
 
     private suspend fun classifyOne(packageId: String) {
-        val target = packagesById.value.values.firstOrNull { it.id.equals(packageId.trim(), ignoreCase = true) }
+        val target = packagesById.values.firstOrNull { it.id.equals(packageId.trim(), ignoreCase = true) }
             ?: return showFailure(UiError.InvalidInput("Package '$packageId' was not found."))
 
         // KNN scans the whole training set: CPU-bound work stays off the UI dispatcher.

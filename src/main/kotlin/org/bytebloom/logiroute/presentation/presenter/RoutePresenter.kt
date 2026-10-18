@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bytebloom.logiroute.domain.model.Warehouse
@@ -52,7 +51,7 @@ class RoutePresenter(
         val graph: WarehouseGraph
     )
 
-    private val routingData = MutableStateFlow<RoutingData?>(null)
+    private var routingData: RoutingData? = null
     private var job: Job? = null
 
     fun load() {
@@ -61,7 +60,7 @@ class RoutePresenter(
 
         job = scope.launch {
             val ready = guarded(onFailure = ::showFailure) { fetchRoutingData() } ?: return@launch
-            routingData.value = ready.first
+            routingData = ready.first
             update { ready.second }
         }
     }
@@ -91,7 +90,7 @@ class RoutePresenter(
     }
 
     private suspend fun findRoute(originId: String, destinationId: String) {
-        val data = routingData.value
+        val data = routingData
             ?: return showFailure(UiError.Unexpected(NOT_LOADED))
         val origin = data.warehouseOrNull(originId)
             ?: return showFailure(UiError.InvalidInput(unknownWarehouse(originId)))
