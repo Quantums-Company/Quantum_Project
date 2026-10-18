@@ -6,7 +6,6 @@ import org.bytebloom.logiroute.domain.model.EntityType
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
-import org.bytebloom.logiroute.domain.validator.id.EntityIdValidator
 
 class EntityIdValidatorTest {
     private val validator = EntityIdValidator()

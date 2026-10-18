@@ -10,7 +10,6 @@ import org.bytebloom.logiroute.domain.model.input.update.PackageUpdateInput
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
-import org.bytebloom.logiroute.domain.validator.update.UpdatePackageValidator
 import org.junit.jupiter.api.Test
 
 class UpdatePackageValidatorTest {

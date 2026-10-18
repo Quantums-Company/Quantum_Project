@@ -9,7 +9,6 @@ import org.bytebloom.logiroute.domain.model.input.update.RouteUpdateInput
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
-import org.bytebloom.logiroute.domain.validator.update.UpdateRouteValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
