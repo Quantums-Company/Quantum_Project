@@ -1,7 +1,6 @@
 package org.bytebloom.logiroute.domain.knn
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.logiroute.domain.knn.KNearestNeighborsClassifier
 import org.bytebloom.logiroute.domain.model.Region
 import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
