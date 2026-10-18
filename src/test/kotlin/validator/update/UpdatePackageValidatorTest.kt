@@ -1,5 +1,6 @@
 package validator.update
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import org.bytebloom.domain.model.EntityType
@@ -11,11 +12,10 @@ import org.bytebloom.domain.model.validation.ValidatorField
 import org.bytebloom.domain.model.validation.ValidatorResult
 import org.bytebloom.domain.validator.update.UpdatePackageValidator
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
-import kotlin.test.assertSame
 
 class UpdatePackageValidatorTest {
+
+    private val validator = UpdatePackageValidator()
 
     private fun warehouse(): Warehouse =
         Warehouse(
@@ -26,10 +26,8 @@ class UpdatePackageValidatorTest {
             latitude = 32.0
         )
 
-    private val validator = UpdatePackageValidator()
-
     @Test
-    fun `rejects identical origin and destination warehouses`() {
+    fun `should return same warehouse violation when origin and destination are identical`() {
         // Given
         val warehouse = warehouse()
         val input = PackageUpdateInput(
@@ -42,15 +40,17 @@ class UpdatePackageValidatorTest {
         val result = validator(input)
 
         // Then
-        val invalid = assertIs<ValidatorResult.Invalid>(result)
-        val error = assertIs<ValidatorError.SameWarehouse>(
-            invalid.violations.single()
-        )
-        assertEquals(ValidatorField.ORIGIN_WAREHOUSE, error.field)
+        assertThat(result).isInstanceOf(ValidatorResult.Invalid::class.java)
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
+
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.SameWarehouse::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.ORIGIN_WAREHOUSE)
     }
 
     @Test
-    fun `rejects an update with no fields`() {
+    fun `should return no fields provided violation when update has no fields`() {
         // Given
         val input = PackageUpdateInput(id = "PKG-001")
 
@@ -58,15 +58,17 @@ class UpdatePackageValidatorTest {
         val result = validator(input)
 
         // Then
-        val invalid = assertIs<ValidatorResult.Invalid>(result)
-        val error = assertIs<ValidatorError.NoFieldsProvided>(
-            invalid.violations.single()
-        )
-        assertEquals(ValidatorField.ENTITY, error.field)
+        assertThat(result).isInstanceOf(ValidatorResult.Invalid::class.java)
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
+
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.NoFieldsProvided::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.ENTITY)
     }
 
     @Test
-    fun `rejects an id with the wrong package format`() {
+    fun `should return invalid format violation when package id has wrong format`() {
         // Given
         val input = PackageUpdateInput(
             id = "WH-001",
@@ -77,16 +79,20 @@ class UpdatePackageValidatorTest {
         val result = validator(input)
 
         // Then
-        val invalid = assertIs<ValidatorResult.Invalid>(result)
-        val error = assertIs<ValidatorError.InvalidIdFormat>(
-            invalid.violations.single()
-        )
-        assertEquals(ValidatorField.ID, error.field)
-        assertEquals(EntityType.PACKAGE, error.entityType)
+        assertThat(result).isInstanceOf(ValidatorResult.Invalid::class.java)
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
+
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.InvalidIdFormat::class.java)
+
+        val formatError = error as ValidatorError.InvalidIdFormat
+        assertThat(formatError.field).isEqualTo(ValidatorField.ID)
+        assertThat(formatError.entityType).isEqualTo(EntityType.PACKAGE)
     }
 
     @Test
-    fun `rejects a non positive weight`() {
+    fun `should return not positive violation when weight is zero`() {
         // Given
         val input = PackageUpdateInput(
             id = "PKG-001",
@@ -97,15 +103,17 @@ class UpdatePackageValidatorTest {
         val result = validator(input)
 
         // Then
-        val invalid = assertIs<ValidatorResult.Invalid>(result)
-        val error = assertIs<ValidatorError.NotPositive>(
-            invalid.violations.single()
-        )
-        assertEquals(ValidatorField.WEIGHT, error.field)
+        assertThat(result).isInstanceOf(ValidatorResult.Invalid::class.java)
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
+
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.NotPositive::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.WEIGHT)
     }
 
     @Test
-    fun `rejects a blank origin warehouse id`() {
+    fun `should return blank violation when origin warehouse id is blank`() {
         // Given
         val origin = mockk<Warehouse>()
         every { origin.id } returns ""
@@ -119,15 +127,17 @@ class UpdatePackageValidatorTest {
         val result = validator(input)
 
         // Then
-        val invalid = assertIs<ValidatorResult.Invalid>(result)
-        val error = assertIs<ValidatorError.Blank>(
-            invalid.violations.single()
-        )
-        assertEquals(ValidatorField.ORIGIN_WAREHOUSE, error.field)
+        assertThat(result).isInstanceOf(ValidatorResult.Invalid::class.java)
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
+
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.Blank::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.ORIGIN_WAREHOUSE)
     }
 
     @Test
-    fun `rejects a blank destination warehouse id`() {
+    fun `should return blank violation when destination warehouse id is blank`() {
         // Given
         val destination = mockk<Warehouse>()
         every { destination.id } returns ""
@@ -141,15 +151,17 @@ class UpdatePackageValidatorTest {
         val result = validator(input)
 
         // Then
-        val invalid = assertIs<ValidatorResult.Invalid>(result)
-        val error = assertIs<ValidatorError.Blank>(
-            invalid.violations.single()
-        )
-        assertEquals(ValidatorField.DESTINATION_WAREHOUSE, error.field)
+        assertThat(result).isInstanceOf(ValidatorResult.Invalid::class.java)
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
+
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.Blank::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.DESTINATION_WAREHOUSE)
     }
 
     @Test
-    fun `accepts a valid priority update`() {
+    fun `should return valid when priority is updated`() {
         // Given
         val input = PackageUpdateInput(
             id = "PKG-001",
@@ -160,6 +172,6 @@ class UpdatePackageValidatorTest {
         val result = validator(input)
 
         // Then
-        assertSame(ValidatorResult.Valid, result)
+        assertThat(result).isEqualTo(ValidatorResult.Valid)
     }
 }
