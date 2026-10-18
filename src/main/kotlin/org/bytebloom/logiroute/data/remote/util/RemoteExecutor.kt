@@ -16,11 +16,11 @@ class RemoteExecutor(
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         block: suspend () -> T
     ): T = withContext(dispatcher) {
-        circuitBreaker.execute {
-            retryWithBackoff {
+        retryWithBackoff {
+            circuitBreaker.execute {
                 rateLimiter.acquire()
                 errorTranslator.translate(operation, block)
-            }.getOrThrow()
-        }
+            }
+        }.getOrThrow()
     }
 }
