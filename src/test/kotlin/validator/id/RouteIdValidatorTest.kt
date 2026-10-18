@@ -12,20 +12,27 @@ import org.junit.jupiter.params.provider.ValueSource
 
 class RouteIdValidatorTest {
 
-    private lateinit var validateRouteId: RouteIdValidator
+    private lateinit var validator: RouteIdValidator
 
     @BeforeEach
     fun setUp() {
-        validateRouteId = RouteIdValidator()
+        validator = RouteIdValidator()
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["RT-001", "RT-123456", "RT-550e8400-e29b-41d4-a716-446655440000"])
-    fun `should return valid when route id has correct prefix and format`(routeId: String) {
-        // Given: routeId from @ValueSource
+    @ValueSource(
+        strings = [
+            "RT-001",
+            "RT-123456",
+            "RT-550e8400-e29b-41d4-a716-446655440000"
+        ]
+    )
+    fun `should return valid when route id has correct format`(routeId: String) {
+        // Given
+        val id = routeId
 
         // When
-        val result = validateRouteId(routeId)
+        val result = validator(id)
 
         // Then
         assertThat(result).isEqualTo(ValidatorResult.Valid)
@@ -34,29 +41,48 @@ class RouteIdValidatorTest {
     @ParameterizedTest
     @ValueSource(strings = ["", "   "])
     fun `should return blank violation when route id is blank`(routeId: String) {
-        // Given: routeId from @ValueSource
+        // Given
+        val id = routeId
 
         // When
-        val violation = validateRouteId(routeId).singleViolation()
+        val result = validator(id)
 
         // Then
-        assertThat(violation).isInstanceOf(ValidatorError.Blank::class.java)
-        assertThat(violation.field).isEqualTo(ValidatorField.ID)
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
+
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.Blank::class.java)
+        assertThat(error.field).isEqualTo(ValidatorField.ID)
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["RT-12", "WH-001", "rt-001", "RT-00A", "RT001", "RT-001 "])
+    @ValueSource(
+        strings = [
+            "RT-12",
+            "WH-001",
+            "rt-001",
+            "RT-00A",
+            "RT001",
+            "RT-001 "
+        ]
+    )
     fun `should return invalid format violation when route id is malformed`(routeId: String) {
-        // Given: routeId from @ValueSource
+        // Given
+        val id = routeId
 
         // When
-        val violation = validateRouteId(routeId).singleViolation()
+        val result = validator(id)
 
         // Then
-        assertThat(violation).isInstanceOf(ValidatorError.InvalidIdFormat::class.java)
-        assertThat((violation as ValidatorError.InvalidIdFormat).entityType).isEqualTo(EntityType.ROUTE)
-    }
+        val invalid = result as ValidatorResult.Invalid
+        assertThat(invalid.violations).hasSize(1)
 
-    private fun ValidatorResult.singleViolation(): ValidatorError =
-        (this as ValidatorResult.Invalid).violations.single()
+        val error = invalid.violations.single()
+        assertThat(error).isInstanceOf(ValidatorError.InvalidIdFormat::class.java)
+
+        val formatError = error as ValidatorError.InvalidIdFormat
+        assertThat(formatError.field).isEqualTo(ValidatorField.ID)
+        assertThat(formatError.entityType).isEqualTo(EntityType.ROUTE)
+    }
 }
