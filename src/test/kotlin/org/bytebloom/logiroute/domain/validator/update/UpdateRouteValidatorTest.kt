@@ -1,15 +1,15 @@
-package validator.update
+package org.bytebloom.logiroute.domain.validator.update
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.bytebloom.domain.model.EntityType
-import org.bytebloom.domain.model.Warehouse
-import org.bytebloom.domain.model.input.update.RouteUpdateInput
-import org.bytebloom.domain.model.validation.ValidatorError
-import org.bytebloom.domain.model.validation.ValidatorField
-import org.bytebloom.domain.model.validation.ValidatorResult
-import org.bytebloom.domain.validator.update.UpdateRouteValidator
+import org.bytebloom.logiroute.domain.model.EntityType
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.input.update.RouteUpdateInput
+import org.bytebloom.logiroute.domain.model.validation.ValidatorError
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
+import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
+import org.bytebloom.logiroute.domain.validator.update.UpdateRouteValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
