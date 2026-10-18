@@ -1,89 +1,117 @@
 package org.bytebloom.logiroute.domain.usecase.vehicles
 
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import org.bytebloom.logiroute.domain.model.Vehicle
-import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.validator.id.VehicleIdValidator
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.EntityType
+import org.bytebloom.logiroute.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.bytebloom.logiroute.domain.validator.id.VehicleIdValidator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 class GetVehicleByIdUseCaseTest {
+
+    private val vehicleRepository: VehicleRepository = mockk()
+    private val validator: VehicleIdValidator = mockk()
+    private lateinit var useCase: GetVehicleByIdUseCase
+
+    @BeforeEach
+    fun setUp() {
+        useCase = GetVehicleByIdUseCase(vehicleRepository, validator)
+    }
 
     @Test
     fun `should return vehicle when id is valid and vehicle exists`() = runTest {
         // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<VehicleIdValidator>()
-
-        val warehouse = Warehouse(
-            id = "WH-001",
-            name = "Main Warehouse",
-            regionalZone = "North",
-            longitude = 35.0,
-            latitude = 32.0
-        )
-
-        val vehicle = Vehicle(
-            id = "TRK-001",
-            maxCapacityKg = 200.0,
-            costPerKm = 5.0,
-            currentWarehouse = warehouse
-        )
-
-        every { validator("TRK-001") } returns ValidatorResult.Valid
-        coEvery { vehicleRepository.getById("TRK-001") } returns vehicle
-
-        val useCase = GetVehicleByIdUseCase(
-            vehicleRepository,
-            validator
-        )
+        val vehicle = createVehicle(id = "TRK-001")
+        every { validator(vehicle.id) } returns ValidatorResult.Valid
+        coEvery { vehicleRepository.getById(vehicle.id) } returns vehicle
 
         // When
-        val result = useCase("TRK-001")
+        val result = useCase(vehicle.id)
 
         // Then
-        assertEquals(vehicle, result)
+        assertThat(result).isEqualTo(vehicle)
     }
-
 
     @Test
-    fun `should throw exception when vehicle id is invalid`() = runTest {
+    fun `should return null when id is valid but vehicle does not exist`() = runTest {
         // Given
-        val vehicleRepository = mockk<VehicleRepository>()
-        val validator = mockk<VehicleIdValidator>()
+        val unknownVehicleId = "TRK-999"
+        every { validator(unknownVehicleId) } returns ValidatorResult.Valid
+        coEvery { vehicleRepository.getById(unknownVehicleId) } returns null
 
-        val violation = ValidatorError.InvalidIdFormat(
-            ValidatorField.ID,
-            EntityType.VEHICLE
-        )
+        // When
+        val result = useCase(unknownVehicleId)
 
-        every { validator("INVALID") } returns
-                ValidatorResult.Invalid(listOf(violation))
-
-        val useCase = GetVehicleByIdUseCase(
-            vehicleRepository,
-            validator
-        )
-
-        // When & Then
-        var exception: EntityValidationException? = null
-
-        try {
-            useCase("INVALID")
-        } catch (e: EntityValidationException) {
-            exception = e
-        }
-
-        assertNotNull(exception)
+        // Then
+        assertThat(result).isNull()
     }
+
+    @Test
+    fun `should throw validation exception when vehicle id is invalid`() = runTest {
+        // Given
+        val invalidId = "INVALID"
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(createInvalidIdError()))
+
+        // When
+        val action = suspend { useCase(invalidId) }
+
+        // Then
+        assertFailsWith<EntityValidationException> { action() }
+    }
+
+    @Test
+    fun `should not call repository when vehicle id is invalid`() = runTest {
+        // Given
+        val invalidId = "INVALID"
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(createInvalidIdError()))
+
+        // When
+        runCatching { useCase(invalidId) }
+
+        // Then
+        coVerify(exactly = 0) { vehicleRepository.getById(any()) }
+    }
+
+    private fun createWarehouse(
+        id: String = "WH-001",
+        name: String = "Main Warehouse",
+        regionalZone: String = "North",
+        longitude: Double = 35.0,
+        latitude: Double = 32.0
+    ) = Warehouse(
+        id = id,
+        name = name,
+        regionalZone = regionalZone,
+        longitude = longitude,
+        latitude = latitude
+    )
+
+    private fun createVehicle(
+        id: String = "TRK-001",
+        maxCapacityKg: Double = 200.0,
+        costPerKm: Double = 5.0,
+        currentWarehouse: Warehouse = createWarehouse()
+    ) = Vehicle(
+        id = id,
+        maxCapacityKg = maxCapacityKg,
+        costPerKm = costPerKm,
+        currentWarehouse = currentWarehouse
+    )
+
+    private fun createInvalidIdError() = ValidatorError.InvalidIdFormat(
+        ValidatorField.ID,
+        EntityType.VEHICLE
+    )
 }

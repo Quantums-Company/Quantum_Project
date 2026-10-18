@@ -1,17 +1,20 @@
 package org.bytebloom.logiroute.domain.usecase.analytics
 
-import org.junit.jupiter.api.Test
+import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.performance.PackageTrackingIdGenerator
 import org.bytebloom.logiroute.domain.tree.binary.AVLTree
 import org.bytebloom.logiroute.domain.tree.binary.BST
-import org.bytebloom.logiroute.domain.usecase.analytics.AnalyzeTreePerformanceUseCase
 import org.junit.jupiter.api.BeforeEach
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
 
 class AnalyzeTreePerformanceUseCaseTest {
 
     private lateinit var useCase: AnalyzeTreePerformanceUseCase
+
+    private val firstTrackingId = "PKG-000001"
+    private val secondTrackingId = "PKG-000002"
+    private val thirdTrackingId = "PKG-000003"
+    private val neverInsertedTrackingId = "PKG-999999"
 
     @BeforeEach
     fun setUp() {
@@ -23,75 +26,91 @@ class AnalyzeTreePerformanceUseCaseTest {
     }
 
     @Test
-    fun `reports the correct total package count`() {
+    fun `should report the requested total package count`() {
+        // Given
+        val packageCount = 3
+
         // When
-        val report = useCase(packageCount = 3, targetTrackingIds = listOf("PKG-000001"))
+        val report = useCase(packageCount = packageCount, targetTrackingIds = listOf(firstTrackingId))
 
         // Then
-        assertEquals(3, report.totalPackages)
+        assertThat(report.totalPackages).isEqualTo(packageCount)
     }
 
     @Test
-    fun `returns one search result per requested tracking id, in the order given`() {
-        // When
-        val report = useCase(packageCount = 3, targetTrackingIds = listOf("PKG-000002", "PKG-000001"))
-
-        // Then
-        assertEquals(listOf("PKG-000002", "PKG-000001"), report.results.map { it.trackingId })
-    }
-
-    @Test
-    fun `on ascending insertion order, AVL's worst-case lookup is never worse than the unbalanced BST's`() {
-        // Given — PKG-000001..000003 insert in sorted order, the exact case that degrades a plain BST
-        val targetIds = listOf("PKG-000001", "PKG-000002", "PKG-000003")
+    fun `should return one search result per requested tracking id in the order given`() {
+        // Given
+        val targetIds = listOf(secondTrackingId, firstTrackingId)
 
         // When
         val report = useCase(packageCount = 3, targetTrackingIds = targetIds)
 
-        // Then — AVL's balancing guarantees a better (or equal) WORST-CASE bound across the
-        // whole dataset. It does NOT guarantee every individual id is faster than in the
-        // unbalanced BST — a rebalance can push one element slightly deeper even as it
-        // shortens the tree's overall worst case (PKG-000001 is exactly that case here:
-        // 2 AVL steps vs 1 BST step, yet AVL's worst case is still better overall).
+        // Then
+        assertThat(report.results.map { it.trackingId }).containsExactlyElementsIn(targetIds).inOrder()
+    }
+
+    @Test
+    fun `should have avl worst case lookup no worse than bst when ids are inserted in ascending order`() {
+        // Given
+        val targetIds = listOf(firstTrackingId, secondTrackingId, thirdTrackingId)
+
+        // When
+        val report = useCase(packageCount = 3, targetTrackingIds = targetIds)
+
+        // Then
         val maxBstSteps = report.results.maxOf { it.binarySearchTreeSteps }
         val maxAvlSteps = report.results.maxOf { it.avlTreeSteps }
-        assertTrue(
-            maxAvlSteps <= maxBstSteps,
-            "Expected AVL worst case ($maxAvlSteps) <= BST worst case ($maxBstSteps)"
-        )
+        assertThat(maxAvlSteps).isAtMost(maxBstSteps)
+    }
 
-        // The unbalanced BST degenerates into a linked list on ascending input: the last
-        // inserted id requires exactly N steps.
-        assertEquals(3, report.results.last { it.trackingId == "PKG-000003" }.binarySearchTreeSteps)
+    @Test
+    fun `should need as many bst steps as packages for the last id when ids are inserted in ascending order`() {
+        // Given
+        val packageCount = 3
+        val targetIds = listOf(firstTrackingId, secondTrackingId, thirdTrackingId)
 
-        // AVL's self-balancing keeps every single lookup within ceil(log2(N+1)) steps — here, 2.
+        // When
+        val report = useCase(packageCount = packageCount, targetTrackingIds = targetIds)
+
+        // Then
+        val lastResult = report.results.last { it.trackingId == thirdTrackingId }
+        assertThat(lastResult.binarySearchTreeSteps).isEqualTo(packageCount)
+    }
+
+    @Test
+    fun `should keep every avl lookup within balanced tree height when ids are inserted in ascending order`() {
+        // Given
+        val balancedTreeHeightForThreeNodes = 2
+        val targetIds = listOf(firstTrackingId, secondTrackingId, thirdTrackingId)
+
+        // When
+        val report = useCase(packageCount = 3, targetTrackingIds = targetIds)
+
+        // Then
         report.results.forEach { result ->
-            assertTrue(
-                result.avlTreeSteps <= 2,
-                "Expected AVL step count <= 2 for ${result.trackingId}, got ${result.avlTreeSteps}"
-            )
+            assertThat(result.avlTreeSteps).isAtMost(balancedTreeHeightForThreeNodes)
         }
     }
 
     @Test
-    fun `searching for a tracking id that was never inserted still returns a step count, not an error`() {
+    fun `should return a step count when tracking id was never inserted`() {
         // When
-        val report = useCase(packageCount = 2, targetTrackingIds = listOf("PKG-999999"))
+        val report = useCase(packageCount = 2, targetTrackingIds = listOf(neverInsertedTrackingId))
 
         // Then
-        assertEquals(1, report.results.size)
-        assertTrue(report.results.first().binarySearchTreeSteps > 0)
-        assertTrue(report.results.first().avlTreeSteps > 0)
+        assertThat(report.results).hasSize(1)
+        assertThat(report.results.first().binarySearchTreeSteps).isGreaterThan(0)
+        assertThat(report.results.first().avlTreeSteps).isGreaterThan(0)
     }
 
     @Test
-    fun `zero packages still allows searching, returning minimal step counts`() {
+    fun `should return zero steps when no packages were inserted`() {
         // When
-        val report = useCase(packageCount = 0, targetTrackingIds = listOf("PKG-000001"))
+        val report = useCase(packageCount = 0, targetTrackingIds = listOf(firstTrackingId))
 
         // Then
-        assertEquals(0, report.totalPackages)
-        assertEquals(0, report.results.first().binarySearchTreeSteps)
-        assertEquals(0, report.results.first().avlTreeSteps)
+        assertThat(report.totalPackages).isEqualTo(0)
+        assertThat(report.results.first().binarySearchTreeSteps).isEqualTo(0)
+        assertThat(report.results.first().avlTreeSteps).isEqualTo(0)
     }
 }

@@ -14,75 +14,109 @@ import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
 import org.bytebloom.logiroute.domain.validator.id.WarehouseIdValidator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertFailsWith
 
 class DeleteWarehouseUseCaseTest {
 
-    private val repository = mockk<WarehouseRepository>()
-    private val validator = mockk<WarehouseIdValidator>()
-    private val useCase = DeleteWarehouseUseCase(
-        repository,
-        validator
-    )
+    private val repository: WarehouseRepository = mockk()
+    private val validator: WarehouseIdValidator = mockk()
+    private lateinit var useCase: DeleteWarehouseUseCase
+
+    @BeforeEach
+    fun setUp() {
+        useCase = DeleteWarehouseUseCase(repository, validator)
+    }
 
     @Test
-    fun `returns true when warehouse is deleted`() = runTest {
-        every { validator("WH-001") } returns ValidatorResult.Valid
-        coEvery { repository.delete("WH-001") } returns true
+    fun `should return true when warehouse is deleted`() = runTest {
+        // Given
+        val warehouseId = "WH-001"
+        every { validator(warehouseId) } returns ValidatorResult.Valid
+        coEvery { repository.delete(warehouseId) } returns true
 
-        val result = useCase("WH-001")
+        // When
+        val result = useCase(warehouseId)
 
+        // Then
         assertThat(result).isTrue()
     }
 
     @Test
-    fun `call repository exactly once when warehouse is deleted`() = runTest {
-        every { validator("WH-001") } returns ValidatorResult.Valid
-        coEvery { repository.delete("WH-001") } returns true
+    fun `should call repository delete exactly once when warehouse is deleted`() = runTest {
+        // Given
+        val warehouseId = "WH-001"
+        every { validator(warehouseId) } returns ValidatorResult.Valid
+        coEvery { repository.delete(warehouseId) } returns true
 
-        useCase("WH-001")
+        // When
+        useCase(warehouseId)
 
-        coVerify(exactly = 1) { repository.delete("WH-001") }
+        // Then
+        coVerify(exactly = 1) { repository.delete(warehouseId) }
     }
 
     @Test
-    fun `returns false when repository did not delete anything`() = runTest {
-        every { validator("WH-999") } returns ValidatorResult.Valid
-        coEvery { repository.delete("WH-999") } returns false
+    fun `should return false when repository did not delete anything`() = runTest {
+        // Given
+        val unknownWarehouseId = "WH-999"
+        every { validator(unknownWarehouseId) } returns ValidatorResult.Valid
+        coEvery { repository.delete(unknownWarehouseId) } returns false
 
-        val result = useCase("WH-999")
+        // When
+        val result = useCase(unknownWarehouseId)
 
+        // Then
         assertThat(result).isFalse()
     }
 
     @Test
-    fun `skips repository when id is invalid`() = runTest {
-        val error = ValidatorError.InvalidIdFormat(ValidatorField.ID, EntityType.WAREHOUSE)
-        every { validator("bad-id") } returns ValidatorResult.Invalid(listOf(error))
+    fun `should throw validation exception with id violation when id is invalid`() = runTest {
+        // Given
+        val invalidId = "bad-id"
+        val error = createInvalidIdError()
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(error))
 
-        val exception = assertThrows<EntityValidationException> { useCase("bad-id") }
+        // When
+        val action = suspend { useCase(invalidId) }
 
+        // Then
+        val exception = assertFailsWith<EntityValidationException> { action() }
         assertThat(exception.violations).containsExactly(error)
     }
 
     @Test
-    fun `don't call repository delete when id is invalid`() = runTest {
-        val error = ValidatorError.InvalidIdFormat(ValidatorField.ID, EntityType.WAREHOUSE)
-        every { validator("bad-id") } returns ValidatorResult.Invalid(listOf(error))
+    fun `should not call repository when id is invalid`() = runTest {
+        // Given
+        val invalidId = "bad-id"
+        every { validator(invalidId) } returns ValidatorResult.Invalid(listOf(createInvalidIdError()))
 
-        assertThrows<EntityValidationException> { useCase("bad-id") }
+        // When
+        runCatching { useCase(invalidId) }
 
+        // Then
         coVerify(exactly = 0) { repository.delete(any()) }
     }
 
     @Test
-    fun `propagates repository exception when deleting fails`() = runTest {
-        every { validator("WH-001") } returns ValidatorResult.Valid
-        coEvery { repository.delete("WH-001") } throws DatabaseConflictException("Warehouse is in use")
+    fun `should propagate repository exception when deleting fails`() = runTest {
+        // Given
+        val warehouseId = "WH-001"
+        val conflictMessage = "Warehouse is in use"
+        every { validator(warehouseId) } returns ValidatorResult.Valid
+        coEvery { repository.delete(warehouseId) } throws DatabaseConflictException(conflictMessage)
 
-        val exception = assertThrows<DatabaseConflictException> { useCase("WH-001") }
+        // When
+        val action = suspend { useCase(warehouseId) }
 
-        assertThat(exception).hasMessageThat().isEqualTo("Warehouse is in use")
+        // Then
+        val exception = assertFailsWith<DatabaseConflictException> { action() }
+        assertThat(exception).hasMessageThat().isEqualTo(conflictMessage)
     }
+
+    private fun createInvalidIdError() = ValidatorError.InvalidIdFormat(
+        ValidatorField.ID,
+        EntityType.WAREHOUSE
+    )
 }
