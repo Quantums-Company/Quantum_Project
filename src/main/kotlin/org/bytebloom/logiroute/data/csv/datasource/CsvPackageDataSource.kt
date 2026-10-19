@@ -1,14 +1,13 @@
 package org.bytebloom.logiroute.data.csv.datasource
 
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
-import org.bytebloom.logiroute.data.csv.io.CsvColumns
 import org.bytebloom.logiroute.data.csv.io.CsvFileReader
-import org.bytebloom.logiroute.data.csv.io.CsvTablesName
 import org.bytebloom.logiroute.data.csv.io.requireExpectedColumnCount
 import org.bytebloom.logiroute.data.csv.io.requireNonBlankValues
 import org.bytebloom.logiroute.data.csv.io.toDoubleOrThrow
 import org.bytebloom.logiroute.data.csv.raw.PackageRaw
 import org.bytebloom.logiroute.domain.model.Priority
+import org.bytebloom.logiroute.data.csv.io.CsvTable
 
 class CsvPackageDataSource(
     private val csvFileReader: CsvFileReader = CsvFileReader()
@@ -23,12 +22,12 @@ class CsvPackageDataSource(
     }
 
     override suspend fun loadAll(): List<PackageRaw> =
-        csvFileReader.loadCsv(fileName = CsvTablesName.PACKAGE, parser = ::parsePackage).rows
+        csvFileReader.loadCsv(fileName = CsvTable.PACKAGES.fileName, parser = ::parsePackage).rows
 
     private fun parsePackage(line: String, lineNumber: Int): PackageRaw {
         val columns = line.split(",").map(String::trim)
 
-        requireExpectedColumnCount(columns, CsvColumns.PACKAGE, lineNumber)
+        requireExpectedColumnCount(columns, CsvTable.PACKAGES.columnCount, lineNumber)
 
         val id = columns[ID_INDEX].uppercase()
         val weightValue = columns[WEIGHT_INDEX]

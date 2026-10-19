@@ -10,33 +10,29 @@ import org.bytebloom.logiroute.data.csv.datasource.CsvVehicleDataSource
 import org.bytebloom.logiroute.data.csv.datasource.CsvWarehouseDataSource
 import org.bytebloom.logiroute.data.remote.client.SupabaseClientProvider
 
-object CsvUploadRunner {
+@Suppress("TooGenericExceptionCaught")
+fun main() = runBlocking {
+    println("🚀 Starting CSV to Supabase upload process...")
 
-    @JvmStatic
-    @Suppress("TooGenericExceptionCaught")
-    fun main(args: Array<String>) = runBlocking {
-        println("🚀 Starting CSV to Supabase upload process...")
+    try {
+        withContext(Dispatchers.IO) {
+            val supabaseClient = SupabaseClientProvider().create()
 
-        try {
-            withContext(Dispatchers.IO) {
-                val supabaseClient = SupabaseClientProvider().create()
+            val uploader = CsvToSupabaseUploader(
+                client = supabaseClient,
+                warehouseDataSource = CsvWarehouseDataSource(),
+                routeDataSource = CsvRouteDataSource(),
+                vehicleDataSource = CsvVehicleDataSource(),
+                packageDataSource = CsvPackageDataSource()
+            )
 
-                val uploader = CsvToSupabaseUploader(
-                    client = supabaseClient,
-                    warehouseDataSource = CsvWarehouseDataSource(),
-                    routeDataSource = CsvRouteDataSource(),
-                    vehicleDataSource = CsvVehicleDataSource(),
-                    packageDataSource = CsvPackageDataSource()
-                )
-
-                uploader.upload()
-            }
-            println("✅ CSV Data uploaded successfully to Supabase!")
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            println("❌ Failed to upload CSV data: ${e.message}")
-            e.printStackTrace()
+            uploader.upload()
         }
+        println("✅ CSV Data uploaded successfully to Supabase!")
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        println("❌ Failed to upload CSV data: ${e.message}")
+        e.printStackTrace()
     }
 }

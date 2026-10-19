@@ -1,11 +1,11 @@
 package org.bytebloom.logiroute.data.csv.cache
 
 import org.bytebloom.logiroute.data.csv.io.CsvFileWriter
-import org.bytebloom.logiroute.data.csv.io.CsvTablesName
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Route
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.data.csv.io.CsvTable
 import java.io.File
 
 class CsvSnapshotStore(
@@ -21,7 +21,7 @@ class CsvSnapshotStore(
 
     fun saveWarehouses(items: List<Warehouse>) {
         save(
-            CsvTablesName.WAREHOUSE,
+            CsvTable.WAREHOUSES.fileName,
             "id,name,regionalZone,latitude,longitude",
             items.map {
                 row(
@@ -34,7 +34,7 @@ class CsvSnapshotStore(
 
     fun saveRoutes(items: List<Route>) {
         save(
-            CsvTablesName.ROUTE,
+            CsvTable.ROUTES.fileName,
             "routeId,originHubId,destinationHubId,distanceKm,typicalDelayMin",
             items.map {
                 row(
@@ -47,7 +47,7 @@ class CsvSnapshotStore(
 
     fun saveVehicles(items: List<Vehicle>) {
         save(
-            CsvTablesName.FLEET,
+            CsvTable.VEHICLES.fileName,
             "vehicleId,currentHubId,maxCapacityKg,costPerKm",
             items.map {
                 row(
@@ -60,7 +60,7 @@ class CsvSnapshotStore(
 
     fun savePackages(items: List<Package>) {
         save(
-            CsvTablesName.PACKAGE,
+            CsvTable.PACKAGES.fileName,
             "id,weight,originHubId,destinationHubId,priority",
             items.map {
                 row(

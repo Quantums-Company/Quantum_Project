@@ -1,13 +1,12 @@
 package org.bytebloom.logiroute.data.csv.datasource
 
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
-import org.bytebloom.logiroute.data.csv.io.CsvColumns
 import org.bytebloom.logiroute.data.csv.io.CsvFileReader
-import org.bytebloom.logiroute.data.csv.io.CsvTablesName
 import org.bytebloom.logiroute.data.csv.io.requireExpectedColumnCount
 import org.bytebloom.logiroute.data.csv.io.requireNonBlankValues
 import org.bytebloom.logiroute.data.csv.io.toDoubleOrThrow
 import org.bytebloom.logiroute.data.csv.raw.WarehouseRaw
+import org.bytebloom.logiroute.data.csv.io.CsvTable
 
 class CsvWarehouseDataSource(
     private val csvFileReader: CsvFileReader = CsvFileReader()
@@ -22,12 +21,12 @@ class CsvWarehouseDataSource(
     }
 
     override suspend fun loadAll(): List<WarehouseRaw> =
-        csvFileReader.loadCsv(fileName = CsvTablesName.WAREHOUSE, parser = ::parseWarehouse).rows
+        csvFileReader.loadCsv(fileName = CsvTable.WAREHOUSES.fileName, parser = ::parseWarehouse).rows
 
     private fun parseWarehouse(line: String, lineNumber: Int): WarehouseRaw {
         val columns = line.split(",").map(String::trim)
 
-        requireExpectedColumnCount(columns, CsvColumns.WAREHOUSE, lineNumber)
+        requireExpectedColumnCount(columns, CsvTable.WAREHOUSES.columnCount, lineNumber)
 
         val id = columns[ID_INDEX].uppercase()
         val name = columns[NAME_INDEX]
