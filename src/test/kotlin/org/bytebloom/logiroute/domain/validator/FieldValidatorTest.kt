@@ -1,326 +1,343 @@
+
 package org.bytebloom.logiroute.domain.validator
 
-import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
-import org.bytebloom.logiroute.domain.validator.FieldValidator
+import org.junit.jupiter.api.Test
 
 class FieldValidatorTest {
+
     private val validator = FieldValidator()
 
     @Test
-    fun `requiredText returns null when text is not blank`() {
+    fun `should return null when required text is not blank`() {
+        // Given
         val text = "Main Hub"
 
+        // When
         val result = validator.requiredText(text, ValidatorField.NAME)
 
+        // Then
         assertThat(result).isNull()
     }
 
     @Test
-    fun `requiredText returns Blank error type when text is empty`() {
+    fun `should return Blank error when required text is empty`() {
+        // Given
         val text = ""
 
+        // When
         val result = validator.requiredText(text, ValidatorField.NAME)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.Blank::class.java)
-    }
-
-    @Test
-    fun `requiredText sets target field when text is empty`() {
-        val text = ""
-
-        val result = validator.requiredText(text, ValidatorField.NAME)
-
         assertThat(result?.field).isEqualTo(ValidatorField.NAME)
     }
 
     @Test
-    fun `requiredText returns Blank error type when text contains only spaces`() {
+    fun `should return Blank error when required text contains only spaces`() {
+        // Given
         val text = "   "
 
+        // When
         val result = validator.requiredText(text, ValidatorField.REGIONAL_ZONE)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.Blank::class.java)
-    }
-
-    @Test
-    fun `requiredText returns Blank error when text contains only spaces`() {
-        val text = "   "
-
-        val result = validator.requiredText(text, ValidatorField.REGIONAL_ZONE)
-
         assertThat(result?.field).isEqualTo(ValidatorField.REGIONAL_ZONE)
     }
 
     @Test
-    fun `positive returns null when value is greater than zero`() {
+    fun `should return null when positive value is greater than zero`() {
+        // Given
         val value = 5.0
 
+        // When
         val result = validator.positive(value, ValidatorField.WEIGHT)
 
+        // Then
         assertThat(result).isNull()
     }
 
     @Test
-    fun `positive returns NotPositive error type when value is zero`() {
+    fun `should return NotPositive error when positive value is zero`() {
+        // Given
         val value = 0.0
 
+        // When
         val result = validator.positive(value, ValidatorField.WEIGHT)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.NotPositive::class.java)
-    }
-
-    @Test
-    fun `positive sets target field when value is zero`() {
-        val value = 0.0
-
-        val result = validator.positive(value, ValidatorField.WEIGHT)
-
         assertThat(result?.field).isEqualTo(ValidatorField.WEIGHT)
     }
 
     @Test
-    fun `positive returns NotPositive error when value is negative`() {
+    fun `should return NotPositive error when positive value is negative`() {
+        // Given
         val value = -3.5
 
+        // When
         val result = validator.positive(value, ValidatorField.WEIGHT)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.NotPositive::class.java)
+        assertThat(result?.field).isEqualTo(ValidatorField.WEIGHT)
     }
 
     @Test
-    fun `positive returns NonFiniteNumber error for NaN`() {
-        val notANumber = Double.NaN
+    fun `should return NonFiniteNumber error when positive value is NaN`() {
+        // Given
+        val value = Double.NaN
 
-        val nanResult = validator.positive(notANumber, ValidatorField.WEIGHT)
+        // When
+        val result = validator.positive(value, ValidatorField.WEIGHT)
 
-        assertThat(nanResult).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
+        // Then
+        assertThat(result).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
+        assertThat(result?.field).isEqualTo(ValidatorField.WEIGHT)
     }
 
     @Test
-    fun `positive returns NonFiniteNumber error for infinity`() {
-        val infinity = Double.POSITIVE_INFINITY
+    fun `should return NonFiniteNumber error when positive value is infinity`() {
+        // Given
+        val value = Double.POSITIVE_INFINITY
 
-        val infinityResult = validator.positive(infinity, ValidatorField.WEIGHT)
+        // When
+        val result = validator.positive(value, ValidatorField.WEIGHT)
 
-        assertThat(infinityResult).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
+        // Then
+        assertThat(result).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
+        assertThat(result?.field).isEqualTo(ValidatorField.WEIGHT)
     }
 
     @Test
-    fun `nonNegative returns null for zero values`() {
-        val zero = 0
+    fun `should return null when non-negative value is zero`() {
+        // Given
+        val value = 0
 
-        val zeroResult = validator.nonNegative(zero, ValidatorField.DISTANCE_KM)
-
-        assertThat(zeroResult).isNull()
-    }
-
-    @Test
-    fun `nonNegative returns null for positive values`() {
-        val positive = 10
-
-        val positiveResult = validator.nonNegative(positive, ValidatorField.DISTANCE_KM)
-
-        assertThat(positiveResult).isNull()
-    }
-
-    @Test
-    fun `nonNegative returns NegativeValue error when value is below zero`() {
-        val value = -1
-
+        // When
         val result = validator.nonNegative(value, ValidatorField.DISTANCE_KM)
 
+        // Then
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `should return null when non-negative value is positive`() {
+        // Given
+        val value = 10
+
+        // When
+        val result = validator.nonNegative(value, ValidatorField.DISTANCE_KM)
+
+        // Then
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `should return NegativeValue error when non-negative value is negative`() {
+        // Given
+        val value = -1
+
+        // When
+        val result = validator.nonNegative(value, ValidatorField.DISTANCE_KM)
+
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.NegativeValue::class.java)
-    }
-
-    @Test
-    fun `nonNegative sets target field when value is below zero`() {
-        val value = -1
-
-        val result = validator.nonNegative(value, ValidatorField.DISTANCE_KM)
-
         assertThat(result?.field).isEqualTo(ValidatorField.DISTANCE_KM)
     }
 
     @Test
-    fun `latitude returns null for values inside is at minimum limit`() {
-        val min = -90.0
+    fun `should return null when latitude is at minimum boundary`() {
+        // Given
+        val value = -90.0
 
-        val minimum = validator.latitude(min)
+        // When
+        val result = validator.latitude(value)
 
-        assertThat(minimum).isNull()
+        // Then
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `latitude returns null for values inside is at middle limit`() {
-        val mid = 0.0
+    fun `should return null when latitude is at middle boundary`() {
+        // Given
+        val value = 0.0
 
-        val middle = validator.latitude(mid)
+        // When
+        val result = validator.latitude(value)
 
-        assertThat(middle).isNull()
+        // Then
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `latitude returns null for values inside is at maximum limit`() {
-        val max = 90.0
+    fun `should return null when latitude is at maximum boundary`() {
+        // Given
+        val value = 90.0
 
-       val maximum = validator.latitude(max)
+        // When
+        val result = validator.latitude(value)
 
-        assertThat(maximum).isNull()
+        // Then
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `latitude returns OutOfRange error when value is above 90`() {
+    fun `should return OutOfRange error with correct field and bounds when latitude exceeds maximum`() {
+        // Given
         val value = 90.1
 
+        // When
         val result = validator.latitude(value)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.OutOfRange::class.java)
+
+        val error = result as ValidatorError.OutOfRange
+        assertThat(error.field).isEqualTo(ValidatorField.LATITUDE)
+        assertThat(error.minimum).isEqualTo(-90.0)
+        assertThat(error.maximum).isEqualTo(90.0)
     }
 
-@Test
-fun `latitude sets LATITUDE field when value is above 90`() {
-    val value = 90.1
-
-    val result = validator.latitude(value) as ValidatorError.OutOfRange
-
-    assertThat(result.field).isEqualTo(ValidatorField.LATITUDE)
-}
-
-@Test
-fun `latitude sets correct minimum bound in error when value is above 90`() {
-    val value = 90.1
-
-    val result = validator.latitude(value) as ValidatorError.OutOfRange
-
-    assertThat(result.minimum).isEqualTo(-90.0)
-}
-
-@Test
-fun `latitude sets correct maximum bound in error when value is above 90`() {
-    val value = 90.1
-
-    val result = validator.latitude(value) as ValidatorError.OutOfRange
-
-    assertThat(result.maximum).isEqualTo(90.0)
-}
-
     @Test
-    fun `latitude returns OutOfRange error when value is below minus 90`() {
+    fun `should return OutOfRange error when latitude is below minimum`() {
+        // Given
         val value = -90.1
 
+        // When
         val result = validator.latitude(value)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.OutOfRange::class.java)
+
+        val error = result as ValidatorError.OutOfRange
+        assertThat(error.field).isEqualTo(ValidatorField.LATITUDE)
+        assertThat(error.minimum).isEqualTo(-90.0)
+        assertThat(error.maximum).isEqualTo(90.0)
     }
 
     @Test
-    fun `latitude returns NonFiniteNumber error type for NaN`() {
+    fun `should return NonFiniteNumber error when latitude is NaN`() {
+        // Given
         val value = Double.NaN
 
+        // When
         val result = validator.latitude(value)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
-    }
-
-    @Test
-    fun `latitude sets LATITUDE field when value is NaN`() {
-        val value = Double.NaN
-
-        val result = validator.latitude(value)
-
         assertThat(result?.field).isEqualTo(ValidatorField.LATITUDE)
     }
 
     @Test
-    fun `longitude returns null when values is at minimum limit`() {
-        val minimum = -180.0
+    fun `should return NonFiniteNumber error when latitude is infinity`() {
+        // Given
+        val value = Double.POSITIVE_INFINITY
 
-        val minimumResult = validator.longitude(minimum)
+        // When
+        val result = validator.latitude(value)
 
-        assertThat(minimumResult).isNull()
+        // Then
+        assertThat(result).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
+        assertThat(result?.field).isEqualTo(ValidatorField.LATITUDE)
     }
 
     @Test
-    fun `longitude returns null when values is at middle limit`() {
-        val middle = 0.0
+    fun `should return null when longitude is at minimum boundary`() {
+        // Given
+        val value = -180.0
 
-        val middleResult = validator.longitude(middle)
+        // When
+        val result = validator.longitude(value)
 
-        assertThat(middleResult).isNull()
+        // Then
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `longitude returns null when values is at maximum limit`() {
-        val maximum = 180.0
+    fun `should return null when longitude is at middle boundary`() {
+        // Given
+        val value = 0.0
 
-        val maximumResult = validator.longitude(maximum)
+        // When
+        val result = validator.longitude(value)
 
-        assertThat(maximumResult).isNull()
+        // Then
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `longitude returns OutOfRange error when value is above 180`() {
+    fun `should return null when longitude is at maximum boundary`() {
+        // Given
+        val value = 180.0
+
+        // When
+        val result = validator.longitude(value)
+
+        // Then
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `should return OutOfRange error with correct field and bounds when longitude exceeds maximum`() {
+        // Given
         val value = 180.1
 
+        // When
         val result = validator.longitude(value)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.OutOfRange::class.java)
+
+        val error = result as ValidatorError.OutOfRange
+        assertThat(error.field).isEqualTo(ValidatorField.LONGITUDE)
+        assertThat(error.minimum).isEqualTo(-180.0)
+        assertThat(error.maximum).isEqualTo(180.0)
     }
 
-@Test
-fun `longitude sets LONGITUDE field when value is above 180`() {
-    val value = 180.1
-
-    val result = validator.longitude(value) as ValidatorError.OutOfRange
-
-    assertThat(result.field).isEqualTo(ValidatorField.LONGITUDE)
-}
-
-@Test
-fun `longitude sets correct minimum bound in error when value is above 180`() {
-    val value = 180.1
-
-    val result = validator.longitude(value) as ValidatorError.OutOfRange
-
-    assertThat(result.minimum).isEqualTo(-180.0)
-}
-
-@Test
-fun `longitude sets correct maximum bound in error when value is above 180`() {
-    val value = 180.1
-
-    val result = validator.longitude(value) as ValidatorError.OutOfRange
-
-    assertThat(result.maximum).isEqualTo(180.0)
-}
-
     @Test
-    fun `longitude returns OutOfRange error when value is below minus 180`() {
+    fun `should return OutOfRange error when longitude is below minimum`() {
+        // Given
         val value = -180.1
 
+        // When
         val result = validator.longitude(value)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.OutOfRange::class.java)
+
+        val error = result as ValidatorError.OutOfRange
+        assertThat(error.field).isEqualTo(ValidatorField.LONGITUDE)
+        assertThat(error.minimum).isEqualTo(-180.0)
+        assertThat(error.maximum).isEqualTo(180.0)
     }
 
     @Test
-    fun `longitude returns NonFiniteNumber error type for negative infinity`() {
+    fun `should return NonFiniteNumber error when longitude is negative infinity`() {
+        // Given
         val value = Double.NEGATIVE_INFINITY
 
+        // When
         val result = validator.longitude(value)
 
+        // Then
         assertThat(result).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
+        assertThat(result?.field).isEqualTo(ValidatorField.LONGITUDE)
     }
 
     @Test
-    fun `longitude sets LONGITUDE field when value is negative infinity`() {
-        val value = Double.NEGATIVE_INFINITY
+    fun `should return NonFiniteNumber error when longitude is NaN`() {
+        // Given
+        val value = Double.NaN
 
+        // When
         val result = validator.longitude(value)
 
+        // Then
+        assertThat(result).isInstanceOf(ValidatorError.NonFiniteNumber::class.java)
         assertThat(result?.field).isEqualTo(ValidatorField.LONGITUDE)
     }
 }
