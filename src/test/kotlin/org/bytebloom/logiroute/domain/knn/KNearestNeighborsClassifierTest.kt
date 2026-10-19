@@ -1,7 +1,6 @@
 package org.bytebloom.logiroute.domain.knn
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.logiroute.domain.knn.KNearestNeighborsClassifier
 import org.bytebloom.logiroute.domain.model.Region
 import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
@@ -10,16 +9,16 @@ import org.junit.jupiter.api.Test
 class KNearestNeighborsClassifierTest {
 
     @Test
-    fun `should classify target into the sector of its nearest neighbors`() {
+    fun `should classify target into the region of its nearest neighbors`() {
         // Given
         val classifier = KNearestNeighborsClassifier()
         val target = CargoFeatures(latitude = 0.2, longitude = 0.1, weightKg = 105.0)
 
         // When
-        val sector = classifier.classify(target, WEST_CLUSTER + EAST_CLUSTER)
+        val region = classifier.classify(target, WEST_CLUSTER + EAST_CLUSTER)
 
         // Then
-        assertThat(sector).isEqualTo(Region.WEST)
+        assertThat(region).isEqualTo(Region.WEST)
     }
 
     @Test
@@ -31,10 +30,10 @@ class KNearestNeighborsClassifierTest {
         val target = CargoFeatures(latitude = 9.8, longitude = 9.9, weightKg = 100.0)
 
         // When
-        val sector = classifier.classify(target, nearbyEastRecords + distantWestRecords)
+        val region = classifier.classify(target, nearbyEastRecords + distantWestRecords)
 
         // Then
-        assertThat(sector).isEqualTo(Region.EAST)
+        assertThat(region).isEqualTo(Region.EAST)
     }
 
     @Test
@@ -46,10 +45,10 @@ class KNearestNeighborsClassifierTest {
         val target = CargoFeatures(latitude = 0.5, longitude = 0.5, weightKg = 515.0)
 
         // When
-        val sector = classifier.classify(target, westRecords + eastRecords)
+        val region = classifier.classify(target, westRecords + eastRecords)
 
         // Then
-        assertThat(sector).isEqualTo(Region.WEST)
+        assertThat(region).isEqualTo(Region.WEST)
     }
 
     @Test
@@ -89,7 +88,7 @@ class KNearestNeighborsClassifierTest {
             labeled(latitude = 9.9, longitude = 10.3, weightKg = 390.0, Region.EAST)
         )
 
-        fun labeled(latitude: Double, longitude: Double, weightKg: Double, sector: Region) =
-            LabeledCargoRecord(CargoFeatures(latitude, longitude, weightKg), sector)
+        fun labeled(latitude: Double, longitude: Double, weightKg: Double, region: Region) =
+            LabeledCargoRecord(CargoFeatures(latitude, longitude, weightKg), region)
     }
 }
