@@ -3,9 +3,10 @@ package org.bytebloom.logiroute.presentation.screen
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Region
 
-interface ClassificationScreen {
-    fun showLoadingIndicator(isLoading: Boolean)
-    fun showErrorMessage(errorMessage: String)
+/** What the "classify a package (KNN)" screen must be able to show. Implemented by the UI. */
+interface ClassificationScreen : BaseScreen {
+
     fun showPackages(packages: List<Package>)
-    fun showClassification(packageId: String, region: Region)
+
+    fun showClassification(pkg: Package, region: Region)
 }
