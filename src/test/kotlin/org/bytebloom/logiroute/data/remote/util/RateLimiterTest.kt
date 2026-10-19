@@ -17,33 +17,22 @@ class RateLimiterTest {
 
     private var fakeNowNanos = 0L
 
-    private fun rateLimiter(capacity: Int = 10, refillRatePerSecond: Int = 5) =
-        RateLimiter(
-            maxBucketCapacity = capacity,
-            refillRatePerSecond = refillRatePerSecond,
-            nanoClock = { fakeNowNanos }
-        )
-
-    private fun RateLimiter.drain() {
-        while (tryAcquire()) Unit
-    }
-
     @Test
     fun `should start with a full bucket`() {
         // Given
-        val limiter = rateLimiter(capacity = 10)
+        val limiter = rateLimiter(capacity = DEFAULT_CAPACITY)
 
         // When
-        val acquired = List(10) { limiter.tryAcquire() }
+        val acquired = List(DEFAULT_CAPACITY) { limiter.tryAcquire() }
 
         // Then
-        assertThat(acquired).containsExactlyElementsIn(List(10) { true })
+        assertThat(acquired).containsExactlyElementsIn(List(DEFAULT_CAPACITY) { true })
     }
 
     @Test
     fun `should reject token immediately when bucket is empty`() {
         // Given
-        val limiter = rateLimiter(capacity = 10)
+        val limiter = rateLimiter(capacity = DEFAULT_CAPACITY)
         limiter.drain()
 
         // When
@@ -56,24 +45,39 @@ class RateLimiterTest {
     @Test
     fun `should refill one token when 200 milliseconds have passed`() {
         // Given
-        val limiter = rateLimiter(capacity = 10, refillRatePerSecond = 5)
+        val limiter = rateLimiter(capacity = DEFAULT_CAPACITY, refillRatePerSecond = DEFAULT_REFILL_RATE)
         limiter.drain()
-        fakeNowNanos += 200_000_000L
+        fakeNowNanos += TWO_HUNDRED_MS_NANOS
 
         // When
-        val firstAttempt = limiter.tryAcquire()
-        val secondAttempt = limiter.tryAcquire()
+        val attempts = List(2) { limiter.tryAcquire() }
 
         // Then
-        assertThat(listOf(firstAttempt, secondAttempt)).containsExactly(true, false).inOrder()
+        assertThat(attempts).containsExactly(true, false).inOrder()
+    }
+
+    @Test
+    fun `should preserve fractional refill when a token is consumed`() {
+        // Given
+        val limiter = rateLimiter(capacity = 2, refillRatePerSecond = DEFAULT_REFILL_RATE)
+        assertThat(limiter.tryAcquire()).isTrue()
+        fakeNowNanos += HUNDRED_MS_NANOS
+
+        // When
+        val attempts = listOf(limiter.tryAcquire(), limiter.tryAcquire())
+
+        // Then
+        assertThat(attempts).containsExactly(true, false).inOrder()
+        fakeNowNanos += HUNDRED_MS_NANOS
+        assertThat(limiter.tryAcquire()).isTrue()
     }
 
     @Test
     fun `should not refill when less than a whole token has accumulated`() {
         // Given
-        val limiter = rateLimiter(capacity = 10, refillRatePerSecond = 5)
+        val limiter = rateLimiter(capacity = DEFAULT_CAPACITY, refillRatePerSecond = DEFAULT_REFILL_RATE)
         limiter.drain()
-        fakeNowNanos += 199_000_000L
+        fakeNowNanos += ONE_HUNDRED_NINETY_NINE_MS_NANOS
 
         // When
         val acquired = limiter.tryAcquire()
@@ -85,15 +89,15 @@ class RateLimiterTest {
     @Test
     fun `should not refill above bucket capacity when a long time has passed`() {
         // Given
-        val limiter = rateLimiter(capacity = 10, refillRatePerSecond = 5)
+        val limiter = rateLimiter(capacity = DEFAULT_CAPACITY, refillRatePerSecond = DEFAULT_REFILL_RATE)
         limiter.drain()
-        fakeNowNanos += 60_000_000_000L
+        fakeNowNanos += SIXTY_SECONDS_NANOS
 
         // When
         val acquiredCount = List(20) { limiter.tryAcquire() }.count { it }
 
         // Then
-        assertThat(acquiredCount).isEqualTo(10)
+        assertThat(acquiredCount).isEqualTo(DEFAULT_CAPACITY)
     }
 
     @Test
@@ -101,7 +105,7 @@ class RateLimiterTest {
         // Given
         val limiter = RateLimiter(
             maxBucketCapacity = 1,
-            refillRatePerSecond = 5,
+            refillRatePerSecond = DEFAULT_REFILL_RATE,
             nanoClock = { testScheduler.currentTime * 1_000_000L }
         )
         limiter.acquire()
@@ -128,15 +132,15 @@ class RateLimiterTest {
     @Test
     fun `should hand out exactly the capacity when requests are concurrent`() = runBlocking {
         // Given
-        val limiter = rateLimiter(capacity = 10)
+        val limiter = rateLimiter(capacity = DEFAULT_CAPACITY)
 
-        // When
+        // When: using real Dispatchers.Default threads intentionally to test concurrent thread safety without delays
         val results = withContext(Dispatchers.Default) {
             List(1_000) { async { limiter.tryAcquire() } }.awaitAll()
         }
 
         // Then
-        assertThat(results.count { it }).isEqualTo(10)
+        assertThat(results.count { it }).isEqualTo(DEFAULT_CAPACITY)
     }
 
     @Test
@@ -155,5 +159,27 @@ class RateLimiterTest {
 
         // Then
         assertFailsWith<IllegalArgumentException> { action() }
+    }
+
+    private fun rateLimiter(capacity: Int = DEFAULT_CAPACITY, refillRatePerSecond: Int = DEFAULT_REFILL_RATE) =
+        RateLimiter(
+            maxBucketCapacity = capacity,
+            refillRatePerSecond = refillRatePerSecond,
+            nanoClock = { fakeNowNanos }
+        )
+
+    private fun RateLimiter.drain() {
+        do {
+            val acquired = tryAcquire()
+        } while (acquired)
+    }
+
+    companion object {
+        private const val DEFAULT_CAPACITY = 10
+        private const val DEFAULT_REFILL_RATE = 5
+        private const val HUNDRED_MS_NANOS = 100_000_000L
+        private const val TWO_HUNDRED_MS_NANOS = 200_000_000L
+        private const val ONE_HUNDRED_NINETY_NINE_MS_NANOS = 199_000_000L
+        private const val SIXTY_SECONDS_NANOS = 60_000_000_000L
     }
 }
