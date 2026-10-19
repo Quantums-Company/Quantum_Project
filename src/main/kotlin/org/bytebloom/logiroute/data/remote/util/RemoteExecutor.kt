@@ -17,8 +17,9 @@ class RemoteExecutor(
         block: suspend () -> T
     ): T = withContext(dispatcher) {
         retryWithBackoff {
-            circuitBreaker.execute {
-                rateLimiter.acquire()
+            circuitBreaker.execute(
+                beforeCall = { rateLimiter.acquire() }
+            ) {
                 errorTranslator.translate(operation, block)
             }
         }.getOrThrow()
