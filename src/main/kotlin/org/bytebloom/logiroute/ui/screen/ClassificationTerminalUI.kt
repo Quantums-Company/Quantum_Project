@@ -36,7 +36,8 @@ class ClassificationTerminalUI(
         presenter.onViewReady().join()
         if (packages.isEmpty()) return
 
-        val chosen = terminal.chooseFrom(PACKAGE_PROMPT, packages, Package::id, style) ?: return
+        val chosen = terminal.chooseFrom(PACKAGE_PROMPT, packages, Package::id, style)
+            ?: return
 
         loadingMessage = "Running k-nearest-neighbours…"
         presenter.onClassify(chosen.id).join()
@@ -71,7 +72,8 @@ class ClassificationTerminalUI(
             style.box(
                 title = style.green("${style.glyphs.success} Predicted region"),
                 lines = listOf(
-                    "Package  ${pkg.id}  (${formatNumber(pkg.weight, 1)} kg ${style.glyphs.arrow} ${pkg.destinationWarehouse.name})",
+                    "Package  ${pkg.id}  (${formatNumber(pkg.weight, 1)}" +
+                            " kg ${style.glyphs.arrow} ${pkg.destinationWarehouse.name})",
                     "Region   ${coloured(region)}"
                 )
             )

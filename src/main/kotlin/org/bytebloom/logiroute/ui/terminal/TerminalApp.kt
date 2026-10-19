@@ -18,6 +18,7 @@ class TerminalApp(
 ) {
     private val entries: List<MenuEntry> = sections.flatMap { it.entries }
 
+    @Suppress("LoopWithTooManyJumpStatements")
     suspend fun run() {
         printBanner()
         while (true) {
@@ -29,13 +30,15 @@ class TerminalApp(
 
             val entry = findEntry(key)
             if (entry == null) {
-                terminal.writeLine(style.yellow("  '$answer' is not an option — type a number from the menu, or 0 to exit."))
+                terminal.writeLine(style.yellow("  '$answer' is not an option" +
+                        " — type a number from the menu, or 0 to exit."))
             } else {
                 open(entry)
             }
         }
         terminal.writeLine()
-        terminal.writeLine(style.green("${style.glyphs.success} Goodbye — all background work has been stopped."))
+        terminal.writeLine(style.green("${style.glyphs.success} Goodbye" +
+                " — all background work has been stopped."))
     }
 
     private fun findEntry(key: String): MenuEntry? =

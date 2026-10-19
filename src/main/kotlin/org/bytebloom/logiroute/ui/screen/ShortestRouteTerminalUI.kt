@@ -37,8 +37,10 @@ class ShortestRouteTerminalUI(
         presenter.onViewReady().join()
         if (warehouses.isEmpty()) return
 
-        val origin = terminal.chooseFrom(FROM_PROMPT, warehouses, Warehouse::id, style) ?: return
-        val destination = terminal.chooseFrom(TO_PROMPT, warehouses, Warehouse::id, style) ?: return
+        val origin = terminal.chooseFrom(FROM_PROMPT, warehouses, Warehouse::id, style)
+            ?: return
+        val destination = terminal.chooseFrom(TO_PROMPT, warehouses, Warehouse::id, style)
+            ?: return
 
         loadingMessage = "Calculating the shortest route…"
         presenter.onCalculate(origin.id, destination.id).join()
@@ -64,7 +66,8 @@ class ShortestRouteTerminalUI(
 
     override fun showSkippedRoutes(routeIds: List<String>) {
         terminal.writeLine(
-            style.yellow("  ${style.glyphs.warning} ${routeIds.size} route(s) point to an unknown warehouse and were ignored: ${routeIds.joinToString()}")
+            style.yellow("  ${style.glyphs.warning} ${routeIds.size}" +
+                    " route(s) point to an unknown warehouse and were ignored: ${routeIds.joinToString()}")
         )
     }
 
@@ -93,9 +96,12 @@ class ShortestRouteTerminalUI(
 
     override fun showNoRouteFound(origin: Warehouse, destination: Warehouse) {
         terminal.writeLine(
-            style.yellow("  ${style.glyphs.warning} No route exists from ${origin.name} to ${destination.name}.")
+            style.yellow("  ${style.glyphs.warning}" +
+                    " No route exists from ${origin.name} to ${destination.name}.")
         )
-        terminal.writeLine("  " + style.hint("Routes are one-way: check that a road leads from the first warehouse to the second."))
+        terminal.writeLine("  " +
+                style.hint("Routes are one-way: " +
+                        "check that a road leads from the first warehouse to the second."))
     }
 
     private companion object {
