@@ -6,13 +6,18 @@ import org.bytebloom.logiroute.data.remote.exception.CallNotPermittedException
 import java.io.IOException
 
 class CircuitBreaker(
-    private val failureThreshold: Int = 5,
-    private val openDuration: Duration = Duration.ofSeconds(5),
+    private val failureThreshold: Int = DEFAULT_FAILURE_THRESHOLD,
+    private val openDuration: Duration = DEFAULT_OPEN_DURATION,
     private val isNetworkFailure: (Throwable) -> Boolean = { error ->
         generateSequence(error) { it.cause }.any { it is IOException }
     },
     private val clockNanos: () -> Long = System::nanoTime
 ) {
+    companion object {
+        private const val DEFAULT_FAILURE_THRESHOLD = 5
+        private val DEFAULT_OPEN_DURATION: Duration = Duration.ofSeconds(5)
+    }
+
     private val lock = Any()
 
     private var state = CircuitState.CLOSED
@@ -38,6 +43,7 @@ class CircuitBreaker(
         val isProbe: Boolean
     )
 
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     suspend fun <T> execute(block: suspend () -> T): T {
         val permit = acquirePermit()
 

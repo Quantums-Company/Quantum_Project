@@ -22,7 +22,7 @@ class ConsoleStyle(
     private fun paint(text: String, code: String): String =
         if (colors) "$ESC[${code}m$text$ESC[${RESET}m" else text
 
-    class Glyphs(
+    class Glyphs @Suppress("LongParameterList") constructor(
         val horizontal: String,
         val vertical: String,
         val topLeft: String,

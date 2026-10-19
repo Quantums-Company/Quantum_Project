@@ -29,8 +29,18 @@ class GetWarehouseReportUseCaseTest {
         // Given
         val origin = createWarehouse(id = "WH-001")
         val destination = createWarehouse(id = "WH-002")
-        origin.addPackage(createPackage(id = "PKG-001", weight = 10.5, originWarehouse = origin, destinationWarehouse = destination))
-        origin.addPackage(createPackage(id = "PKG-002", weight = 4.5, originWarehouse = origin, destinationWarehouse = destination))
+        origin.addPackage(createPackage(
+            id = "PKG-001",
+            weight = 10.5,
+            originWarehouse = origin,
+            destinationWarehouse = destination
+        ))
+        origin.addPackage(createPackage(
+            id = "PKG-002",
+            weight = 4.5,
+            originWarehouse = origin,
+            destinationWarehouse = destination
+        ))
         origin.addVehicle(createVehicle(id = "TRK-001", maxCapacityKg = 500.0, currentWarehouse = origin))
         origin.addVehicle(createVehicle(id = "TRK-002", maxCapacityKg = 250.0, currentWarehouse = origin))
         coEvery { repository.getAll() } returns listOf(origin, destination)
