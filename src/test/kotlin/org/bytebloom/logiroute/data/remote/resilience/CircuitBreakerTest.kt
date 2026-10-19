@@ -3,6 +3,7 @@ package org.bytebloom.logiroute.data.remote.resilience
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.data.remote.exception.CallNotPermittedException
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import java.io.IOException
 import java.time.Duration
 import kotlin.test.Test
@@ -129,6 +130,64 @@ class CircuitBreakerTest {
 
         assertThat(breaker.execute { "Recovered" }).isEqualTo("Recovered")
         assertThat(breaker.currentState).isEqualTo(CircuitState.CLOSED)
+    }
+
+    @Test
+    fun `should count translated network unavailable exception as network failure`() = runTest {
+        val breaker = CircuitBreaker(
+            failureThreshold = 5,
+            openDuration = Duration.ofSeconds(5),
+            clockNanos = { nowNanos }
+        )
+
+        repeat(5) {
+            assertFailsWith<NetworkUnavailableException> {
+                breaker.execute<String> {
+                    throw NetworkUnavailableException("Remote network unavailable")
+                }
+            }
+        }
+
+        assertThat(breaker.currentState).isEqualTo(CircuitState.OPEN)
+    }
+
+    @Test
+    fun `should reopen after any failed half open probe`() = runTest {
+        val breaker = createBreaker()
+        repeat(5) {
+            assertFailsWith<IOException> {
+                breaker.execute<String> { throw IOException("Network failure") }
+            }
+        }
+        nowNanos += Duration.ofSeconds(5).toNanos()
+
+        assertFailsWith<IllegalArgumentException> {
+            breaker.execute<String> { throw IllegalArgumentException("Probe failed") }
+        }
+
+        assertThat(breaker.currentState).isEqualTo(CircuitState.OPEN)
+        assertFailsWith<CallNotPermittedException> {
+            breaker.execute { "Must still be blocked" }
+        }
+    }
+
+    @Test
+    fun `should reject before running suspending pre call work while open`() = runTest {
+        val breaker = createBreaker()
+        repeat(5) {
+            assertFailsWith<IOException> {
+                breaker.execute<String> { throw IOException("Network failure") }
+            }
+        }
+        var preCallWasRun = false
+
+        assertFailsWith<CallNotPermittedException> {
+            breaker.execute(
+                beforeCall = { preCallWasRun = true }
+            ) { "Should not run" }
+        }
+
+        assertFalse(preCallWasRun)
     }
 
     @Test
