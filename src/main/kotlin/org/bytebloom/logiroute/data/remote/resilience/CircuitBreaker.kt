@@ -43,8 +43,12 @@ class CircuitBreaker(
         val isProbe: Boolean
     )
 
-    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
-    suspend fun <T> execute(block: suspend () -> T): T {
+    suspend fun <T> execute(
+        beforeCall: suspend () -> Unit = {},
+        block: suspend () -> T
+    ): T {
+        ensureCallAllowed()
+        beforeCall()
         val permit = acquirePermit()
 
         try {
@@ -64,6 +68,25 @@ class CircuitBreaker(
         } catch (error: Throwable) {
             releaseProbe(permit)
             throw error
+        }
+    }
+
+    private fun ensureCallAllowed() = synchronized(lock) {
+        when (state) {
+            CircuitState.CLOSED -> Unit
+            CircuitState.OPEN -> {
+                val elapsed = clockNanos() - openedAtNanos
+                if (elapsed < openDuration.toNanos()) {
+                    throw CallNotPermittedException()
+                }
+            }
+            CircuitState.HALF_OPEN -> {
+                if (probeInFlight) {
+                    throw CallNotPermittedException(
+                        "Circuit breaker is HALF_OPEN. A probe is already running."
+                    )
+                }
+            }
         }
     }
 
@@ -166,7 +189,7 @@ class CircuitBreaker(
 
                 CircuitState.HALF_OPEN -> {
                     if (permit.isProbe) {
-                        probeInFlight = false
+                        openCircuit()
                     }
                 }
 
