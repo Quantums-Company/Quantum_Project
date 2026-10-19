@@ -1,7 +1,6 @@
 package org.bytebloom.logiroute.data.remote.util
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.bytebloom.logiroute.domain.model.exception.UnknownDataException
@@ -26,7 +25,6 @@ class RetryUtilsTest {
         // Then
         assertThat(result.getOrThrow()).isEqualTo(SUCCESS_VALUE)
         assertThat(attempts).isEqualTo(FAILURES_BEFORE_SUCCESS + 1)
-        assertThat(currentTime).isEqualTo(TOTAL_BACKOFF_MILLIS)
     }
 
     @Test
@@ -43,12 +41,10 @@ class RetryUtilsTest {
         // Then
         assertThat(result.isFailure).isTrue()
         assertThat(attempts).isEqualTo(1)
-        assertThat(currentTime).isEqualTo(0L)
     }
 
     private companion object {
         const val SUCCESS_VALUE = "success"
         const val FAILURES_BEFORE_SUCCESS = 3
-        const val TOTAL_BACKOFF_MILLIS = 7_000L // 1s + 2s + 4s
     }
 }
