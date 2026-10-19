@@ -52,7 +52,7 @@ class RateLimiter(
         val elapsedNanos = nowNanos - lastRefillNanos
         if (elapsedNanos <= 0) return this
 
-        val refilledTokens = elapsedNanos * refillRatePerSecond / NANOS_PER_SECOND
+        val refilledTokens = elapsedNanos.toDouble() * refillRatePerSecond / NANOS_PER_SECOND
         return BucketState(
             availableTokens = min(maxBucketCapacity.toDouble(), availableTokens + refilledTokens),
             lastRefillNanos = nowNanos
