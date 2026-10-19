@@ -3,13 +3,16 @@ package org.bytebloom.logiroute.data.remote.resilience
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import org.bytebloom.logiroute.data.remote.exception.CallNotPermittedException
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import java.io.IOException
 
 class CircuitBreaker(
     private val failureThreshold: Int = DEFAULT_FAILURE_THRESHOLD,
     private val openDuration: Duration = DEFAULT_OPEN_DURATION,
     private val isNetworkFailure: (Throwable) -> Boolean = { error ->
-        generateSequence(error) { it.cause }.any { it is IOException }
+        generateSequence(error) { it.cause }.any {
+            it is IOException || it is NetworkUnavailableException
+        }
     },
     private val clockNanos: () -> Long = System::nanoTime
 ) {
@@ -43,9 +46,22 @@ class CircuitBreaker(
         val isProbe: Boolean
     )
 
-    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
-    suspend fun <T> execute(block: suspend () -> T): T {
+    suspend fun <T> execute(
+        beforeCall: suspend () -> Unit = {},
+        block: suspend () -> T
+    ): T {
         val permit = acquirePermit()
+
+        try {
+            beforeCall()
+            validatePermit(permit)
+        } catch (exception: CancellationException) {
+            releaseProbe(permit)
+            throw exception
+        } catch (error: Throwable) {
+            releaseProbe(permit)
+            throw error
+        }
 
         try {
             val result = block()
@@ -64,6 +80,33 @@ class CircuitBreaker(
         } catch (error: Throwable) {
             releaseProbe(permit)
             throw error
+        }
+    }
+
+
+    private fun validatePermit(permit: Permit) = synchronized(lock) {
+        if (permit.generation != generation) {
+            throw CallNotPermittedException()
+        }
+
+        when (state) {
+            CircuitState.CLOSED -> {
+                if (permit.isProbe) {
+                    throw CallNotPermittedException()
+                }
+            }
+
+            CircuitState.OPEN -> {
+                throw CallNotPermittedException()
+            }
+
+            CircuitState.HALF_OPEN -> {
+                if (!permit.isProbe || !probeInFlight) {
+                    throw CallNotPermittedException(
+                        "Circuit breaker is HALF_OPEN. A probe is already running."
+                    )
+                }
+            }
         }
     }
 
@@ -166,7 +209,7 @@ class CircuitBreaker(
 
                 CircuitState.HALF_OPEN -> {
                     if (permit.isProbe) {
-                        probeInFlight = false
+                        openCircuit()
                     }
                 }
 
