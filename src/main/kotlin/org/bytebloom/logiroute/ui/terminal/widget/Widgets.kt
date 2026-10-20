@@ -1,19 +1,10 @@
 package org.bytebloom.logiroute.ui.terminal.widget
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import org.bytebloom.logiroute.ui.terminal.ConsoleStyle
-import org.bytebloom.logiroute.ui.terminal.Terminal
 import java.util.Locale
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
 
 private const val BOX_PADDING = 1
-private const val SPINNER_FRAME_MILLIS = 90L
 private const val FULL_PERCENT = 100.0
 private const val HEALTHY_FUEL_PERCENT = 50.0
 private const val LOW_FUEL_PERCENT = 20.0
@@ -114,29 +105,4 @@ private const val PERCENT_WIDTH = 4
 fun formatNumber(value: Double, decimals: Int = 2): String =
     String.format(Locale.ROOT, "%.${decimals}f", value)
 
-/**
- * Shows a spinner next to [message] while [block] runs, then erases it.
- * The spinner is a child coroutine, so it is canceled even if [block] throws or the app is closed.
- */
-suspend fun <T> Terminal.withSpinner(
-    style: ConsoleStyle,
-    message: String,
-    block: suspend CoroutineScope.() -> T
-): T = coroutineScope {
-    val spinner = launch {
-        var frame = 0
-        while (isActive) {
-            write("\r" + style.cyan(
-                style.glyphs.spinner[frame % style.glyphs.spinner.size])
-                    + " " + message)
-            frame++
-            delay(SPINNER_FRAME_MILLIS.milliseconds)
-        }
-    }
-    try {
-        block()
-    } finally {
-        spinner.cancelAndJoin()
-        clearLine()
-    }
-}
+

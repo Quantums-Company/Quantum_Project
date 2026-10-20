@@ -17,8 +17,8 @@ import org.bytebloom.logiroute.presentation.RouteLeg
 import org.bytebloom.logiroute.presentation.RoutePlan
 
 class ShortestRoutePresenter(
-    private val getAllWarehouses: GetAllWarehousesUseCase,
-    private val getAllRoutes: GetAllRoutesUseCase,
+    getAllWarehouses: GetAllWarehousesUseCase,
+    getAllRoutes: GetAllRoutesUseCase,
     private val pathFinderFor: (WarehouseGraph) -> FindOptimalPathUseCase,
     view: ShortestRouteScreen,
     parentScope: CoroutineScope,

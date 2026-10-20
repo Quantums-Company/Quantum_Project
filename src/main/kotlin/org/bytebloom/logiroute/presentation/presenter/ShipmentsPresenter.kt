@@ -85,7 +85,7 @@ class ShipmentsPresenter(
         }
     ) { (id, minutes) -> view.showDeliveryEstimate(id, minutes) }
 
-    private suspend fun shipmentOf(packageId: String): Shipment {
+    private fun shipmentOf(packageId: String): Shipment {
         val pkg = loaded().packages.firstOrNull { it.id.equals(packageId.trim(), ignoreCase = true) }
             ?: throw ResourceNotFoundException("Package '$packageId' was not found.")
         return synchronized(shipments) { shipments.getOrPut(pkg.id) { Shipment(pkg) } }
