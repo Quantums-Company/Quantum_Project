@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
 }
 
-group = "org.bytebloom"
+group = "org.bytebloom.logiroute"
 version = "1.0-SNAPSHOT"
 
 repositories {

@@ -1,0 +1,8 @@
+package org.bytebloom.logiroute.domain.model.validation
+
+sealed class ValidatorResult {
+    object Valid : ValidatorResult()
+    data class Invalid(val violations: List<ValidatorError>) : ValidatorResult()
+}
+fun List<ValidatorError>.toValidatorResult(): ValidatorResult =
+    if (isEmpty()) ValidatorResult.Valid else ValidatorResult.Invalid(this)

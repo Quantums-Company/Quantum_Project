@@ -1,0 +1,90 @@
+package org.bytebloom.logiroute.domain.usecase.routing
+
+import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.routing.common.RouteFinder
+import org.junit.jupiter.api.Test
+
+class FindFewestHopsRouteUseCaseTest {
+
+    private val routeFinder = mockk<RouteFinder>()
+    private val useCase = FindFewestHopsRouteUseCase(routeFinder)
+
+    private val origin = Warehouse(
+        id = "WH-001",
+        name = "Gaza Hub",
+        regionalZone = "South",
+        longitude = 34.4668,
+        latitude = 31.5017
+    )
+    private val waypoint = Warehouse(
+        id = "WH-002",
+        name = "Mid Hub",
+        regionalZone = "Central",
+        longitude = 34.4700,
+        latitude = 31.5200
+    )
+    private val destination = Warehouse(
+        id = "WH-003",
+        name = "North Hub",
+        regionalZone = "North",
+        longitude = 34.4668,
+        latitude = 31.5500
+    )
+
+    @Test
+    fun `should return exact path from route finder when a path exists`() {
+        // Given
+        val expectedPath = listOf(origin, waypoint, destination)
+        every { routeFinder.findShortestPath(origin, destination) } returns expectedPath
+
+        // When
+        val result = useCase(origin, destination)
+
+        // Then
+        assertThat(result).isEqualTo(expectedPath)
+        verify(exactly = 1) { routeFinder.findShortestPath(origin, destination) }
+    }
+
+    @Test
+    fun `should return null when no path exists`() {
+        // Given
+        every { routeFinder.findShortestPath(origin, destination) } returns null
+
+        // When
+        val result = useCase(origin, destination)
+
+        // Then
+        assertThat(result).isNull()
+        verify(exactly = 1) { routeFinder.findShortestPath(origin, destination) }
+    }
+
+    @Test
+    fun `should still delegate to route finder when origin and destination are the same`() {
+        // Given
+        every { routeFinder.findShortestPath(origin, origin) } returns listOf(origin)
+
+        // When
+        val result = useCase(origin, origin)
+
+        // Then
+        assertThat(result).containsExactly(origin)
+        verify(exactly = 1) { routeFinder.findShortestPath(origin, origin) }
+    }
+
+    @Test
+    fun `should return path from route finder without reordering it`() {
+        // Given
+        val oddPath = listOf(origin, destination, waypoint, destination)
+        every { routeFinder.findShortestPath(origin, destination) } returns oddPath
+
+        // When
+        val result = useCase(origin, destination)
+
+        // Then
+        assertThat(result).isEqualTo(oddPath)
+    }
+}
