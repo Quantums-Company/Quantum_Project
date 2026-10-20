@@ -31,6 +31,7 @@ class PackagesManagementTerminalUI(
 
     @Volatile
     private var packages: List<Package> = emptyList()
+    private var showAllOnNextList = false
 
     @Volatile
     private var warehouses: List<Warehouse> = emptyList()
@@ -59,6 +60,7 @@ class PackagesManagementTerminalUI(
     }
 
     private suspend fun listAll() {
+        showAllOnNextList = true
         loadingMessage = "Loading packages…"
         presenter.onViewReady().join()
     }
@@ -166,10 +168,22 @@ class PackagesManagementTerminalUI(
     override fun showPackages(packages: List<Package>) {
         this.packages = packages
         terminal.writeLine()
-        if (packages.isEmpty())
+
+        if (packages.isEmpty()) {
             printWarning("There are no packages yet.")
-        else
-            printLines(style.packageTable(packages))
+            return
+        }
+
+        val showAll = showAllOnNextList
+        showAllOnNextList = false
+
+        printLines(
+            if (showAll) {
+                style.packageTable(packages, limit = null)
+            } else {
+                style.packageTable(packages)
+            }
+        )
     }
 
     override fun showWarehouseChoices(warehouses: List<Warehouse>) {

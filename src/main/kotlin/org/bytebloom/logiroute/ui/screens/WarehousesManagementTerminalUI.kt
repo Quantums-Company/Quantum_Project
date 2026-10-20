@@ -32,6 +32,7 @@ class WarehousesManagementTerminalUI(
 
     @Volatile
     private var warehouses: List<Warehouse> = emptyList()
+    private var showAllOnNextList = false
 
     override suspend fun show() {
         heading("Warehouses")
@@ -55,6 +56,7 @@ class WarehousesManagementTerminalUI(
     }
 
     private suspend fun listAll() {
+        showAllOnNextList = true
         loadingMessage = "Loading warehouses…"
         presenter.onViewReady().join()
     }
@@ -134,8 +136,22 @@ class WarehousesManagementTerminalUI(
     override fun showWarehouses(warehouses: List<Warehouse>) {
         this.warehouses = warehouses
         terminal.writeLine()
-        if (warehouses.isEmpty()) printWarning("There are no warehouses yet.")
-        else printLines(style.warehouseTable(warehouses))
+
+        if (warehouses.isEmpty()) {
+            printWarning("There are no warehouses yet.")
+            return
+        }
+
+        val showAll = showAllOnNextList
+        showAllOnNextList = false
+
+        printLines(
+            if (showAll) {
+                style.warehouseTable(warehouses, limit = null)
+            } else {
+                style.warehouseTable(warehouses)
+            }
+        )
     }
 
     override fun showWarehouse(warehouse: Warehouse) {

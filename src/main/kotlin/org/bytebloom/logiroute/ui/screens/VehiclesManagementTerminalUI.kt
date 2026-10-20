@@ -32,6 +32,7 @@ class VehiclesManagementTerminalUI(
 
     @Volatile
     private var vehicles: List<Vehicle> = emptyList()
+    private var showAllOnNextList = false
 
     @Volatile
     private var warehouses: List<Warehouse> = emptyList()
@@ -62,6 +63,7 @@ class VehiclesManagementTerminalUI(
     }
 
     private suspend fun listAll() {
+        showAllOnNextList = true
         loadingMessage = "Loading vehicles…"
         presenter.onViewReady().join()
     }
@@ -165,10 +167,22 @@ class VehiclesManagementTerminalUI(
     override fun showVehicles(vehicles: List<Vehicle>) {
         this.vehicles = vehicles
         terminal.writeLine()
-        if (vehicles.isEmpty())
+
+        if (vehicles.isEmpty()) {
             printWarning("There are no vehicles yet.")
-        else
-            printLines(style.vehicleTable(vehicles))
+            return
+        }
+
+        val showAll = showAllOnNextList
+        showAllOnNextList = false
+
+        printLines(
+            if (showAll) {
+                style.vehicleTable(vehicles, limit = null)
+            } else {
+                style.vehicleTable(vehicles)
+            }
+        )
     }
 
     override fun showWarehouseChoices(warehouses: List<Warehouse>) {

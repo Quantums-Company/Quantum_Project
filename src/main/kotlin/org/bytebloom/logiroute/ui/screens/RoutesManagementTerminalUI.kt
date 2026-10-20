@@ -31,6 +31,7 @@ class RoutesManagementTerminalUI(
 
     @Volatile
     private var routes: List<Route> = emptyList()
+    private var showAllOnNextList = false
 
     @Volatile
     private var warehouses: List<Warehouse> = emptyList()
@@ -54,6 +55,7 @@ class RoutesManagementTerminalUI(
     }
 
     private suspend fun listAll() {
+        showAllOnNextList = true
         loadingMessage = "Loading routes…"
         presenter.onViewReady().join()
     }
@@ -135,10 +137,22 @@ class RoutesManagementTerminalUI(
     override fun showRoutes(routes: List<Route>) {
         this.routes = routes
         terminal.writeLine()
-        if (routes.isEmpty())
+
+        if (routes.isEmpty()) {
             printWarning("There are no routes yet.")
-        else
-            printLines(style.routeTable(routes))
+            return
+        }
+
+        val showAll = showAllOnNextList
+        showAllOnNextList = false
+
+        printLines(
+            if (showAll) {
+                style.routeTable(routes, limit = null)
+            } else {
+                style.routeTable(routes)
+            }
+        )
     }
 
     override fun showWarehouseChoices(warehouses: List<Warehouse>) {
