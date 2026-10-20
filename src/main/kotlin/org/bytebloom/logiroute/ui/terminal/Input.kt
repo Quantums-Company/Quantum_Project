@@ -35,7 +35,7 @@ suspend fun Terminal.confirm(label: String): Boolean =
     prompt("$label (y/N) ")?.lowercase() in YES_ANSWERS
 
 /**
- * Lets the user pick an item by its list number (1, 2, 3…) or by its id/name.
+ * Lets the user pick an item by its index (1, 2, 3…) or by its id/name.
  * A blank answer (just Enter) cancels and returns null.
  */
 suspend fun <T> Terminal.chooseFrom(
@@ -51,6 +51,7 @@ suspend fun <T> Terminal.chooseFrom(
             ?: items.firstOrNull { idOf(it).equals(answer, ignoreCase = true) }
 
         if (chosen != null) return chosen
-        writeLine(style.yellow("  '$answer' is not in the list — type a number or a name, or press Enter to cancel."))
+        writeLine(style.yellow("  '$answer' is not in the list" +
+                " — type an index or a name, or press Enter to cancel."))
     }
 }

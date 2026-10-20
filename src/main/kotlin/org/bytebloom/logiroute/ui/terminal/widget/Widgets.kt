@@ -24,7 +24,7 @@ fun padVisible(text: String, width: Int, alignRight: Boolean = false): String {
     return if (alignRight) padding + text else text + padding
 }
 
-/** A rounded box with a title: `╭─ Title ───╮ … ╰──────────╯`. */
+/** A rounded box with a title: `╭─ Title ───╮ … ╰──────────╯`. The frame is dimmed so the content stands out. */
 fun ConsoleStyle.box(title: String, lines: List<String>): List<String> {
     val g = glyphs
     val contentWidth = maxOf(
@@ -32,44 +32,63 @@ fun ConsoleStyle.box(title: String, lines: List<String>): List<String> {
         lines.maxOfOrNull { ConsoleStyle.visibleLength(it) } ?: 0
     )
     val inner = contentWidth + BOX_PADDING * 2
-    val top = g.topLeft + g.horizontal + " " + bold(title) + " " +
-            g.horizontal.repeat(inner - ConsoleStyle.visibleLength(title) - TITLE_FRAME) + g.topRight
-    val body = lines.map { g.vertical + " " + padVisible(it, contentWidth) + " " + g.vertical }
-    val bottom = g.bottomLeft + g.horizontal.repeat(inner) + g.bottomRight
+    val top = dim(g.topLeft + g.horizontal) + " " + bold(title) + " " +
+            dim(g.horizontal.repeat(inner - ConsoleStyle.visibleLength(title)
+                    - TITLE_FRAME) + g.topRight)
+    val body = lines.map { dim(g.vertical) + " " + padVisible(it, contentWidth)+
+            " " + dim(g.vertical) }
+    val bottom = dim(g.bottomLeft + g.horizontal.repeat(inner) + g.bottomRight)
     return listOf(top) + body + listOf(bottom)
 }
 
 private const val TITLE_MIN_EXTRA = 4
 private const val TITLE_FRAME = 3
 
-/** A table with a header row. Columns listed in [rightAligned] (numbers) are aligned to the right. */
+/** How many rows a long list shows before it says "… and N more". */
+const val DEFAULT_ROW_LIMIT = 10
+
+/**
+ * A colored table: dimmed frame, bold cyan header. Columns listed in [rightAligned] (numbers) are
+ * aligned to the right. [cellColors] paints a whole column (for example the id column).
+ *
+ * With a [limit], only the first rows are drawn and a last line says how many were left out;
+ * [moreHint] is added to that line (for example how to pick a hidden row).
+ */
 fun ConsoleStyle.table(
     headers: List<String>,
     rows: List<List<String>>,
-    rightAligned: Set<Int> = emptySet()
+    rightAligned: Set<Int> = emptySet(),
+    cellColors: Map<Int, (String) -> String> = emptyMap(),
+    limit: Int? = null,
+    moreHint: String = ""
 ): List<String> {
     val g = glyphs
+    val shown = if (limit != null) rows.take(limit) else rows
+    val hidden = rows.size - shown.size
     val widths = headers.indices.map { column ->
         maxOf(
             ConsoleStyle.visibleLength(headers[column]),
-            rows.maxOfOrNull { ConsoleStyle.visibleLength(it[column]) } ?: 0
+            shown.maxOfOrNull { ConsoleStyle.visibleLength(it[column]) } ?: 0
         )
     }
 
     fun rule(left: String, middle: String, right: String) =
-        left + widths.joinToString(middle) { g.horizontal.repeat(it + 2) } + right
+        dim(left + widths.joinToString(middle) { g.horizontal.repeat(it + 2) } + right)
 
     fun line(cells: List<String>) =
-        g.vertical + cells.mapIndexed { column, cell ->
+        dim(g.vertical) + cells.mapIndexed { column, cell ->
             " " + padVisible(cell, widths[column], alignRight = column in rightAligned) + " "
-        }.joinToString(g.vertical) + g.vertical
+        }.joinToString(dim(g.vertical)) + dim(g.vertical)
 
     return buildList {
         add(rule(g.topLeft, g.teeDown, g.topRight))
-        add(line(headers.map { bold(it) }))
+        add(line(headers.map { bold(cyan(it)) }))
         add(rule(g.teeRight, g.cross, g.teeLeft))
-        rows.forEach { add(line(it)) }
+        shown.forEach { row ->
+            add(line(row.mapIndexed { column, cell -> cellColors[column]?.invoke(cell) ?: cell }))
+        }
         add(rule(g.bottomLeft, g.teeUp, g.bottomRight))
+        if (hidden > 0) add(dim("  ${if (unicode) "…" else "..."} and $hidden more$moreHint"))
     }
 }
 
@@ -83,7 +102,11 @@ fun ConsoleStyle.percentBar(percent: Double, width: Int = DEFAULT_BAR_WIDTH): St
         clamped >= LOW_FUEL_PERCENT -> yellow(bar)
         else -> red(bar)
     }
-    return coloured + " " + padVisible(formatNumber(clamped, 0) + "%", PERCENT_WIDTH, alignRight = true)
+    return "$coloured " + padVisible(
+        formatNumber(clamped, 0) + "%",
+        PERCENT_WIDTH,
+        alignRight = true
+    )
 }
 
 private const val PERCENT_WIDTH = 4
@@ -103,7 +126,9 @@ suspend fun <T> Terminal.withSpinner(
     val spinner = launch {
         var frame = 0
         while (isActive) {
-            write("\r" + style.cyan(style.glyphs.spinner[frame % style.glyphs.spinner.size]) + " " + message)
+            write("\r" + style.cyan(
+                style.glyphs.spinner[frame % style.glyphs.spinner.size])
+                    + " " + message)
             frame++
             delay(SPINNER_FRAME_MILLIS.milliseconds)
         }

@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.presentation.screen
+package org.bytebloom.logiroute.presentation.screens
 
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.presentation.RoutePlan

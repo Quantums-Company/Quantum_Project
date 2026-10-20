@@ -5,8 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.bytebloom.logiroute.presentation.screen.BaseScreen
 import org.bytebloom.logiroute.presentation.toUserMessage
+import org.bytebloom.logiroute.presentation.screens.BaseScreen
 
 /**
  * Base class of every presenter.

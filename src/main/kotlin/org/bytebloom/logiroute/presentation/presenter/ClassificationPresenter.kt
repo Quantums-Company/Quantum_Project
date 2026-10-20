@@ -10,7 +10,7 @@ import org.bytebloom.logiroute.domain.model.Region
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.logiroute.domain.usecase.classification.ClassifyPackageSectorUseCase
 import org.bytebloom.logiroute.domain.usecase.packages.GetAllPackagesUseCase
-import org.bytebloom.logiroute.presentation.screen.ClassificationScreen
+import org.bytebloom.logiroute.presentation.screens.ClassificationScreen
 
 class ClassificationPresenter(
     private val getAllPackages: GetAllPackagesUseCase,
