@@ -61,6 +61,7 @@ import org.bytebloom.logiroute.domain.usecase.warehouses.GetWarehouseReportUseCa
 import org.bytebloom.logiroute.domain.usecase.warehouses.TraceHubLineageUseCase
 import org.bytebloom.logiroute.domain.usecase.warehouses.UpdateWarehouseUseCase
 import org.bytebloom.logiroute.domain.usecase.telemetry.StreamFleetTelemetryUseCase
+import org.bytebloom.logiroute.domain.usecase.telemetry.SearchTelemetryUseCase
 
 val useCaseModule = module {
 
@@ -192,4 +193,5 @@ val useCaseModule = module {
     }
 
     factory { StreamFleetTelemetryUseCase(get()) }
+    factory { SearchTelemetryUseCase(get()) }
 }
