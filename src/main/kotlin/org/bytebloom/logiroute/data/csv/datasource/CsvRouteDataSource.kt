@@ -1,14 +1,13 @@
 package org.bytebloom.logiroute.data.csv.datasource
 
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
-import org.bytebloom.logiroute.data.csv.io.CsvColumns
 import org.bytebloom.logiroute.data.csv.io.CsvFileReader
-import org.bytebloom.logiroute.data.csv.io.CsvTablesName
 import org.bytebloom.logiroute.data.csv.io.requireExpectedColumnCount
 import org.bytebloom.logiroute.data.csv.io.requireNonBlankValues
 import org.bytebloom.logiroute.data.csv.io.toDoubleOrThrow
 import org.bytebloom.logiroute.data.csv.io.toIntOrThrow
 import org.bytebloom.logiroute.data.csv.raw.RouteRaw
+import org.bytebloom.logiroute.data.csv.io.CsvTable
 
 class CsvRouteDataSource(
     private val csvFileReader: CsvFileReader = CsvFileReader()
@@ -23,12 +22,12 @@ class CsvRouteDataSource(
     }
 
     override suspend fun loadAll(): List<RouteRaw> =
-        csvFileReader.loadCsv(fileName = CsvTablesName.ROUTE, parser = ::parseRoute).rows
+        csvFileReader.loadCsv(fileName = CsvTable.ROUTES.fileName, parser = ::parseRoute).rows
 
     private fun parseRoute(line: String, lineNumber: Int): RouteRaw {
         val columns = line.split(",").map(String::trim)
 
-        requireExpectedColumnCount(columns, CsvColumns.ROUTE, lineNumber)
+        requireExpectedColumnCount(columns, CsvTable.ROUTES.columnCount, lineNumber)
 
         val routeId = columns[ID_INDEX].uppercase()
         val originHubId = columns[ORIGIN_INDEX].uppercase()

@@ -7,21 +7,17 @@ import org.bytebloom.logiroute.data.csv.datasource.CsvVehicleDataSource
 import org.bytebloom.logiroute.data.csv.datasource.CsvWarehouseDataSource
 import org.bytebloom.logiroute.data.csv.io.CsvFileWriter
 
-object CsvCleaningRunner {
+fun main() = runBlocking {
 
-    @JvmStatic
-    fun main(args: Array<String>) = runBlocking {
+    val cleaner = CsvDataCleaner(
+        warehouseDataSource = CsvWarehouseDataSource(),
+        routeDataSource = CsvRouteDataSource(),
+        vehicleDataSource = CsvVehicleDataSource(),
+        packageDataSource = CsvPackageDataSource(),
+        csvFileWriter = CsvFileWriter()
+    )
 
-        val cleaner = CsvDataCleaner(
-            warehouseDataSource = CsvWarehouseDataSource(),
-            routeDataSource = CsvRouteDataSource(),
-            vehicleDataSource = CsvVehicleDataSource(),
-            packageDataSource = CsvPackageDataSource(),
-            csvFileWriter = CsvFileWriter()
-        )
+    cleaner.clean()
 
-        cleaner.clean()
-
-        println("CSV cleaning completed successfully.")
-    }
+    println("CSV cleaning completed successfully.")
 }

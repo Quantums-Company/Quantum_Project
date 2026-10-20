@@ -15,7 +15,7 @@ class SdkWarehouseDataSource(
 ) : WarehouseRemoteDataSource {
 
     private suspend fun fetchById(id: String): WarehouseResponseDto? =
-        client.from(TableName.WAREHOUSES)
+        client.from(TableName.WAREHOUSES.value)
             .select {
                 filter {
                     eq("id", id)
@@ -25,7 +25,7 @@ class SdkWarehouseDataSource(
 
     override suspend fun loadAll(): List<WarehouseResponseDto> =
         remoteExecutor.execute("getAll warehouses", ioDispatcher) {
-            client.from(TableName.WAREHOUSES).select().decodeList<WarehouseResponseDto>()
+            client.from(TableName.WAREHOUSES.value).select().decodeList<WarehouseResponseDto>()
         }
 
     override suspend fun loadById(id: String): WarehouseResponseDto? =
@@ -35,19 +35,19 @@ class SdkWarehouseDataSource(
 
     override suspend fun create(request: WarehouseRequestDto): WarehouseResponseDto? =
         remoteExecutor.execute("create warehouse '${request.id}'", ioDispatcher) {
-            client.from(TableName.WAREHOUSES).insert(request)
+            client.from(TableName.WAREHOUSES.value).insert(request)
             fetchById(request.id)
         }
 
     override suspend fun update(id: String, request: WarehouseRequestDto): WarehouseResponseDto? =
         remoteExecutor.execute("update warehouse '$id'", ioDispatcher) {
-            client.from(TableName.WAREHOUSES).update(request) { filter { eq("id", id) } }
+            client.from(TableName.WAREHOUSES.value).update(request) { filter { eq("id", id) } }
             fetchById(id)
         }
 
     override suspend fun delete(id: String): Boolean =
         remoteExecutor.execute("delete warehouse '$id'", ioDispatcher) {
-            client.from(TableName.WAREHOUSES).delete { filter { eq("id", id) } }
+            client.from(TableName.WAREHOUSES.value).delete { filter { eq("id", id) } }
             true
         }
 }

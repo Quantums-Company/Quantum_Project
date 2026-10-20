@@ -15,7 +15,7 @@ class SdkRouteDataSource(
 ) : RouteRemoteDataSource {
 
     private suspend fun fetchById(id: String): RouteResponseDto? =
-        client.from(TableName.ROUTES)
+        client.from(TableName.ROUTES.value)
             .select {
                 filter {
                     eq("id", id)
@@ -25,7 +25,7 @@ class SdkRouteDataSource(
 
     override suspend fun loadAll(): List<RouteResponseDto> =
         remoteExecutor.execute("getAll routes", ioDispatcher) {
-            client.from(TableName.ROUTES).select().decodeList<RouteResponseDto>()
+            client.from(TableName.ROUTES.value).select().decodeList<RouteResponseDto>()
         }
 
     override suspend fun loadById(id: String): RouteResponseDto? =
@@ -35,19 +35,19 @@ class SdkRouteDataSource(
 
     override suspend fun create(request: RouteRequestDto): RouteResponseDto? =
         remoteExecutor.execute("create route '${request.id}'", ioDispatcher) {
-            client.from(TableName.ROUTES).insert(request)
+            client.from(TableName.ROUTES.value).insert(request)
             fetchById(request.id)
         }
 
     override suspend fun update(id: String, request: RouteRequestDto): RouteResponseDto? =
         remoteExecutor.execute("update route '$id'", ioDispatcher) {
-            client.from(TableName.ROUTES).update(request) { filter { eq("id", id) } }
+            client.from(TableName.ROUTES.value).update(request) { filter { eq("id", id) } }
             fetchById(id)
         }
 
     override suspend fun delete(id: String): Boolean =
         remoteExecutor.execute("delete route '$id'", ioDispatcher) {
-            client.from(TableName.ROUTES).delete { filter { eq("id", id) } }
+            client.from(TableName.ROUTES.value).delete { filter { eq("id", id) } }
             true
         }
 }

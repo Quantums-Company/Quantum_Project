@@ -70,7 +70,7 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.WAREHOUSES).upsert(requests) { onConflict = "id" }
+        client.from(TableName.WAREHOUSES.value).upsert(requests) { onConflict = "id" }
     }
 
     private suspend fun uploadRoutes(routes: List<Route>, syncedAt: String) {
@@ -85,7 +85,7 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.ROUTES).upsert(requests) { onConflict = "id" }
+        client.from(TableName.ROUTES.value).upsert(requests) { onConflict = "id" }
     }
 
     private suspend fun uploadVehicles(vehicles: List<Vehicle>, syncedAt: String) {
@@ -99,7 +99,7 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.VEHICLES).upsert(requests) { onConflict = "id" }
+        client.from(TableName.VEHICLES.value).upsert(requests) { onConflict = "id" }
     }
 
     private suspend fun uploadPackages(packages: List<Package>, syncedAt: String) {
@@ -114,6 +114,6 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.PACKAGES).upsert(requests) { onConflict = "id" }
+        client.from(TableName.PACKAGES.value).upsert(requests) { onConflict = "id" }
     }
 }

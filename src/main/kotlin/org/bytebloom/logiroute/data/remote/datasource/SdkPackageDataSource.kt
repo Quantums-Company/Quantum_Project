@@ -15,7 +15,7 @@ class SdkPackageDataSource(
 ) : PackageRemoteDataSource {
 
     private suspend fun fetchById(id: String): PackageResponseDto? =
-        client.from(TableName.PACKAGES)
+        client.from(TableName.PACKAGES.value)
             .select {
                 filter {
                     eq("id", id)
@@ -25,7 +25,7 @@ class SdkPackageDataSource(
 
     override suspend fun loadAll(): List<PackageResponseDto> =
         remoteExecutor.execute("getAll packages", ioDispatcher) {
-            client.from(TableName.PACKAGES).select().decodeList<PackageResponseDto>()
+            client.from(TableName.PACKAGES.value).select().decodeList<PackageResponseDto>()
         }
 
     override suspend fun loadById(id: String): PackageResponseDto? =
@@ -35,19 +35,19 @@ class SdkPackageDataSource(
 
     override suspend fun create(request: PackageRequestDto): PackageResponseDto? =
         remoteExecutor.execute("create package '${request.id}'", ioDispatcher) {
-            client.from(TableName.PACKAGES).insert(request)
+            client.from(TableName.PACKAGES.value).insert(request)
             fetchById(request.id)
         }
 
     override suspend fun update(id: String, request: PackageRequestDto): PackageResponseDto? =
         remoteExecutor.execute("update package '$id'", ioDispatcher) {
-            client.from(TableName.PACKAGES).update(request) { filter { eq("id", id) } }
+            client.from(TableName.PACKAGES.value).update(request) { filter { eq("id", id) } }
             fetchById(id)
         }
 
     override suspend fun delete(id: String): Boolean =
         remoteExecutor.execute("delete package '$id'", ioDispatcher) {
-            client.from(TableName.PACKAGES).delete { filter { eq("id", id) } }
+            client.from(TableName.PACKAGES.value).delete { filter { eq("id", id) } }
             true
         }
 }

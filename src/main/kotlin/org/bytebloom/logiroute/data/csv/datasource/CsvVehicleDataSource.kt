@@ -1,13 +1,12 @@
 package org.bytebloom.logiroute.data.csv.datasource
 
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
-import org.bytebloom.logiroute.data.csv.io.CsvColumns
 import org.bytebloom.logiroute.data.csv.io.CsvFileReader
-import org.bytebloom.logiroute.data.csv.io.CsvTablesName
 import org.bytebloom.logiroute.data.csv.io.requireExpectedColumnCount
 import org.bytebloom.logiroute.data.csv.io.requireNonBlankValues
 import org.bytebloom.logiroute.data.csv.io.toDoubleOrThrow
 import org.bytebloom.logiroute.data.csv.raw.VehicleRaw
+import org.bytebloom.logiroute.data.csv.io.CsvTable
 
 class CsvVehicleDataSource(
     private val csvFileReader: CsvFileReader = CsvFileReader()
@@ -21,12 +20,12 @@ class CsvVehicleDataSource(
     }
 
     override suspend fun loadAll(): List<VehicleRaw> =
-        csvFileReader.loadCsv(fileName = CsvTablesName.FLEET, parser = ::parseVehicle).rows
+        csvFileReader.loadCsv(fileName = CsvTable.VEHICLES.fileName, parser = ::parseVehicle).rows
 
     private fun parseVehicle(line: String, lineNumber: Int): VehicleRaw {
         val columns = line.split(",").map(String::trim)
 
-        requireExpectedColumnCount(columns, CsvColumns.VEHICLE, lineNumber)
+        requireExpectedColumnCount(columns, CsvTable.VEHICLES.columnCount, lineNumber)
 
         val vehicleId = columns[ID_INDEX].uppercase()
         val currentHubId = columns[HUB_INDEX].uppercase()
