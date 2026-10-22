@@ -15,6 +15,7 @@ import org.bytebloom.logiroute.ui.screens.TelemetryTerminalUI
 import org.bytebloom.logiroute.ui.screens.VehiclesManagementTerminalUI
 import org.bytebloom.logiroute.ui.screens.WarehousesManagementTerminalUI
 import org.koin.core.Koin
+import org.bytebloom.logiroute.ui.screens.TelemetrySearchTerminalUI
 
 /**
  * Builds the menu of the terminal application.
@@ -31,7 +32,9 @@ fun buildTerminalMenu(koin: Koin, showAllScreens: Boolean): List<MenuSection> {
             MenuEntry("Classify a package (KNN)", setOf("classify", "knn"),
                 koin.get<ClassificationTerminalUI>()),
             MenuEntry("Live vehicle telemetry", setOf("telemetry", "live"),
-                koin.get<TelemetryTerminalUI>())
+                koin.get<TelemetryTerminalUI>()),
+            MenuEntry("Debounced telemetry search (bonus)", setOf("search", "debounce"),
+                koin.get<TelemetrySearchTerminalUI>())
         )
     )
     if (!showAllScreens) return listOf(taskFive)

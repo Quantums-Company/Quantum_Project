@@ -41,6 +41,9 @@ import org.bytebloom.logiroute.presentation.presenter.WarehousesManagementPresen
 import org.bytebloom.logiroute.ui.screens.WarehousesManagementTerminalUI
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
+import org.bytebloom.logiroute.domain.usecase.telemetry.SearchTelemetryUseCase
+import org.bytebloom.logiroute.presentation.presenter.TelemetrySearchPresenter
+import org.bytebloom.logiroute.ui.screens.TelemetrySearchTerminalUI
 
 /**
  * Wiring of the TERMINAL application: every screen's UI class and its presenter.
@@ -89,6 +92,16 @@ fun presentationModule(
                 getAllVehicles = get(),
                 streamFleetTelemetry = get(),
                 trackActiveFleet = get(),
+                view = view,
+                parentScope = uiScope
+            )
+        }
+    }
+    factory {
+        TelemetrySearchTerminalUI(terminal, style, uiScope) { view ->
+            TelemetrySearchPresenter(
+                telemetrySearchRepository = get(),
+                searchTelemetryFor = { repository -> SearchTelemetryUseCase(repository) },
                 view = view,
                 parentScope = uiScope
             )
