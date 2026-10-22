@@ -1,4 +1,8 @@
 package org.bytebloom.logiroute.presentation
 
-class SearchTraceSummary {
-}
+data class SearchTraceSummary(
+    val keystrokes: Int,
+    val searchesStarted: Int,
+    val searchesCancelled: Int,
+    val searchesCompleted: Int
+)
