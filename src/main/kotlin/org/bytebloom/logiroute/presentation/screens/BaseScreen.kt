@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.presentation.screen
+package org.bytebloom.logiroute.presentation.screens
 
 /**
  * The part of the "View contract" that every screen shares.

@@ -12,4 +12,3 @@ interface Terminal {
     /** Suspends until the user presses Enter. Returns null when the input ends (Ctrl+D / closed pipe). */
     suspend fun readLine(): String?
 }
-

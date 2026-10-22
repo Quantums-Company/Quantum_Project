@@ -1,32 +1,14 @@
-# Quantum Project — Error Handling Strategy
+# UI polish patch (on top of part 2)
 
-## Chosen strategy: Strategy B (Legacy Exception Style)
+    cd <project root>
+    unzip -o /path/to/LogiRoute-ui-polish.zip
+    bash scripts/3-ui-polish.sh
+    ./gradlew test detekt
 
-We adopt Strategy B across the codebase:
-
-1. Catch low-level Supabase / PostgREST / HTTP errors at the **repository boundary** (`data` layer).
-2. Translate them into typed **domain exceptions**.
-3. Let use cases propagate domain exceptions (and throw `EntityValidationException` on validation failure).
-4. Catch domain exceptions at the **CLI boundary** (`Main.kt`) and print clear messages.
-
-## Why not Strategy A (Kotlin Result)?
-
-- Our repository interfaces already return domain values directly (`Warehouse`, `List<Route>`, …).
-- CRUD use cases already use exception-style failure for invalid input.
-- `Main` already uses `try/catch`.
-- Switching everything to `Result` would force a large breaking rewrite of every interface and caller.
-
-## Domain exception hierarchy
-
-- `DomainException` (sealed base)
-- `NetworkUnavailableException`
-- `EntityValidationException`
-- `ResourceNotFoundException`
-- `DatabaseConflictException`
-- `UnknownDataException` (fallback for unexpected data/SDK failures)
-
-## Architectural rationale (Clean Architecture)
-
-- Third-party SDK types must not leak into `domain` or `presentation` (Clean Code: Boundaries).
-- Repositories own infrastructure failures; domain owns business/validation failures.
-- Presentation only formats known domain errors for the user.
+What changed
+- The "2K" glitch: the spinner no longer uses the "erase line" escape code (IDE consoles print it as text).
+- "number" -> "index" in every prompt, menu hint and table header (Index).
+- Every table is coloured (dim frame, bold cyan header, cyan ids, yellow index, coloured priority/zone)
+  and long lists show the first 10 rows, then "... and 81 more".
+- The shortest-route and classification screens now use the same shared tables.
+- ConsoleTerminal() no longer takes a style parameter (it was only used for the old erase code).

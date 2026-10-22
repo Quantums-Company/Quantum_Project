@@ -9,8 +9,8 @@ import org.bytebloom.logiroute.domain.model.VehicleTelemetry
 import org.bytebloom.logiroute.domain.usecase.telemetry.StreamFleetTelemetryUseCase
 import org.bytebloom.logiroute.domain.usecase.telemetry.TrackActiveFleetUseCase
 import org.bytebloom.logiroute.domain.usecase.vehicles.GetAllVehiclesUseCase
-import org.bytebloom.logiroute.presentation.screen.TelemetryScreen
 import org.bytebloom.logiroute.presentation.toUserMessage
+import org.bytebloom.logiroute.presentation.screens.TelemetryScreen
 
 class TelemetryPresenter(
     private val getAllVehicles: GetAllVehiclesUseCase,

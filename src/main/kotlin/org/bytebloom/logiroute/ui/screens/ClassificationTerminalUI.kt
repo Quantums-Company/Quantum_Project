@@ -1,17 +1,17 @@
-package org.bytebloom.logiroute.ui.screen
+package org.bytebloom.logiroute.ui.screens
 
 import kotlinx.coroutines.CoroutineScope
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Region
 import org.bytebloom.logiroute.presentation.presenter.ClassificationPresenter
-import org.bytebloom.logiroute.presentation.screen.ClassificationScreen
+import org.bytebloom.logiroute.presentation.screens.ClassificationScreen
 import org.bytebloom.logiroute.ui.terminal.ConsoleStyle
 import org.bytebloom.logiroute.ui.terminal.Terminal
 import org.bytebloom.logiroute.ui.terminal.TerminalScreenBase
 import org.bytebloom.logiroute.ui.terminal.chooseFrom
 import org.bytebloom.logiroute.ui.terminal.widget.box
 import org.bytebloom.logiroute.ui.terminal.widget.formatNumber
-import org.bytebloom.logiroute.ui.terminal.widget.table
+import org.bytebloom.logiroute.ui.terminal.widget.packageTable
 import org.bytebloom.logiroute.ui.terminal.writeLines
 
 /** The terminal implementation of [ClassificationScreen]. */
@@ -36,8 +36,8 @@ class ClassificationTerminalUI(
         presenter.onViewReady().join()
         if (packages.isEmpty()) return
 
-        val chosen = terminal.chooseFrom(PACKAGE_PROMPT, packages, Package::id, style)
-            ?: return
+        val chosen = terminal.chooseFrom(PACKAGE_PROMPT,
+            packages, Package::id, style) ?: return
 
         loadingMessage = "Running k-nearest-neighbours…"
         presenter.onClassify(chosen.id).join()
@@ -49,21 +49,7 @@ class ClassificationTerminalUI(
             terminal.writeLine(style.yellow("  There are no packages yet."))
             return
         }
-        terminal.writeLines(
-            style.table(
-                headers = listOf("#", "ID", "Weight (kg)", "Priority", "To"),
-                rows = packages.mapIndexed { index, pkg ->
-                    listOf(
-                        (index + 1).toString(),
-                        pkg.id,
-                        formatNumber(pkg.weight, 1),
-                        pkg.priority.name,
-                        pkg.destinationWarehouse.name
-                    )
-                },
-                rightAligned = setOf(0, 2)
-            )
-        )
+        terminal.writeLines(style.packageTable(packages, numbered = true))
         terminal.writeLine()
     }
 
@@ -89,6 +75,6 @@ class ClassificationTerminalUI(
     }
 
     private companion object {
-        const val PACKAGE_PROMPT = "Package to classify (number or id, Enter to cancel): "
+        const val PACKAGE_PROMPT = "Package to classify (index or id, Enter to cancel): "
     }
 }
