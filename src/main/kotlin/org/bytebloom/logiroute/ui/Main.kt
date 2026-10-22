@@ -6,24 +6,25 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
+import org.bytebloom.logiroute.di.dispatchShipmentModule
 import org.bytebloom.logiroute.di.localDataModule
 import org.bytebloom.logiroute.di.networkModule
-import org.bytebloom.logiroute.di.presentationModule
 import org.bytebloom.logiroute.di.repositoryModule
 import org.bytebloom.logiroute.di.telemetryModule
 import org.bytebloom.logiroute.di.useCaseModule
 import org.bytebloom.logiroute.di.validatorModule
+import org.bytebloom.logiroute.di.presentationModule
+import org.bytebloom.logiroute.ui.terminal.buildTerminalMenu
 import org.bytebloom.logiroute.ui.terminal.ConsoleStyle
 import org.bytebloom.logiroute.ui.terminal.ConsoleTerminal
 import org.bytebloom.logiroute.ui.terminal.TerminalApp
-import org.bytebloom.logiroute.ui.terminal.buildTerminalMenu
 import org.koin.core.context.startKoin
 
 /**
  * `false` = only the screens required by Task 5.
  * Change to `true` to open the whole application (every management and planning screen).
  */
-private const val SHOW_ALL_SCREENS = false
+private const val SHOW_ALL_SCREENS = true
 
 /**
  * Composition root of the TERMINAL application.
@@ -33,7 +34,7 @@ private const val SHOW_ALL_SCREENS = false
 fun main() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val style = ConsoleStyle.detect()
-    val terminal = ConsoleTerminal(style = style)
+    val terminal = ConsoleTerminal()
 
     val koinApp = startKoin {
         modules(
@@ -43,13 +44,19 @@ fun main() {
             repositoryModule,
             validatorModule,
             useCaseModule,
+            dispatchShipmentModule,
             presentationModule(terminal, style, appScope)
         )
     }
 
     try {
         runBlocking {
-            TerminalApp(terminal, style, buildTerminalMenu(koinApp.koin, SHOW_ALL_SCREENS)).run()
+            TerminalApp(terminal, style,
+                buildTerminalMenu(
+                    koinApp.koin,
+                    SHOW_ALL_SCREENS
+                )
+            ).run()
         }
     } finally {
         // Cancel every presenter's work and wait until it has really finished.

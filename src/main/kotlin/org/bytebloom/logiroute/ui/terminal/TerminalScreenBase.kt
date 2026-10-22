@@ -1,7 +1,7 @@
 package org.bytebloom.logiroute.ui.terminal
 
 import kotlinx.coroutines.CoroutineScope
-import org.bytebloom.logiroute.presentation.screen.BaseScreen
+import org.bytebloom.logiroute.presentation.screens.BaseScreen
 import org.bytebloom.logiroute.ui.terminal.widget.errorBox
 
 /**
@@ -26,6 +26,19 @@ abstract class TerminalScreenBase(
 
     override fun showErrorMessage(errorMessage: String) =
         terminal.writeLines(style.errorBox(errorMessage))
+
+    protected fun heading(text: String) {
+        terminal.writeLine()
+        terminal.writeLine(style.bold(text))
+    }
+
+    protected fun printSuccess(text: String) =
+        terminal.writeLine(style.green("${style.glyphs.success} $text"))
+
+    protected fun printWarning(text: String) =
+        terminal.writeLine(style.yellow("  ${style.glyphs.warning} $text"))
+
+    protected fun printLines(lines: List<String>) = terminal.writeLines(lines)
 
     private companion object {
         const val DEFAULT_LOADING_MESSAGE = "Working…"

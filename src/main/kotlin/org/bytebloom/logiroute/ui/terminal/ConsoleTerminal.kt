@@ -19,8 +19,8 @@ import kotlin.concurrent.thread
  */
 class ConsoleTerminal(
     input: InputStream = System.`in`,
-    private val output: PrintStream = PrintStream(FileOutputStream(FileDescriptor.out), true, Charsets.UTF_8),
-    private val style: ConsoleStyle = ConsoleStyle.detect()
+    private val output: PrintStream = PrintStream(FileOutputStream(FileDescriptor.out),
+        true, Charsets.UTF_8)
 ) : Terminal, AutoCloseable {
 
     private val lines = Channel<String?>(Channel.UNLIMITED)
@@ -50,8 +50,8 @@ class ConsoleTerminal(
         output.flush()
     }
 
-    override fun clearLine() =
-        if (style.colors) write("\r$ESC[2K") else write("\r" + " ".repeat(PLAIN_CLEAR_WIDTH) + "\r")
+    /** Overwrites the line with spaces: unlike the "erase line" escape code, this works in every console. */
+    override fun clearLine() = write("\r" + " ".repeat(CLEAR_WIDTH) + "\r")
 
     override suspend fun readLine(): String? = lines.receiveCatching().getOrNull()
 
@@ -62,7 +62,6 @@ class ConsoleTerminal(
 
     private companion object {
         const val READER_THREAD_NAME = "logiroute-console-input"
-        const val PLAIN_CLEAR_WIDTH = 100
-        const val ESC = "\u001B["
+        const val CLEAR_WIDTH = 70
     }
 }

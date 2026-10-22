@@ -5,8 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.bytebloom.logiroute.presentation.screen.BaseScreen
 import org.bytebloom.logiroute.presentation.toUserMessage
+import org.bytebloom.logiroute.presentation.screens.BaseScreen
 
 /**
  * Base class of every presenter.
@@ -35,7 +35,10 @@ abstract class BasePresenter<V : BaseScreen>(
      * outcome to the view: [onSuccess] with the value, or `showErrorMessage` with a readable message.
      * Cancellation is never swallowed, so structured concurrency keeps working.
      */
-    protected fun <T> perform(task: suspend () -> T, onSuccess: (T) -> Unit): Job = scope.launch {
+    protected fun <T> perform(
+        task: suspend () -> T,
+        onSuccess: suspend (T) -> Unit
+    ): Job = scope.launch {
         view.showLoadingIndicator(true)
         val attempt = attemptOf(task)
         view.showLoadingIndicator(false)

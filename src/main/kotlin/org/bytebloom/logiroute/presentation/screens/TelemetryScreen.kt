@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.presentation.screen
+package org.bytebloom.logiroute.presentation.screens
 
 import org.bytebloom.logiroute.domain.model.VehicleTelemetry
 import org.bytebloom.logiroute.domain.model.result.VehicleDelayNotification
