@@ -6,10 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import edu.logiroute.logiroute.ui.sampledata.PackageSamples
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
 import edu.logiroute.logiroute.ui.theme.*
-import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 
 private const val WIDE_SCREEN_BREAKPOINT_DP = 840

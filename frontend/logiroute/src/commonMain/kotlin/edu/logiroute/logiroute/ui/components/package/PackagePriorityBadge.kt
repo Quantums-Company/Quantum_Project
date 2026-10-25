@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.PackageSamples
-import edu.logiroute.logiroute.ui.style.BoxCard
 import edu.logiroute.logiroute.ui.style.RowCard
 import org.bytebloom.logiroute.domain.model.Package
 import edu.logiroute.logiroute.ui.theme.TextSecondary

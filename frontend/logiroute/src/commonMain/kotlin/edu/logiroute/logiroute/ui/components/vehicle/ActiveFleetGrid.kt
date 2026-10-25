@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.VehicleSamples
 import edu.logiroute.logiroute.ui.theme.InkBlack
 import org.bytebloom.logiroute.domain.model.Vehicle
-import org.bytebloom.logiroute.domain.model.Warehouse
 
 @Composable
 fun ActiveFleetGrid(

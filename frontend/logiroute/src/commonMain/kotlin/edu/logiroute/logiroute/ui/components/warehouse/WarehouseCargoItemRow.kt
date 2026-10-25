@@ -18,18 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.components.`package`.PackagePriorityBadge
 import edu.logiroute.logiroute.ui.sampledata.PackageSamples
-import edu.logiroute.logiroute.ui.style.BoxCard
 import edu.logiroute.logiroute.ui.style.Card
-import edu.logiroute.logiroute.ui.style.RowCard
 import edu.logiroute.logiroute.ui.theme.CharcoalBlue
 import edu.logiroute.logiroute.ui.theme.InkBlack
-import edu.logiroute.logiroute.ui.theme.TextPrimary
 import edu.logiroute.logiroute.ui.theme.TextSecondary
 import org.bytebloom.logiroute.domain.model.Package
-import org.jetbrains.compose.resources.stringResource
-import quantum_project.frontend.logiroute.generated.resources.Res
-import quantum_project.frontend.logiroute.generated.resources.cargo_weight_format
-
 @Composable
 fun WarehouseCargoItemRow(
     packageItem: Package,

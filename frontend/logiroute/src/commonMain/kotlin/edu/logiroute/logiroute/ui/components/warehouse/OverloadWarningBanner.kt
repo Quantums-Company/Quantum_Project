@@ -7,9 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import edu.logiroute.logiroute.ui.components.vehicle.ActiveFleetGridPreview
-import edu.logiroute.logiroute.ui.sampledata.VehicleSamples
-import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
 import edu.logiroute.logiroute.ui.style.BoxCard
 import edu.logiroute.logiroute.ui.theme.ErrorRed
 import org.jetbrains.compose.resources.stringResource
