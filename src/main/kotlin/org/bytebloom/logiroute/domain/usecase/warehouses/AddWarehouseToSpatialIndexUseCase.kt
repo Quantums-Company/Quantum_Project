@@ -7,6 +7,6 @@ class AddWarehouseToSpatialIndexUseCase(
     private val spatialWarehouseRepository: SpatialWarehouseRepository
 ) {
     suspend operator fun invoke(warehouse: Warehouse) {
-        spatialWarehouseRepository.addWarehouse(warehouse)
+        spatialWarehouseRepository.add(warehouse)
     }
 }
