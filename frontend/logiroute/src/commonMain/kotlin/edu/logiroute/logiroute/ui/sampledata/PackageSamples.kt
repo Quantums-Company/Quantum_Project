@@ -1,7 +1,7 @@
 package edu.logiroute.logiroute.ui.sampledata
 
-import org.bytebloom.domain.model.Package
-import org.bytebloom.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Priority
 
 object PackageSamples {
     val urgentCargo: Package

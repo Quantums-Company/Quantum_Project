@@ -1,8 +1,7 @@
 package edu.logiroute.logiroute.ui.sampledata
 
-import org.bytebloom.domain.model.Route
-import org.bytebloom.domain.model.Warehouse
-
+import org.bytebloom.logiroute.domain.model.Route
+import org.bytebloom.logiroute.domain.model.Warehouse
 object RouteSamples {
     val sampleRoute = Route(
         id = "RT-501",

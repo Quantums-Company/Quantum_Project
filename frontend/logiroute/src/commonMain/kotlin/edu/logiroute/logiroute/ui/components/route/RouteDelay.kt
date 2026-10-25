@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.sampledata.RouteSamples
 import edu.logiroute.logiroute.ui.theme.TextSecondary
 import edu.logiroute.logiroute.ui.theme.WarningAmber
-import org.bytebloom.domain.model.Route
+import org.bytebloom.logiroute.domain.model.Route
 
 @Composable
 fun RouteDelay(route: Route) {

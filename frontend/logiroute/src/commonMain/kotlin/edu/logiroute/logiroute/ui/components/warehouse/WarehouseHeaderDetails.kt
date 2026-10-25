@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
-import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.Warehouse
 
 @Composable
 fun RowScope.WarehouseHeaderDetails(warehouse: Warehouse) {

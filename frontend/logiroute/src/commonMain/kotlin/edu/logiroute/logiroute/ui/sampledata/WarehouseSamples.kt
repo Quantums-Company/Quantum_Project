@@ -1,6 +1,6 @@
 package edu.logiroute.logiroute.ui.sampledata
 
-import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.Warehouse
 
 object WarehouseSamples {
     val northWarehouse: Warehouse

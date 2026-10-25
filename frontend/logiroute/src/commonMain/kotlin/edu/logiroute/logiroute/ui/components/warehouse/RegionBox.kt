@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
 import edu.logiroute.logiroute.ui.style.BoxCard
 import edu.logiroute.logiroute.ui.theme.InkBlack
-import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.Warehouse
 
 @Composable
 fun RegionBox(

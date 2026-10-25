@@ -15,9 +15,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
-import org.bytebloom.domain.model.Warehouse
 import edu.logiroute.logiroute.ui.theme.Border
 import edu.logiroute.logiroute.ui.theme.JetBlack
+import org.bytebloom.logiroute.domain.model.Warehouse
 
 @Composable
 fun WarehouseSummaryCard(

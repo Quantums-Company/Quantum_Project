@@ -9,14 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.PackageSamples
+import edu.logiroute.logiroute.ui.style.BoxCard
 import edu.logiroute.logiroute.ui.style.RowCard
-import org.bytebloom.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Package
 import edu.logiroute.logiroute.ui.theme.TextSecondary
 import edu.logiroute.logiroute.ui.theme.CharcoalBlue
 import edu.logiroute.logiroute.ui.theme.ErrorRed
 import edu.logiroute.logiroute.ui.theme.InkBlack
 import edu.logiroute.logiroute.ui.theme.LightGreen
-import org.bytebloom.domain.model.Priority
+import org.bytebloom.logiroute.domain.model.Priority
 
 @Composable
 fun PackagePriorityBadge(

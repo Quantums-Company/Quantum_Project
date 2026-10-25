@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import edu.logiroute.logiroute.ui.sampledata.WarehouseSamples
-import org.bytebloom.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.Warehouse
 
 @Composable
 fun WarehouseMetrics(warehouse: Warehouse) {

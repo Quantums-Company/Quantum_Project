@@ -6,7 +6,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.sampledata.PackageSamples
 import edu.logiroute.logiroute.ui.theme.TextSecondary
-import org.bytebloom.domain.model.Package
+import org.bytebloom.logiroute.domain.model.Package
 
 @Composable
 fun WeightPackage(cargo: Package) {

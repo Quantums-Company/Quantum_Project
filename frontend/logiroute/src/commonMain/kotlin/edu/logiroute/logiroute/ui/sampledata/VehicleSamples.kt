@@ -1,6 +1,7 @@
 package edu.logiroute.logiroute.ui.sampledata
 
-import org.bytebloom.domain.model.Vehicle
+import org.bytebloom.logiroute.domain.model.Vehicle
+
 
 object VehicleSamples {
     val westVehicle: Vehicle

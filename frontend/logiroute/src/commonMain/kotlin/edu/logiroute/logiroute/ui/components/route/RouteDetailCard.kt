@@ -7,7 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.RouteSamples
 import edu.logiroute.logiroute.ui.style.Card
-import org.bytebloom.domain.model.Route
+import org.bytebloom.logiroute.domain.model.Route
 
 @Composable
 fun RouteDetailCard(

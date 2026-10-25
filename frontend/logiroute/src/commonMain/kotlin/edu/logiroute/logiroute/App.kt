@@ -13,7 +13,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import edu.logiroute.logiroute.ui.components.vehicle.ActiveFleetGridPreview
 import edu.logiroute.logiroute.ui.components.vehicle.VehicleDetailCardPreview
+import edu.logiroute.logiroute.ui.components.vehicle.VehicleFleetItemPreview
+import edu.logiroute.logiroute.ui.components.warehouse.WarehouseCargoLazyColumnPreview
 
 
 @Composable
@@ -36,7 +39,7 @@ fun App() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    VehicleDetailCardPreview()
+                    WarehouseCargoLazyColumnPreview()
                 }
             }
         }
