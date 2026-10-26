@@ -1,6 +1,10 @@
 package org.bytebloom.logiroute.domain.shipment
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.domain.dispatch.DispatchOrder
 import org.bytebloom.logiroute.domain.dispatch.DispatchOutcome
 import org.bytebloom.logiroute.domain.dispatch.StandardDispatchProcessor
@@ -9,9 +13,9 @@ import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.IllegalShipmentTransitionException
-import org.bytebloom.logiroute.domain.shipment.ShipmentTracker
 import org.bytebloom.logiroute.domain.shipment.state.CreatedState
 import org.bytebloom.logiroute.domain.shipment.state.InTransitState
+import org.bytebloom.logiroute.domain.shipment.state.ShipmentState
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -62,6 +66,35 @@ class ShipmentTrackerTest {
 
             // Then
             assertThat(secondShipment).isSameInstanceAs(firstShipment)
+            assertThat(shipmentTracker.historyOf(pkg.id)).hasSize(1)
+        }
+
+        @Test
+        fun `concurrent tracking of the same package creates only one shipment`() = runTest {
+            // Given
+            val pkg = createPackage(id = "PKG-123")
+
+            // When
+            val tracked = (1..50).map {
+                async(Dispatchers.Default) { shipmentTracker.track(pkg) }
+            }.awaitAll()
+
+            // Then
+            assertThat(tracked.all { it === tracked.first() }).isTrue()
+            assertThat(shipmentTracker.historyOf(pkg.id)).hasSize(1)
+        }
+
+        @Test
+        fun `mutating an exposed history snapshot does not change recorded history`() {
+            // Given
+            val pkg = createPackage(id = "PKG-001")
+            shipmentTracker.track(pkg)
+            val exposedHistory = shipmentTracker.historyOf(pkg.id)
+
+            // When
+            runCatching { (exposedHistory as MutableList<ShipmentState>).clear() }
+
+            // Then
             assertThat(shipmentTracker.historyOf(pkg.id)).hasSize(1)
         }
 

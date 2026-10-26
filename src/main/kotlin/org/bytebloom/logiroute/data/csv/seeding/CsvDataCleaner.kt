@@ -55,7 +55,7 @@ class CsvDataCleaner(
     private suspend fun loadPackagesWithValidWarehouses(mapper: WarehouseReferenceMapper): List<Package> =
         PackageMapper(warehouseMapper = mapper).toDomain(packageDataSource.loadAll())
 
-    private fun writeWarehouses(
+    private suspend fun writeWarehouses(
         warehouses: List<Warehouse>
     ) {
         val rows = warehouses.map { warehouse ->
@@ -78,7 +78,7 @@ class CsvDataCleaner(
         )
     }
 
-    private fun writeRoutes(
+    private suspend fun writeRoutes(
         routes: List<Route>
     ) {
         val rows = routes.map { route ->
@@ -101,7 +101,7 @@ class CsvDataCleaner(
         )
     }
 
-    private fun writeVehicles(
+    private suspend fun writeVehicles(
         vehicles: List<Vehicle>
     ) {
         val rows = vehicles.map { vehicle ->
@@ -123,7 +123,7 @@ class CsvDataCleaner(
         )
     }
 
-    private fun writePackages(
+    private suspend fun writePackages(
         packages: List<Package>
     ) {
         val rows = packages.map { packageData ->

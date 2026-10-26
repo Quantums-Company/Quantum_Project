@@ -8,15 +8,9 @@ import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.logiroute.domain.model.input.ShipmentTransitionAction
-import org.bytebloom.logiroute.domain.routing.WarehouseGraph
 import org.bytebloom.logiroute.domain.shipment.Shipment
-import org.bytebloom.logiroute.domain.usecase.dispatch.ReroutePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.GetAllPackagesUseCase
-import org.bytebloom.logiroute.domain.usecase.routes.GetAllRoutesUseCase
-import org.bytebloom.logiroute.domain.usecase.shipment.AdvanceShipmentStateUseCase
-import org.bytebloom.logiroute.domain.usecase.shipment.EstimateShipmentDeliveryUseCase
-import org.bytebloom.logiroute.domain.usecase.warehouses.GetAllWarehousesUseCase
 import org.bytebloom.logiroute.presentation.RoutingDataLoader
+import org.bytebloom.logiroute.presentation.dependencies.ShipmentsDependencies
 import org.bytebloom.logiroute.presentation.screens.ShipmentsScreen
 
 /**
@@ -24,19 +18,14 @@ import org.bytebloom.logiroute.presentation.screens.ShipmentsScreen
  * so a later action continues from the state the user already reached.
  */
 class ShipmentsPresenter(
-    private val getAllPackages: GetAllPackagesUseCase,
-    getAllWarehouses: GetAllWarehousesUseCase,
-    getAllRoutes: GetAllRoutesUseCase,
-    private val advanceShipmentState: AdvanceShipmentStateUseCase,
-    private val reroutePackage: ReroutePackageUseCase,
-    private val estimateFor: (WarehouseGraph) -> EstimateShipmentDeliveryUseCase,
+    private val dependencies: ShipmentsDependencies,
     view: ShipmentsScreen,
     parentScope: CoroutineScope
 ) : BasePresenter<ShipmentsScreen>(view, parentScope) {
 
     private class Data(val packages: List<Package>, val warehouses: List<Warehouse>)
 
-    private val loader = RoutingDataLoader(getAllWarehouses, getAllRoutes)
+    private val loader = RoutingDataLoader(dependencies.getAllWarehouses, dependencies.getAllRoutes)
     private val shipments = mutableMapOf<String, Shipment>()
 
     @Volatile
@@ -45,7 +34,7 @@ class ShipmentsPresenter(
     fun onViewReady(): Job = perform(
         task = {
             coroutineScope {
-                val packages = async { getAllPackages() }
+                val packages = async { dependencies.getAllPackages() }
                 val routing = async { loader.load() }
                 Data(packages.await(), routing.await().warehouses)
             }
@@ -59,7 +48,7 @@ class ShipmentsPresenter(
 
     fun onAdvance(packageId: String, action: ShipmentTransitionAction): Job = perform(
         task = {
-            val advanced = advanceShipmentState(shipmentOf(packageId), action)
+            val advanced = dependencies.advanceShipmentState(shipmentOf(packageId), action)
             synchronized(shipments) { shipments[advanced.cargo.id] = advanced }
             advanced
         }
@@ -71,7 +60,7 @@ class ShipmentsPresenter(
             val destination = known.warehouses
                 .firstOrNull { it.id.equals(newDestinationId.trim(), ignoreCase = true) }
                 ?: throw ResourceNotFoundException("Warehouse '$newDestinationId' was not found.")
-            val rerouted = reroutePackage(shipmentOf(packageId), destination)
+            val rerouted = dependencies.reroutePackage(shipmentOf(packageId), destination)
             synchronized(shipments) { shipments[rerouted.cargo.id] = rerouted }
             rerouted
         }
@@ -81,7 +70,7 @@ class ShipmentsPresenter(
         task = {
             val pkg = shipmentOf(packageId).cargo
             val graph = loader.load().graph
-            pkg.id to estimateFor(graph)(pkg.id)
+            pkg.id to dependencies.estimateFor(graph)(pkg.id)
         }
     ) { (id, minutes) -> view.showDeliveryEstimate(id, minutes) }
 
@@ -91,5 +80,5 @@ class ShipmentsPresenter(
         return synchronized(shipments) { shipments.getOrPut(pkg.id) { Shipment(pkg) } }
     }
 
-    private fun loaded(): Data = data ?: throw IllegalStateException("The shipment data is not loaded yet.")
+    private fun loaded(): Data = checkNotNull(data) { "The shipment data is not loaded yet." }
 }

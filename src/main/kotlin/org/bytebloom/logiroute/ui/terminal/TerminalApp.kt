@@ -20,19 +20,24 @@ class TerminalApp(
 
     suspend fun run() {
         printBanner()
-        while (true) {
+        var running = true
+        while (running) {
             printMenu()
-            val answer = terminal.prompt(style.bold("Choose an option › ")) ?: break
-            val key = answer.lowercase()
-
-            if (key in EXIT_WORDS) break
-
-            val entry = findEntry(key)
-            if (entry == null) {
-                terminal.writeLine(style.yellow("  '$answer' is not an option " +
-                        "— type an index from the menu, or 0 to exit."))
-            } else {
-                open(entry)
+            val answer = terminal.prompt(style.bold("Choose an option › "))
+            running = when {
+                answer == null -> false
+                answer.lowercase() in EXIT_WORDS -> false
+                else -> {
+                    val key = answer.lowercase()
+                    val entry = findEntry(key)
+                    if (entry == null) {
+                        terminal.writeLine(style.yellow("  '$answer' is not an option " +
+                                "— type an index from the menu, or 0 to exit."))
+                    } else {
+                        open(entry)
+                    }
+                    true
+                }
             }
         }
         terminal.writeLine()

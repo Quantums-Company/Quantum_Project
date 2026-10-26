@@ -46,6 +46,7 @@ class CircuitBreaker(
         val isProbe: Boolean
     )
 
+    @Suppress("ThrowsCount")
     suspend fun <T> execute(
         beforeCall: suspend () -> Unit = {},
         block: suspend () -> T
@@ -82,7 +83,6 @@ class CircuitBreaker(
             throw error
         }
     }
-
 
     private fun validatePermit(permit: Permit) = synchronized(lock) {
         if (permit.generation != generation) {

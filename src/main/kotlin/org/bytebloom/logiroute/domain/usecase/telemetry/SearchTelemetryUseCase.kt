@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.bytebloom.logiroute.domain.model.result.TelemetrySearchResult
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 import org.bytebloom.logiroute.domain.repository.TelemetrySearchRepository
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -20,9 +21,10 @@ class SearchTelemetryUseCase(
 ) {
 
     init {
-        require(debounceTimeout.isPositive()) {
-            "Debounce timeout must be positive."
-        }
+        debounceTimeout.takeIf { it.isPositive() }
+            ?: throw InvalidConfigurationException(
+                "Debounce timeout must be positive."
+            )
     }
 
     operator fun invoke(

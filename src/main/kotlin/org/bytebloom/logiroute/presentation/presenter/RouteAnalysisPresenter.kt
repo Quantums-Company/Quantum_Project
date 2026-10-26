@@ -1,30 +1,18 @@
 package org.bytebloom.logiroute.presentation.presenter
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.routing.WarehouseGraph
-import org.bytebloom.logiroute.domain.usecase.routes.GetAllRoutesUseCase
-import org.bytebloom.logiroute.domain.usecase.routing.FindAllPairsShortestPathUseCase
-import org.bytebloom.logiroute.domain.usecase.routing.FindFewestHopsRouteUseCase
-import org.bytebloom.logiroute.domain.usecase.routing.VerifyHubLinkUseCase
-import org.bytebloom.logiroute.domain.usecase.warehouses.GetAllWarehousesUseCase
 import org.bytebloom.logiroute.presentation.RoutingData
 import org.bytebloom.logiroute.presentation.RoutingDataLoader
+import org.bytebloom.logiroute.presentation.dependencies.RouteAnalysisDependencies
 import org.bytebloom.logiroute.presentation.screens.RouteAnalysisScreen
 
 class RouteAnalysisPresenter(
-    getAllWarehouses: GetAllWarehousesUseCase,
-    getAllRoutes: GetAllRoutesUseCase,
-    private val fewestHopsFor: (WarehouseGraph) -> FindFewestHopsRouteUseCase,
-    private val verifyLinkFor: (WarehouseGraph) -> VerifyHubLinkUseCase,
-    private val allPairsFor: (WarehouseGraph) -> FindAllPairsShortestPathUseCase,
+    private val dependencies: RouteAnalysisDependencies,
     view: RouteAnalysisScreen,
-    parentScope: CoroutineScope,
-    private val computeDispatcher: CoroutineDispatcher = Dispatchers.Default
+    parentScope: CoroutineScope
 ) : BasePresenter<RouteAnalysisScreen>(view, parentScope) {
 
     private sealed interface Hops {
@@ -34,7 +22,7 @@ class RouteAnalysisPresenter(
 
     private class Link(val origin: Warehouse, val destination: Warehouse, val isLinked: Boolean)
 
-    private val loader = RoutingDataLoader(getAllWarehouses, getAllRoutes)
+    private val loader = RoutingDataLoader(dependencies.getAllWarehouses, dependencies.getAllRoutes)
 
     @Volatile
     private var routingData: RoutingData? = null
@@ -63,8 +51,8 @@ class RouteAnalysisPresenter(
         val data = loaded()
         val origin = data.warehouseById(originId)
         val destination = data.warehouseById(destinationId)
-        val path = withContext(computeDispatcher)
-        { fewestHopsFor(data.graph)(origin, destination) }
+        val path = withContext(dependencies.computeDispatcher)
+        { dependencies.fewestHopsFor(data.graph)(origin, destination) }
             ?: return Hops.Unreachable(origin, destination)
         return Hops.Found(path)
     }
@@ -73,14 +61,16 @@ class RouteAnalysisPresenter(
         val data = loaded()
         val origin = data.warehouseById(originId)
         val destination = data.warehouseById(destinationId)
-        val linked = withContext(computeDispatcher) { verifyLinkFor(data.graph)(origin, destination) }
+        val linked = withContext(dependencies.computeDispatcher) {
+            dependencies.verifyLinkFor(data.graph)(origin, destination)
+        }
         return Link(origin, destination, linked)
     }
 
     private suspend fun allPairs(): Map<Warehouse, Map<Warehouse, Double>> {
         val data = loaded()
         // One Dijkstra run per pair: CPU-bound, so off the caller's (UI) dispatcher.
-        return withContext(computeDispatcher) { allPairsFor(data.graph)() }
+        return withContext(dependencies.computeDispatcher) { dependencies.allPairsFor(data.graph)() }
     }
 
     private fun loaded(): RoutingData = checkNotNull(routingData) { NOT_LOADED }

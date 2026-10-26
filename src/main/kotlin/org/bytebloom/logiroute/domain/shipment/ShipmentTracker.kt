@@ -7,22 +7,28 @@ import org.bytebloom.logiroute.domain.shipment.state.ShipmentState
 
 class ShipmentTracker : ShipmentStateUpdater {
 
+    private val lock = Any()
     private val shipmentsByPackageId = mutableMapOf<String, Shipment>()
     private val historyByPackageId = mutableMapOf<String, MutableList<ShipmentState>>()
 
-    fun track(pkg: Package): Shipment =
+    fun track(pkg: Package): Shipment = synchronized(lock) {
         shipmentsByPackageId.getOrPut(pkg.id) {
             Shipment(pkg).also(::recordState)
         }
+    }
 
-    fun stateOf(packageId: String): ShipmentState? =
+    fun stateOf(packageId: String): ShipmentState? = synchronized(lock) {
         shipmentsByPackageId[packageId]?.state
+    }
 
-    fun historyOf(packageId: String): List<ShipmentState> =
-        historyByPackageId[packageId].orEmpty()
+    fun historyOf(packageId: String): List<ShipmentState> = synchronized(lock) {
+        historyByPackageId[packageId]?.toList().orEmpty()
+    }
 
     override fun markAsDispatched(order: DispatchOrder) {
-        order.packages.forEach(::dispatch)
+        synchronized(lock) {
+            order.packages.forEach(::dispatch)
+        }
     }
 
     private fun dispatch(pkg: Package) {

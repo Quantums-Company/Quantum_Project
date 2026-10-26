@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.domain.usecase.dispatch.AssignPackageToCargoQueueUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -55,6 +54,20 @@ class AssignPackageToCargoQueueUseCaseTest {
 
         // Then
         assertThat(warehouse.cargoQueue).containsExactly(firstPackage, secondPackage)
+    }
+
+    @Test
+    fun `mutating an exposed cargo queue snapshot does not change warehouse state`() {
+        // Given
+        val pkg = createPackage(id = "PKG-001")
+        assignPackageToCargoQueue(warehouse, pkg)
+        val exposedQueue = warehouse.cargoQueue
+
+        // When
+        runCatching { (exposedQueue as MutableList<Package>).clear() }
+
+        // Then
+        assertThat(warehouse.cargoQueue).containsExactly(pkg)
     }
 
     @Test
