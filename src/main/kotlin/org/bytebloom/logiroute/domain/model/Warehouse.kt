@@ -1,7 +1,6 @@
 package org.bytebloom.logiroute.domain.model
 
 import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
-import org.bytebloom.logiroute.domain.sorting.quickSortCargoByWeight
 import org.bytebloom.logiroute.domain.validator.id.EntityIdValidator
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.validator.FieldValidator
@@ -26,13 +25,13 @@ data class Warehouse(
     }
 
     private val _cargoQueue = mutableListOf<Package>()
-    val cargoQueue: List<Package> get() = _cargoQueue
+    val cargoQueue: List<Package> get() = _cargoQueue.toList()
 
     private val _outgoingRoutes = mutableListOf<Route>()
-    val outgoingRoutes: List<Route> get() = _outgoingRoutes
+    val outgoingRoutes: List<Route> get() = _outgoingRoutes.toList()
 
     private val _stationedVehicles = mutableListOf<Vehicle>()
-    val stationedVehicles: List<Vehicle> get() = _stationedVehicles
+    val stationedVehicles: List<Vehicle> get() = _stationedVehicles.toList()
 
     fun addPackage(pkg: Package): Boolean = _cargoQueue.add(pkg)
     fun removePackage(pkg: Package): Boolean = _cargoQueue.remove(pkg)
@@ -41,7 +40,7 @@ data class Warehouse(
     fun removeVehicle(vehicle: Vehicle): Boolean = _stationedVehicles.remove(vehicle)
     fun containsPackage(pkg: Package): Boolean = pkg in _cargoQueue
     fun hasVehicle(vehicle: Vehicle): Boolean = vehicle in _stationedVehicles
-    fun sortCargoByWeight() { quickSortCargoByWeight(_cargoQueue) }
+//    fun sortCargoByWeight() { quickSortCargoByWeight(_cargoQueue) }
     fun removeVehicleById(vehicleId: String): Boolean = _stationedVehicles.removeIf { it.id == vehicleId }
 
     override fun toString(): String =

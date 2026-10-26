@@ -1,8 +1,6 @@
 package org.bytebloom.logiroute.presentation.presenter
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -13,28 +11,13 @@ import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
-import org.bytebloom.logiroute.domain.usecase.dispatch.AddVehicleToHubUseCase
-import org.bytebloom.logiroute.domain.usecase.dispatch.AssignPackageToCargoQueueUseCase
-import org.bytebloom.logiroute.domain.usecase.dispatch.DispatchCargoUseCase
-import org.bytebloom.logiroute.domain.usecase.dispatch.DispatchVehicleUseCase
-import org.bytebloom.logiroute.domain.usecase.dispatch.OptimizeCargoLoadUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.GetAllPackagesUseCase
-import org.bytebloom.logiroute.domain.usecase.vehicles.GetAllVehiclesUseCase
-import org.bytebloom.logiroute.domain.usecase.warehouses.GetAllWarehousesUseCase
+import org.bytebloom.logiroute.presentation.dependencies.DispatchDependencies
 import org.bytebloom.logiroute.presentation.screens.DispatchScreen
 
 class DispatchPresenter(
-    private val getAllWarehouses: GetAllWarehousesUseCase,
-    private val getAllVehicles: GetAllVehiclesUseCase,
-    private val getAllPackages: GetAllPackagesUseCase,
-    private val assignPackageToCargoQueue: AssignPackageToCargoQueueUseCase,
-    private val addVehicleToHub: AddVehicleToHubUseCase,
-    private val dispatchVehicle: DispatchVehicleUseCase,
-    private val dispatchCargo: DispatchCargoUseCase,
-    private val optimizeCargoLoad: OptimizeCargoLoadUseCase,
+    private val dependencies: DispatchDependencies,
     view: DispatchScreen,
-    parentScope: CoroutineScope,
-    private val computeDispatcher: CoroutineDispatcher = Dispatchers.Default
+    parentScope: CoroutineScope
 ) : BasePresenter<DispatchScreen>(view, parentScope) {
 
     private class Data(
@@ -74,14 +57,14 @@ class DispatchPresenter(
             val known = loaded()
             val warehouse = known.warehouse(warehouseId)
             val pkg = known.pkg(packageId)
-            Triple(pkg, warehouse, assignPackageToCargoQueue(warehouse, pkg))
+            Triple(pkg, warehouse, dependencies.assignPackageToCargoQueue(warehouse, pkg))
         }
     ) { (pkg, warehouse, assigned) -> view.showPackageAssigned(pkg, warehouse, assigned) }
 
     fun onAddVehicleToHub(warehouseId: String, vehicleId: String): Job = perform(
         task = {
             val known = loaded()
-            addVehicleToHub(known.warehouse(warehouseId), known.vehicle(vehicleId))
+            dependencies.addVehicleToHub(known.warehouse(warehouseId), known.vehicle(vehicleId))
         }
     ) { view.showVehicleStationed(it) }
 
@@ -94,7 +77,7 @@ class DispatchPresenter(
             val known = loaded()
             val vehicle = known.vehicle(vehicleId)
             val packages = packageIds.map { known.pkg(it) }
-            Dispatched(dispatchVehicle(
+            Dispatched(dependencies.dispatchVehicle(
                 packages,
                 vehicle,
                 known.warehouse(warehouseId)
@@ -116,7 +99,7 @@ class DispatchPresenter(
                     vehicle = known.vehicle(vehicleId),
                     warehouse = known.warehouse(warehouseId)
                 )
-                dispatchCargo(order, mode)
+                dependencies.dispatchCargo(order, mode)
             }
         ) { view.showDispatchOutcome(mode, it) }
 
@@ -126,16 +109,16 @@ class DispatchPresenter(
             val vehicle = known.vehicle(vehicleId)
             val candidates = packageIds.map { known.pkg(it) }
             // The knapsack table grows with capacity x packages: CPU-bound, so off the UI dispatcher.
-            val result = withContext(computeDispatcher)
-            { optimizeCargoLoad(vehicle, candidates) }
+            val result = withContext(dependencies.computeDispatcher)
+            { dependencies.optimizeCargoLoad(vehicle, candidates) }
             Triple(vehicle, candidates, result)
         }
     ) { (vehicle, candidates, result) -> view.showLoadPlan(vehicle, candidates, result) }
 
     private suspend fun loadAll(): Data = coroutineScope {
-        val warehouses = async { getAllWarehouses() }
-        val vehicles = async { getAllVehicles() }
-        val packages = async { getAllPackages() }
+        val warehouses = async { dependencies.getAllWarehouses() }
+        val vehicles = async { dependencies.getAllVehicles() }
+        val packages = async { dependencies.getAllPackages() }
         Data(warehouses.await(), vehicles.await(), packages.await())
     }
 

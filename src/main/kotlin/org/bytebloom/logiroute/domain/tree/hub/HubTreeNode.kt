@@ -9,7 +9,7 @@ class HubTreeNode(
     private val _children = mutableListOf<HubTreeNode>()
 
     val children: List<HubTreeNode>
-        get() = _children
+        get() = _children.toList()
 
     var parent: HubTreeNode? = null
         private set

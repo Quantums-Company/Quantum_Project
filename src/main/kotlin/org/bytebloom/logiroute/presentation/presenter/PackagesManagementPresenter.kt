@@ -9,27 +9,11 @@ import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.logiroute.domain.model.input.update.PackageUpdateInput
-import org.bytebloom.logiroute.domain.usecase.packages.CreatePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.DeletePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.FindPackagesAboveWeightUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByDestinationUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.FindPackagesByPriorityUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.GetAllPackagesUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.GetPackageByIdUseCase
-import org.bytebloom.logiroute.domain.usecase.packages.UpdatePackageUseCase
-import org.bytebloom.logiroute.domain.usecase.warehouses.GetAllWarehousesUseCase
+import org.bytebloom.logiroute.presentation.dependencies.PackagesManagementDependencies
 import org.bytebloom.logiroute.presentation.screens.PackagesManagementScreen
 
 class PackagesManagementPresenter(
-    private val getAllPackages: GetAllPackagesUseCase,
-    private val getPackageById: GetPackageByIdUseCase,
-    private val createPackage: CreatePackageUseCase,
-    private val updatePackage: UpdatePackageUseCase,
-    private val deletePackage: DeletePackageUseCase,
-    private val findPackagesAboveWeight: FindPackagesAboveWeightUseCase,
-    private val findPackagesByDestination: FindPackagesByDestinationUseCase,
-    private val findPackagesByPriority: FindPackagesByPriorityUseCase,
-    private val getAllWarehouses: GetAllWarehousesUseCase,
+    private val dependencies: PackagesManagementDependencies,
     view: PackagesManagementScreen,
     parentScope: CoroutineScope
 ) : BasePresenter<PackagesManagementScreen>(view, parentScope) {
@@ -46,12 +30,12 @@ class PackagesManagementPresenter(
         view.showPackages(loaded.packages)
     }
 
-    fun onFindById(id: String): Job = perform(task = { getPackageById(id) }) { found ->
+    fun onFindById(id: String): Job = perform(task = { dependencies.getPackageById(id) }) { found ->
         if (found == null) view.showPackageNotFound(id) else view.showPackage(found)
     }
 
     fun onCreate(weightKg: Double, priority: Priority, originId: String, destinationId: String): Job = perform(
-        task = { createPackage(
+        task = { dependencies.createPackage(
             weightKg,
             priority,
             warehouseById(originId),
@@ -68,7 +52,7 @@ class PackagesManagementPresenter(
         destinationId: String?
     ): Job = perform(
         task = {
-            updatePackage(
+            dependencies.updatePackage(
                 PackageUpdateInput(
                     id = id,
                     weight = weightKg,
@@ -81,32 +65,32 @@ class PackagesManagementPresenter(
     ) { view.showPackageUpdated(it) }
 
     fun onDelete(id: String): Job =
-        perform(task = { deletePackage(id) }) { view.showPackageDeleted(id, it) }
+        perform(task = { dependencies.deletePackage(id) }) { view.showPackageDeleted(id, it) }
 
     fun onFindAboveWeight(minimumWeightKg: Double): Job = perform(
-        task = { findPackagesAboveWeight(minimumWeightKg) }
+        task = { dependencies.findPackagesAboveWeight(minimumWeightKg) }
     ) { view.showMatchingPackages("weighing at least $minimumWeightKg kg", it) }
 
     fun onFindByDestination(destinationId: String): Job = perform(
         task = {
             val destination = warehouseById(destinationId)
-            destination to findPackagesByDestination(destination)
+            destination to dependencies.findPackagesByDestination(destination)
         }
     ) { (destination, found) ->
         view.showMatchingPackages("going to ${destination.name}", found) }
 
     fun onFindByPriority(priority: Priority): Job = perform(
-        task = { findPackagesByPriority(priority) }
+        task = { dependencies.findPackagesByPriority(priority) }
     ) { view.showMatchingPackages("with ${priority.name} priority", it) }
 
     private suspend fun loadAll(): Loaded = coroutineScope {
-        val packages = async { getAllPackages() }
-        val warehouses = async { getAllWarehouses() }
+        val packages = async { dependencies.getAllPackages() }
+        val warehouses = async { dependencies.getAllWarehouses() }
         Loaded(packages.await(), warehouses.await())
     }
 
     private suspend fun warehouseById(id: String): Warehouse {
-        val known = warehouses.ifEmpty { getAllWarehouses().also { warehouses = it } }
+        val known = warehouses.ifEmpty { dependencies.getAllWarehouses().also { warehouses = it } }
         return known.firstOrNull { it.id.equals(id.trim(), ignoreCase = true) }
             ?: throw ResourceNotFoundException("Warehouse '$id' was not found.")
     }
