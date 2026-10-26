@@ -9,8 +9,14 @@ import org.bytebloom.logiroute.ui.terminal.ConsoleStyle
 
 private const val INDEX_HEADER = "Index"
 private const val INDEX_COLUMN = 0
+private const val CAPACITY_DECIMALS = 1
 private const val COORDINATE_DECIMALS = 4
 private const val PICK_HINT = " - type an index or an id to pick any of them"
+
+private const val COL_ONE = 1
+private const val COL_TWO = 2
+private const val COL_THREE = 3
+private const val COL_FOUR = 4
 
 private fun <T> numberedRows(
     items: List<T>,
@@ -31,10 +37,10 @@ private fun ConsoleStyle.colors(
     numbered: Boolean,
     extra: Map<Int, (String) -> String> = emptyMap()
 ): Map<Int, (String) -> String> {
-    val idColumn = if (numbered) 1 else 0
+    val idColumn = if (numbered) COL_ONE else INDEX_COLUMN
     val base = mutableMapOf<Int, (String) -> String>(idColumn to { cell -> bold(cyan(cell)) })
     if (numbered) base[INDEX_COLUMN] = { cell -> yellow(cell) }
-    extra.forEach { (column, painter) -> base[if (numbered) column + 1 else column] = painter }
+    extra.forEach { (column, painter) -> base[if (numbered) column + COL_ONE else column] = painter }
     return base
 }
 
@@ -62,8 +68,8 @@ fun ConsoleStyle.warehouseTable(
                 formatNumber(it.longitude, COORDINATE_DECIMALS)
             )
         },
-        rightAligned = shifted(setOf(3, 4), numbered),
-        cellColors = colors(numbered, mapOf(2 to { cell -> magenta(cell) })),
+        rightAligned = shifted(setOf(COL_THREE, COL_FOUR), numbered),
+        cellColors = colors(numbered, mapOf(COL_TWO to { cell -> magenta(cell) })),
         limit = limit,
         moreHint = hint(numbered)
     )
@@ -76,13 +82,15 @@ fun ConsoleStyle.vehicleTable(
     table(
         headers = withIndex(listOf("ID", "Capacity (kg)", "Cost / km", "Stationed at"), numbered),
         rows = numberedRows(vehicles, numbered) {
-            listOf(it.id, formatNumber(
-                it.maxCapacityKg,
-                1
-            ), formatNumber(it.costPerKm), it.currentWarehouse.name)
+            listOf(
+                it.id,
+                formatNumber(it.maxCapacityKg, CAPACITY_DECIMALS),
+                formatNumber(it.costPerKm),
+                it.currentWarehouse.name
+            )
         },
-        rightAligned = shifted(setOf(1, 2), numbered),
-        cellColors = colors(numbered, mapOf(3 to { cell -> magenta(cell) })),
+        rightAligned = shifted(setOf(COL_ONE, COL_TWO), numbered),
+        cellColors = colors(numbered, mapOf(COL_THREE to { cell -> magenta(cell) })),
         limit = limit,
         moreHint = hint(numbered)
     )
@@ -95,13 +103,16 @@ fun ConsoleStyle.packageTable(
     table(
         headers = withIndex(listOf("ID", "Weight (kg)", "Priority", "From", "To"), numbered),
         rows = numberedRows(packages, numbered) {
-            listOf(it.id, formatNumber(
-                it.weight,
-                1
-            ), it.priority.name, it.originWarehouse.name, it.destinationWarehouse.name)
+            listOf(
+                it.id,
+                formatNumber(it.weight, CAPACITY_DECIMALS),
+                it.priority.name,
+                it.originWarehouse.name,
+                it.destinationWarehouse.name
+            )
         },
-        rightAligned = shifted(setOf(1), numbered),
-        cellColors = colors(numbered, mapOf(2 to { cell -> priorityColor(cell) })),
+        rightAligned = shifted(setOf(COL_ONE), numbered),
+        cellColors = colors(numbered, mapOf(COL_TWO to { cell -> priorityColor(cell) })),
         limit = limit,
         moreHint = hint(numbered)
     )
@@ -122,7 +133,7 @@ fun ConsoleStyle.routeTable(
                 it.typicalDelayMin.toString()
             )
         },
-        rightAligned = shifted(setOf(3, 4), numbered),
+        rightAligned = shifted(setOf(COL_THREE, COL_FOUR), numbered),
         cellColors = colors(numbered),
         limit = limit,
         moreHint = hint(numbered)

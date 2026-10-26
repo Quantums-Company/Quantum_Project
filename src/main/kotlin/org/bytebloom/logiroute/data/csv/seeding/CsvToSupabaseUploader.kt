@@ -16,6 +16,7 @@ import org.bytebloom.logiroute.data.remote.dto.PackageRequestDto
 import org.bytebloom.logiroute.data.remote.dto.RouteRequestDto
 import org.bytebloom.logiroute.data.remote.dto.VehicleRequestDto
 import org.bytebloom.logiroute.data.remote.dto.WarehouseRequestDto
+import org.bytebloom.logiroute.data.remote.util.RemoteExecutor
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Route
 import org.bytebloom.logiroute.domain.model.Vehicle
@@ -26,6 +27,7 @@ import kotlinx.coroutines.coroutineScope
 
 class CsvToSupabaseUploader(
     private val client: SupabaseClient,
+    private val remoteExecutor: RemoteExecutor,
     private val warehouseDataSource: CsvWarehouseDataSource,
     private val routeDataSource: CsvRouteDataSource,
     private val vehicleDataSource: CsvVehicleDataSource,
@@ -70,7 +72,9 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.WAREHOUSES.value).upsert(requests) { onConflict = "id" }
+        remoteExecutor.execute("upload warehouses") {
+            client.from(TableName.WAREHOUSES.value).upsert(requests) { onConflict = "id" }
+        }
     }
 
     private suspend fun uploadRoutes(routes: List<Route>, syncedAt: String) {
@@ -85,7 +89,9 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.ROUTES.value).upsert(requests) { onConflict = "id" }
+        remoteExecutor.execute("upload routes") {
+            client.from(TableName.ROUTES.value).upsert(requests) { onConflict = "id" }
+        }
     }
 
     private suspend fun uploadVehicles(vehicles: List<Vehicle>, syncedAt: String) {
@@ -99,7 +105,9 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.VEHICLES.value).upsert(requests) { onConflict = "id" }
+        remoteExecutor.execute("upload vehicles") {
+            client.from(TableName.VEHICLES.value).upsert(requests) { onConflict = "id" }
+        }
     }
 
     private suspend fun uploadPackages(packages: List<Package>, syncedAt: String) {
@@ -114,6 +122,8 @@ class CsvToSupabaseUploader(
                 updatedAt = syncedAt
             )
         }
-        client.from(TableName.PACKAGES.value).upsert(requests) { onConflict = "id" }
+        remoteExecutor.execute("upload packages") {
+            client.from(TableName.PACKAGES.value).upsert(requests) { onConflict = "id" }
+        }
     }
 }

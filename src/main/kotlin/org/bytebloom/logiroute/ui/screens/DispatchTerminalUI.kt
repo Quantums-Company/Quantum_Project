@@ -23,6 +23,10 @@ import org.bytebloom.logiroute.ui.terminal.widget.table
 import org.bytebloom.logiroute.ui.terminal.widget.vehicleTable
 import org.bytebloom.logiroute.ui.terminal.widget.warehouseTable
 
+private const val COL_ONE = 1
+private const val COL_TWO = 2
+private const val COL_THREE = 3
+
 /** The terminal implementation of [DispatchScreen]. */
 class DispatchTerminalUI(
     terminal: Terminal,
@@ -88,7 +92,7 @@ class DispatchTerminalUI(
                         it.stationedVehicles.size.toString()
                     )
                 },
-                rightAligned = setOf(1, 2, 3)
+                rightAligned = setOf(COL_ONE, COL_TWO, COL_THREE)
             )
         )
     }
@@ -186,7 +190,10 @@ class DispatchTerminalUI(
 
     private suspend fun pickQueuedPackages(warehouse: Warehouse): List<Package>? {
         if (warehouse.cargoQueue.isEmpty()) {
-            printWarning("No package is queued at ${warehouse.name}. Use \"Put a package in its warehouse's cargo queue\" first.")
+            printWarning(
+                "No package is queued at ${warehouse.name}. " +
+                        "Use \"Put a package in its warehouse's cargo queue\" first."
+            )
             return null
         }
         return pickSeveral("Add a package",
@@ -247,7 +254,7 @@ class DispatchTerminalUI(
         } else {
             printWarning(
                 pkg.id +
-                    " was not queued: it must start at ${warehouse.name} and not be queued there already.")
+                        " was not queued: it must start at ${warehouse.name} and not be queued there already.")
         }
     }
 
@@ -260,7 +267,7 @@ class DispatchTerminalUI(
         } else {
             printWarning(
                 vehicle.id +
-                    " cannot take these packages (not queued here, not stationed here, or too heavy).")
+                        " cannot take these packages (not queued here, not stationed here, or too heavy).")
         }
     }
 

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transform
 import org.bytebloom.logiroute.domain.model.VehicleTelemetry
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 import org.bytebloom.logiroute.domain.model.result.VehicleDelayNotification
 import org.bytebloom.logiroute.domain.repository.TelemetryRepository
 
@@ -16,9 +17,10 @@ class TrackActiveFleetUseCase(
 ) {
 
     init {
-        require(delaySpeedThresholdKph >= 0.0) {
-            "Delay speed threshold cannot be negative."
-        }
+        delaySpeedThresholdKph.takeIf { it.isFinite() && it >= 0.0 }
+            ?: throw InvalidConfigurationException(
+                "Delay speed threshold must be finite and non-negative."
+            )
     }
 
     operator fun invoke(

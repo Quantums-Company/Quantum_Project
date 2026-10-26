@@ -65,7 +65,7 @@ class ShortestRoutePresenter(
 
     private fun planOf(path: List<Warehouse>, graph: WarehouseGraph): RoutePlan {
         val legs = path.zipWithNext { from, to ->
-            RouteLeg(from, to, distanceKm = graph.adjacencyMap[from]?.get(to) ?: 0.0)
+            RouteLeg(from, to, distanceKm = graph.neighbors(from)[to] ?: 0.0)
         }
         return RoutePlan(stops = path, legs = legs, totalDistanceKm = legs.sumOf { it.distanceKm })
     }

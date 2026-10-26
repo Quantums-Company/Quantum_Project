@@ -31,21 +31,18 @@ class CsvRouteRepository(
 
     suspend fun refresh(): List<Route> =
         mutex.withLock {
-            loadAll().also { routes ->
-                cachedRoutes = routes
+            loadAll().also { loaded ->
+                cachedRoutes = loaded.toList()
+            }.toList()
+        }
+
+    override suspend fun getAll(): List<Route> =
+        mutex.withLock {
+            val loaded = cachedRoutes ?: loadAll().also { routes ->
+                cachedRoutes = routes.toList()
             }
+            loaded.toList()
         }
-
-    override suspend fun getAll(): List<Route> {
-        cachedRoutes?.let { return it }
-
-        return mutex.withLock {
-            cachedRoutes
-                ?: loadAll().also { routes ->
-                    cachedRoutes = routes
-                }
-        }
-    }
 
     override suspend fun getById(id: String): Route? =
         getAll().find { it.id == id }

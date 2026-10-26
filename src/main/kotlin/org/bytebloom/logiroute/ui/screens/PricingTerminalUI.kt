@@ -51,15 +51,25 @@ class PricingTerminalUI(
         ) ?: return
 
         val decorators = mutableListOf<DecoratorFee>()
-        while (terminal.confirm("Add an extra fee (cold chain, insurance, fragile handling)?")) {
+        var addingFees = terminal.confirm("Add an extra fee (cold chain, insurance, fragile handling)?")
+        while (addingFees) {
             val type = terminal.chooseFrom(
                 "Fee ${DecoratorType.entries.mapIndexed { i, t -> "${i + 1}=${t.name}" }.joinToString()} : ",
                 DecoratorType.entries,
                 DecoratorType::name,
                 style
-            ) ?: break
-            val value = terminal.askDouble(valuePrompt(type), style) ?: break
-            decorators += DecoratorFee(type, value)
+            )
+            if (type == null) {
+                addingFees = false
+            } else {
+                val value = terminal.askDouble(valuePrompt(type), style)
+                if (value == null) {
+                    addingFees = false
+                } else {
+                    decorators += DecoratorFee(type, value)
+                    addingFees = terminal.confirm("Add an extra fee (cold chain, insurance, fragile handling)?")
+                }
+            }
         }
 
         loadingMessage = "Calculating the price…"
@@ -97,4 +107,3 @@ class PricingTerminalUI(
             )
         )
 }
-

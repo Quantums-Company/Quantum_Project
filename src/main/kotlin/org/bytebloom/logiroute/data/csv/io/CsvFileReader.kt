@@ -1,23 +1,27 @@
 package org.bytebloom.logiroute.data.csv.io
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.bytebloom.logiroute.data.csv.exception.CsvFileNotFoundException
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
 import java.io.File
 import java.io.IOException
 
 class CsvFileReader(
-private val cacheDirectory: String = CACHE_DIRECTORY,
-private val seedDirectory: String = DEFAULT_CSV_DIRECTORY
+    private val cacheDirectory: String = CACHE_DIRECTORY,
+    private val seedDirectory: String = DEFAULT_CSV_DIRECTORY,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     companion object {
         const val DEFAULT_CSV_DIRECTORY = "src/resources"
         const val CACHE_DIRECTORY = "src/resources/cache"
     }
 
-    fun <T> loadCsv(
+    suspend fun <T> loadCsv(
         fileName: String,
         parser: (String, Int) -> T?
-    ): CsvLoadReport<T> {
+    ): CsvLoadReport<T> = withContext(ioDispatcher) {
         val cacheFile = File(cacheDirectory, fileName)
         val seedFile = File(seedDirectory, fileName)
 
@@ -56,6 +60,6 @@ private val seedDirectory: String = DEFAULT_CSV_DIRECTORY
             throw exception
         }
 
-        return CsvLoadReport(rows, skipped)
+        CsvLoadReport(rows.toList(), skipped.toList())
     }
 }

@@ -19,21 +19,18 @@ class CsvWarehouseRepository(
 
     suspend fun refresh(): List<Warehouse> =
         mutex.withLock {
-            loadAll().also { warehouses ->
-                cachedWarehouses = warehouses
+            loadAll().also { loaded ->
+                cachedWarehouses = loaded.toList()
+            }.toList()
+        }
+
+    override suspend fun getAll(): List<Warehouse> =
+        mutex.withLock {
+            val loaded = cachedWarehouses ?: loadAll().also { warehouses ->
+                cachedWarehouses = warehouses.toList()
             }
+            loaded.toList()
         }
-
-    override suspend fun getAll(): List<Warehouse> {
-        cachedWarehouses?.let { return it }
-
-        return mutex.withLock {
-            cachedWarehouses
-                ?: loadAll().also { warehouses ->
-                    cachedWarehouses = warehouses
-                }
-        }
-    }
 
     override suspend fun getById(id: String): Warehouse? =
         getAll().find { it.id == id }
