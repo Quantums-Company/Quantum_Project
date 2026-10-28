@@ -1,10 +1,10 @@
-package org.bytebloom.logiroute.ui.screen
+package org.bytebloom.logiroute.ui.screens
 
 import kotlinx.coroutines.CoroutineScope
 import org.bytebloom.logiroute.domain.model.Warehouse
-import org.bytebloom.logiroute.presentation.screen.ShortestRouteScreen
-import org.bytebloom.logiroute.presentation.RoutePlan
 import org.bytebloom.logiroute.presentation.presenter.ShortestRoutePresenter
+import org.bytebloom.logiroute.presentation.screens.ShortestRouteScreen
+import org.bytebloom.logiroute.presentation.RoutePlan
 import org.bytebloom.logiroute.ui.terminal.ConsoleStyle
 import org.bytebloom.logiroute.ui.terminal.Terminal
 import org.bytebloom.logiroute.ui.terminal.TerminalScreenBase
@@ -13,6 +13,7 @@ import org.bytebloom.logiroute.ui.terminal.widget.box
 import org.bytebloom.logiroute.ui.terminal.widget.formatNumber
 import org.bytebloom.logiroute.ui.terminal.widget.hint
 import org.bytebloom.logiroute.ui.terminal.widget.table
+import org.bytebloom.logiroute.ui.terminal.widget.warehouseTable
 import org.bytebloom.logiroute.ui.terminal.writeLines
 
 /** The terminal implementation of [ShortestRouteScreen]. An Android UI would implement the same interface. */
@@ -37,10 +38,18 @@ class ShortestRouteTerminalUI(
         presenter.onViewReady().join()
         if (warehouses.isEmpty()) return
 
-        val origin = terminal.chooseFrom(FROM_PROMPT, warehouses, Warehouse::id, style)
-            ?: return
-        val destination = terminal.chooseFrom(TO_PROMPT, warehouses, Warehouse::id, style)
-            ?: return
+        val origin = terminal.chooseFrom(
+            FROM_PROMPT,
+            warehouses,
+            Warehouse::id,
+            style
+        ) ?: return
+        val destination = terminal.chooseFrom(
+            TO_PROMPT,
+            warehouses,
+            Warehouse::id,
+            style
+        ) ?: return
 
         loadingMessage = "Calculating the shortest route…"
         presenter.onCalculate(origin.id, destination.id).join()
@@ -52,15 +61,7 @@ class ShortestRouteTerminalUI(
             terminal.writeLine(style.yellow("  There are no warehouses yet."))
             return
         }
-        terminal.writeLines(
-            style.table(
-                headers = listOf("#", "ID", "Name", "Zone"),
-                rows = warehouses.mapIndexed { index, warehouse ->
-                    listOf((index + 1).toString(), warehouse.id, warehouse.name, warehouse.regionalZone)
-                },
-                rightAligned = setOf(0)
-            )
-        )
+        terminal.writeLines(style.warehouseTable(warehouses, numbered = true))
         terminal.writeLine()
     }
 
@@ -99,13 +100,12 @@ class ShortestRouteTerminalUI(
             style.yellow("  ${style.glyphs.warning}" +
                     " No route exists from ${origin.name} to ${destination.name}.")
         )
-        terminal.writeLine("  " +
-                style.hint("Routes are one-way: " +
-                        "check that a road leads from the first warehouse to the second."))
+        terminal.writeLine("  " + style.hint("Routes are one-way:" +
+                " check that a road leads from the first warehouse to the second."))
     }
 
     private companion object {
-        const val FROM_PROMPT = "From (number or id, Enter to cancel): "
-        const val TO_PROMPT = "To   (number or id, Enter to cancel): "
+        const val FROM_PROMPT = "From (index or id, Enter to cancel): "
+        const val TO_PROMPT = "To   (index or id, Enter to cancel): "
     }
 }

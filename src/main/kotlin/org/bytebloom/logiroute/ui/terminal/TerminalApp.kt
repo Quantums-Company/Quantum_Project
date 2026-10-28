@@ -18,27 +18,31 @@ class TerminalApp(
 ) {
     private val entries: List<MenuEntry> = sections.flatMap { it.entries }
 
-    @Suppress("LoopWithTooManyJumpStatements")
     suspend fun run() {
         printBanner()
-        while (true) {
+        var running = true
+        while (running) {
             printMenu()
-            val answer = terminal.prompt(style.bold("Choose an option › ")) ?: break
-            val key = answer.lowercase()
-
-            if (key in EXIT_WORDS) break
-
-            val entry = findEntry(key)
-            if (entry == null) {
-                terminal.writeLine(style.yellow("  '$answer' is not an option" +
-                        " — type a number from the menu, or 0 to exit."))
-            } else {
-                open(entry)
+            val answer = terminal.prompt(style.bold("Choose an option › "))
+            running = when {
+                answer == null -> false
+                answer.lowercase() in EXIT_WORDS -> false
+                else -> {
+                    val key = answer.lowercase()
+                    val entry = findEntry(key)
+                    if (entry == null) {
+                        terminal.writeLine(style.yellow("  '$answer' is not an option " +
+                                "— type an index from the menu, or 0 to exit."))
+                    } else {
+                        open(entry)
+                    }
+                    true
+                }
             }
         }
         terminal.writeLine()
-        terminal.writeLine(style.green("${style.glyphs.success} Goodbye" +
-                " — all background work has been stopped."))
+        terminal.writeLine(style.green("${style.glyphs.success} Goodbye " +
+                "— all background work has been stopped."))
     }
 
     private fun findEntry(key: String): MenuEntry? =
@@ -85,7 +89,7 @@ class TerminalApp(
     private companion object {
         const val BANNER_TITLE = "LogiRoute"
         const val BANNER_TAGLINE = "Smart logistics: routing · cargo · live telemetry"
-        const val BANNER_HINT = "Type a number or a word, 0 to exit"
+        const val BANNER_HINT = "Type an index or a word, 0 to exit"
         const val NUMBER_WIDTH = 2
         val EXIT_WORDS = setOf("0", "exit", "quit", "q")
     }

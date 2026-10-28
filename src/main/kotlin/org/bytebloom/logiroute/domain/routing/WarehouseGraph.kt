@@ -6,13 +6,13 @@ class WarehouseGraph {
 
     private val _adjacencyMap = mutableMapOf<Warehouse, MutableMap<Warehouse, Double>>()
     val adjacencyMap: Map<Warehouse, Map<Warehouse, Double>>
-        get() = _adjacencyMap
+        get() = _adjacencyMap.mapValues { (_, neighbors) -> neighbors.toMap() }.toMap()
 
     private val _reverseAdjacencyMap =
         mutableMapOf<Warehouse, MutableMap<Warehouse, Double>>()
 
     fun warehouses(): Set<Warehouse> =
-        adjacencyMap.keys.toSet()
+        _adjacencyMap.keys.toSet()
 
     fun addWarehouse(warehouse: Warehouse) {
         _adjacencyMap.putIfAbsent(warehouse, mutableMapOf())
@@ -29,7 +29,7 @@ class WarehouseGraph {
     }
 
     fun neighbors(warehouse: Warehouse): Map<Warehouse, Double> =
-        adjacencyMap[warehouse]?.toMap()
+        _adjacencyMap[warehouse]?.toMap()
             ?: emptyMap()
 
     fun predecessors(

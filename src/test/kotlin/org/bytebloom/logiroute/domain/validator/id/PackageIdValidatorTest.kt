@@ -1,11 +1,10 @@
-package validator.id
+package org.bytebloom.logiroute.domain.validator.id
 
 import com.google.common.truth.Truth.assertThat
 import org.bytebloom.logiroute.domain.model.EntityType
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 import org.bytebloom.logiroute.domain.model.validation.ValidatorResult
-import org.bytebloom.logiroute.domain.validator.id.PackageIdValidator
 
 import org.junit.jupiter.api.Test
 

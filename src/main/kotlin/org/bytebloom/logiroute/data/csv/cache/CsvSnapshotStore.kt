@@ -1,5 +1,7 @@
 package org.bytebloom.logiroute.data.csv.cache
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.bytebloom.logiroute.data.csv.io.CsvFileWriter
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Route
@@ -7,11 +9,14 @@ import org.bytebloom.logiroute.domain.model.Vehicle
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.data.csv.io.CsvTable
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 class CsvSnapshotStore(
     private val writer: CsvFileWriter,
     private val cacheDirectory: File = File("src/resources/cache")
 ) {
+    private val fileLocks = ConcurrentHashMap<String, Mutex>()
+
     companion object {
         private val SPECIAL_CSV_CHARS = charArrayOf(',', '"', '\n', '\r')
     }
@@ -19,7 +24,7 @@ class CsvSnapshotStore(
     private fun String.containsSpecialCsvChars(): Boolean =
         any { it in SPECIAL_CSV_CHARS }
 
-    fun saveWarehouses(items: List<Warehouse>) {
+    suspend fun saveWarehouses(items: List<Warehouse>) {
         save(
             CsvTable.WAREHOUSES.fileName,
             "id,name,regionalZone,latitude,longitude",
@@ -32,7 +37,7 @@ class CsvSnapshotStore(
         )
     }
 
-    fun saveRoutes(items: List<Route>) {
+    suspend fun saveRoutes(items: List<Route>) {
         save(
             CsvTable.ROUTES.fileName,
             "routeId,originHubId,destinationHubId,distanceKm,typicalDelayMin",
@@ -45,7 +50,7 @@ class CsvSnapshotStore(
         )
     }
 
-    fun saveVehicles(items: List<Vehicle>) {
+    suspend fun saveVehicles(items: List<Vehicle>) {
         save(
             CsvTable.VEHICLES.fileName,
             "vehicleId,currentHubId,maxCapacityKg,costPerKm",
@@ -58,7 +63,7 @@ class CsvSnapshotStore(
         )
     }
 
-    fun savePackages(items: List<Package>) {
+    suspend fun savePackages(items: List<Package>) {
         save(
             CsvTable.PACKAGES.fileName,
             "id,weight,originHubId,destinationHubId,priority",
@@ -72,16 +77,21 @@ class CsvSnapshotStore(
         )
     }
 
-    private fun save(
+    private suspend fun save(
         fileName: String,
         header: String,
         rows: List<String>
     ) {
-        writer.write(
-            file = File(cacheDirectory, fileName),
-            header = header,
-            rows = rows
-        )
+        val file = File(cacheDirectory, fileName)
+        val fileLock = fileLocks.computeIfAbsent(file.absolutePath) { Mutex() }
+
+        fileLock.withLock {
+            writer.write(
+                file = file,
+                header = header,
+                rows = rows
+            )
+        }
     }
 
     private fun row(vararg values: String): String =

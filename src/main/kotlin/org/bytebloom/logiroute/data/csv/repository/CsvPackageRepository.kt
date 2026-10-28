@@ -31,21 +31,18 @@ class CsvPackageRepository(
 
     suspend fun refresh(): List<Package> =
         mutex.withLock {
-            loadAll().also { packages ->
-                cachedPackages = packages
+            loadAll().also { loaded ->
+                cachedPackages = loaded.toList()
+            }.toList()
+        }
+
+    override suspend fun getAll(): List<Package> =
+        mutex.withLock {
+            val loaded = cachedPackages ?: loadAll().also { packages ->
+                cachedPackages = packages.toList()
             }
+            loaded.toList()
         }
-
-    override suspend fun getAll(): List<Package> {
-        cachedPackages?.let { return it }
-
-        return mutex.withLock {
-            cachedPackages
-                ?: loadAll().also { packages ->
-                    cachedPackages = packages
-                }
-        }
-    }
 
     override suspend fun getById(id: String): Package? =
         getAll().find { it.id == id }

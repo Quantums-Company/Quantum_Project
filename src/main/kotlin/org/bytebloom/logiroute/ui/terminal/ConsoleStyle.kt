@@ -1,5 +1,15 @@
 package org.bytebloom.logiroute.ui.terminal
 
+private const val ANSI_RESET_CODE = "0"
+private const val ANSI_BOLD_CODE = "1"
+private const val ANSI_DIM_CODE = "2"
+private const val ANSI_RED_CODE = "31"
+private const val ANSI_GREEN_CODE = "32"
+private const val ANSI_YELLOW_CODE = "33"
+private const val ANSI_BLUE_CODE = "34"
+private const val ANSI_MAGENTA_CODE = "35"
+private const val ANSI_CYAN_CODE = "36"
+
 /**
  * Colors and drawing characters, decided once.
  * [colors] = ANSI colors on/off, [unicode] = box-drawing characters or plain ASCII.
@@ -22,7 +32,7 @@ class ConsoleStyle(
     private fun paint(text: String, code: String): String =
         if (colors) "$ESC[${code}m$text$ESC[${RESET}m" else text
 
-    class Glyphs @Suppress("LongParameterList") constructor(
+    data class BoxChars(
         val horizontal: String,
         val vertical: String,
         val topLeft: String,
@@ -33,7 +43,39 @@ class ConsoleStyle(
         val teeUp: String,
         val teeRight: String,
         val teeLeft: String,
-        val cross: String,
+        val cross: String
+    ) {
+        companion object {
+            val UNICODE = BoxChars(
+                "─",
+                "│",
+                "╭",
+                "╮",
+                "╰",
+                "╯",
+                "┬",
+                "┴",
+                "├",
+                "┤",
+                "┼"
+            )
+            val ASCII = BoxChars(
+                "-",
+                "|",
+                "+",
+                "+",
+                "+",
+                "+",
+                "+",
+                "+",
+                "+",
+                "+",
+                "+"
+            )
+        }
+    }
+
+    data class UiSymbols(
         val arrow: String,
         val barFilled: String,
         val barEmpty: String,
@@ -43,36 +85,66 @@ class ConsoleStyle(
         val spinner: List<String>
     ) {
         companion object {
-            val UNICODE = Glyphs(
-                horizontal = "─", vertical = "│",
-                topLeft = "╭", topRight = "╮", bottomLeft = "╰", bottomRight = "╯",
-                teeDown = "┬", teeUp = "┴", teeRight = "├", teeLeft = "┤", cross = "┼",
-                arrow = "→", barFilled = "█", barEmpty = "░",
-                warning = "⚠", success = "✔", bullet = "•",
-                spinner = listOf("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
+            val UNICODE = UiSymbols(
+                "→",
+                "█",
+                "░",
+                "⚠",
+                "✔",
+                "•",
+                listOf("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
             )
-            val ASCII = Glyphs(
-                horizontal = "-", vertical = "|",
-                topLeft = "+", topRight = "+", bottomLeft = "+", bottomRight = "+",
-                teeDown = "+", teeUp = "+", teeRight = "+", teeLeft = "+", cross = "+",
-                arrow = "->", barFilled = "#", barEmpty = ".",
-                warning = "!", success = "OK", bullet = "*",
-                spinner = listOf("|", "/", "-", "\\")
+            val ASCII = UiSymbols(
+                "->",
+                "#",
+                ".",
+                "!",
+                "OK",
+                "*",
+                listOf("|", "/", "-", "\\")
             )
+        }
+    }
+
+    class Glyphs(
+        val box: BoxChars,
+        val symbols: UiSymbols
+    ) {
+        val horizontal: String get() = box.horizontal
+        val vertical: String get() = box.vertical
+        val topLeft: String get() = box.topLeft
+        val topRight: String get() = box.topRight
+        val bottomLeft: String get() = box.bottomLeft
+        val bottomRight: String get() = box.bottomRight
+        val teeDown: String get() = box.teeDown
+        val teeUp: String get() = box.teeUp
+        val teeRight: String get() = box.teeRight
+        val teeLeft: String get() = box.teeLeft
+        val cross: String get() = box.cross
+        val arrow: String get() = symbols.arrow
+        val barFilled: String get() = symbols.barFilled
+        val barEmpty: String get() = symbols.barEmpty
+        val warning: String get() = symbols.warning
+        val success: String get() = symbols.success
+        val spinner: List<String> get() = symbols.spinner
+
+        companion object {
+            val UNICODE = Glyphs(BoxChars.UNICODE, UiSymbols.UNICODE)
+            val ASCII = Glyphs(BoxChars.ASCII, UiSymbols.ASCII)
         }
     }
 
     companion object {
         private const val ESC = "\u001B"
-        private const val RESET = "0"
-        private const val BOLD = "1"
-        private const val DIM = "2"
-        private const val RED = "31"
-        private const val GREEN = "32"
-        private const val YELLOW = "33"
-        private const val BLUE = "34"
-        private const val MAGENTA = "35"
-        private const val CYAN = "36"
+        private const val RESET = ANSI_RESET_CODE
+        private const val BOLD = ANSI_BOLD_CODE
+        private const val DIM = ANSI_DIM_CODE
+        private const val RED = ANSI_RED_CODE
+        private const val GREEN = ANSI_GREEN_CODE
+        private const val YELLOW = ANSI_YELLOW_CODE
+        private const val BLUE = ANSI_BLUE_CODE
+        private const val MAGENTA = ANSI_MAGENTA_CODE
+        private const val CYAN = ANSI_CYAN_CODE
 
         private val ANSI_SEQUENCE = Regex("\u001B\\[[0-9;]*[A-Za-z]")
 

@@ -1,4 +1,4 @@
-package org.bytebloom.logiroute.ui.screen
+package org.bytebloom.logiroute.ui.screens
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -6,7 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.selects.select
 import org.bytebloom.logiroute.domain.model.VehicleTelemetry
 import org.bytebloom.logiroute.domain.model.result.VehicleDelayNotification
-import org.bytebloom.logiroute.presentation.screen.TelemetryScreen
+import org.bytebloom.logiroute.presentation.screens.TelemetryScreen
 import org.bytebloom.logiroute.presentation.presenter.TelemetryPresenter
 import org.bytebloom.logiroute.ui.terminal.ConsoleStyle
 import org.bytebloom.logiroute.ui.terminal.Terminal
@@ -31,7 +31,8 @@ class TelemetryTerminalUI(
 
     override suspend fun show() {
         terminal.writeLine()
-        terminal.writeLine(style.bold(style.cyan("Live vehicle telemetry")) + style.dim("   press Enter to stop"))
+        terminal.writeLine(style.bold(style.cyan("Live vehicle telemetry"))
+                + style.dim("   press Enter to stop"))
         terminal.writeLine()
 
         eventCounter.set(0)
@@ -53,7 +54,8 @@ class TelemetryTerminalUI(
     }
 
     override fun showTrackingStarted(vehicleIds: Set<String>) {
-        terminal.writeLine(style.dim("Tracking ${vehicleIds.size} vehicle(s): ${vehicleIds.sorted().joinToString()}"))
+        terminal.writeLine(style.dim("Tracking ${vehicleIds.size} " +
+                "vehicle(s): ${vehicleIds.sorted().joinToString()}"))
         terminal.writeLine()
     }
 
@@ -63,7 +65,8 @@ class TelemetryTerminalUI(
             listOf(
                 numberLabel(),
                 style.bold(padVisible(telemetry.vehicleId, VEHICLE_WIDTH)),
-                padVisible(formatNumber(telemetry.speedKph, 0), SPEED_WIDTH, alignRight = true) + " km/h",
+                padVisible(formatNumber(telemetry.speedKph, 0),
+                    SPEED_WIDTH, alignRight = true) + " km/h",
                 "fuel " + style.percentBar(telemetry.fuelPercent),
                 style.dim(gps(telemetry))
             ).joinToString(" $divider ")
@@ -89,7 +92,10 @@ class TelemetryTerminalUI(
             style.table(
                 headers = listOf("Vehicle", "Speed (km/h)", "Fuel", "GPS"),
                 rows = latestReadings.map {
-                    listOf(it.vehicleId, formatNumber(it.speedKph, 0), style.percentBar(it.fuelPercent), gps(it))
+                    listOf(it.vehicleId, formatNumber(
+                        it.speedKph,
+                        0
+                    ), style.percentBar(it.fuelPercent), gps(it))
                 },
                 rightAligned = setOf(1)
             )
@@ -97,7 +103,8 @@ class TelemetryTerminalUI(
     }
 
     private fun numberLabel(): String =
-        style.dim("#" + eventCounter.incrementAndGet().toString().padStart(SEQUENCE_WIDTH, '0'))
+        style.dim("#" + eventCounter.incrementAndGet().toString()
+            .padStart(SEQUENCE_WIDTH, '0'))
 
     private fun gps(t: VehicleTelemetry) =
         "${formatNumber(t.latitude, GPS_DECIMALS)}, ${formatNumber(t.longitude, GPS_DECIMALS)}"

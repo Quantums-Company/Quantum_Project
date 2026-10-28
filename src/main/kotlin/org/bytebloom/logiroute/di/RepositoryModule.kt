@@ -6,6 +6,7 @@ import org.bytebloom.logiroute.data.csv.repository.CsvPackageRepository
 import org.bytebloom.logiroute.data.csv.repository.CsvRouteRepository
 import org.bytebloom.logiroute.data.csv.repository.CsvVehicleRepository
 import org.bytebloom.logiroute.data.csv.repository.CsvWarehouseRepository
+import org.bytebloom.logiroute.data.csv.repository.SpatialWarehouseRepositoryImpl
 import org.bytebloom.logiroute.data.offline.repository.OfflineFirstPackageRepository
 import org.bytebloom.logiroute.data.offline.repository.OfflineFirstRouteRepository
 import org.bytebloom.logiroute.data.offline.repository.OfflineFirstVehicleRepository
@@ -17,6 +18,7 @@ import org.bytebloom.logiroute.data.remote.repository.RemoteWarehouseRepository
 import org.bytebloom.logiroute.data.training.PackageHistoryTrainingCargoRepository
 import org.bytebloom.logiroute.domain.repository.PackageRepository
 import org.bytebloom.logiroute.domain.repository.RouteRepository
+import org.bytebloom.logiroute.domain.repository.SpatialWarehouseRepository
 import org.bytebloom.logiroute.domain.repository.TrainingCargoRepository
 import org.bytebloom.logiroute.domain.repository.VehicleRepository
 import org.bytebloom.logiroute.domain.repository.WarehouseRepository
@@ -56,6 +58,10 @@ val repositoryModule = module {
     }
 
     single { OfflineReadExecutor() }
+
+    single<SpatialWarehouseRepository>{
+        SpatialWarehouseRepositoryImpl(get(), get())
+    }
 
     // Domain interfaces use Offline-first implementations
     single<WarehouseRepository> {
