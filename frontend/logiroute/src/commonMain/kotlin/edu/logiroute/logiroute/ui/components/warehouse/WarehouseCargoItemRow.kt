@@ -5,24 +5,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.components.`package`.PackagePriorityBadge
+import edu.logiroute.logiroute.ui.components.`package`.WarehouseCargoDestinationText
 import edu.logiroute.logiroute.ui.sampledata.PackageSamples
 import edu.logiroute.logiroute.ui.style.Card
-import edu.logiroute.logiroute.ui.theme.CharcoalBlue
 import edu.logiroute.logiroute.ui.theme.InkBlack
-import edu.logiroute.logiroute.ui.theme.TextSecondary
 import org.bytebloom.logiroute.domain.model.Package
+
 @Composable
 fun WarehouseCargoItemRow(
     packageItem: Package,
@@ -30,12 +25,12 @@ fun WarehouseCargoItemRow(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        backgroundColor = CharcoalBlue,
+        backgroundColor = InkBlack,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().background(color = InkBlack),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             WarehouseCargoDestinationText(packageItem)
@@ -76,13 +71,4 @@ fun WarehouseCargoItemRowStandardPreview() {
             packageItem = PackageSamples.standardCargo
         )
     }
-}
-
-@Composable
-private fun WarehouseCargoDestinationText(packageItem: Package) {
-    Text(
-        text = "Destination: ${packageItem.destinationWarehouse.name}",
-        color = TextSecondary,
-        fontSize = 12.sp
-    )
 }

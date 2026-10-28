@@ -42,4 +42,20 @@ object VehicleSamples {
             costPerKm = 5.0,
             currentWarehouse = WarehouseSamples.centralWarehouse
         )
+
+    val sampleVehicles = listOf(
+        safeLoadVehicle,
+        heavyLoadVehicle,
+        overloadedVehicle
+    )
+
+    val sampleLoads = mapOf(
+        safeLoadVehicle.id to 2500.0,    // 25% - Normal
+        heavyLoadVehicle.id to 8900.0,   // 89% - WarningAmber
+        overloadedVehicle.id to 10000.0  // 100% - ErrorRed
+    )
+
+    val heavyDataLoads: Map<String, Double> = List(12) { index ->
+        "TRK-${200 + index}" to (20.0 + (index * 7.0))
+    }.toMap()
 }

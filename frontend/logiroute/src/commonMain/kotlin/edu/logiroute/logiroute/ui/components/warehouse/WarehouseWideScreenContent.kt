@@ -15,7 +15,8 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 @Composable
 fun WarehouseWideScreenContent(
     warehouse: Warehouse,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    vehicleLoads: Map<String, Double> = emptyMap()
 ) {
     Row(
         modifier = modifier.fillMaxSize(),
@@ -27,6 +28,7 @@ fun WarehouseWideScreenContent(
         )
         ActiveFleetGrid(
             vehicles = warehouse.stationedVehicles,
+            vehicleLoads = vehicleLoads,
             modifier = Modifier.weight(0.6f).fillMaxHeight())
     }
 }
@@ -34,5 +36,5 @@ fun WarehouseWideScreenContent(
 @Preview
 @Composable
 fun WarehouseWideScreenContentPreview() {
-    WarehouseWideScreenContent(WarehouseSamples.westWarehouse)
+    WarehouseWideScreenContent(WarehouseSamples.centralWarehouse)
 }

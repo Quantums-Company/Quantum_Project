@@ -18,7 +18,7 @@ fun WarehouseCargoQueueList(cargoQueue: List<Package>, modifier: Modifier = Modi
     val cargoHeaderLabel = stringResource(Res.string.cargo_header_label)
     WarehouseCargoLazyColumn(
         modifier =
-            modifier.fillMaxWidth(),
+            modifier,
         cargoQueue = cargoQueue,
         cargoHeaderLabel = cargoHeaderLabel
     )

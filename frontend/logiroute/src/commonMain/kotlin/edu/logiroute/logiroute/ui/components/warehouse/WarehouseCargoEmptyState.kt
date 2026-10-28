@@ -10,9 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.theme.TextSecondary
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import quantum_project.frontend.logiroute.generated.resources.Res
+import quantum_project.frontend.logiroute.generated.resources.empty_cargo_queue
+import quantum_project.frontend.logiroute.generated.resources.warehouse_overloaded_warning
 
 @Composable
 fun WarehouseCargoEmptyState(
@@ -34,4 +40,10 @@ fun WarehouseCargoEmptyState(
             fontWeight = FontWeight.Normal,
         )
     }
+}
+
+@Preview
+@Composable
+fun WarehouseCargoEmptyPreview() {
+    WarehouseCargoEmptyState(stringResource(Res.string.empty_cargo_queue))
 }

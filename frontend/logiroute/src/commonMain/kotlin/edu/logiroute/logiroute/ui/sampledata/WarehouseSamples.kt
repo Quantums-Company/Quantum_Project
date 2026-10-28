@@ -50,4 +50,49 @@ object WarehouseSamples {
             addVehicle(VehicleSamples.westVehicle)
             addRoute(RouteSamples.sampleRoute)
         }
+
+    val heavyDataWarehouse: Warehouse
+        get() = Warehouse(
+            id = "WH-006",
+            name = "Mega Distribution Center",
+            regionalZone = "CENTRAL",
+            longitude = 35.00,
+            latitude = 32.00
+        ).apply {
+            List(50) { index ->
+                PackageSamples.standardCargo.copy(
+                    id = "PKG-${100 + index}",
+                    weight = 5.0 + (index % 10)
+                )
+            }.forEach { addPackage(it) }
+
+            List(12) { index ->
+                VehicleSamples.westVehicle.copy(
+                    id = "TRK-${200 + index}",
+                    maxCapacityKg = 100.0
+                )
+            }.forEach { addVehicle(it) }
+        }
+
+    val overloadedWarehouse: Warehouse
+        get() = Warehouse(
+            id = "WH-007",
+            name = "Overloaded Regional Terminal",
+            regionalZone = "SOUTH",
+            longitude = 34.40,
+            latitude = 31.30
+        ).apply {
+            addPackage(PackageSamples.urgentCargo.copy(id = "PKG-991", weight = 500.0))
+            addPackage(PackageSamples.standardCargo.copy(id = "PKG-992", weight = 400.0))
+            addVehicle(VehicleSamples.westVehicle.copy(id = "TRK-999", maxCapacityKg = 200.0))
+        }
+
+    val emptyWarehouse: Warehouse
+        get() = Warehouse(
+            id = "WH-008",
+            name = "Inactive Station",
+            regionalZone = "NORTH",
+            longitude = 34.20,
+            latitude = 31.50
+        )
 }

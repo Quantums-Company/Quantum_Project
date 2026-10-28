@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.logiroute.logiroute.ui.sampledata.VehicleSamples
 import edu.logiroute.logiroute.ui.theme.ErrorRed
+import edu.logiroute.logiroute.ui.theme.LightGreen
 import edu.logiroute.logiroute.ui.theme.WarningAmber
 import org.bytebloom.logiroute.domain.model.Vehicle
 
@@ -25,13 +26,14 @@ fun VehicleFleetItem(
 ) {
     val loadRatio = vehicle.maxCapacityKg.takeIf { it > 0.0 }?.let { currentLoad / it } ?: 0.0
     val borderModifier = when {
-        loadRatio > 0.85 ->
+        loadRatio > 0.90 ->
             Modifier.border(2.dp, ErrorRed, FleetCardShape)
 
-        loadRatio > 0.70 ->
+        loadRatio >= 0.70 ->
             Modifier.border(2.dp, WarningAmber, FleetCardShape)
 
-        else -> Modifier
+        else ->
+            Modifier.border(2.dp, LightGreen, FleetCardShape)
     }
     Box(
         modifier = Modifier
@@ -65,7 +67,7 @@ fun VehicleFleetItemPreview() {
 
         VehicleFleetItem(
             vehicle = VehicleSamples.heavyLoadVehicle,
-            currentLoad = 8200.0
+            currentLoad = 8900.0
         )
 
         VehicleFleetItem(

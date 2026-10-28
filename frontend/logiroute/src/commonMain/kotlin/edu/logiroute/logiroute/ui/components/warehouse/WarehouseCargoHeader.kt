@@ -13,6 +13,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.logiroute.logiroute.ui.theme.Border
@@ -34,20 +36,24 @@ fun WarehouseCargoHeader(
                 drawBottomBorder()
             }
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = title,
+            text = title.uppercase(),
             color = TextPrimary,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Text(
             text = "($count)",
             color = TextSecondary,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -60,4 +66,13 @@ private fun DrawScope.drawBottomBorder() {
         end = Offset(size.width, size.height),
         strokeWidth = strokeWidth
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WarehouseCargoHeaderPreview() {
+        WarehouseCargoHeader(
+            title = "Active Cargo",
+            count = 12
+        )
 }

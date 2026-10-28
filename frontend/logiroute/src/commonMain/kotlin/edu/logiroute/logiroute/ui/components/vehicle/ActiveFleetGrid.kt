@@ -9,7 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import edu.logiroute.logiroute.ui.sampledata.VehicleSamples
+import edu.logiroute.logiroute.ui.sampledata.VehicleSamples.sampleLoads
+import edu.logiroute.logiroute.ui.sampledata.VehicleSamples.sampleVehicles
 import edu.logiroute.logiroute.ui.theme.InkBlack
 import org.bytebloom.logiroute.domain.model.Vehicle
 
@@ -31,9 +32,9 @@ fun ActiveFleetGrid(
             key = { vehicle -> vehicle.id },
             contentType = { "vehicle_item" }) { vehicle ->
 
-            vehicleLoads[vehicle.id]?.let { currentLoad ->
-                VehicleFleetItem(vehicle = vehicle, currentLoad = currentLoad)
-            }
+            val currentLoad = vehicleLoads[vehicle.id] ?: 0.0
+
+            VehicleFleetItem(vehicle = vehicle, currentLoad = currentLoad)
         }
     }
 }
@@ -42,18 +43,6 @@ fun ActiveFleetGrid(
 @Preview(name = "Active Fleet Grid - Desktop / Wide (1200dp)", widthDp = 1200, heightDp = 800)
 @Composable
 fun ActiveFleetGridPreview() {
-    val sampleVehicles = listOf(
-        VehicleSamples.safeLoadVehicle,
-        VehicleSamples.heavyLoadVehicle,
-        VehicleSamples.overloadedVehicle
-    )
-
-    val sampleLoads = mapOf(
-        VehicleSamples.safeLoadVehicle.id to 2500.0,    // 25% - Normal
-        VehicleSamples.heavyLoadVehicle.id to 8200.0,   // 82% - WarningAmber
-        VehicleSamples.overloadedVehicle.id to 10000.0  // 100% - ErrorRed
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
