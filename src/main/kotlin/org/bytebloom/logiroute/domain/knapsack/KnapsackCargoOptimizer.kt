@@ -14,27 +14,14 @@ class KnapsackCargoOptimizer {
         private const val VOLUME_SCALE = 100
     }
 
-    /**
-     * Original 1D Knapsack.
-     *
-     * Optimizes cargo using weight capacity only.
-     */
     operator fun invoke(
         items: List<CargoItem>,
         capacityKg: Int
     ): KnapsackResult {
         validateWeightInputs(items, capacityKg)
 
-        val grid = buildValueGrid(
-            items = items,
-            capacityKg = capacityKg
-        )
-
-        val selected = backtrackSelectedItems(
-            items = items,
-            grid = grid,
-            capacityKg = capacityKg
-        )
+        val grid = buildValueGrid(items = items, capacityKg = capacityKg)
+        val selected = backtrackSelectedItems(items = items, grid = grid, capacityKg = capacityKg)
 
         return KnapsackResult(
             selectedItems = selected,
@@ -44,11 +31,6 @@ class KnapsackCargoOptimizer {
         )
     }
 
-    /**
-     * Bonus 2D Knapsack.
-     *
-     * Optimizes cargo using both weight and volume constraints.
-     */
     operator fun invoke(
         items: List<CargoItem>,
         weightCapacityKg: Int,
@@ -87,24 +69,17 @@ class KnapsackCargoOptimizer {
         items: List<CargoItem>,
         capacityKg: Int
     ) {
-        if (capacityKg < 0) {
-            throw EntityValidationException(
-                listOf(
-                    ValidatorError.NegativeValue(
-                        ValidatorField.MAX_CAPACITY_KG
-                    )
-                )
-            )
+        val violations = buildList {
+            if (capacityKg < 0) {
+                add(ValidatorError.NegativeValue(ValidatorField.MAX_CAPACITY_KG))
+            }
+            if (items.any { it.weightKg < 0 }) {
+                add(ValidatorError.NegativeValue(ValidatorField.WEIGHT))
+            }
         }
 
-        if (items.any { it.weightKg < 0 }) {
-            throw EntityValidationException(
-                listOf(
-                    ValidatorError.NegativeValue(
-                        ValidatorField.WEIGHT
-                    )
-                )
-            )
+        if (violations.isNotEmpty()) {
+            throw EntityValidationException(violations)
         }
     }
 
@@ -113,17 +88,24 @@ class KnapsackCargoOptimizer {
         weightCapacityKg: Int,
         volumeCapacityM3: Double
     ) {
-        validateWeightInputs(
-            items = items,
-            capacityKg = weightCapacityKg
-        )
+        validateWeightInputs(items, weightCapacityKg)
 
-        require(volumeCapacityM3 >= 0.0) {
-            "Volume capacity cannot be negative."
+        val violations = buildList {
+            if (!volumeCapacityM3.isFinite()) {
+                add(ValidatorError.NonFiniteNumber(ValidatorField.ENTITY))
+            } else if (volumeCapacityM3 < 0.0) {
+                add(ValidatorError.NegativeValue(ValidatorField.ENTITY))
+            }
+
+            if (items.any { !it.volumeM3.isFinite() }) {
+                add(ValidatorError.NonFiniteNumber(ValidatorField.ENTITY))
+            } else if (items.any { it.volumeM3 < 0.0 }) {
+                add(ValidatorError.NegativeValue(ValidatorField.ENTITY))
+            }
         }
 
-        require(items.none { it.volumeM3 < 0.0 }) {
-            "Cargo volume cannot be negative."
+        if (violations.isNotEmpty()) {
+            throw EntityValidationException(violations)
         }
     }
 
@@ -131,23 +113,19 @@ class KnapsackCargoOptimizer {
         items: List<CargoItem>,
         capacityKg: Int
     ): Array<IntArray> {
-        val grid = Array(items.size + 1) {
-            IntArray(capacityKg + 1)
-        }
+        val grid = Array(items.size + 1) { IntArray(capacityKg + 1) }
 
         for (i in 1..items.size) {
             val item = items[i - 1]
-
             for (weight in 0..capacityKg) {
-                grid[i][weight] =
-                    if (item.weightKg <= weight) {
-                        maxOf(
-                            grid[i - 1][weight],
-                            grid[i - 1][weight - item.weightKg] + item.priorityValue
-                        )
-                    } else {
-                        grid[i - 1][weight]
-                    }
+                grid[i][weight] = if (item.weightKg <= weight) {
+                    maxOf(
+                        grid[i - 1][weight],
+                        grid[i - 1][weight - item.weightKg] + item.priorityValue
+                    )
+                } else {
+                    grid[i - 1][weight]
+                }
             }
         }
 
@@ -163,12 +141,8 @@ class KnapsackCargoOptimizer {
         var remainingCapacity = capacityKg
 
         for (i in items.size downTo 1) {
-            if (
-                grid[i][remainingCapacity] !=
-                grid[i - 1][remainingCapacity]
-            ) {
+            if (grid[i][remainingCapacity] != grid[i - 1][remainingCapacity]) {
                 val item = items[i - 1]
-
                 selected.add(item)
                 remainingCapacity -= item.weightKg
             }
@@ -218,8 +192,8 @@ class KnapsackCargoOptimizer {
         itemVolumeUnits: Int
     ): Int {
         val withoutItem = grid[itemIndex - 1][weight][volume]
-
         val canFitItem = item.weightKg <= weight && itemVolumeUnits <= volume
+
         if (!canFitItem) return withoutItem
 
         val withItem = grid[itemIndex - 1][weight - item.weightKg][volume - itemVolumeUnits] + item.priorityValue
@@ -233,7 +207,6 @@ class KnapsackCargoOptimizer {
         volumeCapacityUnits: Int
     ): List<CargoItem> {
         val selected = mutableListOf<CargoItem>()
-
         var remainingWeight = weightCapacityKg
         var remainingVolume = volumeCapacityUnits
 
@@ -246,7 +219,6 @@ class KnapsackCargoOptimizer {
                 val itemVolumeUnits = toVolumeUnits(item.volumeM3)
 
                 selected.add(item)
-
                 remainingWeight -= item.weightKg
                 remainingVolume -= itemVolumeUnits
             }

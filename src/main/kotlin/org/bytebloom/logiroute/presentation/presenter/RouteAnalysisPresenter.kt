@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 import org.bytebloom.logiroute.presentation.RoutingData
 import org.bytebloom.logiroute.presentation.RoutingDataLoader
 import org.bytebloom.logiroute.presentation.dependencies.RouteAnalysisDependencies
@@ -73,9 +74,8 @@ class RouteAnalysisPresenter(
         return withContext(dependencies.computeDispatcher) { dependencies.allPairsFor(data.graph)() }
     }
 
-    private fun loaded(): RoutingData = checkNotNull(routingData) { NOT_LOADED }
-
-    private companion object {
-        const val NOT_LOADED = "Routing data has not been loaded yet. Call onViewReady() first."
-    }
+    private fun loaded(): RoutingData =
+        routingData ?: throw InvalidConfigurationException(
+            "Routing data has not been loaded. Call onViewReady() before performing this action."
+        )
 }

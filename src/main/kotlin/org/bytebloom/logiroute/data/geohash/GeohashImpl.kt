@@ -33,7 +33,12 @@ class GeohashImpl : Geohash {
 
             decodeCharacter(outerState, charIndex)
         }
-        return BoundingBox(finalState.bounds.minLat, finalState.bounds.maxLat, finalState.bounds.minLon, finalState.bounds.maxLon)
+        return BoundingBox(
+            finalState.bounds.minLat,
+            finalState.bounds.maxLat,
+            finalState.bounds.minLon,
+            finalState.bounds.maxLon
+        )
     }
 
     private fun decodeCharacter(

@@ -6,6 +6,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.bytebloom.logiroute.domain.model.Package
 import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.logiroute.domain.model.input.ShipmentTransitionAction
 import org.bytebloom.logiroute.domain.shipment.Shipment
@@ -80,5 +81,8 @@ class ShipmentsPresenter(
         return synchronized(shipments) { shipments.getOrPut(pkg.id) { Shipment(pkg) } }
     }
 
-    private fun loaded(): Data = checkNotNull(data) { "The shipment data is not loaded yet." }
+    private fun loaded(): Data =
+        data ?: throw InvalidConfigurationException(
+            "Shipment data has not been loaded. Call onViewReady() before performing this action."
+        )
 }

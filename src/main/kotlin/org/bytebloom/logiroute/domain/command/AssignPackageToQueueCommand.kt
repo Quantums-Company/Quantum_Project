@@ -11,11 +11,8 @@ class AssignPackageToQueueCommand(
 ) : Command {
 
     override fun execute(): Boolean =
-        assignPackageToQueue(
-            warehouse,
-            packageItem
-        )
+        assignPackageToQueue(warehouse, packageItem)
 
     override fun undo(): Boolean =
-         warehouse.removePackage(packageItem)
+        warehouse.removePackage(packageItem)
 }

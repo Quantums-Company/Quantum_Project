@@ -1,6 +1,7 @@
 package org.bytebloom.logiroute.di
 
 import org.bytebloom.logiroute.domain.dispatch.DispatchNotifier
+import org.bytebloom.logiroute.domain.dispatch.DispatchOutcome
 import org.bytebloom.logiroute.domain.dispatch.ExpressDispatchProcessor
 import org.bytebloom.logiroute.domain.dispatch.ShipmentStateUpdater
 import org.bytebloom.logiroute.domain.dispatch.StandardDispatchProcessor
@@ -19,7 +20,13 @@ val dispatchShipmentModule = module {
     single<ShipmentStateUpdater> { get<ShipmentTracker>() }
 
     // The terminal has nobody to notify; an app can replace this with a real notifier.
-    single { DispatchNotifier { } }
+    single<DispatchNotifier> {
+        object : DispatchNotifier {
+            override fun notify(outcome: DispatchOutcome) {
+                // No-op implementation for terminal UI
+            }
+        }
+    }
 
     factory { StandardDispatchProcessor(get()) }
     factory { ExpressDispatchProcessor(get(), get()) }

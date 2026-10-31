@@ -1,12 +1,15 @@
 package org.bytebloom.logiroute.data.repository.offline
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.bytebloom.logiroute.data.offline.OfflineReadExecutor
 import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.test.assertEquals
 
 class OfflineReadExecutorTest {
 
@@ -44,6 +47,37 @@ class OfflineReadExecutorTest {
 
         // Then
         assertThat(result).isEqualTo(localData)
+    }
+
+    @Test
+    fun `should propagate unexpected remote errors instead of hiding them with local data`() = runTest {
+        val failure = IllegalStateException("Unexpected remote failure")
+
+        val thrown = assertFailsWith<IllegalStateException> {
+            executor.read(
+                remoteCall = { throw failure },
+                localCall = { listOf("StaleLocalData") },
+                saveSnapshot = { }
+            )
+        }
+
+        assertThat(thrown).hasMessageThat()
+            .isEqualTo("Unexpected remote failure")
+    }
+
+    @Test
+    fun `should propagate coroutine cancellation instead of falling back to local data`() = runTest {
+        val cancellation = CancellationException("Caller cancelled")
+
+        val thrown = assertFailsWith<CancellationException> {
+            executor.read(
+                remoteCall = { throw cancellation },
+                localCall = { listOf("LocalData") },
+                saveSnapshot = { }
+            )
+        }
+
+        assertEquals("Caller cancelled", thrown.message)
     }
 
     @Test

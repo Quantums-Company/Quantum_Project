@@ -1,5 +1,5 @@
 package org.bytebloom.logiroute.domain.dispatch
 
-fun interface ShipmentStateUpdater {
+interface ShipmentStateUpdater {
     fun markAsDispatched(order: DispatchOrder)
 }

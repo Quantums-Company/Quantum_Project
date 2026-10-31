@@ -39,13 +39,25 @@ abstract class BasePresenter<V : BaseScreen>(
         task: suspend () -> T,
         onSuccess: suspend (T) -> Unit
     ): Job = scope.launch {
-        view.showLoadingIndicator(true)
-        val attempt = attemptOf(task)
-        view.showLoadingIndicator(false)
+        var loadingVisible = false
 
-        when (attempt) {
-            is Attempt.Success -> onSuccess(attempt.value)
-            is Attempt.Failure -> view.showErrorMessage(attempt.error.toUserMessage())
+        try {
+            view.showLoadingIndicator(true)
+            loadingVisible = true
+
+            val attempt = attemptOf(task)
+
+            view.showLoadingIndicator(false)
+            loadingVisible = false
+
+            when (attempt) {
+                is Attempt.Success -> onSuccess(attempt.value)
+                is Attempt.Failure -> view.showErrorMessage(attempt.error.toUserMessage())
+            }
+        } finally {
+            if (loadingVisible) {
+                view.showLoadingIndicator(false)
+            }
         }
     }
 
@@ -54,7 +66,6 @@ abstract class BasePresenter<V : BaseScreen>(
         try {
             Attempt.Success(task())
         } catch (cancellation: CancellationException) {
-            view.showLoadingIndicator(false)
             throw cancellation
         } catch (failure: Exception) {
             Attempt.Failure(failure)

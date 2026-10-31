@@ -57,7 +57,7 @@ class CsvPackageDataSource(
 
     private fun parsePriority(value: String, line: Int): Priority = try {
         Priority.valueOf(value.uppercase())
-    } catch (_: Exception) {
+    } catch (_: IllegalArgumentException) {
         throw CsvParsingException("Line $line: invalid priority value '$value'.")
     }
 }
