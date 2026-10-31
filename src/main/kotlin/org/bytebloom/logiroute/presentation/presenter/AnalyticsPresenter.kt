@@ -8,6 +8,9 @@ import kotlinx.coroutines.withContext
 import org.bytebloom.logiroute.domain.performance.PackageTrackingIdGenerator
 import org.bytebloom.logiroute.domain.usecase.analytics.AnalyzeTreePerformanceUseCase
 import org.bytebloom.logiroute.presentation.screens.AnalyticsScreen
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.model.validation.ValidatorError
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 
 class AnalyticsPresenter(
     private val analyzeTreePerformance: AnalyzeTreePerformanceUseCase,
@@ -20,8 +23,15 @@ class AnalyticsPresenter(
     /** Compares search steps in a plain BST and an AVL tree holding [packageCount] tracking ids. */
     fun onAnalyze(packageCount: Int, targetIds: List<String> = emptyList()): Job = perform(
         task = {
-            require(packageCount in MIN_COUNT..MAX_COUNT) {
-                "Package count must be between $MIN_COUNT and $MAX_COUNT."
+            if (packageCount !in MIN_COUNT..MAX_COUNT) {
+                throw EntityValidationException(
+                    listOf(
+                        ValidatorError.Custom(
+                            ValidatorField.ENTITY,
+                            "Package count must be between $MIN_COUNT and $MAX_COUNT."
+                        )
+                    )
+                )
             }
             val targets = targetIds.ifEmpty { defaultTargets(packageCount) }
             withContext(computeDispatcher) { analyzeTreePerformance(packageCount, targets) }

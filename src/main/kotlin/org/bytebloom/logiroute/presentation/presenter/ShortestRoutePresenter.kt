@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import org.bytebloom.logiroute.domain.model.Warehouse
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 import org.bytebloom.logiroute.domain.routing.WarehouseGraph
 import org.bytebloom.logiroute.domain.usecase.routes.GetAllRoutesUseCase
 import org.bytebloom.logiroute.domain.usecase.routing.FindOptimalPathUseCase
@@ -51,7 +52,10 @@ class ShortestRoutePresenter(
         }
 
     private suspend fun findRoute(originId: String, destinationId: String): Outcome {
-        val data = checkNotNull(routingData) { NOT_LOADED }
+        val data = routingData
+            ?: throw InvalidConfigurationException(
+                "Routing data has not been loaded. Call onViewReady() before performing this action."
+            )
         val origin = data.warehouseById(originId)
         val destination = data.warehouseById(destinationId)
 
@@ -68,9 +72,5 @@ class ShortestRoutePresenter(
             RouteLeg(from, to, distanceKm = graph.neighbors(from)[to] ?: 0.0)
         }
         return RoutePlan(stops = path, legs = legs, totalDistanceKm = legs.sumOf { it.distanceKm })
-    }
-
-    private companion object {
-        const val NOT_LOADED = "Routing data has not been loaded yet. Call onViewReady() first."
     }
 }

@@ -1,9 +1,9 @@
 package org.bytebloom.logiroute.domain.knn
 
 import com.google.common.truth.Truth.assertThat
-import org.bytebloom.logiroute.domain.knn.FeatureNormalizer
 import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.junit.jupiter.api.Test
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 
 class FeatureNormalizerTest {
 
@@ -77,7 +77,8 @@ class FeatureNormalizerTest {
         val result = runCatching { FeatureNormalizer(emptyList()) }
 
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull())
+            .isInstanceOf(InvalidConfigurationException::class.java)
     }
 
     private companion object {

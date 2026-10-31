@@ -15,6 +15,7 @@ import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
 import org.bytebloom.logiroute.domain.repository.TrainingCargoRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 
 class ClassifyPackageSectorUseCaseTest {
 
@@ -76,7 +77,8 @@ class ClassifyPackageSectorUseCaseTest {
         val result = runCatching { classifyPackageSector(incomingPackage) }
 
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull())
+            .isInstanceOf(EntityValidationException::class.java)
     }
 
     private fun createPackage(destinationLatitude: Double, destinationLongitude: Double, weight: Double) = Package(

@@ -3,6 +3,10 @@ package org.bytebloom.logiroute.domain.knn
 import org.bytebloom.logiroute.domain.model.Region
 import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
+import org.bytebloom.logiroute.domain.model.validation.ValidatorError
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 
 class KNearestNeighborsClassifier(
     private val distanceMetric: DistanceMetric = EuclideanDistance(),
@@ -10,13 +14,35 @@ class KNearestNeighborsClassifier(
     private val neighborCount: Int = DEFAULT_NEIGHBOR_COUNT
 ) {
     init {
-        require(neighborCount > 0) { "Neighbor count must be positive" }
+        if (neighborCount <= 0) {
+            throw InvalidConfigurationException(
+                "Neighbor count must be greater than zero."
+            )
+        }
     }
 
-    fun classify(target: CargoFeatures, trainingRecords: List<LabeledCargoRecord>): Region {
-        require(trainingRecords.isNotEmpty()) { "Training records must not be empty" }
+    fun classify(
+        target: CargoFeatures,
+        trainingRecords: List<LabeledCargoRecord>
+    ): Region {
+        if (trainingRecords.isEmpty()) {
+            throw EntityValidationException(
+                listOf(
+                    ValidatorError.Custom(
+                        ValidatorField.ENTITY,
+                        "At least one training record is required for classification."
+                    )
+                )
+            )
+        }
+
         val normalizer = FeatureNormalizer(trainingRecords.map { it.features })
-        val nearestNeighbors = findNearestNeighbors(normalizer.normalize(target), trainingRecords, normalizer)
+        val nearestNeighbors = findNearestNeighbors(
+            normalizer.normalize(target),
+            trainingRecords,
+            normalizer
+        )
+
         return voteSelector.select(nearestNeighbors)
     }
 

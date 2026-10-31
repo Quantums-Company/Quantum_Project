@@ -5,6 +5,7 @@ import org.bytebloom.logiroute.domain.model.Region
 import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
 import org.junit.jupiter.api.Test
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 
 class MajorityVoteSelectorTest {
 
@@ -52,7 +53,8 @@ class MajorityVoteSelectorTest {
         val result = runCatching { majorityVoteSelector.select(emptyList()) }
 
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull())
+            .isInstanceOf(InvalidConfigurationException::class.java)
     }
 
     private fun recordsIn(vararg sectors: Region): List<LabeledCargoRecord> =
