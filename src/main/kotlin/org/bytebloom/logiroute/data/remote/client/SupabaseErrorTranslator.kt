@@ -22,19 +22,19 @@ class SupabaseErrorTranslator {
     ): T = try {
         block()
     } catch (e: Exception) {
-        throw mapThrowable(e, operation)
+        throw translateThrowable(e, operation)
     }
 
-    private fun mapThrowable(e: Exception, operation: String): Throwable = when (e) {
+    private fun translateThrowable(e: Exception, operation: String): Throwable = when (e) {
         is CancellationException -> e
         is DomainException -> e
         is HttpRequestException, is IOException ->
             NetworkUnavailableException("Network unavailable during $operation", e)
-        is RestException -> mapRestException(e, operation)
+        is RestException -> translateRestException(e, operation)
         else -> UnknownDataException("Unexpected error during $operation: ${e.message}", e)
     }
 
-    private fun mapRestException(e: RestException, operation: String): DomainException =
+    private fun translateRestException(e: RestException, operation: String): DomainException =
         when (e.statusCode) {
             HTTP_NOT_FOUND -> ResourceNotFoundException("Resource not found during $operation")
             HTTP_CONFLICT -> DatabaseConflictException("Database conflict during $operation", e)

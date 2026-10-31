@@ -17,19 +17,21 @@ class FeatureNormalizer(referenceFeatures: List<CargoFeatures>) {
         val vectors = referenceFeatures.map { it.toVector() }
         val dimensions = vectors.first().indices
 
-        minimums = dimensions.map { index -> vectors.minOf { it[index] } }
-        ranges = dimensions.map { index ->
-            vectors.maxOf { it[index] } - minimums[index]
+        minimums = dimensions.map { featureIndex -> vectors.minOf { it[featureIndex] } }
+        ranges = dimensions.map { featureIndex ->
+            vectors.maxOf { it[featureIndex] } - minimums[featureIndex]
         }
     }
 
     fun normalize(features: CargoFeatures): CargoFeatures {
-        val scaledVector = features.toVector().mapIndexed { index, value -> scale(value, index) }
+        val scaledVector = features.toVector().mapIndexed { featureIndex, featureValue ->
+            scale(featureValue, featureIndex)
+        }
         return CargoFeatures.fromVector(scaledVector)
     }
 
-    private fun scale(value: Double, index: Int): Double {
-        if (ranges[index] == 0.0) return 0.0
-        return ((value - minimums[index]) / ranges[index]).coerceIn(0.0, 1.0)
+    private fun scale(featureValue: Double, featureIndex: Int): Double {
+        if (ranges[featureIndex] == 0.0) return 0.0
+        return ((featureValue - minimums[featureIndex]) / ranges[featureIndex]).coerceIn(0.0, 1.0)
     }
 }

@@ -30,32 +30,32 @@ class CsvPackageDataSource(
         requireExpectedColumnCount(columns, CsvTable.PACKAGES.columnCount, lineNumber)
 
         val id = columns[ID_INDEX].uppercase()
-        val weightValue = columns[WEIGHT_INDEX]
-        val originHubId = columns[ORIGIN_INDEX].uppercase()
-        val destinationHubId = columns[DESTINATION_INDEX].uppercase()
-        val priorityValue = columns[PRIORITY_INDEX]
+        val rawWeight = columns[WEIGHT_INDEX]
+        val originWarehouseId = columns[ORIGIN_INDEX].uppercase()
+        val destinationWarehouseId = columns[DESTINATION_INDEX].uppercase()
+        val rawPriority = columns[PRIORITY_INDEX]
 
         requireNonBlankValues(
             lineNumber,
             "Missing required package identifier or warehouse IDs.",
-            id, originHubId, destinationHubId, weightValue, priorityValue
+            id, originWarehouseId, destinationWarehouseId, rawWeight, rawPriority
         )
 
-        val weight = weightValue.toDoubleOrThrow("weight", lineNumber)
+        val weight = rawWeight.toDoubleOrThrow("weight", lineNumber)
             ?: throw CsvParsingException("Line $lineNumber: weight field is required and cannot be empty.")
 
-        val priority = parsePriority(priorityValue, lineNumber)
+        val priority = parsePackagePriority(rawPriority, lineNumber)
 
         return PackageRaw(
             id = id,
             weight = weight,
-            originWarehouseId = originHubId,
-            destinationWarehouseId = destinationHubId,
+            originWarehouseId = originWarehouseId,
+            destinationWarehouseId = destinationWarehouseId,
             priority = priority
         )
     }
 
-    private fun parsePriority(value: String, line: Int): Priority = try {
+    private fun parsePackagePriority(value: String, line: Int): Priority = try {
         Priority.valueOf(value.uppercase())
     } catch (_: IllegalArgumentException) {
         throw CsvParsingException("Line $line: invalid priority value '$value'.")

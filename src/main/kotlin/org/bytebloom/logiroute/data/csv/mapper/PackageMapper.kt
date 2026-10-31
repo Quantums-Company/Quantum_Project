@@ -12,7 +12,7 @@ class PackageMapper(
         originWarehouse: Warehouse,
         destinationWarehouse: Warehouse
     ): Package {
-        val pkg = Package(
+        val mappedPackage = Package(
             id = id,
             weight = weight,
             priority = priority,
@@ -20,24 +20,24 @@ class PackageMapper(
             destinationWarehouse = destinationWarehouse
         )
 
-        pkg.originWarehouse.addPackage(pkg)
-        return pkg
+        mappedPackage.originWarehouse.addPackage(mappedPackage)
+        return mappedPackage
     }
 
-    private fun map(raw: PackageRaw): Package? {
+    private fun mapPackage(packageRaw: PackageRaw): Package? {
 
-        val origin = warehouseMapper.map(
-            raw.originWarehouseId
+        val originWarehouse = warehouseMapper.map(
+            packageRaw.originWarehouseId
         ) ?: return null
 
-        val destination = warehouseMapper.map(
-            raw.destinationWarehouseId
+        val destinationWarehouse = warehouseMapper.map(
+            packageRaw.destinationWarehouseId
         ) ?: return null
 
-        return raw.toDomain(origin, destination)
+        return packageRaw.toDomain(originWarehouse, destinationWarehouse)
     }
-    fun toDomain(packageRaws: List<PackageRaw>): List<Package> {
-        return packageRaws.mapNotNull(::map)
+    fun toDomain(rawPackages: List<PackageRaw>): List<Package> {
+        return rawPackages.mapNotNull(::mapPackage)
     }
 }
 

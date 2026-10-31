@@ -23,14 +23,14 @@ class CircuitBreaker(
 
     private val lock = Any()
 
-    private var state = CircuitState.CLOSED
+    private var circuitState = CircuitState.CLOSED
     private var consecutiveFailures = 0
     private var openedAtNanos = 0L
     private var probeInFlight = false
     private var generation = 0L
 
     val currentState: CircuitState
-        get() = synchronized(lock) { state }
+        get() = synchronized(lock) { circuitState }
 
     init {
         require(failureThreshold > 0) {
@@ -65,9 +65,9 @@ class CircuitBreaker(
         }
 
         try {
-            val result = block()
+            val operationResult = block()
             onSuccess(permit)
-            return result
+            return operationResult
         } catch (exception: CancellationException) {
             releaseProbe(permit)
             throw exception
@@ -89,7 +89,7 @@ class CircuitBreaker(
             throw CallNotPermittedException()
         }
 
-        when (state) {
+        when (circuitState) {
             CircuitState.CLOSED -> {
                 if (permit.isProbe) {
                     throw CallNotPermittedException()
@@ -111,20 +111,20 @@ class CircuitBreaker(
     }
 
     private fun acquirePermit(): Permit = synchronized(lock) {
-        when (state) {
+        when (circuitState) {
             CircuitState.CLOSED -> Permit(
                 generation = generation,
                 isProbe = false
             )
 
             CircuitState.OPEN -> {
-                val elapsed = clockNanos() - openedAtNanos
+                val elapsedNanos = clockNanos() - openedAtNanos
 
-                if (elapsed < openDuration.toNanos()) {
+                if (elapsedNanos < openDuration.toNanos()) {
                     throw CallNotPermittedException()
                 }
 
-                state = CircuitState.HALF_OPEN
+                circuitState = CircuitState.HALF_OPEN
                 generation++
                 probeInFlight = true
 
@@ -155,14 +155,14 @@ class CircuitBreaker(
         synchronized(lock) {
             if (permit.generation != generation) return
 
-            when (state) {
+            when (circuitState) {
                 CircuitState.CLOSED -> {
                     consecutiveFailures = 0
                 }
 
                 CircuitState.HALF_OPEN -> {
                     if (permit.isProbe) {
-                        state = CircuitState.CLOSED
+                        circuitState = CircuitState.CLOSED
                         consecutiveFailures = 0
                         probeInFlight = false
                         generation++
@@ -178,7 +178,7 @@ class CircuitBreaker(
         synchronized(lock) {
             if (permit.generation != generation) return
 
-            when (state) {
+            when (circuitState) {
                 CircuitState.CLOSED -> {
                     consecutiveFailures++
 
@@ -202,7 +202,7 @@ class CircuitBreaker(
         synchronized(lock) {
             if (permit.generation != generation) return
 
-            when (state) {
+            when (circuitState) {
                 CircuitState.CLOSED -> {
                     consecutiveFailures = 0
                 }
@@ -222,7 +222,7 @@ class CircuitBreaker(
         synchronized(lock) {
             if (
                 permit.generation == generation &&
-                state == CircuitState.HALF_OPEN &&
+                circuitState == CircuitState.HALF_OPEN &&
                 permit.isProbe
             ) {
                 probeInFlight = false
@@ -231,7 +231,7 @@ class CircuitBreaker(
     }
 
     private fun openCircuit() {
-        state = CircuitState.OPEN
+        circuitState = CircuitState.OPEN
         consecutiveFailures = 0
         openedAtNanos = clockNanos()
         probeInFlight = false

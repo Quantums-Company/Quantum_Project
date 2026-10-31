@@ -6,13 +6,13 @@ import org.bytebloom.logiroute.domain.routing.common.RouteFinder
 import org.bytebloom.logiroute.domain.routing.common.RouterValidator
 
 class DijkstraRouter(
-    private val graph: WarehouseGraph
-): RouterValidator(graph), RouteFinder {
+    private val warehouseGraph: WarehouseGraph
+): RouterValidator(warehouseGraph), RouteFinder {
 
     private data class DijkstraState(
-        val distances: MutableMap<Warehouse, Double>,
-        val visited: MutableSet<Warehouse>,
-        val parent: MutableMap<Warehouse, Warehouse>
+        val distanceByWarehouse: MutableMap<Warehouse, Double>,
+        val visitedWarehouses: MutableSet<Warehouse>,
+        val predecessorByWarehouse: MutableMap<Warehouse, Warehouse>
     )
 
     override fun findShortestPath(
@@ -28,104 +28,104 @@ class DijkstraRouter(
             return listOf(start)
         }
 
-        val state = createInitialState(start)
+        val searchState = createInitialState(start)
 
-        return search(state, destination)
+        return search(searchState, destination)
     }
 
     private fun createInitialState(
         startWarehouse: Warehouse
     ): DijkstraState {
 
-        val distances = mutableMapOf<Warehouse, Double>()
+        val distanceByWarehouse = mutableMapOf<Warehouse, Double>()
 
-        for (warehouse in graph.warehouses()) {
-            distances[warehouse] =
+        for (warehouse in warehouseGraph.warehouses()) {
+            distanceByWarehouse[warehouse] =
                 Double.POSITIVE_INFINITY
         }
 
-        distances[startWarehouse] = 0.0
+        distanceByWarehouse[startWarehouse] = 0.0
 
         return DijkstraState(
-            distances = distances,
-            visited = mutableSetOf(),
-            parent = mutableMapOf()
+            distanceByWarehouse = distanceByWarehouse,
+            visitedWarehouses = mutableSetOf(),
+            predecessorByWarehouse = mutableMapOf()
         )
     }
 
-    private fun findLowestUnvisitedNode(
-        distances: Map<Warehouse, Double>,
-        visited: Set<Warehouse>
+    private fun findClosestUnvisitedWarehouse(
+        distanceByWarehouse: Map<Warehouse, Double>,
+        visitedWarehouses: Set<Warehouse>
     ): Warehouse? {
 
-        var lowestNode: Warehouse? = null
-        var lowestDistance = Double.POSITIVE_INFINITY
+        var closestWarehouse: Warehouse? = null
+        var shortestDistance = Double.POSITIVE_INFINITY
 
-        for ((node, distance) in distances) {
+        for ((warehouse, distance) in distanceByWarehouse) {
 
-            if (node in visited) {
+            if (warehouse in visitedWarehouses) {
                 continue
             }
 
-            if (distance < lowestDistance) {
-                lowestDistance = distance
-                lowestNode = node
+            if (distance < shortestDistance) {
+                shortestDistance = distance
+                closestWarehouse = warehouse
             }
         }
 
-        return lowestNode
+        return closestWarehouse
     }
 
     private fun relaxNeighbors(
-        current: Warehouse,
+        currentWarehouse: Warehouse,
         currentDistance: Double,
-        state: DijkstraState
+        searchState: DijkstraState
     ) {
-        for ((neighbor, distanceKm) in graph.neighbors(current)) {
+        for ((neighbor, distanceKm) in warehouseGraph.neighbors(currentWarehouse)) {
 
-            if (neighbor in state.visited) {
+            if (neighbor in searchState.visitedWarehouses) {
                 continue
             }
 
-            val newDistance =
+            val candidateDistance =
                 currentDistance + distanceKm
 
-            val knownDistance =
-                state.distances.getValue(neighbor)
+            val knownShortestDistance =
+                searchState.distanceByWarehouse.getValue(neighbor)
 
-            if (newDistance < knownDistance) {
-                state.distances[neighbor] = newDistance
-                state.parent[neighbor] = current
+            if (candidateDistance < knownShortestDistance) {
+                searchState.distanceByWarehouse[neighbor] = candidateDistance
+                searchState.predecessorByWarehouse[neighbor] = currentWarehouse
             }
         }
     }
 
     private fun search(
-        state: DijkstraState,
-        endWarehouse: Warehouse
+        searchState: DijkstraState,
+        destinationWarehouse: Warehouse
     ): List<Warehouse>? {
 
         while (true) {
 
-            val current =
-                findLowestUnvisitedNode(
-                    state.distances,
-                    state.visited
+            val currentWarehouse =
+                findClosestUnvisitedWarehouse(
+                    searchState.distanceByWarehouse,
+                    searchState.visitedWarehouses
                 ) ?: return null
 
-            if (current.id == endWarehouse.id) {
+            if (currentWarehouse.id == destinationWarehouse.id) {
                 return reconstructPath(
-                    state.parent,
-                    endWarehouse
+                    searchState.predecessorByWarehouse,
+                    destinationWarehouse
                 )
             }
 
-            state.visited.add(current)
+            searchState.visitedWarehouses.add(currentWarehouse)
 
             relaxNeighbors(
-                current,
-                state.distances.getValue(current),
-                state
+                currentWarehouse,
+                searchState.distanceByWarehouse.getValue(currentWarehouse),
+                searchState
             )
         }
     }

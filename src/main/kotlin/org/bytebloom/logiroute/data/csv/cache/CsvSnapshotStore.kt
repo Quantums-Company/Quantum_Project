@@ -15,7 +15,7 @@ class CsvSnapshotStore(
     private val writer: CsvFileWriter,
     private val cacheDirectory: File = File("src/resources/cache")
 ) {
-    private val fileLocks = ConcurrentHashMap<String, Mutex>()
+    private val snapshotLocks = ConcurrentHashMap<String, Mutex>()
 
     companion object {
         private val SPECIAL_CSV_CHARS = charArrayOf(',', '"', '\n', '\r')
@@ -29,7 +29,7 @@ class CsvSnapshotStore(
             CsvTable.WAREHOUSES.fileName,
             "id,name,regionalZone,latitude,longitude",
             items.map {
-                row(
+                toCsvRow(
                     it.id, it.name, it.regionalZone,
                     it.latitude.toString(), it.longitude.toString()
                 )
@@ -42,7 +42,7 @@ class CsvSnapshotStore(
             CsvTable.ROUTES.fileName,
             "routeId,originHubId,destinationHubId,distanceKm,typicalDelayMin",
             items.map {
-                row(
+                toCsvRow(
                     it.id, it.originWarehouse.id, it.destinationWarehouse.id,
                     it.distanceKm.toString(), it.typicalDelayMin.toString()
                 )
@@ -55,7 +55,7 @@ class CsvSnapshotStore(
             CsvTable.VEHICLES.fileName,
             "vehicleId,currentHubId,maxCapacityKg,costPerKm",
             items.map {
-                row(
+                toCsvRow(
                     it.id, it.currentWarehouse.id,
                     it.maxCapacityKg.toString(), it.costPerKm.toString()
                 )
@@ -68,7 +68,7 @@ class CsvSnapshotStore(
             CsvTable.PACKAGES.fileName,
             "id,weight,originHubId,destinationHubId,priority",
             items.map {
-                row(
+                toCsvRow(
                     it.id, it.weight.toString(),
                     it.originWarehouse.id, it.destinationWarehouse.id,
                     it.priority.name
@@ -83,9 +83,9 @@ class CsvSnapshotStore(
         rows: List<String>
     ) {
         val file = File(cacheDirectory, fileName)
-        val fileLock = fileLocks.computeIfAbsent(file.absolutePath) { Mutex() }
+        val snapshotLock = snapshotLocks.computeIfAbsent(file.absolutePath) { Mutex() }
 
-        fileLock.withLock {
+        snapshotLock.withLock {
             writer.write(
                 file = file,
                 header = header,
@@ -94,7 +94,7 @@ class CsvSnapshotStore(
         }
     }
 
-    private fun row(vararg values: String): String =
+    private fun toCsvRow(vararg values: String): String =
         values.joinToString(",") { value ->
             if (value.containsSpecialCsvChars()) {
                 "\"${value.replace("\"", "\"\"")}\""
