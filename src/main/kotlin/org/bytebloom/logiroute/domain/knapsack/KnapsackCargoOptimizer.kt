@@ -20,14 +20,18 @@ class KnapsackCargoOptimizer {
     ): KnapsackResult {
         validateWeightInputs(items, capacityKg)
 
-        val grid = buildValueGrid(items = items, capacityKg = capacityKg)
-        val selected = backtrackSelectedItems(items = items, grid = grid, capacityKg = capacityKg)
+        val priorityValueTable = buildValueGrid(items = items, capacityKg = capacityKg)
+        val selectedItems = backtrackSelectedItems(
+            items = items,
+            priorityValueTable = priorityValueTable,
+            capacityKg = capacityKg
+        )
 
         return KnapsackResult(
-            selectedItems = selected,
-            totalWeightKg = selected.sumOf { it.weightKg },
-            totalPriorityValue = grid[items.size][capacityKg],
-            totalVolumeM3 = selected.sumOf { it.volumeM3 }
+            selectedItems = selectedItems,
+            totalWeightKg = selectedItems.sumOf { it.weightKg },
+            totalPriorityValue = priorityValueTable[items.size][capacityKg],
+            totalVolumeM3 = selectedItems.sumOf { it.volumeM3 }
         )
     }
 
@@ -44,24 +48,24 @@ class KnapsackCargoOptimizer {
 
         val volumeCapacityUnits = toVolumeUnits(volumeCapacityM3)
 
-        val grid = buildTwoDimensionalValueGrid(
+        val priorityValueTable = buildTwoDimensionalValueGrid(
             items = items,
             weightCapacityKg = weightCapacityKg,
             volumeCapacityUnits = volumeCapacityUnits
         )
 
-        val selected = backtrackTwoDimensionalItems(
+        val selectedItems = backtrackTwoDimensionalItems(
             items = items,
-            grid = grid,
+            priorityValueTable = priorityValueTable,
             weightCapacityKg = weightCapacityKg,
             volumeCapacityUnits = volumeCapacityUnits
         )
 
         return KnapsackResult(
-            selectedItems = selected,
-            totalWeightKg = selected.sumOf { it.weightKg },
-            totalPriorityValue = selected.sumOf { it.priorityValue },
-            totalVolumeM3 = selected.sumOf { it.volumeM3 }
+            selectedItems = selectedItems,
+            totalWeightKg = selectedItems.sumOf { it.weightKg },
+            totalPriorityValue = selectedItems.sumOf { it.priorityValue },
+            totalVolumeM3 = selectedItems.sumOf { it.volumeM3 }
         )
     }
 
@@ -113,42 +117,43 @@ class KnapsackCargoOptimizer {
         items: List<CargoItem>,
         capacityKg: Int
     ): Array<IntArray> {
-        val grid = Array(items.size + 1) { IntArray(capacityKg + 1) }
+        val priorityValueTable = Array(items.size + 1) { IntArray(capacityKg + 1) }
 
         for (i in 1..items.size) {
             val item = items[i - 1]
             for (weight in 0..capacityKg) {
-                grid[i][weight] = if (item.weightKg <= weight) {
+                priorityValueTable[i][weight] = if (item.weightKg <= weight) {
                     maxOf(
-                        grid[i - 1][weight],
-                        grid[i - 1][weight - item.weightKg] + item.priorityValue
+                        priorityValueTable[i - 1][weight],
+                        priorityValueTable[i - 1][weight - item.weightKg] + item.priorityValue
                     )
                 } else {
-                    grid[i - 1][weight]
+                    priorityValueTable[i - 1][weight]
                 }
             }
         }
 
-        return grid
+        return priorityValueTable
     }
 
     private fun backtrackSelectedItems(
         items: List<CargoItem>,
-        grid: Array<IntArray>,
+        priorityValueTable: Array<IntArray>,
         capacityKg: Int
     ): List<CargoItem> {
-        val selected = mutableListOf<CargoItem>()
-        var remainingCapacity = capacityKg
+        val selectedItems = mutableListOf<CargoItem>()
+        var remainingWeightCapacityKg = capacityKg
 
         for (i in items.size downTo 1) {
-            if (grid[i][remainingCapacity] != grid[i - 1][remainingCapacity]) {
+            if (priorityValueTable[i][remainingWeightCapacityKg] !=
+                priorityValueTable[i - 1][remainingWeightCapacityKg]) {
                 val item = items[i - 1]
-                selected.add(item)
-                remainingCapacity -= item.weightKg
+                selectedItems.add(item)
+                remainingWeightCapacityKg -= item.weightKg
             }
         }
 
-        return selected.reversed()
+        return selectedItems.reversed()
     }
 
     private fun buildTwoDimensionalValueGrid(
@@ -156,7 +161,7 @@ class KnapsackCargoOptimizer {
         weightCapacityKg: Int,
         volumeCapacityUnits: Int
     ): Array<Array<IntArray>> {
-        val grid = Array(items.size + 1) {
+        val priorityValueTable = Array(items.size + 1) {
             Array(weightCapacityKg + 1) {
                 IntArray(volumeCapacityUnits + 1)
             }
@@ -164,67 +169,71 @@ class KnapsackCargoOptimizer {
 
         for (i in 1..items.size) {
             val item = items[i - 1]
-            val itemVolumeUnits = toVolumeUnits(item.volumeM3)
+            val cargoVolumeUnits = toVolumeUnits(item.volumeM3)
 
             for (weight in 0..weightCapacityKg) {
                 for (volume in 0..volumeCapacityUnits) {
-                    grid[i][weight][volume] = calculateBestValue(
-                        grid = grid,
+                    priorityValueTable[i][weight][volume] = calculateBestValue(
+                        priorityValueTable = priorityValueTable,
                         item = item,
                         itemIndex = i,
                         weight = weight,
                         volume = volume,
-                        itemVolumeUnits = itemVolumeUnits
+                        cargoVolumeUnits = cargoVolumeUnits
                     )
                 }
             }
         }
 
-        return grid
+        return priorityValueTable
     }
 
     private fun calculateBestValue(
-        grid: Array<Array<IntArray>>,
+        priorityValueTable: Array<Array<IntArray>>,
         item: CargoItem,
         itemIndex: Int,
         weight: Int,
         volume: Int,
-        itemVolumeUnits: Int
+        cargoVolumeUnits: Int
     ): Int {
-        val withoutItem = grid[itemIndex - 1][weight][volume]
-        val canFitItem = item.weightKg <= weight && itemVolumeUnits <= volume
+        val valueWithoutItem = priorityValueTable[itemIndex - 1][weight][volume]
+        val itemFitsCapacity = item.weightKg <= weight && cargoVolumeUnits <= volume
 
-        if (!canFitItem) return withoutItem
+        if (!itemFitsCapacity) return valueWithoutItem
 
-        val withItem = grid[itemIndex - 1][weight - item.weightKg][volume - itemVolumeUnits] + item.priorityValue
-        return maxOf(withoutItem, withItem)
+        val valueWithItem =
+            priorityValueTable[itemIndex - 1][weight - item.weightKg][volume - cargoVolumeUnits] +
+                    item.priorityValue
+        return maxOf(valueWithoutItem, valueWithItem)
     }
 
     private fun backtrackTwoDimensionalItems(
         items: List<CargoItem>,
-        grid: Array<Array<IntArray>>,
+        priorityValueTable: Array<Array<IntArray>>,
         weightCapacityKg: Int,
         volumeCapacityUnits: Int
     ): List<CargoItem> {
-        val selected = mutableListOf<CargoItem>()
-        var remainingWeight = weightCapacityKg
-        var remainingVolume = volumeCapacityUnits
+        val selectedItems = mutableListOf<CargoItem>()
+        var remainingWeightCapacityKg = weightCapacityKg
+        var remainingVolumeCapacityUnits = volumeCapacityUnits
 
         for (i in items.size downTo 1) {
-            val currentValue = grid[i][remainingWeight][remainingVolume]
-            val previousValue = grid[i - 1][remainingWeight][remainingVolume]
+            val currentPriorityValue =
+                priorityValueTable[i][remainingWeightCapacityKg][remainingVolumeCapacityUnits]
+            val previousPriorityValue =
+                priorityValueTable[i - 1][remainingWeightCapacityKg][remainingVolumeCapacityUnits]
 
-            if (currentValue != previousValue) {
+            if (currentPriorityValue != previousPriorityValue) {
                 val item = items[i - 1]
-                val itemVolumeUnits = toVolumeUnits(item.volumeM3)
+                val cargoVolumeUnits = toVolumeUnits(item.volumeM3)
 
-                selected.add(item)
-                remainingWeight -= item.weightKg
-                remainingVolume -= itemVolumeUnits
+                selectedItems.add(item)
+                remainingWeightCapacityKg -= item.weightKg
+                remainingVolumeCapacityUnits -= cargoVolumeUnits
             }
         }
 
-        return selected.reversed()
+        return selectedItems.reversed()
     }
 
     private fun toVolumeUnits(volumeM3: Double): Int =

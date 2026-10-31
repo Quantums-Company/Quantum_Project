@@ -22,21 +22,22 @@ class RateLimiter(
         require(refillRatePerSecond > 0) { "Refill rate must be positive." }
     }
 
-    private val bucket = AtomicReference(
+    private val tokenBucket = AtomicReference(
         BucketState(availableTokens = maxBucketCapacity.toDouble(), lastRefillNanos = nanoClock())
     )
 
     fun tryAcquire(): Boolean {
         while (true) {
-            val current = bucket.get()
-            val refilled = current.refilledAt(nanoClock())
+            val currentState = tokenBucket.get()
+            val refilledState = currentState.refilledAt(nanoClock())
 
-            if (refilled.availableTokens < ONE_TOKEN) {
+            if (refilledState.availableTokens < ONE_TOKEN) {
                 return false
             }
 
-            val consumed = refilled.copy(availableTokens = refilled.availableTokens - ONE_TOKEN)
-            if (bucket.compareAndSet(current, consumed)) {
+            val stateAfterTokenAcquisition =
+                refilledState.copy(availableTokens = refilledState.availableTokens - ONE_TOKEN)
+            if (tokenBucket.compareAndSet(currentState, stateAfterTokenAcquisition)) {
                 return true
             }
         }
@@ -48,21 +49,21 @@ class RateLimiter(
         }
     }
 
-    private fun BucketState.refilledAt(nowNanos: Long): BucketState {
-        val elapsedNanos = nowNanos - lastRefillNanos
-        if (elapsedNanos <= 0) return this
+    private fun BucketState.refilledAt(currentTimeNanos: Long): BucketState {
+        val elapsedTimeNanos = currentTimeNanos - lastRefillNanos
+        if (elapsedTimeNanos <= 0) return this
 
-        val refilledTokens = elapsedNanos.toDouble() * refillRatePerSecond / NANOS_PER_SECOND
+        val newlyRefilledTokens = elapsedTimeNanos.toDouble() * refillRatePerSecond / NANOS_PER_SECOND
         return BucketState(
-            availableTokens = min(maxBucketCapacity.toDouble(), availableTokens + refilledTokens),
-            lastRefillNanos = nowNanos
+            availableTokens = min(maxBucketCapacity.toDouble(), availableTokens + newlyRefilledTokens),
+            lastRefillNanos = currentTimeNanos
         )
     }
 
     private fun nanosUntilNextToken(): Long {
-        val refilled = bucket.get().refilledAt(nanoClock())
-        val missingTokens = ONE_TOKEN - refilled.availableTokens
-        return ceil(missingTokens * NANOS_PER_SECOND / refillRatePerSecond)
+        val refilledState = tokenBucket.get().refilledAt(nanoClock())
+        val tokensNeeded = ONE_TOKEN - refilledState.availableTokens
+        return ceil(tokensNeeded * NANOS_PER_SECOND / refillRatePerSecond)
             .toLong()
             .coerceAtLeast(MIN_WAIT_NANOS)
     }

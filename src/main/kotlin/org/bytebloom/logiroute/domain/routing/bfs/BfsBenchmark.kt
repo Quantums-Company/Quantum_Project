@@ -3,7 +3,7 @@ package org.bytebloom.logiroute.domain.routing.bfs
 import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.routing.WarehouseGraph
 
-class BfsBenchmark(private val graph: WarehouseGraph) {
+class BfsBenchmark(private val warehouseGraph: WarehouseGraph) {
 
     companion object {
         private const val NANOS_PER_MILLISECOND = 1_000_000.0
@@ -20,36 +20,41 @@ class BfsBenchmark(private val graph: WarehouseGraph) {
     fun runAndCompare(startWarehouse: Warehouse, endWarehouse: Warehouse): String {
         val unidirectionalResult = runStandardBfs(startWarehouse, endWarehouse)
         val bidirectionalResult = runBidirectionalBfs(startWarehouse, endWarehouse)
-        return buildReport(startWarehouse, endWarehouse, unidirectionalResult, bidirectionalResult)
+        return buildReport(
+            startWarehouse,
+            endWarehouse,
+            unidirectionalResult,
+            bidirectionalResult
+        )
     }
 
-    private fun runStandardBfs(start: Warehouse, end: Warehouse): RunResult {
-        val router = UnidirectionalBreadthFirstRouter(graph)
-        val (path, elapsedNanos) = measure { router.findShortestPath(start, end) }
+    private fun runStandardBfs(startWarehouse: Warehouse, destinationWarehouse: Warehouse): RunResult {
+        val router = UnidirectionalBreadthFirstRouter(warehouseGraph)
+        val (path, elapsedNanos) = measure { router.findShortestPath(startWarehouse, destinationWarehouse) }
         return RunResult("Unidirectional BFS", path, router.evaluatedWarehouses, elapsedNanos)
     }
 
-    private fun runBidirectionalBfs(start: Warehouse, end: Warehouse): RunResult {
-        val router = BidirectionalBreadthFirstRouter(graph)
-        val (path, elapsedNanos) = measure { router.findShortestPath(start, end) }
+    private fun runBidirectionalBfs(startWarehouse: Warehouse, destinationWarehouse: Warehouse): RunResult {
+        val router = BidirectionalBreadthFirstRouter(warehouseGraph)
+        val (path, elapsedNanos) = measure { router.findShortestPath(startWarehouse, destinationWarehouse) }
         return RunResult("Bidirectional BFS", path, router.evaluatedWarehouses, elapsedNanos)
     }
 
     private fun <T> measure(block: () -> T): Pair<T, Long> {
-        val startTime = System.nanoTime()
-        val result = block()
-        return result to (System.nanoTime() - startTime)
+        val startedAtNanos = System.nanoTime()
+        val measuredValue = block()
+        return measuredValue to (System.nanoTime() - startedAtNanos)
     }
 
     private fun buildReport(
-        start: Warehouse,
-        end: Warehouse,
+        startWarehouse: Warehouse,
+        destinationWarehouse: Warehouse,
         unidirectional: RunResult,
         bidirectional: RunResult
     ): String = buildString {
         appendLine()
         appendLine("==================== BFS Benchmark ====================")
-        appendLine("Route: ${start.id} -> ${end.id}")
+        appendLine("Route: ${startWarehouse.id} -> ${destinationWarehouse.id}")
         appendLine("---------------------------------------------------------")
         appendLine(String.format("%-20s %12s %14s %12s", "Algorithm", "Evaluated", "Path Length", "Time (ms)"))
         appendLine("---------------------------------------------------------")
@@ -61,17 +66,24 @@ class BfsBenchmark(private val graph: WarehouseGraph) {
         appendLine("===========================================================")
     }
 
-    private fun rowFor(result: RunResult): String {
-        val pathLength = result.path?.size ?: 0
-        val elapsedMs = result.elapsedNanos / NANOS_PER_MILLISECOND
-        return String.format("%-20s %12d %14d %12.3f", result.label, result.evaluatedWarehouses, pathLength, elapsedMs)
+    private fun rowFor(measuredValue: RunResult): String {
+        val routeLength = measuredValue.path?.size ?: 0
+        val elapsedMillis = measuredValue.elapsedNanos / NANOS_PER_MILLISECOND
+        return String.format(
+            "%-20s %12d %14d %12.3f",
+            measuredValue.label,
+            measuredValue.evaluatedWarehouses,
+            routeLength,
+            elapsedMillis
+        )
     }
 
     private fun efficiencyLine(unidirectional: RunResult, bidirectional: RunResult): String {
         if (unidirectional.evaluatedWarehouses == 0) return ""
-        val reduction = PERCENTAGE_MULTIPLIER *
+        val evaluationReductionPercent = PERCENTAGE_MULTIPLIER *
                 (1.0 - bidirectional.evaluatedWarehouses.toDouble() / unidirectional.evaluatedWarehouses)
-        return "Bidirectional BFS evaluated %.1f%% fewer warehouses than Unidirectional BFS.".format(reduction)
+        return "Bidirectional BFS evaluated %.1f%% fewer warehouses than Unidirectional BFS."
+            .format(evaluationReductionPercent)
     }
 
     private fun correctnessLine(unidirectional: RunResult, bidirectional: RunResult): String {
