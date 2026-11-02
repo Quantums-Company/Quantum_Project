@@ -1,5 +1,8 @@
 package org.bytebloom.logiroute.di
 
+import org.bytebloom.logiroute.data.geohash.Geohash
+import org.bytebloom.logiroute.data.geohash.GeohashImpl
+import org.bytebloom.logiroute.data.geohash.WarehouseGeohashIndex
 import org.bytebloom.logiroute.data.id.UuidIdGenerator
 import org.bytebloom.logiroute.data.offline.OfflineReadExecutor
 import org.bytebloom.logiroute.data.csv.repository.CsvPackageRepository
@@ -60,6 +63,9 @@ val repositoryModule = module {
     }
 
     single { OfflineReadExecutor() }
+
+    single<Geohash> { GeohashImpl() }
+    single { WarehouseGeohashIndex(get()) }
 
     single<SpatialWarehouseRepository>{
         SpatialWarehouseRepositoryImpl(get(), get())
