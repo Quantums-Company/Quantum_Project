@@ -283,6 +283,8 @@ private fun Module.loadOperationsAndAnalyticsPresenters(
                     getAllPackages = get(),
                     getAllWarehouses = get(),
                     getAllRoutes = get(),
+                    trackShipment = get(),
+                    saveShipment = get(),
                     advanceShipmentState = get(),
                     reroutePackage = get(),
                     estimateFor = { graph: WarehouseGraph ->

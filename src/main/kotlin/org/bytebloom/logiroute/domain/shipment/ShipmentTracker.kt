@@ -18,6 +18,17 @@ class ShipmentTracker : ShipmentStateUpdater {
         }
     }
 
+    /**
+     * Stores a shipment that was changed outside of a dispatch (advanced by hand or rerouted),
+     * so every screen keeps seeing the same state. The history only grows when the state changes.
+     */
+    fun update(shipment: Shipment): Shipment = synchronized(lock) {
+        val previous = shipmentsByPackageId[shipment.cargo.id]
+        shipmentsByPackageId[shipment.cargo.id] = shipment
+        if (previous == null || previous.state::class != shipment.state::class) recordState(shipment)
+        shipment
+    }
+
     fun stateOf(packageId: String): ShipmentState? = synchronized(lock) {
         shipmentsByPackageId[packageId]?.state
     }
