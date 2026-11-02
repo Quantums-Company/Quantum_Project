@@ -61,16 +61,18 @@ class AVLTree<T : Comparable<T>> {
         val balance = balanceFactor(node)
 
         if (balance > 1) {
-            if (balanceFactor(node.left!!) < 0) {
-                node.left = rotateLeft(node.left!!)
+            val leftChild = checkNotNull(node.left) { "A left-heavy node must have a left child." }
+            if (balanceFactor(leftChild) < 0) {
+                node.left = rotateLeft(leftChild)
             }
 
             return rotateRight(node)
         }
 
         if (balance < -1) {
-            if (balanceFactor(node.right!!) > 0) {
-                node.right = rotateRight(node.right!!)
+            val rightChild = checkNotNull(node.right) { "A right-heavy node must have a right child." }
+            if (balanceFactor(rightChild) > 0) {
+                node.right = rotateRight(rightChild)
             }
 
             return rotateLeft(node)
@@ -81,7 +83,7 @@ class AVLTree<T : Comparable<T>> {
 
     private fun rotateRight(node: Node<T>): Node<T> {
 
-        val newRoot = node.left!!
+        val newRoot = checkNotNull(node.left) { "Cannot rotate right without a left child." }
         val movedSubtree = newRoot.right
 
         newRoot.right = node
@@ -95,7 +97,7 @@ class AVLTree<T : Comparable<T>> {
 
     private fun rotateLeft(node: Node<T>): Node<T> {
 
-        val newRoot = node.right!!
+        val newRoot = checkNotNull(node.right) { "Cannot rotate left without a right child." }
         val movedSubtree = newRoot.left
 
         newRoot.left = node

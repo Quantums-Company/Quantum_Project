@@ -1,7 +1,8 @@
 package org.bytebloom.logiroute.data.csv.io
 
 /**
- * Splits one CSV line into its columns. Understands the quoting [org.bytebloom.logiroute.data.csv.cache.CsvSnapshotStore] writes:
+ * Splits one CSV line into its columns. Understands the quoting
+ * [org.bytebloom.logiroute.data.csv.cache.CsvSnapshotStore] writes:
  * a value that contains a comma or a quote is wrapped in quotes and an inner quote is doubled.
  * A comma inside quotes therefore stays inside its column.
  */
