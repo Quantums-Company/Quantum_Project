@@ -2,6 +2,7 @@ package org.bytebloom.logiroute.data.csv.datasource
 
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
 import org.bytebloom.logiroute.data.csv.io.CsvFileReader
+import org.bytebloom.logiroute.data.csv.io.CsvLineSplitter
 import org.bytebloom.logiroute.data.csv.io.requireExpectedColumnCount
 import org.bytebloom.logiroute.data.csv.io.requireNonBlankValues
 import org.bytebloom.logiroute.data.csv.io.toDoubleOrThrow
@@ -10,7 +11,8 @@ import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.data.csv.io.CsvTable
 
 class CsvPackageDataSource(
-    private val csvFileReader: CsvFileReader = CsvFileReader()
+    private val csvFileReader: CsvFileReader = CsvFileReader(),
+    private val lineSplitter: CsvLineSplitter = CsvLineSplitter()
 ) : PackageDataSource {
 
     companion object {
@@ -25,37 +27,37 @@ class CsvPackageDataSource(
         csvFileReader.loadCsv(fileName = CsvTable.PACKAGES.fileName, parser = ::parsePackage).rows
 
     private fun parsePackage(line: String, lineNumber: Int): PackageRaw {
-        val columns = line.split(",").map(String::trim)
+        val columns = lineSplitter.split(line).map(String::trim)
 
         requireExpectedColumnCount(columns, CsvTable.PACKAGES.columnCount, lineNumber)
 
         val id = columns[ID_INDEX].uppercase()
-        val rawWeight = columns[WEIGHT_INDEX]
-        val originWarehouseId = columns[ORIGIN_INDEX].uppercase()
-        val destinationWarehouseId = columns[DESTINATION_INDEX].uppercase()
-        val rawPriority = columns[PRIORITY_INDEX]
+        val weightValue = columns[WEIGHT_INDEX]
+        val originHubId = columns[ORIGIN_INDEX].uppercase()
+        val destinationHubId = columns[DESTINATION_INDEX].uppercase()
+        val priorityValue = columns[PRIORITY_INDEX]
 
         requireNonBlankValues(
             lineNumber,
             "Missing required package identifier or warehouse IDs.",
-            id, originWarehouseId, destinationWarehouseId, rawWeight, rawPriority
+            id, originHubId, destinationHubId, weightValue, priorityValue
         )
 
-        val weight = rawWeight.toDoubleOrThrow("weight", lineNumber)
+        val weight = weightValue.toDoubleOrThrow("weight", lineNumber)
             ?: throw CsvParsingException("Line $lineNumber: weight field is required and cannot be empty.")
 
-        val priority = parsePackagePriority(rawPriority, lineNumber)
+        val priority = parsePriority(priorityValue, lineNumber)
 
         return PackageRaw(
             id = id,
             weight = weight,
-            originWarehouseId = originWarehouseId,
-            destinationWarehouseId = destinationWarehouseId,
+            originWarehouseId = originHubId,
+            destinationWarehouseId = destinationHubId,
             priority = priority
         )
     }
 
-    private fun parsePackagePriority(value: String, line: Int): Priority = try {
+    private fun parsePriority(value: String, line: Int): Priority = try {
         Priority.valueOf(value.uppercase())
     } catch (_: IllegalArgumentException) {
         throw CsvParsingException("Line $line: invalid priority value '$value'.")
