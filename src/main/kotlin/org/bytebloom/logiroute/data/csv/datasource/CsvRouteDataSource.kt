@@ -2,6 +2,7 @@ package org.bytebloom.logiroute.data.csv.datasource
 
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
 import org.bytebloom.logiroute.data.csv.io.CsvFileReader
+import org.bytebloom.logiroute.data.csv.io.CsvLineSplitter
 import org.bytebloom.logiroute.data.csv.io.requireExpectedColumnCount
 import org.bytebloom.logiroute.data.csv.io.requireNonBlankValues
 import org.bytebloom.logiroute.data.csv.io.toDoubleOrThrow
@@ -10,7 +11,8 @@ import org.bytebloom.logiroute.data.csv.raw.RouteRaw
 import org.bytebloom.logiroute.data.csv.io.CsvTable
 
 class CsvRouteDataSource(
-    private val csvFileReader: CsvFileReader = CsvFileReader()
+    private val csvFileReader: CsvFileReader = CsvFileReader(),
+    private val lineSplitter: CsvLineSplitter = CsvLineSplitter()
 ) : RouteDataSource {
 
     companion object {
@@ -25,7 +27,7 @@ class CsvRouteDataSource(
         csvFileReader.loadCsv(fileName = CsvTable.ROUTES.fileName, parser = ::parseRoute).rows
 
     private fun parseRoute(line: String, lineNumber: Int): RouteRaw {
-        val columns = line.split(",").map(String::trim)
+        val columns = lineSplitter.split(line).map(String::trim)
 
         requireExpectedColumnCount(columns, CsvTable.ROUTES.columnCount, lineNumber)
 

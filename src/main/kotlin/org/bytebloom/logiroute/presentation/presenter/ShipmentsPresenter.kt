@@ -15,8 +15,8 @@ import org.bytebloom.logiroute.presentation.dependencies.ShipmentsDependencies
 import org.bytebloom.logiroute.presentation.screens.ShipmentsScreen
 
 /**
- * Follows the life of shipments. The presenter keeps the shipments it has opened (by package id),
- * so a later action continues from the state the user already reached.
+ * Follows the life of shipments. The state of every shipment lives in the domain (the shipment tracker),
+ * so a dispatch and this screen always agree on where a package is.
  */
 class ShipmentsPresenter(
     private val dependencies: ShipmentsDependencies,
@@ -27,7 +27,6 @@ class ShipmentsPresenter(
     private class Data(val packages: List<Package>, val warehouses: List<Warehouse>)
 
     private val loader = RoutingDataLoader(dependencies.getAllWarehouses, dependencies.getAllRoutes)
-    private val shipments = mutableMapOf<String, Shipment>()
 
     @Volatile
     private var data: Data? = null
@@ -49,9 +48,7 @@ class ShipmentsPresenter(
 
     fun onAdvance(packageId: String, action: ShipmentTransitionAction): Job = perform(
         task = {
-            val advanced = dependencies.advanceShipmentState(shipmentOf(packageId), action)
-            synchronized(shipments) { shipments[advanced.cargo.id] = advanced }
-            advanced
+            dependencies.saveShipment(dependencies.advanceShipmentState(shipmentOf(packageId), action))
         }
     ) { view.showShipmentAdvanced(it, action) }
 
@@ -61,9 +58,7 @@ class ShipmentsPresenter(
             val destination = known.warehouses
                 .firstOrNull { it.id.equals(newDestinationId.trim(), ignoreCase = true) }
                 ?: throw ResourceNotFoundException("Warehouse '$newDestinationId' was not found.")
-            val rerouted = dependencies.reroutePackage(shipmentOf(packageId), destination)
-            synchronized(shipments) { shipments[rerouted.cargo.id] = rerouted }
-            rerouted
+            dependencies.saveShipment(dependencies.reroutePackage(shipmentOf(packageId), destination))
         }
     ) { view.showShipmentRerouted(it) }
 
@@ -78,7 +73,7 @@ class ShipmentsPresenter(
     private fun shipmentOf(packageId: String): Shipment {
         val pkg = loaded().packages.firstOrNull { it.id.equals(packageId.trim(), ignoreCase = true) }
             ?: throw ResourceNotFoundException("Package '$packageId' was not found.")
-        return synchronized(shipments) { shipments.getOrPut(pkg.id) { Shipment(pkg) } }
+        return dependencies.trackShipment(pkg)
     }
 
     private fun loaded(): Data =

@@ -9,6 +9,8 @@ import org.bytebloom.logiroute.domain.shipment.ShipmentTracker
 import org.bytebloom.logiroute.domain.tree.hub.HubTreeBuilder
 import org.bytebloom.logiroute.domain.usecase.dispatch.DispatchCargoUseCase
 import org.bytebloom.logiroute.domain.usecase.shipment.AdvanceShipmentStateUseCase
+import org.bytebloom.logiroute.domain.usecase.shipment.SaveShipmentUseCase
+import org.bytebloom.logiroute.domain.usecase.shipment.TrackShipmentUseCase
 import org.koin.dsl.module
 
 /**
@@ -32,5 +34,7 @@ val dispatchShipmentModule = module {
     factory { ExpressDispatchProcessor(get(), get()) }
     factory { DispatchCargoUseCase(get(), get()) }
     factory { AdvanceShipmentStateUseCase() }
+    factory { TrackShipmentUseCase(get()) }
+    factory { SaveShipmentUseCase(get()) }
     factory { HubTreeBuilder(get()) }
 }

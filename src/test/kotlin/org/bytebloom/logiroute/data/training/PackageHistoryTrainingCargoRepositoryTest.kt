@@ -52,6 +52,19 @@ class PackageHistoryTrainingCargoRepositoryTest {
     }
 
     @Test
+    fun `should remember which package each record was built from`() = runTest {
+        // Given
+        val destination = Warehouse("WH-002", "West Hub", "WEST", longitude = -100.0, latitude = 30.0)
+        coEvery { packageRepository.getAll() } returns listOf(createPackage("PKG-007", 120.0, destination))
+
+        // When
+        val records = trainingCargoRepository.getTrainingRecords()
+
+        // Then
+        assertThat(records.single().sourcePackageId).isEqualTo("PKG-007")
+    }
+
+    @Test
     fun `should label record with destination regional zone`() = runTest {
         // Given
         val destination = Warehouse(
