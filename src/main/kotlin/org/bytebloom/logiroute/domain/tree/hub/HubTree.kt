@@ -40,24 +40,4 @@ class HubTree(
             .map { it.warehouse }
             .toList()
     }
-
-    fun printTree() {
-        printNode(root, "")
-    }
-
-    private fun printNode(
-        node: HubTreeNode,
-        prefix: String
-    ) {
-        println(
-            "$prefix${node.warehouse.id} [${node.type}]"
-        )
-
-        node.children.forEach { child ->
-            printNode(
-                child,
-                "$prefix    "
-            )
-        }
-    }
 }
