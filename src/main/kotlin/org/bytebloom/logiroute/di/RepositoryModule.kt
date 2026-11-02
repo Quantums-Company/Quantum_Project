@@ -33,26 +33,28 @@ val repositoryModule = module {
     single { RemoteRouteRepository(get(), get()) }
     single { RemoteVehicleRepository(get(), get()) }
 
-    // Local CSV implementations
+    // Local CSV implementations. They resolve warehouses from the LOCAL CSV repository only,
+    // so reading offline never waits for a remote call (the domain WarehouseRepository
+    // binding below is the offline-first one and would try Supabase first).
     single { CsvWarehouseRepository(get()) }
 
     single {
         CsvPackageRepository(
-            warehouseRepository = get(),
+            warehouseRepository = get<CsvWarehouseRepository>(),
             csvPackageDataSource = get()
         )
     }
 
     single {
         CsvRouteRepository(
-            warehouseRepository = get(),
+            warehouseRepository = get<CsvWarehouseRepository>(),
             csvRouteDataSource = get()
         )
     }
 
     single {
         CsvVehicleRepository(
-            warehouseRepository = get(),
+            warehouseRepository = get<CsvWarehouseRepository>(),
             csvVehicleDataSource = get()
         )
     }
