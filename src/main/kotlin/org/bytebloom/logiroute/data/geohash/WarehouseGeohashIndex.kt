@@ -3,7 +3,7 @@ package org.bytebloom.logiroute.data.geohash
 import org.bytebloom.logiroute.domain.model.Warehouse
 
 class WarehouseGeohashIndex(
-    private val geohashUtils: GeohashImpl,
+    private val geohashUtils: Geohash,
     private val precision: Int = 7
 ) {
     private var index: Map<String, List<Warehouse>> = emptyMap()

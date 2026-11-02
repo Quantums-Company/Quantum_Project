@@ -7,7 +7,7 @@ data class DecodeState(
     val isEven: Boolean = true
 ) {
     fun next(extractedBit: Int): DecodeState {
-        val nextBounds = bounds.update(!isEven, extractedBit)
+        val nextBounds = bounds.update(isEven, extractedBit)
         return DecodeState(bounds = nextBounds, isEven = !isEven)
     }
 }

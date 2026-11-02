@@ -75,7 +75,7 @@ class GeohashImpl : Geohash {
         val rawLon = currentBounds.centerLon + lonOffset
         val neighborLon = when {
             rawLon > MAX_LONGITUDE -> rawLon - LONGITUDE_WRAP_SPAN
-            rawLon < MAX_LONGITUDE -> rawLon + LONGITUDE_WRAP_SPAN
+            rawLon < MIN_LONGITUDE -> rawLon + LONGITUDE_WRAP_SPAN
             else -> rawLon
         }
         encode(neighborLat, neighborLon, precision)
