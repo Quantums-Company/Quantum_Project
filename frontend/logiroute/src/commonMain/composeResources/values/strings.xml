@@ -1,0 +1,6 @@
+<resources>
+    <string name="empty_cargo_queue">Empty Cargo Queue</string>
+    <string name="cargo_header_label">CARGO</string>
+    <string name="warehouse_overloaded_warning">⚠️ Warehouse Overload: Cargo queue weight exceeds stationed by %1.1f kg</string>
+    <string name="cargo_weight_format">%1.1f kg</string>
+</resources>
