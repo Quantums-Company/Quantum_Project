@@ -7,8 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import edu.logiroute.feature.warehouse.ui.component.QueuePackage
-import edu.logiroute.feature.warehouse.ui.component.StationedFleet
 import edu.logiroute.sampledata.WarehouseSamples
 import org.bytebloom.logiroute.domain.model.Warehouse
 

@@ -14,9 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import edu.logiroute.feature.warehouse.ui.component.WarehouseCargoEmptyState
-import edu.logiroute.feature.warehouse.ui.component.WarehouseCargoHeader
-import edu.logiroute.feature.warehouse.ui.component.WarehouseCargoItemRow
 import edu.logiroute.sampledata.PackageSamples
 import edu.logiroute.theme.InkBlack
 import org.bytebloom.logiroute.domain.model.Package
