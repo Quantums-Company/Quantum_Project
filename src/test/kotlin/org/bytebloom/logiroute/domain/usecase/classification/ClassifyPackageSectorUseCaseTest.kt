@@ -15,6 +15,7 @@ import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
 import org.bytebloom.logiroute.domain.repository.TrainingCargoRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
 
 class ClassifyPackageSectorUseCaseTest {
 
@@ -67,6 +68,42 @@ class ClassifyPackageSectorUseCaseTest {
     }
 
     @Test
+    fun `should not let the incoming package vote for itself when it is part of the training records`() = runTest {
+        // Given
+        val incomingPackage = createPackage(destinationLatitude = 40.0, destinationLongitude = -75.0, weight = 500.0)
+        val itself = LabeledCargoRecord(
+            CargoFeatures(40.0, -75.0, 500.0),
+            Region.WEST,
+            sourcePackageId = incomingPackage.id
+        )
+        coEvery { trainingCargoRepository.getTrainingRecords() } returns listOf(itself) + EAST_RECORDS
+
+        // When
+        val region = classifyPackageSector(incomingPackage)
+
+        // Then
+        assertThat(region).isEqualTo(Region.EAST)
+    }
+
+    @Test
+    fun `should fail when the only training record is the incoming package itself`() = runTest {
+        // Given
+        val incomingPackage = createPackage(destinationLatitude = 30.0, destinationLongitude = -100.0, weight = 100.0)
+        val itself = LabeledCargoRecord(
+            CargoFeatures(30.0, -100.0, 100.0),
+            Region.WEST,
+            sourcePackageId = incomingPackage.id
+        )
+        coEvery { trainingCargoRepository.getTrainingRecords() } returns listOf(itself)
+
+        // When
+        val result = runCatching { classifyPackageSector(incomingPackage) }
+
+        // Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EntityValidationException::class.java)
+    }
+
+    @Test
     fun `should fail when there are no training records`() = runTest {
         // Given
         coEvery { trainingCargoRepository.getTrainingRecords() } returns emptyList()
@@ -76,7 +113,8 @@ class ClassifyPackageSectorUseCaseTest {
         val result = runCatching { classifyPackageSector(incomingPackage) }
 
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull())
+            .isInstanceOf(EntityValidationException::class.java)
     }
 
     private fun createPackage(destinationLatitude: Double, destinationLongitude: Double, weight: Double) = Package(

@@ -1,12 +1,12 @@
 package org.bytebloom.logiroute.data.geohash
 
-import org.bytebloom.logiroute.data.geohash.GeoConstants.BITS_PER_CHAR
-import org.bytebloom.logiroute.data.geohash.GeoConstants.BIT_SHIFT_AMOUNT
-import org.bytebloom.logiroute.data.geohash.GeoConstants.INITIAL_CHAR_INDEX
-import org.bytebloom.logiroute.data.geohash.GeoConstants.STEP_PARITY_DIVISOR
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.BITS_PER_CHAR
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.BIT_SHIFT_AMOUNT
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.INITIAL_CHAR_INDEX
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.STEP_PARITY_DIVISOR
 import org.bytebloom.logiroute.domain.model.result.BoundingBox
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.BIT_HIGH
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.BIT_LOW
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.BIT_HIGH
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.BIT_LOW
 
 data class EncodeState(
     val bounds: BoundingBox = BoundingBox(),

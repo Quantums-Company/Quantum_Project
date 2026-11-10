@@ -9,30 +9,30 @@ import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableExceptio
 suspend fun <T> retryWithBackoff(
     maxRetries: Int = 3,
     initialDelayMs: Long = 1000,
-    factor: Double = 2.0,
-    shouldRetry: (Exception) -> Boolean = { defaultRetryPredicate(it) },
+    backoffMultiplier: Double = 2.0,
+    shouldRetry: (Exception) -> Boolean = { isRetryableNetworkException(it) },
     block: suspend () -> T
 ): Result<T> {
-    var currentDelay = initialDelayMs
-    var retryCount = 0
+    var retryDelayMs = initialDelayMs
+    var attemptCount = 0
 
     while (true) {
         try {
-            retryCount++
+            attemptCount++
             return Result.success(block())
         } catch (e: CancellationException) {
             throw e
         } catch (e: DomainException) {
             val isRetryable = shouldRetry(e)
-            if (!isRetryable || retryCount > maxRetries) {
+            if (!isRetryable || attemptCount > maxRetries) {
                 return Result.failure(e)
             }
-            delay(currentDelay.milliseconds)
-            currentDelay = (currentDelay * factor).toLong()
+            delay(retryDelayMs.milliseconds)
+            retryDelayMs = (retryDelayMs * backoffMultiplier).toLong()
         }
     }
 }
 
-private fun defaultRetryPredicate(e: Exception): Boolean {
+private fun isRetryableNetworkException(e: Exception): Boolean {
     return e is NetworkUnavailableException
 }

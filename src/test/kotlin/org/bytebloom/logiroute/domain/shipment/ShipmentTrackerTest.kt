@@ -185,6 +185,62 @@ class ShipmentTrackerTest {
     }
 
     @Nested
+    inner class Updating {
+
+        @Test
+        fun `should return the updated shipment when tracking a package again`() {
+            // Given
+            val pkg = createPackage(id = "PKG-010")
+            val assigned = shipmentTracker.track(pkg).assignToVehicle()
+
+            // When
+            shipmentTracker.update(assigned)
+
+            // Then
+            assertThat(shipmentTracker.track(pkg)).isEqualTo(assigned)
+        }
+
+        @Test
+        fun `should record a history entry when the state changes`() {
+            // Given
+            val pkg = createPackage(id = "PKG-011")
+            val assigned = shipmentTracker.track(pkg).assignToVehicle()
+
+            // When
+            shipmentTracker.update(assigned)
+
+            // Then
+            assertThat(shipmentTracker.historyOf(pkg.id)).hasSize(2)
+        }
+
+        @Test
+        fun `should not record a history entry when only the cargo changes`() {
+            // Given
+            val pkg = createPackage(id = "PKG-012")
+            val rerouted = shipmentTracker.track(pkg).copy(cargo = pkg.redirectedTo(DESTINATION))
+
+            // When
+            shipmentTracker.update(rerouted)
+
+            // Then
+            assertThat(shipmentTracker.historyOf(pkg.id)).hasSize(1)
+        }
+
+        @Test
+        fun `should continue from the dispatched state when a shipment is advanced after dispatch`() {
+            // Given
+            val pkg = createPackage(id = "PKG-013")
+            shipmentTracker.markAsDispatched(createOrder(pkg))
+
+            // When
+            val delivered = shipmentTracker.update(shipmentTracker.track(pkg).markDelivered())
+
+            // Then
+            assertThat(shipmentTracker.stateOf(pkg.id)).isEqualTo(delivered.state)
+        }
+    }
+
+    @Nested
     inner class IntegrationWithDispatchTemplate {
 
         @Test

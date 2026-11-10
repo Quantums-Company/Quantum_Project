@@ -2,6 +2,7 @@ package org.bytebloom.logiroute.data.csv.datasource
 
 import org.bytebloom.logiroute.data.csv.exception.CsvParsingException
 import org.bytebloom.logiroute.data.csv.io.CsvFileReader
+import org.bytebloom.logiroute.data.csv.io.CsvLineSplitter
 import org.bytebloom.logiroute.data.csv.io.requireExpectedColumnCount
 import org.bytebloom.logiroute.data.csv.io.requireNonBlankValues
 import org.bytebloom.logiroute.data.csv.io.toDoubleOrThrow
@@ -10,7 +11,8 @@ import org.bytebloom.logiroute.domain.model.Priority
 import org.bytebloom.logiroute.data.csv.io.CsvTable
 
 class CsvPackageDataSource(
-    private val csvFileReader: CsvFileReader = CsvFileReader()
+    private val csvFileReader: CsvFileReader = CsvFileReader(),
+    private val lineSplitter: CsvLineSplitter = CsvLineSplitter()
 ) : PackageDataSource {
 
     companion object {
@@ -25,7 +27,7 @@ class CsvPackageDataSource(
         csvFileReader.loadCsv(fileName = CsvTable.PACKAGES.fileName, parser = ::parsePackage).rows
 
     private fun parsePackage(line: String, lineNumber: Int): PackageRaw {
-        val columns = line.split(",").map(String::trim)
+        val columns = lineSplitter.split(line).map(String::trim)
 
         requireExpectedColumnCount(columns, CsvTable.PACKAGES.columnCount, lineNumber)
 
@@ -57,7 +59,7 @@ class CsvPackageDataSource(
 
     private fun parsePriority(value: String, line: Int): Priority = try {
         Priority.valueOf(value.uppercase())
-    } catch (_: Exception) {
+    } catch (_: IllegalArgumentException) {
         throw CsvParsingException("Line $line: invalid priority value '$value'.")
     }
 }

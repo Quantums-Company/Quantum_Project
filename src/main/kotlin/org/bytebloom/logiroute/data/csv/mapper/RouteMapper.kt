@@ -24,21 +24,21 @@ class RouteMapper(
         return route
     }
 
-    private fun map(raw: RouteRaw): Route? {
+    private fun mapRoute(routeRaw: RouteRaw): Route? {
 
-        val origin = warehouseMapper.map(
-            raw.originWarehouseId
+        val originWarehouse = warehouseMapper.map(
+            routeRaw.originWarehouseId
         ) ?: return null
 
-        val destination = warehouseMapper.map(
-            raw.destinationWarehouseId
+        val destinationWarehouse = warehouseMapper.map(
+            routeRaw.destinationWarehouseId
         ) ?: return null
 
-        return raw.toDomain(origin, destination)
+        return routeRaw.toDomain(originWarehouse, destinationWarehouse)
     }
 
-    fun toDomain(routeRaws: List<RouteRaw>): List<Route> {
-        return routeRaws.mapNotNull(::map)
+    fun toDomain(rawRoutes: List<RouteRaw>): List<Route> {
+        return rawRoutes.mapNotNull(::mapRoute)
     }
 }
 

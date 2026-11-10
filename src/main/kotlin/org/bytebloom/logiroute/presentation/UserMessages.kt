@@ -14,7 +14,8 @@ private const val UNEXPECTED_PREFIX = "Something unexpected happened: "
 
 /**
  * Turns an exception into a sentence a person can read.
- * Every typed domain exception has its own branch; nothing is decided by comparing strings.
+ * Exceptions are matched by type, never by comparing strings. A type without its own branch
+ * (for example CallNotPermittedException from the circuit breaker) falls into the "unexpected" message.
  */
 internal fun Exception.toUserMessage(): String {
     val detail = message ?: NO_DETAIL

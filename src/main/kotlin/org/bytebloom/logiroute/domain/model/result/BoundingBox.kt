@@ -1,12 +1,12 @@
 package org.bytebloom.logiroute.domain.model.result
 
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.BIT_HIGH
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.BIT_LOW
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.CENTER_DIVISOR
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MAX_LATITUDE
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MAX_LONGITUDE
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MIN_LATITUDE
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MIN_LONGITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.BIT_HIGH
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.BIT_LOW
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.CENTER_DIVISOR
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MAX_LATITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MAX_LONGITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MIN_LATITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MIN_LONGITUDE
 
 data class BoundingBox(
     val minLat: Double = MIN_LATITUDE, val maxLat: Double = MAX_LATITUDE,

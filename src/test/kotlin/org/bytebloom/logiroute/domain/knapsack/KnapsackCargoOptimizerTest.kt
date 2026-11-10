@@ -150,7 +150,7 @@ class KnapsackCargoOptimizerTest {
         val items = volumeLimitedItems()
 
         // When / Then
-        assertFailsWith<IllegalArgumentException> {
+        assertFailsWith<EntityValidationException> {
             optimizer(items = items, weightCapacityKg = 20, volumeCapacityM3 = -1.0)
         }
     }

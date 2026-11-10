@@ -5,6 +5,8 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import java.io.IOException
+import org.bytebloom.logiroute.domain.model.exception.NetworkUnavailableException
 
 class OfflineReadExecutor(
     private val remoteTimeout: Duration = DEFAULT_REMOTE_TIMEOUT
@@ -25,7 +27,9 @@ class OfflineReadExecutor(
             return localCall()
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (_: IOException) {
+            return localCall()
+        } catch (_: NetworkUnavailableException) {
             return localCall()
         }
 

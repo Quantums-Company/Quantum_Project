@@ -1,251 +1,262 @@
+<div>
 
-
-<img src="src/resources/Quantum.png" alt="Quantum Team Logo" width="598">
+<img src="src/resources/Quantum.png" alt="Quantum Team Logo" width="480">
 
 # QUANTUM TEAM
 
-### LogiRoute — Team Charter, Engineering Standards & Architecture
+### LogiRoute — Team Charter & Engineering Standards
 
 *Build · Ship · Innovate*
 
+</div>
 
 ---
 
 ## Purpose
 
-This charter defines how Quantum Team collaborates on **LogiRoute**, how code changes are proposed and reviewed, and which engineering standards guide implementation. It is a shared working agreement; repository configuration and approved project decisions take precedence when they specify a more concrete rule.
+This charter defines how Quantum Team works on **LogiRoute**: who owns what, how a change travels from an idea to `master`, and the engineering standards every contribution is reviewed against. It is a shared working agreement. Where the repository configuration (Detekt, CI, Konsist tests) states a more concrete rule, that configuration wins.
 
-## Team roles and responsibilities
+## Team and responsibilities
 
-- **Abdallah Jarwan — Workflow Lead:** repository governance, branching workflow, pull-request hygiene, and commit-message consistency.
-- **Zain ALajjouri — Clean Standards Lead:** Kotlin conventions, clean-code practices, code-quality review, and static-analysis configuration.
-- **Marah Issa — Communication & SLA Lead:** team communication, meeting coordination, follow-up, and review-response tracking.
-- **Hadeel Hejazy — Architecture & Environment Lead:** package/module structure, dependency management, build configuration, and environment/ignore rules.
+| Member              | Role                            | Owns                                                                               |
+|---------------------|---------------------------------|------------------------------------------------------------------------------------|
+| **Abdallah Jarwan** | Workflow Lead                   | Repository governance, branching, pull-request hygiene, commit-message consistency |
+| **Zain ALajjouri**  | Clean Standards Lead            | Kotlin conventions, clean-code review, static-analysis configuration               |
+| **Marah Issa**      | Communication & SLA Lead        | Team communication, meetings, follow-up, review-response tracking                  |
+| **Hadeel Hejazy**   | Architecture & Environment Lead | Package and module structure, dependencies, build configuration, ignore rules      |
+| **Noor**            | Contributor                     | Feature work, tests and reviews                                                    |
 
-Roles establish ownership, not exclusive permission: all members are expected to review, test, document, and improve the project collaboratively.
+A role defines ownership, not exclusive permission. Everyone reviews, tests, documents and improves the project.
 
 ---
 
-## 1. Workflow and repository governance
+## 1. Workflow
 
-### 1.1 Branching
+### 1.1 Branches
 
-- Keep `main` stable and merge changes through reviewed pull requests.
-- Create task branches using the agreed naming convention, for example:
-  - `feature/telemetry-delay-alerts`
-  - `fix/csv-cache-safety`
-  - `refactor/presenter-dependencies`
-  - `docs/project-charter-refresh`
-- Do not commit unfinished work directly to `main`.
-- Before starting a task, sync with the current base branch and confirm that the branch contains the latest agreed changes.
+`master` is always stable and only changes through a reviewed pull request. Work happens on short-lived branches named after the **type of change**, using the same three types as commits:
 
-### 1.2 Pull requests
+| Branch prefix | Use for                                             | Example                           |
+|---------------|-----------------------------------------------------|-----------------------------------|
+| `feature/`    | New behaviour, or a fix to behaviour that was wrong | `feature/fewest-hops-routing`     |
+| `refactor/`   | Restructuring, renaming, clean-up, rule compliance  | `refactor/layer-boundaries`       |
+| `test/`       | Adding or improving tests only                      | `test/dijkstra-unreachable-nodes` |
 
-Every pull request should include:
+Rules:
 
-1. A concise problem statement and intended outcome.
-2. A summary of the implementation and important design choices.
-3. Tests and verification commands run, with their actual results.
-4. Screenshots or sample output when UI behavior changes.
-5. Known limitations, migration notes, or follow-up work.
+- Branch from an up-to-date `master`; use lowercase words separated by hyphens.
+- One branch, one purpose. Do not mix a feature and an unrelated cleanup.
+- Never commit directly to `master`.
 
-The team agreement is to obtain **two peer approvals** before merging when repository settings and team availability support that rule. Required CI checks must pass; approvals do not replace tests.
+### 1.2 Commit messages
 
-### 1.3 Conventional Commits
-
-Use:
+Every commit message has **one of exactly three prefixes**, followed by a short, lowercase, imperative description:
 
 ```text
-type(scope): short imperative description
+refactor: <what was changed>
+feature: <what was added or corrected in behaviour>
+test: <what is now covered>
 ```
 
-Recommended types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `build`, and `chore`.
+| Prefix      | Meaning                                                                                                                                                            |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `feature:`  | A user-visible capability is added, or incorrect behaviour is corrected                                                                                            |
+| `refactor:` | The structure improves without a new capability: moving, renaming, extracting, removing dead code, applying the clean-code rules, documentation and build tidy-ups |
+| `test:`     | Only tests are added or changed                                                                                                                                    |
 
 Examples:
 
 ```text
-feat(routing): add fewest-hop route analysis
-fix(csv): prevent callers from mutating cached snapshots
-refactor(presentation): group presenter dependencies
-test(telemetry): cover delay recovery transitions
-docs(readme): document current application architecture
+feature: add fewest-hop route analysis
+feature: stop classification from voting with the package being classified
+refactor: group presenter use-case dependencies
+refactor: replace object constants with companion objects
+test: cover geohash neighbours and bounds
 ```
 
-Keep each commit focused on one cohesive change. Avoid combining unrelated refactoring, UI changes, and bug fixes in a single commit.
+Guidelines:
+
+- No scopes, no ticket numbers, no trailing period, at most about 72 characters.
+- Describe **what** changed in the code, not the activity ("add", "move", "remove" — not "fixed stuff").
+- One logical change per commit. A change and its tests may share a commit or be split into a `feature:`/`refactor:` commit followed by a `test:` commit.
+- Never commit generated output, local IDE files or credentials.
+
+### 1.3 Pull requests
+
+Every pull request contains:
+
+1. **Problem and outcome** — what was wrong or missing, and what is true now.
+2. **Summary of the change** and any important design decision.
+3. **Verification** — the commands that were run and their real results.
+4. **Screenshots or sample output** when terminal output changes.
+5. **Limitations or follow-ups**, if any.
+
+Merge requires **two approvals** and a green CI run (`./gradlew detekt check`). Approvals never replace passing checks.
 
 ---
 
-## 2. Kotlin and clean-code standards
+## 2. Architecture standards
 
-### 2.1 Naming and formatting
-
-- Use `PascalCase` for classes, interfaces, objects, and enums.
-- Use `camelCase` for functions, properties, and local variables.
-- Use `UPPER_SNAKE_CASE` for constants.
-- Prefer descriptive names and boolean prefixes such as `is`, `has`, or `should`.
-- Follow the repository's Detekt configuration. Treat its configured limits as the source of truth for formatting and complexity.
-- Keep comments focused on intent, constraints, and non-obvious decisions rather than restating the code.
-
-### 2.2 Design principles
-
-- **Single Responsibility:** each class and function should have a coherent purpose.
-- **Dependency Inversion:** domain logic depends on domain contracts, not concrete infrastructure implementations.
-- **Small interfaces and explicit boundaries:** introduce abstractions when they clarify a real boundary or enable meaningful substitution/testing, not automatically for every class.
-- **Immutability by default:** prefer `val`, immutable views, and defensive copies at public boundaries when internal mutable state must be retained.
-- **Functional collection operations:** use operations such as `map`, `filter`, `mapNotNull`, `groupBy`, `associateBy`, `any`, `all`, and `fold` when they make transformations clearer. Retain ordinary loops when an algorithm is inherently stateful, index-driven, or easier to understand imperatively.
-- **Parameter clarity:** avoid long constructor parameter lists. Use a cohesive data class when a group of dependencies belongs together, such as presentation dependency bundles. Do not create a catch-all container that hides unrelated responsibilities.
-- **No speculative layers:** do not add abstractions or architecture layers without a concrete requirement.
-
-### 2.3 Exceptions and validation
-
-- Use `require` or `check` for programmer-contract/precondition checks when their standard `IllegalArgumentException` or `IllegalStateException` semantics are intended.
-- Use project-specific exceptions when a failure is part of a domain or application contract and callers need to distinguish it.
-- Keep validation near the boundary that owns the rule; do not catch and suppress unexpected exceptions just to keep execution moving.
-- Preserve useful context when translating infrastructure failures into application/domain-facing errors.
-- Tests should assert both the outcome and the relevant failure behavior.
-
-### 2.4 Coroutines and concurrency
-
-- Mark functions `suspend` when they need to call suspending operations or expose a genuinely suspending contract. Do not add `suspend` merely for consistency.
-- Use structured concurrency. Prefer `coroutineScope` and `async`/`await` when independent operations can safely run concurrently and their results are both required.
-- Do not parallelize dependent operations or add concurrency where it does not improve the behavior.
-- Keep blocking file/network operations on an appropriate dispatcher. Dispatcher choice should reflect the underlying operation and remain testable where practical.
-- Preserve cancellation; avoid catching `CancellationException` as an ordinary failure.
-- Protect shared mutable state at the owner boundary. A thread-safe collection alone does not make a multistep business operation atomic.
-- Test concurrency-sensitive behavior deterministically where possible.
-
----
-
-## 3. LogiRoute architecture standards
-
-The current codebase is organized around the following responsibilities.
-
-### 3.1 Domain
-
-The `domain` area contains business models, use cases, repository contracts, routing and optimization logic, dispatch behavior, domain validation, and domain exceptions.
-
-- Domain code must not depend on terminal UI, Compose, CSV implementation details, Supabase DTOs, or KOIN wiring.
-- Use cases should represent meaningful application actions, not act as unnecessary wrappers around a single property access.
-- Repository contracts belong on the domain side; concrete CSV and remote implementations belong in the data layer.
-- Keep business decisions in domain/application logic rather than screen rendering code.
-
-### 3.2 Data
-
-The `data` area contains CSV and remote data access, data sources, DTOs, mappers, caching, telemetry implementations, and infrastructure resilience utilities.
-
-- Keep CSV parsing and remote DTO mapping at the data boundary.
-- Do not expose mutable cache collections directly to callers.
-- Coordinate concurrent access to caches and file snapshots.
-- Route remote operations through the project's shared resilience/execution policy where that policy applies.
-- Never commit credentials or private configuration.
-
-### 3.3 Presentation and UI
-
-- `presentation/presenter` coordinates use cases and prepares state/data for user-facing workflows.
-- `presentation/screens` contains screen-level presentation flows.
-- `ui` contains terminal widgets, table formatting, and rendering behavior.
-- Presenter dependencies may be grouped into focused data classes under the presentation `dependencies` package to keep constructors readable. Each bundle should contain dependencies for one presenter or one cohesive responsibility.
-- Screens and widgets should not duplicate domain rules or perform direct infrastructure work.
-- Keep formatting and display concerns out of domain models and use cases.
-
-### 3.4 Dependency injection and frontends
-
-- The `di` package assembles repositories, use cases, presenters, and infrastructure using KOIN modules.
-- Keep object construction and environment-specific wiring in DI/composition-root code.
-- The repository also contains a `frontend/logiroute` Compose Multiplatform module. Keep platform/UI concerns in the frontend module and shared business behavior behind appropriate application/domain boundaries.
-- Update architecture documentation whenever package ownership or module boundaries materially change.
-
-### 3.5 High-level repository map
+LogiRoute uses **Clean Architecture** with four code layers and a composition root. The architecture diagram lives in [`README.md`](README.md).
 
 ```text
-src/main/kotlin/org/bytebloom/logiroute/
-├── data/
-│   ├── csv/              # CSV I/O, parsing, mapping, cache, repositories
-│   ├── remote/           # Supabase/remote DTOs, mappers, repositories, resilience
-│   ├── telemetry/        # Telemetry data sources and repository implementation
-│   └── training/         # Training/history data support
-├── di/                   # Koin modules and composition wiring
-├── domain/
-│   ├── command/          # Command pattern and invoker
-│   ├── dispatch/         # Dispatch workflows and state updates
-│   ├── model/            # Domain entities, inputs, results, validation, exceptions
-│   ├── repository/       # Repository contracts
-│   └── use case/          # Application/business actions and feature packages
-├── presentation/
-│   ├── presenter/        # Presenter orchestration
-│   ├── screens/          # Presentation screen flows
-│   └── dependencies/     # Presenter dependency bundles (where present)
-└── ui/                   # Terminal UI, shared tables, widgets and rendering
-
-src/resources/             # CSV fixtures/resources and project images
-frontend/logiroute/        # Compose Multiplatform frontend module
+ui  ──►  presentation  ──►  domain  ◄──  data
+                   di  wires all layers together
 ```
 
-This is a conceptual map, not an exhaustive listing of every package.
+### 2.1 The dependency rule
+
+Dependencies point inwards. Inner layers never import outer ones.
+
+| Layer            | May depend on                             | Must never depend on                                                     |
+|------------------|-------------------------------------------|--------------------------------------------------------------------------|
+| **domain**       | nothing outside itself                    | data, presentation, ui, di, Koin, Supabase, Ktor, CSV, terminal, Compose |
+| **data**         | domain                                    | presentation, ui                                                         |
+| **presentation** | domain                                    | ui, data, di, Koin, `java.io`, Android / desktop APIs                    |
+| **ui**           | presentation, domain (models for display) | use cases and repositories, data                                         |
+| **di**           | every layer, to assemble them             | —                                                                        |
+
+These rules are enforced by Konsist tests in `src/test/.../architecture`. A change that breaks a rule must fix the code, not weaken the test.
+
+### 2.2 Responsibilities
+
+- **Domain** — entities, validation, use cases, algorithms (routing, knapsack, KNN, pricing, geohash), the shipment state machine and repository **interfaces**. Business decisions live here and nowhere else.
+- **Data** — implements the repository interfaces: CSV, Supabase, offline-first reading, caching, DTOs and mappers, resilience utilities.
+- **Presentation** — presenters coordinate use cases and drive a `Screen` **interface**. No rendering, no formatting of terminal output, no business decisions, no state that belongs to the domain.
+- **UI** — implements the `Screen` interfaces and only displays and collects input. It does not call use cases or repositories.
+- **DI** — creates objects and connects them. No logic.
+
+### 2.3 Patterns in use
+
+MVP (presenter + screen interface), Repository, Strategy and Decorator (pricing), State (shipments), Template Method (dispatch), Observer through `Flow` (telemetry), Dependency Injection (KOIN). Add a new abstraction only when it clarifies a real boundary or removes real duplication.
+
+### 2.4 Keeping documentation current
+
+When a package moves, a layer rule changes or a module is added, update the README structure section and the architecture diagram in the same pull request.
+
+---
+
+## 3. Kotlin and clean-code standards
+
+### 3.1 Naming and structure
+
+- `PascalCase` for types, `camelCase` for functions and properties, `UPPER_SNAKE_CASE` for constants.
+- Names describe intent. Booleans read as questions: `isEmpty`, `hasVehicle`, `shouldRetry`.
+- Use-case classes end with `UseCase` and expose a single `operator fun invoke`. Validators end with `Validator`. DTOs end with `Dto` and are `@Serializable`.
+- A function does one thing and stays short. Prefer few parameters; group dependencies that belong together into a small data class instead of passing a long list.
+- Comments explain *why*. Delete commented-out code and unused code instead of keeping it.
+
+### 3.2 Rules the team enforces
+
+1. **Constants live in a `companion object`**, never as top-level `const` values and never as magic numbers or strings in logic.
+2. **No `object` declarations.** Use a class (with a `companion object` for constants) so dependencies stay explicit and testable.
+3. **No decisions by comparing strings.** Model alternatives with enums, sealed types or typed identifiers; normalize values once at the boundary.
+4. **Typed errors.** Failures are specific exception types, not generic `RuntimeException` or `UnsupportedOperationException`. Presenters translate them to user messages by type.
+5. **No `!!`.** Use `checkNotNull`, `requireNotNull` or safe calls with a meaningful message.
+6. **No printing from domain or data code**, no `printStackTrace`, no `TODO` left in `master`.
+7. **Immutability by default** — `val`, read-only collections, defensive copies at public boundaries.
+8. **Functional collection operations** (`map`, `filter`, `groupBy`, `fold`, …) where they make the code clearer; a plain loop is fine for stateful algorithms.
+9. **Remove duplication** when the same knowledge appears twice (for example the same constant or parsing rule in two places).
+
+### 3.3 Exceptions and validation
+
+- `require` / `check` for programmer-contract violations; project exceptions when callers must tell failures apart.
+- Validate at the boundary that owns the rule. Never swallow an exception to keep running.
+- Keep the original cause when translating an infrastructure failure into a domain error.
+
+### 3.4 Coroutines and concurrency
+
+- A function is `suspend` only when it calls suspending code.
+- Use structured concurrency: `coroutineScope` with `async` for independent work whose results are all needed. Do not parallelize dependent steps.
+- Run blocking file and network work on `Dispatchers.IO` once, at the edge that does the blocking.
+- Never swallow `CancellationException`; always re-throw it.
+- Protect shared mutable state at its owner. A thread-safe collection does not make a multistep operation atomic.
+
+### 3.5 Secrets and configuration
+
+Credentials come from environment variables (`URL`, `Key`). Never commit keys, tokens or personal configuration, and never log them.
 
 ---
 
 ## 4. Testing and quality gates
 
-Before requesting review:
+### 4.1 Conventions
 
-- Run `./gradlew test`.
-- Run `./gradlew detekt`.
-- Prefer `./gradlew test detekt` as the combined check when supported by the current build.
-- Run `./gradlew build` for changes that affect compilation, dependency wiring, or module integration.
-- Add regression tests for bug fixes and behavior changes.
-- Test boundary cases, invalid input, empty collections, failure paths, cancellation, and concurrent access when relevant.
-- Never report a check as passing unless it actually completed successfully. If a command cannot run because of a network or environment issue, state that explicitly in the pull request.
+- JUnit 5, Truth, MockK, `kotlinx-coroutines-test`, KOIN test and Konsist.
+- Test names: ``should <expected behaviour> when <condition>``.
+- Test bodies are divided into `// Given`, `// When` and `// Then`.
+- Prefer small fakes over deep mock chains; test behavior, not implementation.
+- Every bug fix comes with a test that fails without the fix.
+- Cover boundaries, invalid input, empty collections, failure paths, cancellation and concurrent access where relevant.
 
-Reviewers should verify:
-1. Functional correctness and edge cases.
-2. Layer boundaries and dependency direction.
-3. Naming, readability, and appropriate use of collection/functional APIs.
-4. Error handling and exception semantics.
-5. Mutability and concurrency safety.
-6. Test quality and actual verification results.
-7. Documentation and UI output where affected.
+### 4.2 Before requesting review
+
+```bash
+./gradlew test detekt     # must pass
+./gradlew build           # when compilation, wiring or modules changed
+```
+
+Detekt runs with zero allowed issues and an empty baseline. Never report a check as passing unless it actually ran and passed; if the environment prevents a command, say so in the pull request.
+
+### 4.3 Reviewer checklist
+
+1. The behavior is correct, including edge cases.
+2. The dependency rule holds and the change is in the right layer.
+3. Names, size and readability follow section 3; the clean-code rules are respected.
+4. Errors are typed and cancellation is preserved.
+5. Shared state is safe; nothing mutable leaks across a boundary.
+6. Tests are meaningful and follow the conventions.
+7. Documentation and the diagram are updated when structure changed.
+8. No credentials, generated files or unrelated edits.
 
 ---
 
-## 5. Communication and team SLAs
+## 5. Communication and service levels
 
-### 5.1 Communication
+### 5.1 Channels and rhythm
 
-- **Channels:** GitHub for issues, code, pull requests, and documentation; WhatsApp for coordination and urgent matters; Google Meet for scheduled discussions.
-- **Daily sync:** 11:00 AM, subject to team availability and urgent circumstances.
-- **Collaboration window:** 1:00 PM–5:00 PM, subject to members' academic and personal commitments.
-- Keep decisions that affect architecture, requirements, or workflow documented in the relevant GitHub issue, pull request, or project document so they remain discoverable.
+| Purpose                                    | Channel     |
+|--------------------------------------------|-------------|
+| Code, pull requests, issues, documentation | GitHub      |
+| Coordination and urgent matters            | WhatsApp    |
+| Planned discussions                        | Google Meet |
+
+- **Daily sync:** 11:00 AM.
+- **Collaboration window:** 1:00 PM – 5:00 PM.
+- Decisions about architecture, requirements or workflow are written in the relevant pull request, issue or document so they stay discoverable.
 
 ### 5.2 Response targets
 
-- Urgent messages: target response within 2 hours during availability.
-- General questions: target response within 24 hours.
-- Pull-request review: target first review within 24 hours.
-- Requested follow-up changes: target completion or status update within 48 hours.
+| Situation                      | Target                                    |
+|--------------------------------|-------------------------------------------|
+| Urgent message                 | within 2 hours                            |
+| General question               | within 24 hours                           |
+| First review of a pull request | within 24 hours                           |
+| Requested changes              | done, or a status update, within 48 hours |
 
-These are team coordination targets, not guarantees when a member is unavailable. Communicate delays early.
+These are coordination targets, not guarantees. Tell the team early when you will be unavailable.
 
 ---
 
 ## 6. Definition of done
 
-A task is ready to merge when:
+A task is done when:
 
-- Acceptance criteria are met.
-- The implementation follows the established architecture and avoids unrelated changes.
-- Relevant tests have been added or updated.
-- Required checks pass, or any environment limitation is explicitly documented.
-- The pull request has the required reviews.
-- Documentation, configuration, and sample output are updated when needed.
-- No secrets, local-only files, generated build output, or unrelated changes are included.
+- The acceptance criteria are met and nothing unrelated was changed.
+- The change sits in the correct layer and respects the dependency rule.
+- Tests were added or updated, and `./gradlew test detekt` passes.
+- The pull request has two approvals and a green CI run.
+- The README and diagram are updated if structure or behavior changed.
+- No secrets, local files or generated output are included.
 
 ---
 
 ## Team commitment
 
-This charter is our shared commitment to building LogiRoute with discipline, transparency, and engineering judgment. We aim for software that is understandable, resilient, testable, and maintainable—not complexity for its own sake. We will communicate clearly, review one another's work respectfully, and prefer verified behavior over assumptions.
+We build LogiRoute with discipline and honesty: simple designs over clever ones, business rules in the domain, infrastructure at the edges, and verified behavior over assumptions. We review each other's work respectfully and say early when something is blocked.
 
+<div >
 
 **Quantum Team — Together, We Build Better.**
 
+</div>

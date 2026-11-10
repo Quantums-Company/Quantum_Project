@@ -5,6 +5,8 @@ import org.bytebloom.logiroute.domain.model.Region
 import org.bytebloom.logiroute.domain.model.knn.CargoFeatures
 import org.bytebloom.logiroute.domain.model.knn.LabeledCargoRecord
 import org.junit.jupiter.api.Test
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 
 class KNearestNeighborsClassifierTest {
 
@@ -61,7 +63,8 @@ class KNearestNeighborsClassifierTest {
         val result = runCatching { classifier.classify(target, emptyList()) }
 
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull())
+            .isInstanceOf(EntityValidationException::class.java)
     }
 
     @Test
@@ -70,7 +73,8 @@ class KNearestNeighborsClassifierTest {
         val result = runCatching { KNearestNeighborsClassifier(neighborCount = 0) }
 
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull())
+            .isInstanceOf(InvalidConfigurationException::class.java)
     }
 
     private companion object {

@@ -16,7 +16,7 @@ class PackageHistoryTrainingCargoRepository(
 
     private fun Package.toLabeledRecord(): LabeledCargoRecord? {
         val sector = regionOf(destinationWarehouse.regionalZone) ?: return null
-        return LabeledCargoRecord(toCargoFeatures(), sector)
+        return LabeledCargoRecord(toCargoFeatures(), sector, sourcePackageId = id)
     }
 
     private fun regionOf(regionalZone: String): Region? =

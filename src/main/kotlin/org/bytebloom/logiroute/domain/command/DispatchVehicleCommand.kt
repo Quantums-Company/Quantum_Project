@@ -12,11 +12,37 @@ class DispatchVehicleCommand(
     private val warehouse: Warehouse
 ) : Command {
 
-    override fun execute(): Boolean = dispatchVehicleUseCase(packages, vehicle, warehouse)
+    override fun execute(): Boolean =
+        dispatchVehicleUseCase(packages, vehicle, warehouse)
 
     override fun undo(): Boolean {
-        packages.forEach { warehouse.addPackage(it) }
-        warehouse.addVehicle(vehicle)
+        if (
+            packages.any(warehouse::containsPackage) ||
+            warehouse.hasVehicle(vehicle)
+        ) {
+            return false
+        }
+
+        if (!restorePackages()) return false
+
+        if (warehouse.addVehicle(vehicle)) return true
+
+        packages.forEach(warehouse::removePackage)
+        return false
+    }
+
+    private fun restorePackages(): Boolean {
+        val restoredPackages = mutableListOf<Package>()
+
+        for (pkg in packages) {
+            if (!warehouse.addPackage(pkg)) {
+                restoredPackages.forEach(warehouse::removePackage)
+                return false
+            }
+
+            restoredPackages.add(pkg)
+        }
+
         return true
     }
 }
