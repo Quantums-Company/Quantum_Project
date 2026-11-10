@@ -10,6 +10,10 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.logiroute.presentation.dependencies.FleetPlanningDependencies
 import org.bytebloom.logiroute.presentation.screens.FleetPlanningScreen
+import org.bytebloom.logiroute.domain.model.exception.EntityValidationException
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
+import org.bytebloom.logiroute.domain.model.validation.ValidatorError
+import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 
 class FleetPlanningPresenter(
     private val dependencies: FleetPlanningDependencies,
@@ -32,7 +36,16 @@ class FleetPlanningPresenter(
         task = {
             val known = loaded()
             val wanted = targetZones.map { it.trim() }.filter { it.isNotEmpty() }.toSet()
-            require(wanted.isNotEmpty()) { "Choose at least one zone." }
+            if (wanted.isEmpty()) {
+                throw EntityValidationException(
+                    listOf(
+                        ValidatorError.Custom(
+                            ValidatorField.REGIONAL_ZONE,
+                            "Choose at least one target zone."
+                        )
+                    )
+                )
+            }
             withContext(dependencies.computeDispatcher) {
                 dependencies.greedyFleetDispatch(wanted, known.vehicles, ::coverageOf)
             }
@@ -71,8 +84,10 @@ class FleetPlanningPresenter(
         Data(warehouses.await(), vehicles.await())
     }
 
-    private fun loaded(): Data = checkNotNull(data) { "The fleet data is not loaded yet." }
-
+    private fun loaded(): Data =
+        data ?: throw InvalidConfigurationException(
+            "Fleet data has not been loaded. Call onViewReady() before performing this action."
+        )
     private fun Data.vehicle(id: String): Vehicle =
         vehicles.firstOrNull { it.id.equals(id.trim(), ignoreCase = true) }
             ?: throw ResourceNotFoundException("Vehicle '$id' was not found.")

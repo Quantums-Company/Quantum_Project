@@ -22,16 +22,16 @@ class VehicleMapper(
         return vehicle
     }
 
-    private fun map(raw: VehicleRaw): Vehicle? {
+    private fun mapVehicle(vehicleRaw: VehicleRaw): Vehicle? {
         val currentWarehouse = warehouseMapper.map(
-            raw.currentWarehouseId
+            vehicleRaw.currentWarehouseId
         ) ?: return null
 
-        return raw.toDomain(currentWarehouse)
+        return vehicleRaw.toDomain(currentWarehouse)
     }
 
     fun toDomain(vehicleRaws: List<VehicleRaw>): List<Vehicle> {
-        return vehicleRaws.mapNotNull(::map)
+        return vehicleRaws.mapNotNull(::mapVehicle)
     }
 }
 

@@ -1,15 +1,13 @@
 package org.bytebloom.logiroute.domain.validator
 
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MAX_LATITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MAX_LONGITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MIN_LATITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MIN_LONGITUDE
 import org.bytebloom.logiroute.domain.model.validation.ValidatorError
 import org.bytebloom.logiroute.domain.model.validation.ValidatorField
 
 class FieldValidator {
-    companion object {
-        private const val MIN_LATITUDE = -90.0
-        private const val MAX_LATITUDE = 90.0
-        private const val MIN_LONGITUDE = -180.0
-        private const val MAX_LONGITUDE = 180.0
-    }
 
     fun requiredText(
         value: String,

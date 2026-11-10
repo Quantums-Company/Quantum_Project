@@ -13,6 +13,7 @@ import org.bytebloom.logiroute.domain.model.Warehouse
 import org.bytebloom.logiroute.domain.model.exception.ResourceNotFoundException
 import org.bytebloom.logiroute.presentation.dependencies.DispatchDependencies
 import org.bytebloom.logiroute.presentation.screens.DispatchScreen
+import org.bytebloom.logiroute.domain.model.exception.InvalidConfigurationException
 
 class DispatchPresenter(
     private val dependencies: DispatchDependencies,
@@ -122,9 +123,8 @@ class DispatchPresenter(
         Data(warehouses.await(), vehicles.await(), packages.await())
     }
 
-    private fun loaded(): Data = checkNotNull(data) { NOT_LOADED }
-
-    private companion object {
-        const val NOT_LOADED = "Dispatch data has not been loaded yet. Call onViewReady() first."
-    }
+    private fun loaded(): Data =
+        data ?: throw InvalidConfigurationException(
+            "Dispatch data has not been loaded. Call onViewReady() before performing this action."
+        )
 }

@@ -40,7 +40,6 @@ data class Warehouse(
     fun removeVehicle(vehicle: Vehicle): Boolean = _stationedVehicles.remove(vehicle)
     fun containsPackage(pkg: Package): Boolean = pkg in _cargoQueue
     fun hasVehicle(vehicle: Vehicle): Boolean = vehicle in _stationedVehicles
-//    fun sortCargoByWeight() { quickSortCargoByWeight(_cargoQueue) }
     fun removeVehicleById(vehicleId: String): Boolean = _stationedVehicles.removeIf { it.id == vehicleId }
 
     override fun toString(): String =

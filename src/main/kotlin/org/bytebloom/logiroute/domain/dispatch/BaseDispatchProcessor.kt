@@ -11,13 +11,24 @@ abstract class BaseDispatchProcessor(
         val rejectionReason = validateCargo(order)
         val outcome = if (rejectionReason == null) {
             reserveVehicleCapacity(order)
-            updateShipmentState(order)
-            DispatchOutcome.Dispatched(order)
+
+            try {
+                updateShipmentState(order)
+                DispatchOutcome.Dispatched(order)
+            } catch (exception: Exception) {
+                restoreVehicleCapacity(order)
+                throw exception
+            }
         } else {
             DispatchOutcome.Rejected(order, rejectionReason)
         }
         notifyDispatchStatus(outcome)
         return outcome
+    }
+
+    private fun restoreVehicleCapacity(order: DispatchOrder) {
+        order.packages.forEach(order.warehouse::addPackage)
+        order.warehouse.addVehicle(order.vehicle)
     }
 
     private fun validateCargo(order: DispatchOrder): DispatchRejectionReason? = when {

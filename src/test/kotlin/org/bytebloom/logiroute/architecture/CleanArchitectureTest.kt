@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 class CleanArchitectureTest {
     private val scope by lazy { Konsist.scopeFromProduction() }
 
+    private val uiLayer by lazy { Layer("ui", "org.bytebloom.logiroute.ui..") }
     private val presentationLayer by lazy { Layer("presentation", "org.bytebloom.logiroute.presentation..") }
     private val domainLayer by lazy { Layer("domain", "org.bytebloom.logiroute.domain..") }
     private val dataLayer by lazy { Layer("data", "org.bytebloom.logiroute.data..") }
@@ -25,7 +26,8 @@ class CleanArchitectureTest {
         // When
         val violation = runCatching {
             productionScope.assertArchitecture {
-                presentationLayer.dependsOn(domainLayer, diLayer)
+                uiLayer.dependsOn(presentationLayer, domainLayer, diLayer)
+                presentationLayer.dependsOn(domainLayer)
                 diLayer.dependsOn(domainLayer, dataLayer)
                 dataLayer.dependsOn(domainLayer)
                 domainLayer.dependsOnNothing()

@@ -2,16 +2,16 @@ package org.bytebloom.logiroute.data.geohash
 
 
 import org.bytebloom.logiroute.data.csv.exception.InvalidCharacterException
-import org.bytebloom.logiroute.data.geohash.GeoConstants.BITS_PER_CHAR
-import org.bytebloom.logiroute.data.geohash.GeoConstants.BIT_MASK
-import org.bytebloom.logiroute.data.geohash.GeoConstants.LONGITUDE_WRAP_SPAN
-import org.bytebloom.logiroute.data.geohash.GeoConstants.MAX_BIT_INDEX
-import org.bytebloom.logiroute.data.geohash.GeoConstants.ZERO_OFFSET
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.BITS_PER_CHAR
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.BIT_MASK
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.LONGITUDE_WRAP_SPAN
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.MAX_BIT_INDEX
+import org.bytebloom.logiroute.data.geohash.GeohashEncodingConstants.Companion.ZERO_OFFSET
 import org.bytebloom.logiroute.domain.model.result.BoundingBox
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MAX_LATITUDE
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MAX_LONGITUDE
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MIN_LATITUDE
-import org.bytebloom.logiroute.domain.model.result.GeoConstants.MIN_LONGITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MAX_LATITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MAX_LONGITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MIN_LATITUDE
+import org.bytebloom.logiroute.domain.model.result.GeoBoundsConstants.Companion.MIN_LONGITUDE
 
 class GeohashImpl : Geohash {
     private val base32 = "0123456789bcdefghjkmnpqrstuvwxyz"
@@ -33,7 +33,12 @@ class GeohashImpl : Geohash {
 
             decodeCharacter(outerState, charIndex)
         }
-        return BoundingBox(finalState.bounds.minLat, finalState.bounds.maxLat, finalState.bounds.minLon, finalState.bounds.maxLon)
+        return BoundingBox(
+            finalState.bounds.minLat,
+            finalState.bounds.maxLat,
+            finalState.bounds.minLon,
+            finalState.bounds.maxLon
+        )
     }
 
     private fun decodeCharacter(
@@ -70,7 +75,7 @@ class GeohashImpl : Geohash {
         val rawLon = currentBounds.centerLon + lonOffset
         val neighborLon = when {
             rawLon > MAX_LONGITUDE -> rawLon - LONGITUDE_WRAP_SPAN
-            rawLon < MAX_LONGITUDE -> rawLon + LONGITUDE_WRAP_SPAN
+            rawLon < MIN_LONGITUDE -> rawLon + LONGITUDE_WRAP_SPAN
             else -> rawLon
         }
         encode(neighborLat, neighborLon, precision)
