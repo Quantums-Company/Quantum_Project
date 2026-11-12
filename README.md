@@ -171,18 +171,6 @@ refactor: group presenter use-case dependencies
 test: cover unreachable destinations in dijkstra
 ```
 
-## Team
-
-| Member              | Role                            |
-|---------------------|---------------------------------|
-| **Abdallah Jarwan** | Workflow Lead                   |
-| **Zain ALajjouri**  | Clean Standards Lead            |
-| **Marah Issa**      | Communication & SLA Lead        |
-| **Hadeel Hejazy**   | Architecture & Environment Lead |
-| **Noor**            | Contributor                     |
-
----
-
 <div>
 
 **Quantum Team — Build · Ship · Innovate**
